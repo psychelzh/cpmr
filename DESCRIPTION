@@ -1,12 +1,12 @@
 Package: cpmR
-Title: What the Package Does (One Line, Title Case)
+Title: Connectome predictive modelling in R
 Version: 0.0.0.9000
-Authors@R: 
+Authors@R:
     person("Liang", "Zhang", , "psychelzh@outlook.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9041-1150"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Description: This package provides a set of functions to perform
+    connectome predictive modelling in R.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
