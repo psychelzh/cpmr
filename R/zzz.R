@@ -1,0 +1,2 @@
+#' @import Rfast
+NULL
