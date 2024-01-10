@@ -37,30 +37,15 @@ bias-corrected. If \code{TRUE}, the connectome data will be centered and scaled
 to have unit variance based on the training data.}
 }
 \value{
-An S3 object of class \code{cpm}, which is a list containing the following
-components:
+A list with the following components:
 
-\item{real}{A numeric vector of observed behavior data.}
+\item{real}{The real behavior data.}
 
-\item{pred}{A matrix of predicted behavior data. Rows are observations and
-columns are different models.}
+\item{pred}{The predicted behavior data, with each column corresponding to
+a model, i.e., both edges, positive edges, negative edges.}
 
-\item{edges_prop}{A list of selection proportion of edges in each network,
-i.e., positive and negative networks.}
-
-\item{cor}{A list of correlation test results between predicted behavior
-data and observed behavior data.}
-
-The object also contains the following attributes:
-
-\item{thresh_method}{The threshold method used in edge selection.}
-
-\item{thresh_level}{The threshold level used in edge selection.}
-
-\item{kfolds}{The folds number of cross-validation.}
-
-\item{bias_correct}{Logical value indicating if the connectome data should
-be bias-corrected.}
+\item{edges}{The selected edges, a 3D array with dimensions of folds, edges
+and networks.}
 }
 \description{
 The connectome-based predictive modeling (CPM) is a data-driven approach to

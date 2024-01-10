@@ -39,30 +39,15 @@
 #' @param bias_correct Logical value indicating if the connectome data should be
 #'   bias-corrected. If `TRUE`, the connectome data will be centered and scaled
 #'   to have unit variance based on the training data.
-#' @return An S3 object of class `cpm`, which is a list containing the following
-#'   components:
+#' @return A list with the following components:
 #'
-#'   \item{real}{A numeric vector of observed behavior data.}
+#'   \item{real}{The real behavior data.}
 #'
-#'   \item{pred}{A matrix of predicted behavior data. Rows are observations and
-#'     columns are different models.}
+#'   \item{pred}{The predicted behavior data, with each column corresponding to
+#'     a model, i.e., both edges, positive edges, negative edges.}
 #'
-#'   \item{edges_prop}{A list of selection proportion of edges in each network,
-#'     i.e., positive and negative networks.}
-#'
-#'   \item{cor}{A list of correlation test results between predicted behavior
-#'     data and observed behavior data.}
-#'
-#'   The object also contains the following attributes:
-#'
-#'   \item{thresh_method}{The threshold method used in edge selection.}
-#'
-#'   \item{thresh_level}{The threshold level used in edge selection.}
-#'
-#'   \item{kfolds}{The folds number of cross-validation.}
-#'
-#'   \item{bias_correct}{Logical value indicating if the connectome data should
-#'      be bias-corrected.}
+#'   \item{edges}{The selected edges, a 3D array with dimensions of folds, edges
+#'     and networks.}
 #' @export
 cpm <- function(conmat, behav, ...,
                 thresh_method = c("alpha", "sparsity"),
@@ -75,16 +60,13 @@ cpm <- function(conmat, behav, ...,
   if (is.null(kfolds)) kfolds <- num_sub
   folds <- crossv_kfold(num_sub, kfolds)
   # pre-allocation
-  networks <- c("pos", "neg")
-  includes <- c("both", "pos", "neg")
-  behav_pred <- matrix(
-    numeric(num_sub * length(includes)),
+  pred <- matrix(
     nrow = num_sub,
+    ncol = length(includes),
     dimnames = list(NULL, includes)
   )
-  masks <- array(
-    logical(kfolds * ncol(conmat) * length(networks)),
-    dim = c(kfolds, ncol(conmat), length(networks)),
+  edges <- array(
+    dim = c(kfolds, dim(conmat)[2], length(networks)),
     dimnames = list(NULL, NULL, networks)
   )
   for (fold in seq_len(kfolds)) {
@@ -93,64 +75,69 @@ cpm <- function(conmat, behav, ...,
     conmat_train <- conmat[rows_train, , drop = FALSE]
     conmat_test <- conmat[!rows_train, , drop = FALSE]
     behav_train <- behav[rows_train]
-    cur_mask <- prepare_brain_mask(
-      conmat_train, behav_train,
-      thresh_method, thresh_level
+    result <- .cpm(
+      conmat_train, behav_train, conmat_test,
+      thresh_method, thresh_level,
+      bias_correct
     )
-    for (include in includes) {
-      cur_networks <- include
-      if (cur_networks == "both") cur_networks <- networks
-      model <- cpm_train(
-        conmat_train, behav_train, cur_mask,
-        bias_correct = bias_correct,
-        networks = cur_networks
-      )
-      behav_pred[!rows_train, include] <- cpm_predict(
-        model, conmat_test, cur_mask
-      )
-    }
-    # save masks
-    masks[fold, , ] <- cur_mask
+    pred[!rows_train, ] <- result$pred
+    edges[fold, , ] <- result$edges
   }
-  structure(
-    list(
-      real = behav,
-      pred = behav_pred,
-      edges_prop = apply(masks, 2:3, mean),
-      cor = apply(
-        behav_pred, 2,
-        function(pred) stats::cor.test(pred, behav)
-      )
-    ),
-    thresh_method = thresh_method,
-    thresh_level = thresh_level,
-    kfolds = kfolds,
-    bias_correct = bias_correct,
-    class = "cpm"
+  list(
+    real = behav,
+    pred = pred,
+    edges = edges
   )
 }
 
-#' @export
-print.cpm <- function(x, ...) {
-  cat("CPM results with the following parameters:\n")
-  cat("  Threshold method: ", attr(x, "thresh_method"), "\n", sep = "")
-  cat("  Threshold level: ", attr(x, "thresh_level"), "\n", sep = "")
-  cat("  Cross-validation folds: ", attr(x, "kfolds"), "\n", sep = "")
-  cat("  Bias correction: ", attr(x, "bias_correct"), "\n", sep = "")
-  cat("Correlation test results (N = ", length(x$real), "):\n", sep = "")
-  for (include in names(x$cor)) {
-    cat(
-      "  Include ", include, " networks: ",
-      round(x$cor[[include]]$estimate, 2),
-      " (p = ", round(x$cor[[include]]$p.value, 3), ")\n",
-      sep = ""
+.cpm <- function(conmat_train, behav_train, conmat_test,
+                 thresh_method, thresh_level,
+                 bias_correct = TRUE) {
+  if (bias_correct) {
+    center <- colmeans(conmat_train)
+    scale <- colVars(conmat_train, std = TRUE)
+    conmat_train <- fscale(conmat_train, center, scale)
+    conmat_test <- fscale(conmat_test, center, scale)
+  }
+  edges <- select_edges(
+    conmat_train, behav_train,
+    method = thresh_method,
+    level = thresh_level
+  )
+  x_train <- allocate_design(dim(conmat_train)[1])
+  x_test <- allocate_design(dim(conmat_test)[1])
+  for (network in networks) {
+    x_train[, network] <- rowsums(
+      conmat_train[, edges[, network], drop = FALSE]
+    )
+    x_test[, network] <- rowsums(
+      conmat_test[, edges[, network], drop = FALSE]
     )
   }
-  invisible(x)
+  pred <- matrix(
+    nrow = dim(conmat_test)[1],
+    ncol = length(includes),
+    dimnames = list(NULL, includes)
+  )
+  for (include in includes) {
+    if (include != "both") {
+      cur_x_train <- x_train[, c("(Intercept)", include)]
+      cur_x_test <- x_test[, c("(Intercept)", include)]
+    } else {
+      cur_x_train <- x_train
+      cur_x_test <- x_test
+    }
+    cur_model <- stats::.lm.fit(cur_x_train, behav_train)
+    pred[, include] <- cur_x_test %*% cur_model$coefficients
+  }
+  list(
+    edges = edges,
+    pred = pred
+  )
 }
 
 # helper functions
-prepare_brain_mask <- function(conmat, behav, ...,
+select_edges <- function(conmat, behav, ...,
                                method = c("alpha", "sparsity"),
                                level = 0.01) {
   method <- match.arg(method)
@@ -172,30 +159,7 @@ prepare_brain_mask <- function(conmat, behav, ...,
   matrix(
     c(r_mat > r_crit[2], r_mat < r_crit[1]),
     ncol = 2,
-    dimnames = list(NULL, c("pos", "neg"))
-  )
-}
-
-cpm_train <- function(conmat, behav, mask, ...,
-                      bias_correct = TRUE,
-                      networks = c("pos", "neg")) {
-  networks <- match.arg(networks, several.ok = TRUE)
-  if (bias_correct) conmat <- fscale(conmat)
-  x <- matrix(1, nrow = nrow(conmat), ncol = length(networks) + 1)
-  for (i in seq_along(networks)) {
-    x[, i] <- rowsums(conmat[, mask[, networks[[i]]], drop = FALSE])
-  }
-  model <- stats::.lm.fit(x, behav)
-  if (bias_correct) {
-    model <- structure(
-      model,
-      train_center = attr(conmat, "scaled:center"),
-      train_scale = attr(conmat, "scaled:scale")
-    )
-  }
-  structure(
-    model,
-    networks = networks
+    dimnames = list(NULL, networks)
   )
 }
 
@@ -214,4 +178,12 @@ cpm_predict <- function(model, conmat, mask, ...,
     x[, i] <- rowsums(conmat[, mask[, networks[[i]]], drop = FALSE])
   }
   x %*% model$coefficients
+}
+
+allocate_design <- function(nrow) {
+  matrix(
+    1,
+    nrow = nrow, ncol = length(networks) + 1,
+    dimnames = list(NULL, c("(Intercept)", networks))
+  )
 }
