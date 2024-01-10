@@ -151,7 +151,10 @@ select_edges <- function(conmat, behav, ...,
       c(-thresh, thresh)
     },
     sparsity = {
-      thresh <- stats::quantile(r_mat, c(level, 1 - level))
+      thresh <- c(
+        nth(r_mat, level * length(r_mat)),
+        nth(r_mat, (1 - level) * length(r_mat))
+      )
       if (thresh[[1]] > 0 || thresh[[2]] < 0) {
         warning("Not enough positive or negative correlation values.")
       }
