@@ -34,7 +34,8 @@ be equal to the number of observations, i.e., leave-one-subject-out.}
 
 \item{bias_correct}{Logical value indicating if the connectome data should be
 bias-corrected. If \code{TRUE}, the connectome data will be centered and scaled
-to have unit variance based on the training data.}
+to have unit variance based on the training data before model fitting and
+prediction. See Rapuano et al. (2020) for more details.}
 }
 \value{
 A list with the following components:
@@ -47,24 +48,15 @@ group in cross-validation.}
 \item{pred}{The predicted behavior data, with each column corresponding to
 a model, i.e., both edges, positive edges, negative edges.}
 
-\item{edges}{The selected edges, a 3D array with dimensions of folds, edges
-and networks.}
+\item{edges}{The selected edges, a 3D array indicating the selction results
+for each fold. Dimensions are folds, edges, and networks.}
 }
 \description{
 The connectome-based predictive modeling (CPM) is a data-driven approach to
-predict individual behavior from brain connectivity data. The CPM is based on
-the linear regression model, where the brain connectivity data are used as
-predictors and the behavior data are used as response.
-}
-\details{
-The CPM is implemented in the following steps:
-\enumerate{
-\item Select edges based on the correlation between brain connectivity and
-behavior data.
-\item Train a linear regression model using the selected edges.
-\item Predict behavior data using the trained model.
-\item Repeat steps 1-3 using different folds of cross-validation.
-}
+predict individual behavior from brain connectivity data. Originally proposed
+by Shen et al. (2017), the CPM has been widely used in various studies. This
+function implements the CPM algorithm and provides a convenient interface to
+use it.
 }
 \examples{
 conmat <- matrix(rnorm(100 * 100), nrow = 100)
@@ -74,4 +66,16 @@ cpm(conmat, behav)
 cpm(conmat, behav, thresh_method = "sparsity", thresh_level = 0.05)
 # use a 10-fold cross-validation
 cpm(conmat, behav, kfolds = 10)
+}
+\references{
+Shen, X., Finn, E. S., Scheinost, D., Rosenberg, M. D., Chun, M. M.,
+Papademetris, X., & Constable, R. T. (2017). Using connectome-based
+predictive modeling to predict individual behavior from brain connectivity.
+Nature Protocols, 12(3), 506–518. https://doi.org/10.1038/nprot.2016.178
+
+Rapuano, K. M., Rosenberg, M. D., Maza, M. T., Dennis, N. J., Dorji, M.,
+Greene, A. S., Horien, C., Scheinost, D., Todd Constable, R., & Casey, B. J.
+(2020). Behavioral and brain signatures of substance use vulnerability in
+childhood. Developmental Cognitive Neuroscience, 46, 100878.
+https://doi.org/10.1016/j.dcn.2020.100878
 }
