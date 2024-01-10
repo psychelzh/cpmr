@@ -41,6 +41,9 @@
 #'   to have unit variance based on the training data.
 #' @return A list with the following components:
 #'
+#'   \item{folds}{The corresponding fold for each observation when used as test
+#'     group in cross-validation.}
+#'
 #'   \item{real}{The real behavior data.}
 #'
 #'   \item{pred}{The predicted behavior data, with each column corresponding to
@@ -84,6 +87,7 @@ cpm <- function(conmat, behav, ...,
     edges[fold, , ] <- result$edges
   }
   list(
+    folds = folds,
     real = behav,
     pred = pred,
     edges = edges
@@ -91,8 +95,7 @@ cpm <- function(conmat, behav, ...,
 }
 
 .cpm <- function(conmat_train, behav_train, conmat_test,
-                 thresh_method, thresh_level,
-                 bias_correct = TRUE) {
+                 thresh_method, thresh_level, bias_correct) {
   if (bias_correct) {
     center <- colmeans(conmat_train)
     scale <- colVars(conmat_train, std = TRUE)
@@ -138,8 +141,8 @@ cpm <- function(conmat, behav, ...,
 
 # helper functions
 select_edges <- function(conmat, behav, ...,
-                               method = c("alpha", "sparsity"),
-                               level = 0.01) {
+                         method = c("alpha", "sparsity"),
+                         level = 0.01) {
   method <- match.arg(method)
   r_mat <- stats::cor(conmat, behav)
   r_crit <- switch(method,

@@ -39,6 +39,9 @@ to have unit variance based on the training data.}
 \value{
 A list with the following components:
 
+\item{folds}{The corresponding fold for each observation when used as test
+group in cross-validation.}
+
 \item{real}{The real behavior data.}
 
 \item{pred}{The predicted behavior data, with each column corresponding to
