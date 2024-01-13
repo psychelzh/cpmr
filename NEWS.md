@@ -1,3 +1,3 @@
 # cpmr (development version)
 
-* Initial CRAN submission.
+* Initial commit to r-universe.
