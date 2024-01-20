@@ -91,8 +91,7 @@ cpm <- function(conmat, behav, ...,
     behav_train <- behav[rows_train]
     result <- .cpm(
       conmat_train, behav_train, conmat_test,
-      thresh_method, thresh_level,
-      bias_correct
+      thresh_method, thresh_level, bias_correct
     )
     pred[!rows_train, ] <- result$pred
     edges[fold, , ] <- result$edges
@@ -182,23 +181,6 @@ select_edges <- function(conmat, behav, ...,
     ncol = 2,
     dimnames = list(NULL, networks)
   )
-}
-
-cpm_predict <- function(model, conmat, mask, ...,
-                        bias_correct = TRUE) {
-  if (bias_correct) {
-    conmat <- fscale(
-      conmat,
-      center = attr(model, "train_center"),
-      scale = attr(model, "train_scale")
-    )
-  }
-  networks <- attr(model, "networks")
-  x <- matrix(1, nrow = nrow(conmat), ncol = length(networks) + 1)
-  for (i in seq_along(networks)) {
-    x[, i] <- rowsums(conmat[, mask[, networks[[i]]], drop = FALSE])
-  }
-  x %*% model$coefficients
 }
 
 allocate_design <- function(nrow) {
