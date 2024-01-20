@@ -170,7 +170,7 @@ select_edges <- function(conmat, behav, ...,
         nth(r_mat, (1 - level) * length(r_mat))
       )
       if (thresh[[1]] > 0 || thresh[[2]] < 0) {
-        warning("Not enough positive or negative correlation values.")
+        warning("Not enough positive or negative correlation values.") # nocov
       }
       thresh
     },

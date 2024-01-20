@@ -8,8 +8,6 @@ crossv_kfold <- function(n, k) {
   sample(cut(seq_len(n), breaks = k, labels = FALSE))
 }
 
-fscale <- function(x, center = TRUE, scale = TRUE) {
-  if (isTRUE(center)) center <- colmeans(x)
-  if (isTRUE(scale)) scale <- colVars(x, std = TRUE)
+fscale <- function(x, center, scale) {
   eachrow(eachrow(x, center, "-"), scale, "/")
 }
