@@ -61,13 +61,12 @@ cpm <- function(conmat, behav, ...,
                 kfolds = NULL,
                 bias_correct = TRUE) {
   thresh_method <- match.arg(thresh_method)
-  num_sub <- length(behav)
   # default to leave-one-subject-out
-  if (is.null(kfolds)) kfolds <- num_sub
-  folds <- crossv_kfold(num_sub, kfolds)
+  if (is.null(kfolds)) kfolds <- length(behav)
+  folds <- crossv_kfold(length(behav), kfolds)
   # pre-allocation
   pred <- matrix(
-    nrow = num_sub,
+    nrow = length(behav),
     ncol = length(includes),
     dimnames = list(NULL, includes)
   )
