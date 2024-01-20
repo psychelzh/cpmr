@@ -11,10 +11,9 @@ coverage](https://codecov.io/gh/psychelzh/cpmr/branch/main/graph/badge.svg)](htt
 <!-- badges: end -->
 
 The cpmr package is specifically designed for the analysis of the
-connectome predictive modeling (CPM) method in R. This package relied on
+connectome predictive modeling (CPM) method in R. This package relies on
 [Rfast](https://cran.r-project.org/web/packages/Rfast/index.html) to do
-row oriented calculation, especially `fscale()`, a faster version of
-`stats::scale()`.
+row oriented calculation.
 
 ## Installation
 
@@ -24,6 +23,13 @@ You can install the development version of cpmr from
 ``` r
 # install.packages("devtools")
 devtools::install_github("psychelzh/cpmr")
+```
+
+Or you can install cpmr from
+[r-universe](https://psychelzh.r-universe.dev) with:
+
+``` r
+install.packages("cpmr", repos = c(getOption("repos"), "https://psychelzh.r-universe.dev"))
 ```
 
 ## Example
