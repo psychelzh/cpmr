@@ -152,7 +152,7 @@ cpm <- function(conmat, behav, ...,
 
 # helper functions
 regress_counfounds <- function(resp, confounds) {
-  .lm.fit(cbind(1, confounds), resp)$residuals
+  stats::.lm.fit(cbind(1, confounds), resp)$residuals
 }
 
 select_edges <- function(conmat, behav, ...,
