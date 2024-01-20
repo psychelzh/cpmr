@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 # cpmr
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/psychelzh/cpmr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/psychelzh/cpmr/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/psychelzh/cpmr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/psychelzh/cpmr?branch=main)
 <!-- badges: end -->
 
 The cpmr package is specifically designed for the analysis of the connectome predictive modeling (CPM) method in R. This package relied on [Rfast](https://cran.r-project.org/web/packages/Rfast/index.html) to do row oriented calculation, especially `fscale()`, a faster version of `stats::scale()`.
@@ -36,6 +38,7 @@ It is very simple to use this package. Just shape your connectivity matrix as a 
 ```{r example}
 library(cpmr)
 
+withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
 res <- cpm(conmat, behav, kfolds = 10)

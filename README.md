@@ -4,6 +4,10 @@
 # cpmr
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/psychelzh/cpmr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/psychelzh/cpmr/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/psychelzh/cpmr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/psychelzh/cpmr?branch=main)
 <!-- badges: end -->
 
 The cpmr package is specifically designed for the analysis of the
@@ -33,6 +37,7 @@ feed them in `cpm()` function.
 ``` r
 library(cpmr)
 
+withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
 res <- cpm(conmat, behav, kfolds = 10)
