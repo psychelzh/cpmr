@@ -8,6 +8,7 @@ cpm(
   conmat,
   behav,
   ...,
+  confounds = NULL,
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
   kfolds = NULL,
@@ -22,6 +23,9 @@ column (assumed that duplicated edges are removed).}
 number of observations in \code{conmat}.}
 
 \item{...}{For future extension. Currently ignored.}
+
+\item{confounds}{A matrix of confounding variables. Observations in row,
+variables in column. If \code{NULL}, no confounding variables are used.}
 
 \item{thresh_method, thresh_level}{The threshold method and level used in edge
 selection. If method is set to be \code{"alpha"}, the edge selection is based on

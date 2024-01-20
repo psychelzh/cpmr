@@ -19,6 +19,8 @@
 #' @param behav A numeric vector contains behavior data. Length must equal to
 #'   number of observations in `conmat`.
 #' @param ... For future extension. Currently ignored.
+#' @param confounds A matrix of confounding variables. Observations in row,
+#'   variables in column. If `NULL`, no confounding variables are used.
 #' @param thresh_method,thresh_level The threshold method and level used in edge
 #'   selection. If method is set to be `"alpha"`, the edge selection is based on
 #'   the critical value of correlation coefficient. If method is set to be
@@ -56,11 +58,18 @@
 #' https://doi.org/10.1016/j.dcn.2020.100878
 #' @export
 cpm <- function(conmat, behav, ...,
+                confounds = NULL,
                 thresh_method = c("alpha", "sparsity"),
                 thresh_level = 0.01,
                 kfolds = NULL,
                 bias_correct = TRUE) {
   thresh_method <- match.arg(thresh_method)
+  if (!is.null(confounds)) {
+    # R is (weirdly?) not efficient at dealing with partial correlation
+    # we use equivalent regress-out method (which is quick!)
+    conmat <- regress_counfounds(conmat, confounds)
+    behav <- regress_counfounds(behav, confounds)
+  }
   # default to leave-one-subject-out
   if (is.null(kfolds)) kfolds <- length(behav)
   folds <- crossv_kfold(length(behav), kfolds)
@@ -142,6 +151,10 @@ cpm <- function(conmat, behav, ...,
 }
 
 # helper functions
+regress_counfounds <- function(resp, confounds) {
+  .lm.fit(cbind(1, confounds), resp)$residuals
+}
+
 select_edges <- function(conmat, behav, ...,
                          method = c("alpha", "sparsity"),
                          level = 0.01) {
