@@ -7,7 +7,7 @@ Authors@R:
 Description: This package provides a set of functions to perform
     connectome predictive modelling in R.
 License: MIT + file LICENSE
-URL: https://github.com/psychelzh/cpmr
+URL: https://github.com/psychelzh/cpmr, https://psychelzh.github.io/cpmr/
 BugReports: https://github.com/psychelzh/cpmr/issues
 Imports:
     Rfast,
