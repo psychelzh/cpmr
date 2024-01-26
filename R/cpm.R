@@ -37,10 +37,12 @@
 #'   \item{folds}{The corresponding fold for each observation when used as test
 #'     group in cross-validation.}
 #'
-#'   \item{real}{The real behavior data.}
+#'   \item{real}{The real behavior data. This is the same as the input `behav`.}
 #'
 #'   \item{pred}{The predicted behavior data, with each column corresponding to
-#'     a model, i.e., both edges, positive edges, negative edges.}
+#'     a model, i.e., both edges, positive edges, negative edges, and the row
+#'     names corresponding to the observation names (the same as those of
+#'     `behav`).}
 #'
 #'   \item{edges}{The selected edges, a 3D array indicating the selction results
 #'     for each fold. Dimensions are folds, edges, and networks.}
@@ -77,7 +79,7 @@ cpm <- function(conmat, behav, ...,
   pred <- matrix(
     nrow = length(behav),
     ncol = length(includes),
-    dimnames = list(NULL, includes)
+    dimnames = list(names(behav), includes)
   )
   edges <- array(
     dim = c(kfolds, dim(conmat)[2], length(networks)),

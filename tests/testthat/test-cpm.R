@@ -26,3 +26,12 @@ test_that("Works with confounds", {
   cpm(conmat, behav, confounds = confounds) |>
     expect_snapshot()
 })
+
+test_that("Keep names of behavior", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+  names(behav) <- LETTERS[1:10]
+  cpm(conmat, behav) |>
+    expect_snapshot()
+})
