@@ -18,7 +18,7 @@ use it."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mat
     
     <a class="navbar-brand me-2" href="../index.html">cpmr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -127,12 +127,14 @@ group in cross-validation.</p></dd>
 
 
 <dt>real</dt>
-<dd><p>The real behavior data.</p></dd>
+<dd><p>The real behavior data. This is the same as the input <code>behav</code>.</p></dd>
 
 
 <dt>pred</dt>
 <dd><p>The predicted behavior data, with each column corresponding to
-a model, i.e., both edges, positive edges, negative edges.</p></dd>
+a model, i.e., both edges, positive edges, negative edges, and the row
+names corresponding to the observation names (the same as those of
+<code>behav</code>).</p></dd>
 
 
 <dt>edges</dt>
