@@ -35,3 +35,13 @@ test_that("Keep names of behavior", {
   cpm(conmat, behav) |>
     expect_snapshot()
 })
+
+test_that("Check observation names match", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  rownames(conmat) <- letters[1:10]
+  behav <- rnorm(10)
+  names(behav) <- LETTERS[1:10]
+  cpm(conmat, behav) |>
+    expect_error("do not match")
+})

@@ -66,6 +66,12 @@ cpm <- function(conmat, behav, ...,
                 kfolds = NULL,
                 bias_correct = TRUE) {
   thresh_method <- match.arg(thresh_method)
+  # check if rownames of conmat and names of behav match if both are not NULL
+  if (!is.null(rownames(conmat)) && !is.null(names(behav))) {
+    if (!identical(rownames(conmat), names(behav))) {
+      stop("Row names of `conmat` and names of `behav` do not match.")
+    }
+  }
   if (!is.null(confounds)) {
     # R is (weirdly?) not efficient at dealing with partial correlation
     # we use equivalent regress-out method (which is quick!)
