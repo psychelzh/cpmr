@@ -173,9 +173,10 @@ select_edges <- function(conmat, behav, ...,
       c(-thresh, thresh)
     },
     sparsity = {
+      k <- round(level * length(r_mat))
       thresh <- c(
-        nth(r_mat, level * length(r_mat)),
-        nth(r_mat, (1 - level) * length(r_mat))
+        nth(r_mat, k),
+        nth(r_mat, k, descending = TRUE)
       )
       if (thresh[[1]] > 0 || thresh[[2]] < 0) {
         warning("Not enough positive or negative correlation values.") # nocov
@@ -185,7 +186,7 @@ select_edges <- function(conmat, behav, ...,
     stop("Invalid threshold method.")
   )
   matrix(
-    c(r_mat > r_crit[2], r_mat < r_crit[1]),
+    c(r_mat >= r_crit[2], r_mat <= r_crit[1]),
     ncol = 2,
     dimnames = list(NULL, networks)
   )
