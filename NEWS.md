@@ -1,3 +1,7 @@
+# cpmr 0.0.6
+
+* Ensure confounds regression are now only used in feature selection.
+
 # cpmr 0.0.5
 
 * Fixed confounds treatment. Now confounds are used in feature selection but not in model fitting.
