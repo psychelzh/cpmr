@@ -90,13 +90,11 @@ cpm <- function(conmat, behav, ...,
     rows_train <- folds != fold
     conmat_train <- conmat[rows_train, , drop = FALSE]
     behav_train <- behav[rows_train]
-    if (!is.null(confounds)) {
-      confounds_train <- confounds[rows_train, , drop = FALSE]
-      conmat_train <- regress_counfounds(conmat_train, confounds_train)
-      behav_train <- regress_counfounds(behav_train, confounds_train)
+    confounds_train <- if (!is.null(confounds)) {
+      confounds[rows_train, , drop = FALSE]
     }
     cur_edges <- select_edges(
-      conmat_train, behav_train,
+      conmat_train, behav_train, confounds_train,
       thresh_method, thresh_level
     )
     conmat_test <- conmat[!rows_train, , drop = FALSE]
@@ -120,6 +118,37 @@ cpm <- function(conmat, behav, ...,
 }
 
 # helper functions
+select_edges <- function(conmat, behav, confounds, method, level) {
+  if (!is.null(confounds)) {
+    conmat <- regress_counfounds(conmat, confounds)
+    behav <- regress_counfounds(behav, confounds)
+  }
+  r_mat <- stats::cor(conmat, behav)
+  r_crit <- switch(method,
+    alpha = {
+      thresh <- critical_r(nrow(conmat), level)
+      c(-thresh, thresh)
+    },
+    sparsity = {
+      k <- round(level * length(r_mat))
+      thresh <- c(
+        nth(r_mat, k),
+        nth(r_mat, k, descending = TRUE)
+      )
+      if (thresh[[1]] > 0 || thresh[[2]] < 0) {
+        warning("Not enough positive or negative correlation values.") # nocov
+      }
+      thresh
+    },
+    stop("Invalid threshold method.")
+  )
+  matrix(
+    c(r_mat >= r_crit[2], r_mat <= r_crit[1]),
+    ncol = 2,
+    dimnames = list(NULL, networks)
+  )
+}
+
 predict_cpm <- function(conmat, behav, conmat_new, edges, bias_correct) {
   if (bias_correct) {
     center <- colmeans(conmat)
@@ -165,31 +194,4 @@ predict_cpm <- function(conmat, behav, conmat_new, edges, bias_correct) {
 
 regress_counfounds <- function(resp, confounds) {
   stats::.lm.fit(cbind(1, confounds), resp)$residuals
-}
-
-select_edges <- function(conmat, behav, method, level) {
-  r_mat <- stats::cor(conmat, behav)
-  r_crit <- switch(method,
-    alpha = {
-      thresh <- critical_r(nrow(conmat), level)
-      c(-thresh, thresh)
-    },
-    sparsity = {
-      k <- round(level * length(r_mat))
-      thresh <- c(
-        nth(r_mat, k),
-        nth(r_mat, k, descending = TRUE)
-      )
-      if (thresh[[1]] > 0 || thresh[[2]] < 0) {
-        warning("Not enough positive or negative correlation values.") # nocov
-      }
-      thresh
-    },
-    stop("Invalid threshold method.")
-  )
-  matrix(
-    c(r_mat >= r_crit[2], r_mat <= r_crit[1]),
-    ncol = 2,
-    dimnames = list(NULL, networks)
-  )
 }
