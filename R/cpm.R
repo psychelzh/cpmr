@@ -37,10 +37,7 @@
 #'   \item{folds}{The corresponding fold for each observation when used as test
 #'     group in cross-validation.}
 #'
-#'   \item{real}{The real behavior data. This is the same as the input `behav`
-#'     if no confounding variables are used. If confounding variables are used,
-#'     this is the residual of `behav` after regressing out the confounding
-#'     variables.}
+#'   \item{real}{The real behavior data. This is the same as the input `behav`.}
 #'
 #'   \item{pred}{The predicted behavior data, with each column corresponding to
 #'     a model, i.e., both edges, positive edges, negative edges, and the row
@@ -75,12 +72,6 @@ cpm <- function(conmat, behav, ...,
       stop("Row names of `conmat` and names of `behav` do not match.")
     }
   }
-  if (!is.null(confounds)) {
-    # R is (weirdly?) not efficient at dealing with partial correlation
-    # we use equivalent regress-out method (which is quick!)
-    conmat <- regress_counfounds(conmat, confounds)
-    behav <- regress_counfounds(behav, confounds)
-  }
   # default to leave-one-subject-out
   if (is.null(kfolds)) kfolds <- length(behav)
   folds <- crossv_kfold(length(behav), kfolds)
@@ -97,13 +88,17 @@ cpm <- function(conmat, behav, ...,
   for (fold in seq_len(kfolds)) {
     rows_train <- folds != fold
     conmat_train <- conmat[rows_train, , drop = FALSE]
-    conmat_test <- conmat[!rows_train, , drop = FALSE]
     behav_train <- behav[rows_train]
+    if (!is.null(confounds)) {
+      confounds_train <- confounds[rows_train, , drop = FALSE]
+      conmat_train <- regress_counfounds(conmat_train, confounds_train)
+      behav_train <- regress_counfounds(behav_train, confounds_train)
+    }
     cur_edges <- select_edges(
       conmat_train, behav_train,
-      method = thresh_method,
-      level = thresh_level
+      thresh_method, thresh_level
     )
+    conmat_test <- conmat[!rows_train, , drop = FALSE]
     cur_pred <- predict_cpm(
       conmat_train, behav_train, conmat_test,
       cur_edges, bias_correct
@@ -167,10 +162,7 @@ regress_counfounds <- function(resp, confounds) {
   stats::.lm.fit(cbind(1, confounds), resp)$residuals
 }
 
-select_edges <- function(conmat, behav, ...,
-                         method = c("alpha", "sparsity"),
-                         level = 0.01) {
-  method <- match.arg(method)
+select_edges <- function(conmat, behav, method, level) {
   r_mat <- stats::cor(conmat, behav)
   r_crit <- switch(method,
     alpha = {

@@ -22,7 +22,7 @@ test_that("Works with confounds", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  confounds <- rnorm(10)
+  confounds <- matrix(rnorm(10), ncol = 1)
   cpm(conmat, behav, confounds = confounds) |>
     expect_snapshot()
 })

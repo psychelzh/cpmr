@@ -47,10 +47,7 @@ A list with the following components:
 \item{folds}{The corresponding fold for each observation when used as test
 group in cross-validation.}
 
-\item{real}{The real behavior data. This is the same as the input \code{behav}
-if no confounding variables are used. If confounding variables are used,
-this is the residual of \code{behav} after regressing out the confounding
-variables.}
+\item{real}{The real behavior data. This is the same as the input \code{behav}.}
 
 \item{pred}{The predicted behavior data, with each column corresponding to
 a model, i.e., both edges, positive edges, negative edges, and the row
