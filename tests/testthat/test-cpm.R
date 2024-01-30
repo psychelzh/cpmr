@@ -6,6 +6,7 @@ test_that("Default threshold method works", {
   expect_s3_class(result, "cpm")
   expect_snapshot_value(result$pred, style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
+  expect_snapshot(result)
 })
 
 test_that("Alternative threshold method works", {
