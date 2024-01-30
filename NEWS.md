@@ -1,3 +1,7 @@
+# cpmr 0.0.5
+
+* Fixed confounds treatment. Now confounds are used in feature selection but not in model fitting.
+
 # cpmr 0.0.4
 
 * Ensure sparsity threshold method work as expect.
