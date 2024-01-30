@@ -1,338 +1,236 @@
-# Different threshold methods works
+# Default threshold method works
 
-    Code
-      cpm(conmat, behav, thresh_method = "alpha")
-    Output
-      $folds
-       [1]  4  9  7  6  5  8  2  3  1 10
-      
-      $real
-       [1] -0.71040656  0.25688371 -0.24669188 -0.34754260 -0.95161857 -0.04502772
-       [7] -0.78490447 -1.66794194 -0.38022652  0.91899661
-      
-      $pred
-                  both        pos        neg
-       [1,] -0.3608970 -0.3608970 -0.3608970
-       [2,] -0.4683737 -0.4683737 -0.5304043
-       [3,] -0.4124209 -0.4124209 -0.4124209
-       [4,] -0.4012153 -0.4012153 -0.4012153
-       [5,] -0.3340957 -0.3340957 -0.3340957
-       [6,] -0.4348280 -0.4348280 -0.4348280
-       [7,] -0.3526195 -0.3526195 -0.3526195
-       [8,] -0.2545042 -0.2545042 -0.2545042
-       [9,] -0.3975837 -0.3975837 -0.3975837
-      [10,] -0.5419418 -0.5419418 -0.5419418
-      
-      $edges
-      , , pos
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [2,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [3,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [4,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [5,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [6,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [7,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [8,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [9,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      [10,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      
-      , , neg
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [2,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [3,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [4,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [5,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [6,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [7,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [8,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [9,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-      [10,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      
-      
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 3]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["both", "pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [-0.36089704, -0.46837374, -0.4124209, -0.40121526, -0.33409571, -0.43482802, -0.3526195, -0.25450422, -0.39758371, -0.54194184, -0.36089704, -0.46837374, -0.4124209, -0.40121526, -0.33409571, -0.43482802, -0.3526195, -0.25450422, -0.39758371, -0.54194184, -0.36089704, -0.53040432, -0.4124209, -0.40121526, -0.33409571, -0.43482802, -0.3526195, -0.25450422, -0.39758371, -0.54194184]
+    }
 
 ---
 
-    Code
-      cpm(conmat, behav, thresh_method = "sparsity")
-    Output
-      $folds
-       [1]  6  9  8  4  2  7  1  5 10  3
-      
-      $real
-       [1] -0.71040656  0.25688371 -0.24669188 -0.34754260 -0.95161857 -0.04502772
-       [7] -0.78490447 -1.66794194 -0.38022652  0.91899661
-      
-      $pred
-                  both         pos         neg
-       [1,] -0.4483117 -0.47270880 -0.38224409
-       [2,] -0.9344481 -1.13102784 -0.13407720
-       [3,] -0.2897953 -0.30731623 -0.34105440
-       [4,] -1.0184311 -0.39982201 -1.25039233
-       [5,] -1.2271578 -0.81405633 -0.98049407
-       [6,]  0.2713981  0.45584186 -0.32868202
-       [7,]  0.4922110  0.55325269 -0.14702750
-       [8,]  0.3972222 -0.03339286  0.54417272
-       [9,] -0.2727538 -0.56246600 -0.06844446
-      [10,] -1.0566739 -0.73762965 -1.13204492
-      
-      $edges
-      , , pos
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,]  TRUE  TRUE  TRUE FALSE FALSE FALSE  TRUE  TRUE  TRUE FALSE
-       [2,]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE
-       [3,]  TRUE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE FALSE
-       [4,]  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE
-       [5,] FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE FALSE
-       [6,]  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE
-       [7,]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE
-       [8,]  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE
-       [9,]  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE
-      [10,]  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE
-      
-      , , neg
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE  TRUE  TRUE  TRUE FALSE FALSE FALSE  TRUE
-       [2,] FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [3,] FALSE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE  TRUE
-       [4,] FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE
-       [5,]  TRUE  TRUE FALSE  TRUE  TRUE FALSE FALSE  TRUE FALSE  TRUE
-       [6,] FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE
-       [7,] FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [8,] FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE
-       [9,] FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE
-      [10,] FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE
-      
-      
+    {
+      "type": "logical",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false]
+    }
+
+# Alternative threshold method works
+
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 3]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["both", "pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [-0.4483117, -0.93444812, -0.28979535, -1.0184311, -1.22715776, 0.27139805, 0.49221098, 0.39722219, -0.27275375, -1.05667388, -0.4727088, -1.13102784, -0.30731623, -0.39982201, -0.81405633, 0.45584186, 0.55325269, -0.03339286, -0.562466, -0.73762965, -0.38224409, -0.1340772, -0.3410544, -1.25039233, -0.98049407, -0.32868202, -0.1470275, 0.54417272, -0.06844446, -1.13204492]
+    }
+
+---
+
+    {
+      "type": "logical",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [true, true, false, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, false, true, false, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, false, true, true, false, true, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true]
+    }
 
 # Different threshold levels works
 
-    Code
-      cpm(conmat, behav, thresh_level = 0.1)
-    Output
-      $folds
-       [1]  4  9  7  6  5  8  2  3  1 10
-      
-      $real
-       [1] -0.71040656  0.25688371 -0.24669188 -0.34754260 -0.95161857 -0.04502772
-       [7] -0.78490447 -1.66794194 -0.38022652  0.91899661
-      
-      $pred
-                  both        pos         neg
-       [1,] -0.3608970 -0.3608970 -0.66417678
-       [2,] -0.4683737 -0.4683737 -0.53040432
-       [3,] -0.4124209 -0.4124209 -0.30399265
-       [4,] -0.4012153 -0.4012153  0.25624007
-       [5,] -0.3340957 -0.3340957 -0.82873672
-       [6,] -0.4348280 -0.4348280  0.15696941
-       [7,] -0.3526195 -0.3526195 -1.57202923
-       [8,] -0.2545042 -0.2545042 -0.36423604
-       [9,] -0.3975837 -0.3975837 -0.01093361
-      [10,] -0.3939514 -0.8341233  0.06133675
-      
-      $edges
-      , , pos
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [2,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [3,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [4,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [5,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [6,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [7,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [8,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [9,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      [10,] FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      
-      , , neg
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [2,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [3,] FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [4,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [5,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [6,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [7,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [8,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [9,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-      [10,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-      
-      
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 3]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["both", "pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [-0.36089704, -0.46837374, -0.4124209, -0.40121526, -0.33409571, -0.43482802, -0.3526195, -0.25450422, -0.39758371, -0.39395137, -0.36089704, -0.46837374, -0.4124209, -0.40121526, -0.33409571, -0.43482802, -0.3526195, -0.25450422, -0.39758371, -0.83412333, -0.66417678, -0.53040432, -0.30399265, 0.25624007, -0.82873672, 0.15696941, -1.57202923, -0.36423604, -0.01093361, 0.06133675]
+    }
 
 ---
 
-    Code
-      cpm(conmat, behav, thresh_level = 0.2)
-    Output
-      $folds
-       [1]  6  9  8  4  2  7  1  5 10  3
-      
-      $real
-       [1] -0.71040656  0.25688371 -0.24669188 -0.34754260 -0.95161857 -0.04502772
-       [7] -0.78490447 -1.66794194 -0.38022652  0.91899661
-      
-      $pred
-                  both         pos         neg
-       [1,] -0.4481122  0.02207492 -0.66417678
-       [2,] -1.2037134 -1.63083279 -0.53040432
-       [3,] -0.4124209 -0.41242090 -0.30399265
-       [4,]  0.1004767 -0.92989415  0.25624007
-       [5,] -0.3340957 -0.33409571 -0.82873672
-       [6,] -0.4348280 -0.43482802  0.15696941
-       [7,] -1.4354862 -0.22414928 -1.57202923
-       [8,] -0.3620571 -0.27943634 -0.36423604
-       [9,] -0.3975837 -0.39758371 -0.01093361
-      [10,] -0.3799516 -0.83707219  0.06133675
-      
-      $edges
-      , , pos
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE
-       [2,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [3,]  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [4,] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE
-       [5,] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE
-       [6,] FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [7,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [8,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [9,] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE
-      [10,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      
-      , , neg
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [2,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [3,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [4,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [5,] FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [6,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [7,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [8,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [9,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-      [10,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-      
-      
+    {
+      "type": "logical",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true]
+    }
 
 # Works with confounds
 
-    Code
-      cpm(conmat, behav, confounds = confounds)
-    Output
-      $folds
-       [1]  5  7 10  1  2  9  4  6  8  3
-      
-      $real
-       [1] -0.71040656  0.25688371 -0.24669188 -0.34754260 -0.95161857 -0.04502772
-       [7] -0.78490447 -1.66794194 -0.38022652  0.91899661
-      
-      $pred
-                     both           pos           neg
-       [1,]  0.000000e+00  0.000000e+00  0.000000e+00
-       [2,]  3.700743e-17  3.700743e-17  3.700743e-17
-       [3,]  0.000000e+00  0.000000e+00  0.000000e+00
-       [4,] -2.219155e-17  0.000000e+00  3.756764e-01
-       [5,] -1.850372e-17 -1.850372e-17 -1.850372e-17
-       [6,] -1.850372e-17 -1.850372e-17 -1.850372e-17
-       [7,] -5.551115e-17 -5.551115e-17 -5.551115e-17
-       [8,] -3.700743e-17 -3.700743e-17 -3.700743e-17
-       [9,]  0.000000e+00  0.000000e+00  0.000000e+00
-      [10,]  2.775558e-17  2.775558e-17  2.775558e-17
-      
-      $edges
-      , , pos
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [2,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [3,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [4,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [5,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [6,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [7,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [8,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [9,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      [10,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      
-      , , neg
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-       [2,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [3,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [4,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [5,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [6,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [7,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [8,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [9,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      [10,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      
-      
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 3]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["both", "pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [0, 3.70074342e-17, 0, -2.2191551e-17, -1.85037171e-17, -1.85037171e-17, -5.55111512e-17, -3.70074342e-17, 0, 2.77555756e-17, 0, 3.70074342e-17, 0, 0, -1.85037171e-17, -1.85037171e-17, -5.55111512e-17, -3.70074342e-17, 0, 2.77555756e-17, 0, 3.70074342e-17, 0, 0.37567643, -1.85037171e-17, -1.85037171e-17, -5.55111512e-17, -3.70074342e-17, 0, 2.77555756e-17]
+    }
 
-# Keep names of behavior
+---
 
-    Code
-      cpm(conmat, behav)
-    Output
-      $folds
-       [1]  4  9  7  6  5  8  2  3  1 10
-      
-      $real
-                A           B           C           D           E           F 
-      -0.71040656  0.25688371 -0.24669188 -0.34754260 -0.95161857 -0.04502772 
-                G           H           I           J 
-      -0.78490447 -1.66794194 -0.38022652  0.91899661 
-      
-      $pred
-              both        pos        neg
-      A -0.3608970 -0.3608970 -0.3608970
-      B -0.4683737 -0.4683737 -0.5304043
-      C -0.4124209 -0.4124209 -0.4124209
-      D -0.4012153 -0.4012153 -0.4012153
-      E -0.3340957 -0.3340957 -0.3340957
-      F -0.4348280 -0.4348280 -0.4348280
-      G -0.3526195 -0.3526195 -0.3526195
-      H -0.2545042 -0.2545042 -0.2545042
-      I -0.3975837 -0.3975837 -0.3975837
-      J -0.5419418 -0.5419418 -0.5419418
-      
-      $edges
-      , , pos
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [2,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [3,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [4,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [5,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [6,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [7,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [8,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [9,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      [10,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      
-      , , neg
-      
-             [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-       [1,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [2,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [3,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [4,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [5,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [6,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [7,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [8,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-       [9,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
-      [10,] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-      
-      
+    {
+      "type": "logical",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false]
+    }
 
