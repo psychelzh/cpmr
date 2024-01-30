@@ -1,3 +1,8 @@
+# cpmr 0.0.4
+
+* Ensure sparsity threshold method work as expect.
+* Some other improvements in code quality.
+
 # cpmr 0.0.3
 
 * Keep observation names in the output.
