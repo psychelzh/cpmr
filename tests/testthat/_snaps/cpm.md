@@ -64,6 +64,72 @@
     Output
       CPM results based on leave-one-out cross validation.
 
+# `kfolds` works
+
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 3]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["both", "pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [-0.19751643, -0.60963073, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.92500993, -0.19751643, -0.60963073, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.92500993, -0.19751643, -0.64179503, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.64179503]
+    }
+
+---
+
+    {
+      "type": "logical",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [5, 10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+    }
+
+---
+
+    Code
+      result
+    Output
+      CPM results based on 5-fold cross validation.
+
 # Alternative threshold method works
 
     {
