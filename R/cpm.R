@@ -68,6 +68,7 @@ cpm <- function(conmat, behav, ...,
                 thresh_level = 0.01,
                 kfolds = NULL,
                 bias_correct = TRUE) {
+  call <- match.call()
   thresh_method <- match.arg(thresh_method)
   # check if rownames of conmat and names of behav match if both are not NULL
   if (!is.null(rownames(conmat)) && !is.null(names(behav))) {
@@ -111,11 +112,15 @@ cpm <- function(conmat, behav, ...,
     pred[!rows_train, ] <- cur_pred
     edges[fold, , ] <- cur_edges
   }
-  list(
-    folds = folds,
-    real = behav,
-    pred = pred,
-    edges = edges
+  structure(
+    list(
+      folds = folds,
+      real = behav,
+      pred = pred,
+      edges = edges,
+      call = call
+    ),
+    class = "cpm"
   )
 }
 
