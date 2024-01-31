@@ -127,7 +127,9 @@ group in cross-validation.</p></dd>
 
 
 <dt>real</dt>
-<dd><p>The real behavior data. This is the same as the input <code>behav</code>.</p></dd>
+<dd><p>The real behavior data. This is the same as the input <code>behav</code>
+if <code>confounds</code> is <code>NULL</code>, otherwise it is the residual of <code>behav</code> after
+regressing out <code>confounds</code>.</p></dd>
 
 
 <dt>pred</dt>
