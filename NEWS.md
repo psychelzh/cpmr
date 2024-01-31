@@ -1,3 +1,7 @@
+# cpmr 0.0.7
+
+* Convert back to older version of confounds treating.
+
 # cpmr 0.0.6
 
 * Ensure confounds regression are now only used in feature selection.
