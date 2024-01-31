@@ -37,7 +37,9 @@
 #'   \item{folds}{The corresponding fold for each observation when used as test
 #'     group in cross-validation.}
 #'
-#'   \item{real}{The real behavior data. This is the same as the input `behav`.}
+#'   \item{real}{The real behavior data. This is the same as the input `behav`
+#'     if `confounds` is `NULL`, otherwise it is the residual of `behav` after
+#'     regressing out `confounds`.}
 #'
 #'   \item{pred}{The predicted behavior data, with each column corresponding to
 #'     a model, i.e., both edges, positive edges, negative edges, and the row
@@ -69,9 +71,32 @@ cpm <- function(conmat, behav, ...,
   thresh_method <- match.arg(thresh_method)
   # check if rownames of conmat and names of behav match if both are not NULL
   if (!is.null(rownames(conmat)) && !is.null(names(behav))) {
-    if (!identical(rownames(conmat), names(behav))) {
-      stop("Row names of `conmat` and names of `behav` do not match.")
+    # nocov start
+    stopifnot(
+      "Row names of `conmat` and names of `behav` do not match." =
+        identical(rownames(conmat), names(behav))
+    )
+    # nocov end
+  }
+  if (!is.null(confounds)) {
+    # nocov start
+    if (!is.null(rownames(confounds))) {
+      if (!is.null(rownames(conmat))) {
+        stopifnot(
+          "Row names of `conmat` and names of `confounds` do not match." =
+            identical(rownames(conmat), rownames(confounds))
+        )
+      }
+      if (!is.null(names(behav))) {
+        stopifnot(
+          "Names of `behav` and names of `confounds` do not match." =
+            identical(names(behav), rownames(confounds))
+        )
+      }
     }
+    # nocov end
+    conmat <- regress_counfounds(conmat, confounds)
+    behav <- regress_counfounds(behav, confounds)
   }
   # default to leave-one-subject-out
   if (is.null(kfolds)) kfolds <- length(behav)
@@ -90,11 +115,8 @@ cpm <- function(conmat, behav, ...,
     rows_train <- folds != fold
     conmat_train <- conmat[rows_train, , drop = FALSE]
     behav_train <- behav[rows_train]
-    confounds_train <- if (!is.null(confounds)) {
-      confounds[rows_train, , drop = FALSE]
-    }
     cur_edges <- select_edges(
-      conmat_train, behav_train, confounds_train,
+      conmat_train, behav_train,
       thresh_method, thresh_level
     )
     conmat_test <- conmat[!rows_train, , drop = FALSE]
@@ -118,11 +140,7 @@ cpm <- function(conmat, behav, ...,
 }
 
 # helper functions
-select_edges <- function(conmat, behav, confounds, method, level) {
-  if (!is.null(confounds)) {
-    conmat <- regress_counfounds(conmat, confounds)
-    behav <- regress_counfounds(behav, confounds)
-  }
+select_edges <- function(conmat, behav, method, level) {
   r_mat <- stats::cor(conmat, behav)
   r_crit <- switch(method,
     alpha = {
