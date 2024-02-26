@@ -1,3 +1,7 @@
+# cpmr 0.0.8
+
+* Added `return_edges` argument to optionally set how to return edges in the output.
+
 # cpmr 0.0.7
 
 * Convert back to older version of confounds treating.
