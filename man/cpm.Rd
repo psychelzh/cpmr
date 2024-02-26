@@ -12,7 +12,8 @@ cpm(
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
   kfolds = NULL,
-  bias_correct = TRUE
+  bias_correct = TRUE,
+  return_edges = c("none", "sum", "all")
 )
 }
 \arguments{
@@ -40,6 +41,11 @@ be equal to the number of observations, i.e., leave-one-subject-out.}
 bias-corrected. If \code{TRUE}, the connectome data will be centered and scaled
 to have unit variance based on the training data before model fitting and
 prediction. See Rapuano et al. (2020) for more details.}
+
+\item{return_edges}{A character string indicating the return value of the
+selected edges. If \code{"none"}, no edges are returned. If \code{"sum"}, the sum of
+selected edges across folds is returned. If \code{"all"}, the selected edges for
+each fold is returned, which is a 3D array and memory-consuming.}
 }
 \value{
 A list with the following components:
@@ -56,8 +62,11 @@ a model, i.e., both edges, positive edges, negative edges, and the row
 names corresponding to the observation names (the same as those of
 \code{behav}).}
 
-\item{edges}{The selected edges, a 3D array indicating the selction results
-for each fold. Dimensions are folds, edges, and networks.}
+\item{edges}{The selected edges, if \code{return_edges} is not \code{"none"}. If
+\code{return_edges} is \code{"sum"}, it is a matrix with rows corresponding to
+edges and columns corresponding to networks. If \code{return_edges} is
+\code{"all"}, it is a 3D array with dimensions corresponding to folds, edges,
+and networks.}
 }
 \description{
 The connectome-based predictive modeling (CPM) is a data-driven approach to

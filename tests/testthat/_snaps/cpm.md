@@ -29,32 +29,7 @@
 ---
 
     {
-      "type": "logical",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [10, 10, 2]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pos", "neg"]
-            }
-          ]
-        }
-      },
-      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false]
+      "type": "NULL"
     }
 
 ---
@@ -95,32 +70,7 @@
 ---
 
     {
-      "type": "logical",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [5, 10, 2]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pos", "neg"]
-            }
-          ]
-        }
-      },
-      "value": [false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+      "type": "NULL"
     }
 
 ---
@@ -161,32 +111,7 @@
 ---
 
     {
-      "type": "logical",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [10, 10, 2]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pos", "neg"]
-            }
-          ]
-        }
-      },
-      "value": [true, true, false, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, true, false, false, true, false, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, false, true, true, false, true, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true]
+      "type": "NULL"
     }
 
 # Different threshold levels works
@@ -220,32 +145,7 @@
 ---
 
     {
-      "type": "logical",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [10, 10, 2]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pos", "neg"]
-            }
-          ]
-        }
-      },
-      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true]
+      "type": "NULL"
     }
 
 # Works with confounds
@@ -279,6 +179,12 @@
 ---
 
     {
+      "type": "NULL"
+    }
+
+# `return_edges` argument works
+
+    {
       "type": "logical",
       "attributes": {
         "dim": {
@@ -304,6 +210,34 @@
           ]
         }
       },
-      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false]
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false]
+    }
+
+---
+
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
     }
 

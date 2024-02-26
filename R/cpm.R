@@ -32,6 +32,10 @@
 #'   bias-corrected. If `TRUE`, the connectome data will be centered and scaled
 #'   to have unit variance based on the training data before model fitting and
 #'   prediction. See Rapuano et al. (2020) for more details.
+#' @param return_edges A character string indicating the return value of the
+#'   selected edges. If `"none"`, no edges are returned. If `"sum"`, the sum of
+#'   selected edges across folds is returned. If `"all"`, the selected edges for
+#'   each fold is returned, which is a 3D array and memory-consuming.
 #' @return A list with the following components:
 #'
 #'   \item{folds}{The corresponding fold for each observation when used as test
@@ -46,8 +50,11 @@
 #'     names corresponding to the observation names (the same as those of
 #'     `behav`).}
 #'
-#'   \item{edges}{The selected edges, a 3D array indicating the selction results
-#'     for each fold. Dimensions are folds, edges, and networks.}
+#'   \item{edges}{The selected edges, if `return_edges` is not `"none"`. If
+#'     `return_edges` is `"sum"`, it is a matrix with rows corresponding to
+#'     edges and columns corresponding to networks. If `return_edges` is
+#'     `"all"`, it is a 3D array with dimensions corresponding to folds, edges,
+#'     and networks.}
 #' @references
 #'
 #' Shen, X., Finn, E. S., Scheinost, D., Rosenberg, M. D., Chun, M. M.,
@@ -66,9 +73,11 @@ cpm <- function(conmat, behav, ...,
                 thresh_method = c("alpha", "sparsity"),
                 thresh_level = 0.01,
                 kfolds = NULL,
-                bias_correct = TRUE) {
+                bias_correct = TRUE,
+                return_edges = c("none", "sum", "all")) {
   call <- match.call()
   thresh_method <- match.arg(thresh_method)
+  return_edges <- match.arg(return_edges)
   # check if rownames of conmat and names of behav match if both are not NULL
   if (!is.null(rownames(conmat)) && !is.null(names(behav))) {
     # nocov start
@@ -102,9 +111,17 @@ cpm <- function(conmat, behav, ...,
   if (is.null(kfolds)) kfolds <- length(behav)
   folds <- crossv_kfold(length(behav), kfolds)
   # pre-allocation
-  edges <- array(
-    dim = c(kfolds, dim(conmat)[2], length(networks)),
-    dimnames = list(NULL, NULL, networks)
+  edges <- switch(return_edges,
+    all = array(
+      dim = c(kfolds, dim(conmat)[2], length(networks)),
+      dimnames = list(NULL, NULL, networks)
+    ),
+    sum = matrix(
+      0,
+      nrow = dim(conmat)[2],
+      ncol = length(networks),
+      dimnames = list(NULL, networks)
+    )
   )
   pred <- matrix(
     nrow = length(behav),
@@ -125,7 +142,11 @@ cpm <- function(conmat, behav, ...,
       cur_edges, bias_correct
     )
     pred[!rows_train, ] <- cur_pred
-    edges[fold, , ] <- cur_edges
+    if (return_edges == "all") {
+      edges[fold, , ] <- cur_edges
+    } else if (return_edges == "sum") {
+      edges <- edges + cur_edges
+    }
   }
   structure(
     list(

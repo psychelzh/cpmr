@@ -60,3 +60,13 @@ test_that("Keep names of behavior", {
   expect_named(result$real, LETTERS[1:10])
   expect_identical(rownames(result$pred), LETTERS[1:10])
 })
+
+test_that("`return_edges` argument works", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+  result <- cpm(conmat, behav, return_edges = "all")
+  expect_snapshot_value(result$edges, style = "json2")
+  result <- cpm(conmat, behav, return_edges = "sum")
+  expect_snapshot_value(result$edges, style = "json2")
+})
