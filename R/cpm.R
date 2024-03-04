@@ -116,10 +116,9 @@ cpm <- function(conmat, behav, ...,
       dim = c(kfolds, dim(conmat)[2], length(networks)),
       dimnames = list(NULL, NULL, networks)
     ),
-    sum = matrix(
+    sum = array(
       0,
-      nrow = dim(conmat)[2],
-      ncol = length(networks),
+      dim = c(dim(conmat)[2], length(networks)),
       dimnames = list(NULL, networks)
     )
   )
