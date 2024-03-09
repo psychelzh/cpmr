@@ -12,8 +12,8 @@ coverage](https://codecov.io/gh/psychelzh/cpmr/branch/main/graph/badge.svg)](htt
 
 The cpmr package is specifically designed for the analysis of the
 connectome predictive modeling (CPM) method in R. This package relies on
-[Rfast](https://cran.r-project.org/web/packages/Rfast/index.html) to do
-row oriented calculation.
+[Rfast](https://CRAN.R-project.org/package=Rfast) to do row oriented
+calculation.
 
 ## Installation
 
