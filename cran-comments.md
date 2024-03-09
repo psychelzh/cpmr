@@ -43,6 +43,13 @@ Check: CRAN incoming feasibility, Result: NOTE
 
 These are corrected and begin a new submission. And "connectome" is correct spelling so I keep it as is.
 
+### Second submission
+
+The main issue for this submission is to enhance the description of the package based on the feedback from the first submission. The following changes are made:
+
+* Added a simple description of the method and doi link to the reference paper.
+* Fixed issue of package name in LICENSE file.
+
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
