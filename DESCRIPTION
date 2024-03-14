@@ -4,9 +4,9 @@ Version: 0.0.8
 Authors@R:
     person("Liang", "Zhang", , "psychelzh@outlook.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9041-1150"))
-Description: Connectome Predictive Modelling (CPM) (Shen et al., 2017
+Description: Connectome Predictive Modelling (CPM) (Shen et al. (2017)
     <doi:10.1038/nprot.2016.178>) is a method to predict individual
-    differences in behaviour from brain functional connectivity. `cpmr`
+    differences in behaviour from brain functional connectivity. 'cpmr'
     provides a simple yet efficient implementation of this method.
 License: MIT + file LICENSE
 URL: https://github.com/psychelzh/cpmr, https://psychelzh.github.io/cpmr/

@@ -50,6 +50,13 @@ The main issue for this submission is to enhance the description of the package 
 * Added a simple description of the method and doi link to the reference paper.
 * Fixed issue of package name in LICENSE file.
 
+### Third submission
+
+This submission enhance more details in DESCRIPTION file:
+
+* Reference now in correct format.
+* Correct package name quotes.
+
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
