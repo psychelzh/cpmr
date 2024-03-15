@@ -8,6 +8,8 @@
 [![R-CMD-check](https://github.com/psychelzh/cpmr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/psychelzh/cpmr/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/psychelzh/cpmr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/psychelzh/cpmr?branch=main)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/cpmr)](https://CRAN.R-project.org/package=cpmr)
 <!-- badges: end -->
 
 The cpmr package is specifically designed for the analysis of the
