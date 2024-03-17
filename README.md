@@ -26,12 +26,11 @@ You can install the released version of cpmr from
 install.packages("cpmr")
 ```
 
-Or you can install the development version of cpmr with:
+Or you can install the development version of cpmr from
+[r-universe](https://psychelzh.r-universe.dev) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("psychelzh/cpmr") # from GitHub
-install.packages("cpmr", repos = "https://psychelzh.r-universe.dev") # from r-universe
+install.packages("cpmr", repos = c("https://psychelzh.r-universe.dev", getOption("repos")))
 ```
 
 ## Example
