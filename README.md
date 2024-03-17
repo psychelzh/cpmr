@@ -19,19 +19,19 @@ calculation.
 
 ## Installation
 
-You can install the development version of cpmr from
-[GitHub](https://github.com/) with:
+You can install the released version of cpmr from
+[CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("cpmr")
+```
+
+Or you can install the development version of cpmr with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("psychelzh/cpmr")
-```
-
-Or you can install cpmr from
-[r-universe](https://psychelzh.r-universe.dev) with:
-
-``` r
-install.packages("cpmr", repos = c(getOption("repos"), "https://psychelzh.r-universe.dev"))
+devtools::install_github("psychelzh/cpmr") # from GitHub
+install.packages("cpmr", repos = "https://psychelzh.r-universe.dev") # from r-universe
 ```
 
 ## Example
