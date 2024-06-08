@@ -159,6 +159,17 @@ cpm <- function(conmat, behav, ...,
   )
 }
 
+#' @export
+print.cpm <- function(x, ...) {
+  cv <- if (length(unique(x$folds)) == length(x$real)) {
+    "leave-one-out"
+  } else {
+    sprintf("%d-fold", length(unique(x$folds)))
+  }
+  cat(sprintf("CPM results based on %s cross validation.\n", cv))
+  invisible(x)
+}
+
 # helper functions
 select_edges <- function(conmat, behav, method, level) {
   r_mat <- stats::cor(conmat, behav)
@@ -232,4 +243,18 @@ predict_cpm <- function(conmat, behav, conmat_new, edges, bias_correct) {
 
 regress_counfounds <- function(resp, confounds) {
   stats::.lm.fit(cbind(1, confounds), resp)$residuals
+}
+
+critical_r <- function(n, alpha) {
+  df <- n - 2
+  ct <- stats::qt(alpha / 2, df, lower.tail = FALSE)
+  sqrt((ct^2) / ((ct^2) + df))
+}
+
+crossv_kfold <- function(n, k) {
+  sample(cut(seq_len(n), breaks = k, labels = FALSE))
+}
+
+fscale <- function(x, center, scale) {
+  eachrow(eachrow(x, center, "-"), scale, "/")
 }
