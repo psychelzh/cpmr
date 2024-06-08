@@ -78,32 +78,9 @@ cpm <- function(conmat, behav, ...,
   call <- match.call()
   thresh_method <- match.arg(thresh_method)
   return_edges <- match.arg(return_edges)
-  # check if rownames of conmat and names of behav match if both are not NULL
-  if (!is.null(rownames(conmat)) && !is.null(names(behav))) {
-    # nocov start
-    stopifnot(
-      "Row names of `conmat` and names of `behav` do not match." =
-        identical(rownames(conmat), names(behav))
-    )
-    # nocov end
-  }
+  check_names(conmat, behav)
   if (!is.null(confounds)) {
-    # nocov start
-    if (!is.null(rownames(confounds))) {
-      if (!is.null(rownames(conmat))) {
-        stopifnot(
-          "Row names of `conmat` and names of `confounds` do not match." =
-            identical(rownames(conmat), rownames(confounds))
-        )
-      }
-      if (!is.null(names(behav))) {
-        stopifnot(
-          "Names of `behav` and names of `confounds` do not match." =
-            identical(names(behav), rownames(confounds))
-        )
-      }
-    }
-    # nocov end
+    check_names(confounds, behav)
     conmat <- regress_counfounds(conmat, confounds)
     behav <- regress_counfounds(behav, confounds)
   }
@@ -171,6 +148,22 @@ print.cpm <- function(x, ...) {
 }
 
 # helper functions
+# nocov start
+check_names <- function(data, behav) {
+  if (!is.null(rownames(data)) && !is.null(names(behav))) {
+    if (!identical(rownames(data), names(behav))) {
+      stop(
+        sprintf(
+          "Case names of `%s` must match those of behavior data.",
+          deparse1(substitute(data))
+        )
+      )
+    }
+  }
+  invisible()
+}
+# nocov end
+
 select_edges <- function(conmat, behav, method, level) {
   r_mat <- stats::cor(conmat, behav)
   r_crit <- switch(method,
