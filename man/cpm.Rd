@@ -27,7 +27,8 @@ matrix, which will be converted to a vector using \code{\link[=drop]{drop()}}.}
 \item{...}{For future extension. Currently ignored.}
 
 \item{confounds}{A matrix of confounding variables. Observations in row,
-variables in column. If \code{NULL}, no confounding variables are used.}
+variables in column. If \code{NULL}, no confounding variables are used. Note if
+a vector is provided, it will be converted to a column matrix.}
 
 \item{thresh_method, thresh_level}{The threshold method and level used in edge
 selection. If method is set to be \code{"alpha"}, the edge selection is based on

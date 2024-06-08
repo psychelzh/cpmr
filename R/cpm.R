@@ -21,7 +21,8 @@
 #'   matrix, which will be converted to a vector using [drop()].
 #' @param ... For future extension. Currently ignored.
 #' @param confounds A matrix of confounding variables. Observations in row,
-#'   variables in column. If `NULL`, no confounding variables are used.
+#'   variables in column. If `NULL`, no confounding variables are used. Note if
+#'   a vector is provided, it will be converted to a column matrix.
 #' @param thresh_method,thresh_level The threshold method and level used in edge
 #'   selection. If method is set to be `"alpha"`, the edge selection is based on
 #'   the critical value of correlation coefficient. If method is set to be
@@ -84,8 +85,15 @@ cpm <- function(conmat, behav, ...,
   if (!is.vector(behav) || !is.numeric(behav)) {
     stop("Behavior data must be a numeric vector.")
   }
+  if (nrow(conmat) != length(behav)) {
+    stop("Case numbers of `conmat` and `behav` must match.")
+  }
   check_names(conmat, behav)
   if (!is.null(confounds)) {
+    if (is.vector(confounds)) confounds <- as.matrix(confounds)
+    if (nrow(confounds) != length(behav)) {
+      stop("Case numbers of `confounds` and `behav` must match.")
+    }
     check_names(confounds, behav)
     conmat <- regress_counfounds(conmat, confounds)
     behav <- regress_counfounds(behav, confounds)

@@ -2,7 +2,7 @@
 
 ## New features
 
-* Added support for row/column matrix as input for behavior data.
+* Added support for row/column matrix as input for behavior and confounds data.
 
 # cpmr 0.0.8
 

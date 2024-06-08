@@ -74,7 +74,7 @@ test_that("`return_edges` argument works", {
   expect_snapshot_value(result$edges, style = "json2")
 })
 
-test_that("Support row/column matrix input of `behav`", {
+test_that("Support row/column matrix input of `behav` and `confounds`", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
@@ -88,11 +88,27 @@ test_that("Support row/column matrix input of `behav`", {
     cpm(conmat, matrix(behav, nrow = 1))[key_fields],
     result[key_fields]
   )
+  confounds <- matrix(rnorm(10), ncol = 1)
+  result <- cpm(conmat, behav, confounds = confounds)
+  expect_identical(
+    cpm(conmat, behav, confounds = drop(confounds))[key_fields],
+    result[key_fields]
+  )
 })
 
-test_that("Throw informative error if `behav` is not vector-compatible", {
+test_that("Throw informative error if data checking not pass", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- matrix(rnorm(20), ncol = 2)
-  expect_error(cpm(conmat, behav), "Behavior data must be a numeric vector.")
+  expect_error(
+    cpm(conmat, matrix(rnorm(20), ncol = 2)),
+    "Behavior data must be a numeric vector."
+  )
+  expect_error(
+    cpm(conmat, rnorm(20)),
+    "Case numbers of `conmat` and `behav` must match."
+  )
+  expect_error(
+    cpm(conmat, rnorm(10), confounds = matrix(rnorm(20), ncol = 1)),
+    "Case numbers of `confounds` and `behav` must match."
+  )
 })
