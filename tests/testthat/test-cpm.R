@@ -89,3 +89,10 @@ test_that("Support row/column matrix input of `behav`", {
     result[key_fields]
   )
 })
+
+test_that("Throw informative error if `behav` is not vector-compatible", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- matrix(rnorm(20), ncol = 2)
+  expect_error(cpm(conmat, behav), "Behavior data must be a numeric vector.")
+})

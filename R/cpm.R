@@ -82,7 +82,7 @@ cpm <- function(conmat, behav, ...,
   # ensure `behav` is a vector
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {
-    stop("Behavior data must be a numeric vector.") # nocov
+    stop("Behavior data must be a numeric vector.")
   }
   check_names(conmat, behav)
   if (!is.null(confounds)) {
@@ -154,7 +154,6 @@ print.cpm <- function(x, ...) {
 }
 
 # helper functions
-# nocov start
 check_names <- function(data, behav) {
   if (!is.null(rownames(data)) && !is.null(names(behav))) {
     if (!identical(rownames(data), names(behav))) {
@@ -168,7 +167,6 @@ check_names <- function(data, behav) {
   }
   invisible()
 }
-# nocov end
 
 select_edges <- function(conmat, behav, method, level) {
   r_mat <- stats::cor(conmat, behav)
