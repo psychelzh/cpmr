@@ -1,4 +1,4 @@
-# cpmr (development version)
+# cpmr 0.0.9
 
 ## New features
 
