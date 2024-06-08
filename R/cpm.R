@@ -17,7 +17,7 @@
 #' @param conmat A matrix of connectome data. Observations in row, edges in
 #'   column (assumed that duplicated edges are removed).
 #' @param behav A numeric vector contains behavior data. Length must equal to
-#'   number of observations in `conmat`. Note `behav` could also be a one-column
+#'   number of observations in `conmat`. Note `behav` could also be a row/column
 #'   matrix, which will be converted to a vector using [drop()].
 #' @param ... For future extension. Currently ignored.
 #' @param confounds A matrix of confounding variables. Observations in row,
