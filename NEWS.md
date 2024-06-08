@@ -1,5 +1,9 @@
 # cpmr (development version)
 
+## New features
+
+* Added support for one-column matrix as input for behavior data.
+
 # cpmr 0.0.8
 
 * Added `return_edges` argument to optionally set how to return edges in the output.
