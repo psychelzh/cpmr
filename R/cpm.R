@@ -17,7 +17,8 @@
 #' @param conmat A matrix of connectome data. Observations in row, edges in
 #'   column (assumed that duplicated edges are removed).
 #' @param behav A numeric vector contains behavior data. Length must equal to
-#'   number of observations in `conmat`.
+#'   number of observations in `conmat`. Note `behav` could also be a one-column
+#'   matrix, which will be converted to a vector using [drop()].
 #' @param ... For future extension. Currently ignored.
 #' @param confounds A matrix of confounding variables. Observations in row,
 #'   variables in column. If `NULL`, no confounding variables are used.
@@ -78,6 +79,11 @@ cpm <- function(conmat, behav, ...,
   call <- match.call()
   thresh_method <- match.arg(thresh_method)
   return_edges <- match.arg(return_edges)
+  # ensure `behav` is a vector
+  behav <- drop(behav)
+  if (!is.vector(behav) || !is.numeric(behav)) {
+    stop("Behavior data must be a numeric vector.") # nocov
+  }
   check_names(conmat, behav)
   if (!is.null(confounds)) {
     check_names(confounds, behav)

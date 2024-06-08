@@ -21,7 +21,8 @@ cpm(
 column (assumed that duplicated edges are removed).}
 
 \item{behav}{A numeric vector contains behavior data. Length must equal to
-number of observations in \code{conmat}.}
+number of observations in \code{conmat}. Note \code{behav} could also be a one-column
+matrix, which will be converted to a vector using \code{\link[=drop]{drop()}}.}
 
 \item{...}{For future extension. Currently ignored.}
 
