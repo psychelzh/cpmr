@@ -1,6 +1,6 @@
 Package: cpmr
 Title: Connectome Predictive Modelling in R
-Version: 0.0.8.9000
+Version: 0.0.9
 Authors@R:
     person("Liang", "Zhang", , "psychelzh@outlook.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9041-1150"))
