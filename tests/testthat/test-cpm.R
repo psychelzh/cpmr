@@ -73,3 +73,14 @@ test_that("`return_edges` argument works", {
   result <- cpm(conmat, behav, return_edges = "sum")
   expect_snapshot_value(result$edges, style = "json2")
 })
+
+test_that("Support one-column vector input of `behav`", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- matrix(rnorm(10), ncol = 1)
+  result <- cpm(conmat, behav)
+  expect_s3_class(result, "cpm")
+  expect_snapshot_value(result$pred, style = "json2")
+  expect_null(result$edges)
+  expect_snapshot(result)
+})
