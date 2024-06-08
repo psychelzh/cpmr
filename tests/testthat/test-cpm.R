@@ -5,7 +5,7 @@ test_that("Default threshold method works", {
   result <- cpm(conmat, behav)
   expect_s3_class(result, "cpm")
   expect_snapshot_value(result$pred, style = "json2")
-  expect_snapshot_value(result$edges, style = "json2")
+  expect_null(result$edges)
   expect_snapshot(result)
 })
 
@@ -16,7 +16,7 @@ test_that("`kfolds` works", {
   result <- cpm(conmat, behav, kfolds = 5)
   expect_s3_class(result, "cpm")
   expect_snapshot_value(result$pred, style = "json2")
-  expect_snapshot_value(result$edges, style = "json2")
+  expect_null(result$edges)
   expect_snapshot(result)
 })
 
@@ -27,7 +27,8 @@ test_that("Alternative threshold method works", {
   result <- cpm(conmat, behav, thresh_method = "sparsity")
   expect_s3_class(result, "cpm")
   expect_snapshot_value(result$pred, style = "json2")
-  expect_snapshot_value(result$edges, style = "json2")
+  expect_null(result$edges)
+  expect_snapshot(result)
 })
 
 test_that("Different threshold levels works", {
@@ -37,7 +38,8 @@ test_that("Different threshold levels works", {
   result <- cpm(conmat, behav, thresh_level = 0.1)
   expect_s3_class(result, "cpm")
   expect_snapshot_value(result$pred, style = "json2")
-  expect_snapshot_value(result$edges, style = "json2")
+  expect_null(result$edges)
+  expect_snapshot(result)
 })
 
 test_that("Works with confounds", {
@@ -48,7 +50,8 @@ test_that("Works with confounds", {
   result <- cpm(conmat, behav, confounds = confounds)
   expect_s3_class(result, "cpm")
   expect_snapshot_value(result$pred, style = "json2", tolerance = 1e-6)
-  expect_snapshot_value(result$edges, style = "json2")
+  expect_null(result$edges)
+  expect_snapshot(result)
 })
 
 test_that("Keep names of behavior", {

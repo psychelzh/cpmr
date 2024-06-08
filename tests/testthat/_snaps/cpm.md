@@ -28,12 +28,6 @@
 
 ---
 
-    {
-      "type": "NULL"
-    }
-
----
-
     Code
       result
     Output
@@ -65,12 +59,6 @@
         }
       },
       "value": [-0.19751643, -0.60963073, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.92500993, -0.19751643, -0.60963073, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.92500993, -0.19751643, -0.64179503, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.64179503]
-    }
-
----
-
-    {
-      "type": "NULL"
     }
 
 ---
@@ -110,9 +98,10 @@
 
 ---
 
-    {
-      "type": "NULL"
-    }
+    Code
+      result
+    Output
+      CPM results based on leave-one-out cross validation.
 
 # Different threshold levels works
 
@@ -144,9 +133,10 @@
 
 ---
 
-    {
-      "type": "NULL"
-    }
+    Code
+      result
+    Output
+      CPM results based on leave-one-out cross validation.
 
 # Works with confounds
 
@@ -178,9 +168,10 @@
 
 ---
 
-    {
-      "type": "NULL"
-    }
+    Code
+      result
+    Output
+      CPM results based on leave-one-out cross validation.
 
 # `return_edges` argument works
 
