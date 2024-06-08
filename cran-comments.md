@@ -1,7 +1,7 @@
 
 ## Test Environments
 
-* local Windows 11 install, R 4.3.3
+* local Windows 11 install, R 4.4.0
 * via GitHub Actions:
   * macos-latest (release)
   * windows-latest (release)
