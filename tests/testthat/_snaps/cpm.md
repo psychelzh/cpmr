@@ -31,7 +31,9 @@
     Code
       result
     Output
-      CPM results based on leave-one-out cross validation.
+      CPM results:
+        Call: cpm(conmat = conmat, behav = behav)
+        Number of observations: 10
 
 # `kfolds` works
 
@@ -66,7 +68,9 @@
     Code
       result
     Output
-      CPM results based on 5-fold cross validation.
+      CPM results:
+        Call: cpm(conmat = conmat, behav = behav, kfolds = 5)
+        Number of observations: 10
 
 # Alternative threshold method works
 
@@ -101,7 +105,9 @@
     Code
       result
     Output
-      CPM results based on leave-one-out cross validation.
+      CPM results:
+        Call: cpm(conmat = conmat, behav = behav, thresh_method = "sparsity")
+        Number of observations: 10
 
 # Different threshold levels works
 
@@ -136,7 +142,9 @@
     Code
       result
     Output
-      CPM results based on leave-one-out cross validation.
+      CPM results:
+        Call: cpm(conmat = conmat, behav = behav, thresh_level = 0.1)
+        Number of observations: 10
 
 # Works with confounds
 
@@ -171,7 +179,9 @@
     Code
       result
     Output
-      CPM results based on leave-one-out cross validation.
+      CPM results:
+        Call: cpm(conmat = conmat, behav = behav, confounds = confounds)
+        Number of observations: 10
 
 # `return_edges` argument works
 
