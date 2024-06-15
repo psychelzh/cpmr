@@ -1,0 +1,46 @@
+#' Summary of a cpm object.
+#'
+#' This function provides a summary of a \code{cpm} object, including the
+#' prediction performance and the selected edges.
+#'
+#' @rdname summary.cpm
+#' @param object An object of class \code{cpm}.
+#' @param edge_level A numeric value between 0 and 1 indicating the proportional
+#'   threshold for edge selection.
+#' @return
+#' @export
+summary.cpm <- function(object, edge_level = 0.5, ...) {
+  # summary prediction performance
+  performance <- cor(object$real, object$pred)
+  # summary edge selection
+  edges <- if (!is.null(object$edges)) {
+    if (length(dim(object$edges)) == 3) {
+      object$edges <- apply(object$edges, 1:2, mean)
+    }
+    object$edges > edge_level * length(unique(object$folds))
+  }
+  structure(
+    list(
+      performance = performance,
+      edges = edges
+    ),
+    class = "cpm_summary"
+  )
+}
+
+#' @rdname summary.cpm
+#' @export
+print.cpm_summary <- function(x, ...) {
+  cat("CPM summary:\n")
+  cat("  Performance: \n")
+  cat("    Including both edges: ", x$performance[, "both"], "\n")
+  cat("    Including postive edges only: ", x$performance[, "pos"], "\n")
+  cat("    Including negative edges only: ", x$performance[, "neg"], "\n")
+  cat("  Edges: \n")
+  if (is.null(x$edges)) {
+    cat("    No edges selection results found\n")
+  } else {
+    cat(sprintf("    %f percent of edges selected\n", mean(x$edges)))
+  }
+  invisible(x)
+}
