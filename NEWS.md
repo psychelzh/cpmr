@@ -1,5 +1,9 @@
 # cpmr (development version)
 
+## New features
+
+* Added `summary` method to summarize the results of the CPM analysis.
+
 # cpmr 0.0.9
 
 ## New features
