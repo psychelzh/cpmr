@@ -7,7 +7,14 @@
 #' @param object An object of class \code{cpm}.
 #' @param edge_level A numeric value between 0 and 1 indicating the proportional
 #'   threshold for edge selection.
-#' @return
+#' @param ... Other parameters passed to the function.
+#' @return A list of class \code{cpm_summary} containing two elements:
+#'   \item{performance}{A matrix of prediction performance, including the
+#'     correlation between the real and predicted values for both edges,
+#'     positive edges only, and negative edges only.}
+#'
+#'   \item{edges}{A logical vector indicating whether each edge is selected
+#'     based on the edge_level.}
 #' @export
 summary.cpm <- function(object, edge_level = 0.5, ...) {
   # summary prediction performance
@@ -29,6 +36,7 @@ summary.cpm <- function(object, edge_level = 0.5, ...) {
 }
 
 #' @rdname summary.cpm
+#' @param x An object of class \code{cpm_summary}.
 #' @export
 print.cpm_summary <- function(x, ...) {
   cat("CPM summary:\n")

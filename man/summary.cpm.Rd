@@ -14,6 +14,19 @@
 
 \item{edge_level}{A numeric value between 0 and 1 indicating the proportional
 threshold for edge selection.}
+
+\item{...}{Other parameters passed to the function.}
+
+\item{x}{An object of class \code{cpm_summary}.}
+}
+\value{
+A list of class \code{cpm_summary} containing two elements:
+\item{performance}{A matrix of prediction performance, including the
+correlation between the real and predicted values for both edges,
+positive edges only, and negative edges only.}
+
+\item{edges}{A logical vector indicating whether each edge is selected
+based on the edge_level.}
 }
 \description{
 This function provides a summary of a \code{cpm} object, including the
