@@ -11,7 +11,7 @@
 #' @export
 summary.cpm <- function(object, edge_level = 0.5, ...) {
   # summary prediction performance
-  performance <- cor(object$real, object$pred)
+  performance <- stats::cor(object$real, object$pred)
   # summary edge selection
   edges <- if (!is.null(object$edges)) {
     if (length(dim(object$edges)) == 3) {
