@@ -22,14 +22,15 @@ summary.cpm <- function(object, edge_level = 0.5, ...) {
   # summary edge selection
   edges <- if (!is.null(object$edges)) {
     if (length(dim(object$edges)) == 3) {
-      object$edges <- apply(object$edges, 1:2, mean)
+      object$edges <- apply(object$edges, 2:3, sum)
     }
     object$edges > edge_level * length(unique(object$folds))
   }
   structure(
     list(
       performance = performance,
-      edges = edges
+      edges = edges,
+      edge_level = edge_level
     ),
     class = "cpm_summary"
   )
@@ -41,14 +42,13 @@ summary.cpm <- function(object, edge_level = 0.5, ...) {
 print.cpm_summary <- function(x, ...) {
   cat("CPM summary:\n")
   cat("  Performance: \n")
-  cat("    Including both edges: ", x$performance[, "both"], "\n")
-  cat("    Including postive edges only: ", x$performance[, "pos"], "\n")
-  cat("    Including negative edges only: ", x$performance[, "neg"], "\n")
-  cat("  Edges: \n")
-  if (is.null(x$edges)) {
-    cat("    No edges selection results found\n")
-  } else {
-    cat(sprintf("    %f percent of edges selected\n", mean(x$edges)))
+  cat(sprintf("    Positive: %.3f\n", x$performance[, "pos"]))
+  cat(sprintf("    Negative: %.3f\n", x$performance[, "neg"]))
+  cat(sprintf("    Combined: %.3f\n", x$performance[, "both"]))
+  if (!is.null(x$edges)) {
+    cat(sprintf("  Edges selected by %.0f%% of folds:\n", x$edge_level * 100))
+    cat(sprintf("    Positive: %.2f%%\n", mean(x$edges[, "pos"]) * 100))
+    cat(sprintf("    Negative: %.2f%%\n", mean(x$edges[, "neg"]) * 100))
   }
   invisible(x)
 }

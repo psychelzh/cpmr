@@ -5,11 +5,9 @@
     Output
       CPM summary:
         Performance: 
-          Including both edges:  -1 
-          Including postive edges only:  -1 
-          Including negative edges only:  -0.9768833 
-        Edges: 
-          No edges selection results found
+          Positive: 0.897
+          Negative: -0.119
+          Combined: 0.809
 
 ---
 
@@ -18,11 +16,12 @@
     Output
       CPM summary:
         Performance: 
-          Including both edges:  -1 
-          Including postive edges only:  -1 
-          Including negative edges only:  -0.9768833 
-        Edges: 
-          0.000000 percent of edges selected
+          Positive: 0.897
+          Negative: -0.119
+          Combined: 0.809
+        Edges selected by 50% of folds:
+          Positive: 0.50%
+          Negative: 0.30%
 
 ---
 
@@ -31,9 +30,10 @@
     Output
       CPM summary:
         Performance: 
-          Including both edges:  -1 
-          Including postive edges only:  -1 
-          Including negative edges only:  -0.9768833 
-        Edges: 
-          0.000000 percent of edges selected
+          Positive: 0.897
+          Negative: -0.119
+          Combined: 0.809
+        Edges selected by 50% of folds:
+          Positive: 0.50%
+          Negative: 0.30%
 

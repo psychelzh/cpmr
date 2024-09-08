@@ -1,6 +1,6 @@
 test_that("Works for basic summary", {
   withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
+  conmat <- matrix(rnorm(10000), nrow = 10)
   behav <- rnorm(10)
   summary_result <- summary(cpm(conmat, behav))
   expect_s3_class(summary_result, "cpm_summary")
