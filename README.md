@@ -47,8 +47,20 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-res <- cpm(conmat, behav, kfolds = 10)
+res <- cpm(conmat, behav, kfolds = 10, return_edges = "sum")
 plot(res$real, res$pred[, "both"], xlab = "Real", ylab = "Predicted")
 ```
 
 <img src="man/figures/README-example-1.png" width="100%" />
+
+``` r
+summary(res)
+#> CPM summary:
+#>   Performance (Pearson):
+#>     Positive: -0.238
+#>     Negative: -0.232
+#>     Combined: -0.294
+#>   Prop. edges (50% folds):
+#>     Positive: 0.30%
+#>     Negative: 0.10%
+```
