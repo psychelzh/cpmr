@@ -46,7 +46,7 @@ print.cpm_summary <- function(x, ...) {
   cat(sprintf("    Negative: %.3f\n", x$performance[, "neg"]))
   cat(sprintf("    Combined: %.3f\n", x$performance[, "both"]))
   if (!is.null(x$edges)) {
-    cat(sprintf("  Edges selected by %.0f%% of folds:\n", x$edge_level * 100))
+    cat(sprintf("  Prop. edges (%.0f%% folds):\n", x$edge_level * 100))
     cat(sprintf("    Positive: %.2f%%\n", mean(x$edges[, "pos"]) * 100))
     cat(sprintf("    Negative: %.2f%%\n", mean(x$edges[, "neg"]) * 100))
   }
