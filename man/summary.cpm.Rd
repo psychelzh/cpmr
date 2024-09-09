@@ -5,17 +5,20 @@
 \alias{print.cpm_summary}
 \title{Summary of a cpm object.}
 \usage{
-\method{summary}{cpm}(object, edge_level = 0.5, ...)
+\method{summary}{cpm}(object, ..., method = c("pearson", "spearman"), edge_level = 0.5)
 
 \method{print}{cpm_summary}(x, ...)
 }
 \arguments{
 \item{object}{An object of class \code{cpm}.}
 
+\item{...}{Other parameters passed to the function.}
+
+\item{method}{A character vector indicating the method used to calculate the
+correlation between the real and predicted values.}
+
 \item{edge_level}{A numeric value between 0 and 1 indicating the proportional
 threshold for edge selection.}
-
-\item{...}{Other parameters passed to the function.}
 
 \item{x}{An object of class \code{cpm_summary}.}
 }
