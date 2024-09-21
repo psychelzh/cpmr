@@ -2,7 +2,8 @@
 
 ## New features
 
-* Added `summary` method to summarize the results of the CPM analysis.
+* Added `summary()` method to summarize the results of the CPM analysis.
+* Added `tidy()` method to tidy the results of the CPM analysis.
 
 # cpmr 0.0.9
 
