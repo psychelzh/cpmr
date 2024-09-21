@@ -3,5 +3,8 @@
 S3method(print,cpm)
 S3method(print,cpm_summary)
 S3method(summary,cpm)
+S3method(tidy,cpm)
 export(cpm)
+export(tidy)
 import(Rfast)
+importFrom(generics,tidy)
