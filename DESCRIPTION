@@ -12,8 +12,10 @@ License: MIT + file LICENSE
 URL: https://github.com/psychelzh/cpmr, https://psychelzh.github.io/cpmr/
 BugReports: https://github.com/psychelzh/cpmr/issues
 Imports:
+    generics,
     Rfast,
-    stats
+    stats,
+    tibble
 Suggests:
     testthat (>= 3.0.0),
     withr
