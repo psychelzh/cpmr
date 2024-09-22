@@ -13,7 +13,7 @@ cpm(
   thresh_level = 0.01,
   kfolds = NULL,
   bias_correct = TRUE,
-  return_edges = c("none", "sum", "all")
+  return_edges = c("sum", "none", "all")
 )
 }
 \arguments{
@@ -69,6 +69,17 @@ names corresponding to the observation names (the same as those of
 edges and columns corresponding to networks. If \code{return_edges} is
 \code{"all"}, it is a 3D array with dimensions corresponding to folds, edges,
 and networks.}
+
+\item{call}{The matched call.}
+
+\item{params}{A list of parameters used in the function, including:
+\itemize{
+\item \code{confounds} indicating if confounds are used
+\item \code{thresh_method} indicating the threshold method
+\item \code{thresh_level} indicating the threshold level
+\item \code{kfolds} indicating the number of folds in cross-validation
+\item \code{bias_correct} indicating if bias correction is used}
+}
 }
 \description{
 The connectome-based predictive modeling (CPM) is a data-driven approach to

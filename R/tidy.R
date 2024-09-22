@@ -3,7 +3,8 @@
 #' @param x A `cpm` object.
 #' @param ... Additional arguments passed to `summary()`.
 #' @param component A character vector indicating the component to tidy.
-#' @return A tibble with the following columns:
+#' @return A [tibble][tibble-package] with columns storing parameters of the
+#'   [cpm()] object and further columns depending on the `component` argument:
 #'
 #'   For `component = "performance"`:
 #'
@@ -28,9 +29,11 @@
 #' @export
 tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
   component <- match.arg(component)
+  params <- tibble::as_tibble(x$params)
   sum_x <- summary(x, ...)
   switch(component,
     performance = tibble::tibble(
+      params,
       method = sum_x$params$method,
       tibble::as_tibble(sum_x$performance)
     ),
@@ -43,6 +46,7 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
         return(tibble::tibble())
       }
       tibble::tibble(
+        params,
         level = sum_x$params$edge_level,
         tibble::as_tibble(apply(sum_x$edges, 2, list))
       )

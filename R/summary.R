@@ -17,6 +17,8 @@
 #'
 #'   \item{edges}{A logical vector indicating whether each edge is selected
 #'     based on the edge_level.}
+#'
+#'   \item{params}{A list of parameters used in the summary.}
 #' @export
 summary.cpm <- function(object, ...,
                         method = c("pearson", "spearman"),

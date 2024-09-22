@@ -16,10 +16,35 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["method", "both", "pos", "neg"]
+          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct", "method", "both", "pos", "neg"]
         }
       },
       "value": [
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [false]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["alpha"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.01]
+        },
+        {
+          "type": "integer",
+          "attributes": {},
+          "value": [10]
+        },
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [true]
+        },
         {
           "type": "character",
           "attributes": {},
@@ -61,10 +86,35 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["level", "pos", "neg"]
+          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct", "level", "pos", "neg"]
         }
       },
       "value": [
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [false]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["alpha"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.01]
+        },
+        {
+          "type": "integer",
+          "attributes": {},
+          "value": [10]
+        },
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [true]
+        },
         {
           "type": "double",
           "attributes": {},

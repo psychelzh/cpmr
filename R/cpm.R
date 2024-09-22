@@ -57,6 +57,20 @@
 #'     edges and columns corresponding to networks. If `return_edges` is
 #'     `"all"`, it is a 3D array with dimensions corresponding to folds, edges,
 #'     and networks.}
+#'
+#'   \item{call}{The matched call.}
+#'
+#'   \item{params}{A list of parameters used in the function, including:
+#'
+#'   * `confounds` indicating if confounds are used
+#'
+#'   * `thresh_method` indicating the threshold method
+#'
+#'   * `thresh_level` indicating the threshold level
+#'
+#'   * `kfolds` indicating the number of folds in cross-validation
+#'
+#'   * `bias_correct` indicating if bias correction is used}
 #' @references
 #'
 #' Shen, X., Finn, E. S., Scheinost, D., Rosenberg, M. D., Chun, M. M.,
@@ -76,7 +90,7 @@ cpm <- function(conmat, behav, ...,
                 thresh_level = 0.01,
                 kfolds = NULL,
                 bias_correct = TRUE,
-                return_edges = c("none", "sum", "all")) {
+                return_edges = c("sum", "none", "all")) {
   call <- match.call()
   thresh_method <- match.arg(thresh_method)
   return_edges <- match.arg(return_edges)
@@ -144,7 +158,14 @@ cpm <- function(conmat, behav, ...,
       real = behav,
       pred = pred,
       edges = edges,
-      call = call
+      call = call,
+      params = list(
+        confounds = !is.null(confounds),
+        thresh_method = thresh_method,
+        thresh_level = thresh_level,
+        kfolds = kfolds,
+        bias_correct = bias_correct
+      )
     ),
     class = "cpm"
   )
@@ -157,6 +178,12 @@ print.cpm <- function(x, ...) {
   print(x$call)
   cat("  Number of observations: ")
   cat(length(x$real), sep = "\n")
+  cat("  Parameters:\n")
+  cat("    Confounds:       ", x$params$confounds, "\n")
+  cat("    Threshold method:", x$params$thresh_method, "\n")
+  cat("    Threshold level: ", x$params$thresh_level, "\n")
+  cat("    CV folds:        ", x$params$kfolds, "\n")
+  cat("    Bias correction: ", x$params$bias_correct, "\n")
   invisible(x)
 }
 
