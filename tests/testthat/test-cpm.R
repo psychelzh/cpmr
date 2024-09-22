@@ -73,9 +73,9 @@ test_that("`return_edges` argument works", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
+  result <- cpm(conmat, behav, return_edges = "none")
+  expect_null(result$edges)
   result <- cpm(conmat, behav, return_edges = "all")
-  expect_snapshot_value(result$edges, style = "json2")
-  result <- cpm(conmat, behav, return_edges = "sum")
   expect_snapshot_value(result$edges, style = "json2")
 })
 
