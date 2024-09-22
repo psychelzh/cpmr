@@ -53,7 +53,7 @@ print.cpm_summary <- function(x, ...) {
   cat("CPM summary:\n")
   cat(
     sprintf(
-      "  Performance (%s): \n",
+      "  Performance (%s):\n",
       # capitalize the first letter
       sub("^(.)", "\\U\\1", x$params$method, perl = TRUE)
     )

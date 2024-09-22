@@ -4,7 +4,7 @@
       summary_result
     Output
       CPM summary:
-        Performance (Pearson): 
+        Performance (Pearson):
           Positive: 0.897
           Negative: -0.119
           Combined: 0.809
@@ -18,7 +18,7 @@
       summary_result
     Output
       CPM summary:
-        Performance (Pearson): 
+        Performance (Pearson):
           Positive: 0.897
           Negative: -0.119
           Combined: 0.809
@@ -29,7 +29,7 @@
       summary_result
     Output
       CPM summary:
-        Performance (Pearson): 
+        Performance (Pearson):
           Positive: 0.897
           Negative: -0.119
           Combined: 0.809
