@@ -8,6 +8,9 @@
 ## Enhancements
 
 * Added `params` to `cpm()` output to store the input arguments (#14).
+* Let `"sum"` be the default value for `return_edges` argument.
+* Let the first two dimensions of `edges` in the output be edges and networks, respectively.
+* Polish the print method of the `cpm` class.
 
 # cpmr 0.0.9
 
