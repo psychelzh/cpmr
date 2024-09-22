@@ -5,6 +5,10 @@
 * Added `summary()` method to summarize the results of the CPM analysis.
 * Added `tidy()` method to tidy the results of the CPM analysis.
 
+## Enhancements
+
+* Added `params` to `cpm()` output to store the input arguments (#14).
+
 # cpmr 0.0.9
 
 ## New features
