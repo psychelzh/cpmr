@@ -60,7 +60,7 @@ use it.</p>
 <span>  thresh_level <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  kfolds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bias_correct <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  return_edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"sum"</span>, <span class="st">"all"</span><span class="op">)</span></span>
+<span>  return_edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sum"</span>, <span class="st">"none"</span>, <span class="st">"all"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -144,6 +144,19 @@ edges and columns corresponding to networks. If <code>return_edges</code> is
 <code>"all"</code>, it is a 3D array with dimensions corresponding to folds, edges,
 and networks.</p></dd>
 
+
+<dt>call</dt>
+<dd><p>The matched call.</p></dd>
+
+
+<dt>params</dt>
+<dd><p>A list of parameters used in the function, including:</p><ul><li><p><code>confounds</code> indicating if confounds are used</p></li>
+<li><p><code>thresh_method</code> indicating the threshold method</p></li>
+<li><p><code>thresh_level</code> indicating the threshold level</p></li>
+<li><p><code>kfolds</code> indicating the number of folds in cross-validation</p></li>
+<li><p><code>bias_correct</code> indicating if bias correction is used</p></li>
+</ul></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -166,17 +179,35 @@ https://doi.org/10.1016/j.dcn.2020.100878</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> CPM results:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Call: cpm(conmat = conmat, behav = behav)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Confounds:        FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold method: alpha </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold level:  0.01 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CV folds:         100 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Bias correction:  TRUE </span>
 <span class="r-in"><span><span class="co"># use different threshold method and level</span></span></span>
 <span class="r-in"><span><span class="fu">cpm</span><span class="op">(</span><span class="va">conmat</span>, <span class="va">behav</span>, thresh_method <span class="op">=</span> <span class="st">"sparsity"</span>, thresh_level <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> CPM results:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Call: cpm(conmat = conmat, behav = behav, thresh_method = "sparsity", </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     thresh_level = 0.05)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Confounds:        FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold method: sparsity </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold level:  0.05 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CV folds:         100 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Bias correction:  TRUE </span>
 <span class="r-in"><span><span class="co"># use a 10-fold cross-validation</span></span></span>
 <span class="r-in"><span><span class="fu">cpm</span><span class="op">(</span><span class="va">conmat</span>, <span class="va">behav</span>, kfolds <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> CPM results:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Call: cpm(conmat = conmat, behav = behav, kfolds = 10)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Confounds:        FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold method: alpha </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold level:  0.01 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CV folds:         10 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Bias correction:  TRUE </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
