@@ -75,8 +75,10 @@ test_that("`return_edges` argument works", {
   behav <- rnorm(10)
   result <- cpm(conmat, behav, return_edges = "none")
   expect_null(result$edges)
+  expect_snapshot(result)
   result <- cpm(conmat, behav, return_edges = "all")
   expect_snapshot_value(result$edges, style = "json2")
+  expect_snapshot(result)
 })
 
 test_that("Support row/column matrix input of `behav` and `confounds`", {

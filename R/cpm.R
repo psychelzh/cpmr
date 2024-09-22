@@ -55,8 +55,8 @@
 #'   \item{edges}{The selected edges, if `return_edges` is not `"none"`. If
 #'     `return_edges` is `"sum"`, it is a matrix with rows corresponding to
 #'     edges and columns corresponding to networks. If `return_edges` is
-#'     `"all"`, it is a 3D array with dimensions corresponding to folds, edges,
-#'     and networks.}
+#'     `"all"`, it is a 3D array with dimensions corresponding to edges,
+#'     networks and folds.}
 #'
 #'   \item{call}{The matched call.}
 #'
@@ -118,8 +118,8 @@ cpm <- function(conmat, behav, ...,
   # pre-allocation
   edges <- switch(return_edges,
     all = array(
-      dim = c(kfolds, dim(conmat)[2], length(networks)),
-      dimnames = list(NULL, NULL, networks)
+      dim = c(dim(conmat)[2], length(networks), kfolds),
+      dimnames = list(NULL, networks, NULL)
     ),
     sum = array(
       0,
@@ -147,7 +147,7 @@ cpm <- function(conmat, behav, ...,
     )
     pred[!rows_train, ] <- cur_pred
     if (return_edges == "all") {
-      edges[fold, , ] <- cur_edges
+      edges[, , fold] <- cur_edges
     } else if (return_edges == "sum") {
       edges <- edges + cur_edges
     }
@@ -177,6 +177,11 @@ print.cpm <- function(x, ...) {
   cat("  Call: ")
   print(x$call)
   cat(sprintf("  Number of observations: %d\n", length(x$real)))
+  if (!is.null(x$edges)) {
+    cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
+  } else {
+    cat("  Number of edges: unknown\n")
+  }
   cat("  Parameters:\n")
   cat(sprintf("    Confounds:        %s\n", x$params$confounds))
   cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))

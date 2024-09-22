@@ -102,6 +102,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav)
         Number of observations: 10
+        Number of edges: 10
         Parameters:
           Confounds:        FALSE
           Threshold method: alpha
@@ -213,6 +214,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, kfolds = 5)
         Number of observations: 10
+        Number of edges: 10
         Parameters:
           Confounds:        FALSE
           Threshold method: alpha
@@ -324,6 +326,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, thresh_method = "sparsity")
         Number of observations: 10
+        Number of edges: 10
         Parameters:
           Confounds:        FALSE
           Threshold method: sparsity
@@ -435,6 +438,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, thresh_level = 0.1)
         Number of observations: 10
+        Number of edges: 10
         Parameters:
           Confounds:        FALSE
           Threshold method: alpha
@@ -546,6 +550,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, confounds = confounds)
         Number of observations: 10
+        Number of edges: 10
         Parameters:
           Confounds:        TRUE
           Threshold method: alpha
@@ -555,13 +560,29 @@
 
 # `return_edges` argument works
 
+    Code
+      result
+    Output
+      CPM results:
+        Call: cpm(conmat = conmat, behav = behav, return_edges = "none")
+        Number of observations: 10
+        Number of edges: unknown
+        Parameters:
+          Confounds:        FALSE
+          Threshold method: alpha
+          Threshold level:  0.01
+          CV folds:         10
+          Bias correction:  TRUE
+
+---
+
     {
       "type": "logical",
       "attributes": {
         "dim": {
           "type": "integer",
           "attributes": {},
-          "value": [10, 10, 2]
+          "value": [10, 2, 10]
         },
         "dimnames": {
           "type": "list",
@@ -571,16 +592,32 @@
               "type": "NULL"
             },
             {
-              "type": "NULL"
-            },
-            {
               "type": "character",
               "attributes": {},
               "value": ["pos", "neg"]
+            },
+            {
+              "type": "NULL"
             }
           ]
         }
       },
-      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false]
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
     }
+
+---
+
+    Code
+      result
+    Output
+      CPM results:
+        Call: cpm(conmat = conmat, behav = behav, return_edges = "all")
+        Number of observations: 10
+        Number of edges: 10
+        Parameters:
+          Confounds:        FALSE
+          Threshold method: alpha
+          Threshold level:  0.01
+          CV folds:         10
+          Bias correction:  TRUE
 

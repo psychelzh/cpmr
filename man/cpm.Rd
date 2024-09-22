@@ -67,8 +67,8 @@ names corresponding to the observation names (the same as those of
 \item{edges}{The selected edges, if \code{return_edges} is not \code{"none"}. If
 \code{return_edges} is \code{"sum"}, it is a matrix with rows corresponding to
 edges and columns corresponding to networks. If \code{return_edges} is
-\code{"all"}, it is a 3D array with dimensions corresponding to folds, edges,
-and networks.}
+\code{"all"}, it is a 3D array with dimensions corresponding to edges,
+networks and folds.}
 
 \item{call}{The matched call.}
 

@@ -29,7 +29,7 @@ summary.cpm <- function(object, ...,
   # summary edge selection
   edges <- if (!is.null(object$edges)) {
     if (length(dim(object$edges)) == 3) {
-      object$edges <- apply(object$edges, 2:3, sum)
+      object$edges <- apply(object$edges, 1:2, sum)
     }
     object$edges > edge_level * length(unique(object$folds))
   }
