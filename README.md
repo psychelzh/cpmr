@@ -48,12 +48,16 @@ withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
 res <- cpm(conmat, behav, kfolds = 10, return_edges = "sum")
-plot(res$real, res$pred[, "both"], xlab = "Real", ylab = "Predicted")
-```
-
-<img src="man/figures/README-example-1.png" width="100%" />
-
-``` r
+res
+#> CPM results:
+#>   Call: cpm(conmat = conmat, behav = behav, kfolds = 10, return_edges = "sum")
+#>   Number of observations: 100
+#>   Parameters:
+#>     Confounds:        FALSE
+#>     Threshold method: alpha
+#>     Threshold level:  0.01
+#>     CV folds:         10
+#>     Bias correction:  TRUE
 summary(res)
 #> CPM summary:
 #>   Performance (Pearson):
