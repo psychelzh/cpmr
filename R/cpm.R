@@ -90,7 +90,7 @@ cpm <- function(conmat, behav, ...,
                 thresh_level = 0.01,
                 kfolds = NULL,
                 bias_correct = TRUE,
-                return_edges = c("none", "sum", "all")) {
+                return_edges = c("sum", "none", "all")) {
   call <- match.call()
   thresh_method <- match.arg(thresh_method)
   return_edges <- match.arg(return_edges)

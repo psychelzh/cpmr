@@ -13,7 +13,7 @@ cpm(
   thresh_level = 0.01,
   kfolds = NULL,
   bias_correct = TRUE,
-  return_edges = c("none", "sum", "all")
+  return_edges = c("sum", "none", "all")
 )
 }
 \arguments{

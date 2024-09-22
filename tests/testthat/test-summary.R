@@ -5,7 +5,7 @@ test_that("Works for basic summary", {
   summary_result <- summary(cpm(conmat, behav))
   expect_s3_class(summary_result, "cpm_summary")
   expect_snapshot(summary_result)
-  summary_result <- summary(cpm(conmat, behav, return_edges = "sum"))
+  summary_result <- summary(cpm(conmat, behav, return_edges = "none"))
   expect_s3_class(summary_result, "cpm_summary")
   expect_snapshot(summary_result)
   summary_result <- summary(cpm(conmat, behav, return_edges = "all"))
