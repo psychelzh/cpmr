@@ -141,8 +141,8 @@ names corresponding to the observation names (the same as those of
 <dd><p>The selected edges, if <code>return_edges</code> is not <code>"none"</code>. If
 <code>return_edges</code> is <code>"sum"</code>, it is a matrix with rows corresponding to
 edges and columns corresponding to networks. If <code>return_edges</code> is
-<code>"all"</code>, it is a 3D array with dimensions corresponding to folds, edges,
-and networks.</p></dd>
+<code>"all"</code>, it is a 3D array with dimensions corresponding to edges,
+networks and folds.</p></dd>
 
 
 <dt>call</dt>
@@ -179,6 +179,7 @@ https://doi.org/10.1016/j.dcn.2020.100878</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> CPM results:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Call: cpm(conmat = conmat, behav = behav)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of edges: 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Confounds:        FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold method: alpha</span>
@@ -191,6 +192,7 @@ https://doi.org/10.1016/j.dcn.2020.100878</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Call: cpm(conmat = conmat, behav = behav, thresh_method = "sparsity", </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     thresh_level = 0.05)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of edges: 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Confounds:        FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold method: sparsity</span>
@@ -202,6 +204,7 @@ https://doi.org/10.1016/j.dcn.2020.100878</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> CPM results:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Call: cpm(conmat = conmat, behav = behav, kfolds = 10)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of edges: 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Confounds:        FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold method: alpha</span>
