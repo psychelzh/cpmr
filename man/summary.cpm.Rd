@@ -30,6 +30,8 @@ positive edges only, and negative edges only.}
 
 \item{edges}{A logical vector indicating whether each edge is selected
 based on the edge_level.}
+
+\item{params}{A list of parameters used in the summary.}
 }
 \description{
 This function provides a summary of a \code{cpm} object, including the
