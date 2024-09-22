@@ -28,6 +28,74 @@
 
 ---
 
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+    }
+
+---
+
+    {
+      "type": "list",
+      "attributes": {
+        "names": {
+          "type": "character",
+          "attributes": {},
+          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+        }
+      },
+      "value": [
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [false]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["alpha"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.01]
+        },
+        {
+          "type": "integer",
+          "attributes": {},
+          "value": [10]
+        },
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [true]
+        }
+      ]
+    }
+
+---
+
     Code
       result
     Output
@@ -67,6 +135,74 @@
         }
       },
       "value": [-0.19751643, -0.60963073, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.92500993, -0.19751643, -0.60963073, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.92500993, -0.19751643, -0.64179503, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.64179503]
+    }
+
+---
+
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+
+---
+
+    {
+      "type": "list",
+      "attributes": {
+        "names": {
+          "type": "character",
+          "attributes": {},
+          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+        }
+      },
+      "value": [
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [false]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["alpha"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.01]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [5]
+        },
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [true]
+        }
+      ]
     }
 
 ---
@@ -114,6 +250,74 @@
 
 ---
 
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [9, 9, 9, 1, 2, 9, 9, 9, 9, 0, 1, 1, 1, 9, 8, 1, 1, 1, 1, 10]
+    }
+
+---
+
+    {
+      "type": "list",
+      "attributes": {
+        "names": {
+          "type": "character",
+          "attributes": {},
+          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+        }
+      },
+      "value": [
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [false]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["sparsity"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.01]
+        },
+        {
+          "type": "integer",
+          "attributes": {},
+          "value": [10]
+        },
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [true]
+        }
+      ]
+    }
+
+---
+
     Code
       result
     Output
@@ -157,6 +361,74 @@
 
 ---
 
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 10]
+    }
+
+---
+
+    {
+      "type": "list",
+      "attributes": {
+        "names": {
+          "type": "character",
+          "attributes": {},
+          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+        }
+      },
+      "value": [
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [false]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["alpha"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.1]
+        },
+        {
+          "type": "integer",
+          "attributes": {},
+          "value": [10]
+        },
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [true]
+        }
+      ]
+    }
+
+---
+
     Code
       result
     Output
@@ -196,6 +468,74 @@
         }
       },
       "value": [0.03747695, -0.08184062, -0.00361471, -0.00804253, 0.05332356, -0.04522479, 0.03893979, 0.14452379, 0.00353565, -0.13907709, 0.03747695, -0.08184062, -0.00361471, -0.00804253, 0.05332356, -0.04522479, 0.03893979, 0.14452379, 0.00353565, -0.13907709, 0.03747695, -0.08184062, -0.00361471, 0.76576079, 0.05332356, -0.04522479, 0.03893979, 0.14452379, 0.00353565, -0.13907709]
+    }
+
+---
+
+    {
+      "type": "double",
+      "attributes": {
+        "dim": {
+          "type": "integer",
+          "attributes": {},
+          "value": [10, 2]
+        },
+        "dimnames": {
+          "type": "list",
+          "attributes": {},
+          "value": [
+            {
+              "type": "NULL"
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pos", "neg"]
+            }
+          ]
+        }
+      },
+      "value": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+    }
+
+---
+
+    {
+      "type": "list",
+      "attributes": {
+        "names": {
+          "type": "character",
+          "attributes": {},
+          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+        }
+      },
+      "value": [
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [true]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["alpha"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.01]
+        },
+        {
+          "type": "integer",
+          "attributes": {},
+          "value": [10]
+        },
+        {
+          "type": "logical",
+          "attributes": {},
+          "value": [true]
+        }
+      ]
     }
 
 ---
