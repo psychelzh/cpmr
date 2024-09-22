@@ -34,6 +34,12 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav)
         Number of observations: 10
+        Parameters:
+          Confounds:        FALSE 
+          Threshold method: alpha 
+          Threshold level:  0.01 
+          CV folds:         10 
+          Bias correction:  TRUE 
 
 # `kfolds` works
 
@@ -71,6 +77,12 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, kfolds = 5)
         Number of observations: 10
+        Parameters:
+          Confounds:        FALSE 
+          Threshold method: alpha 
+          Threshold level:  0.01 
+          CV folds:         5 
+          Bias correction:  TRUE 
 
 # Alternative threshold method works
 
@@ -108,6 +120,12 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, thresh_method = "sparsity")
         Number of observations: 10
+        Parameters:
+          Confounds:        FALSE 
+          Threshold method: sparsity 
+          Threshold level:  0.01 
+          CV folds:         10 
+          Bias correction:  TRUE 
 
 # Different threshold levels works
 
@@ -145,6 +163,12 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, thresh_level = 0.1)
         Number of observations: 10
+        Parameters:
+          Confounds:        FALSE 
+          Threshold method: alpha 
+          Threshold level:  0.1 
+          CV folds:         10 
+          Bias correction:  TRUE 
 
 # Works with confounds
 
@@ -182,6 +206,12 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, confounds = confounds)
         Number of observations: 10
+        Parameters:
+          Confounds:        TRUE 
+          Threshold method: alpha 
+          Threshold level:  0.01 
+          CV folds:         10 
+          Bias correction:  TRUE 
 
 # `return_edges` argument works
 
