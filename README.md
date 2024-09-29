@@ -52,6 +52,7 @@ res
 #> CPM results:
 #>   Call: cpm(conmat = conmat, behav = behav, kfolds = 10, return_edges = "sum")
 #>   Number of observations: 100
+#>   Number of edges: 1000
 #>   Parameters:
 #>     Confounds:        FALSE
 #>     Threshold method: alpha
@@ -68,3 +69,9 @@ summary(res)
 #>     Positive: 0.30%
 #>     Negative: 0.10%
 ```
+
+## Code of Conduct
+
+Please note that the cpmr project is released with a [Contributor Code
+of Conduct](https://psychelzh.github.io/cpmr/CODE_OF_CONDUCT.html). By
+contributing to this project, you agree to abide by its terms.
