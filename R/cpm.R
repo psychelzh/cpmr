@@ -200,6 +200,8 @@ cpm <- function(conmat, behav, ...,
       edges <- edges + cur_edges
     }
   }
+
+  # compose output object
   structure(
     list(
       folds = folds,
