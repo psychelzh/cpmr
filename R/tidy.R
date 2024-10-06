@@ -7,7 +7,7 @@ generics::tidy
 #' @param x A `cpm` object.
 #' @param ... Additional arguments passed to `summary()`.
 #' @param component A character vector indicating the component to tidy.
-#' @return A [tibble][tibble-package] with columns storing parameters of the
+#' @return A [tibble][tibble::tibble-package] with columns storing parameters of the
 #'   [cpm()] object and further columns depending on the `component` argument:
 #'
 #'   For `component = "performance"`:

@@ -133,10 +133,10 @@ cpm <- function(conmat, behav, ...,
     exclude = Reduce(
       function(x, y) intersect(x, y),
       list(
-        which(complete.cases(conmat)),
-        which(complete.cases(behav)),
+        which(stats::complete.cases(conmat)),
+        which(stats::complete.cases(behav)),
         if (!is.null(confounds)) {
-          which(complete.cases(confounds))
+          which(stats::complete.cases(confounds))
         } else {
           seq_along(behav)
         }
@@ -225,7 +225,7 @@ print.cpm <- function(x, ...) {
   cat("  Call: ")
   print(x$call)
   cat(sprintf("  Number of observations: %d\n", length(x$real)))
-  cat(sprintf("    Complete cases: %d\n", sum(complete.cases(x$pred))))
+  cat(sprintf("    Complete cases: %d\n", sum(stats::complete.cases(x$pred))))
   if (!is.null(x$edges)) {
     cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
   } else {
