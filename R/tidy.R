@@ -1,3 +1,7 @@
+#' @importFrom generics tidy
+#' @export
+generics::tidy
+
 #' Tidy a `cpm` object
 #'
 #' @param x A `cpm` object.
