@@ -61,7 +61,7 @@ use it.</p>
 <span>  kfolds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bias_correct <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  return_edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sum"</span>, <span class="st">"none"</span>, <span class="st">"all"</span><span class="op">)</span>,</span>
-<span>  na_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fail"</span>, <span class="st">"omit"</span>, <span class="st">"exclude"</span><span class="op">)</span></span>
+<span>  na_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fail"</span>, <span class="st">"exclude"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -119,11 +119,10 @@ each fold is returned, which is a 3D array and memory-consuming.</p></dd>
 
 <dt id="arg-na-action">na_action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
 <dd><p>A character string indicating the action when missing values
-are found in <code>behav</code>. If <code>"fail"</code>, an error will be thrown. If <code>"omit"</code>,
-missing values will be omitted. If <code>"exclude"</code>, missing values will be
-excluded from the analysis and added back to the output. Note <code>conmat</code> must
-not contain any missing values, and <code>confounds</code> must not contain missing
-values for complete cases of <code>behav</code>.</p></dd>
+are found in <code>behav</code>. If <code>"fail"</code>, an error will be thrown. If <code>"exclude"</code>,
+missing values will be excluded from the analysis but kept in the output.
+Note complete cases are intersection of <code>conmat</code>, <code>behav</code> and <code>confounds</code>
+if provided.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -189,6 +188,7 @@ https://doi.org/10.1016/j.dcn.2020.100878</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> CPM results:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Call: cpm(conmat = conmat, behav = behav)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Complete cases: 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of edges: 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Confounds:        FALSE</span>
@@ -202,6 +202,7 @@ https://doi.org/10.1016/j.dcn.2020.100878</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Call: cpm(conmat = conmat, behav = behav, thresh_method = "sparsity", </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     thresh_level = 0.05)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Complete cases: 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of edges: 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Confounds:        FALSE</span>
@@ -214,6 +215,7 @@ https://doi.org/10.1016/j.dcn.2020.100878</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> CPM results:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Call: cpm(conmat = conmat, behav = behav, kfolds = 10)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Complete cases: 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of edges: 100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Confounds:        FALSE</span>
