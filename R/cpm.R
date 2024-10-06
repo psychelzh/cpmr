@@ -131,7 +131,7 @@ cpm <- function(conmat, behav, ...,
       seq_along(behav)
     },
     exclude = Reduce(
-      function(x, y) intersect(x, y),
+      intersect,
       list(
         which(stats::complete.cases(conmat)),
         which(stats::complete.cases(behav)),
