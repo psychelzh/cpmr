@@ -14,7 +14,7 @@ cpm(
   kfolds = NULL,
   bias_correct = TRUE,
   return_edges = c("sum", "none", "all"),
-  na_action = c("fail", "omit", "exclude")
+  na_action = c("fail", "exclude")
 )
 }
 \arguments{
@@ -51,11 +51,10 @@ selected edges across folds is returned. If \code{"all"}, the selected edges for
 each fold is returned, which is a 3D array and memory-consuming.}
 
 \item{na_action}{A character string indicating the action when missing values
-are found in \code{behav}. If \code{"fail"}, an error will be thrown. If \code{"omit"},
-missing values will be omitted. If \code{"exclude"}, missing values will be
-excluded from the analysis and added back to the output. Note \code{conmat} must
-not contain any missing values, and \code{confounds} must not contain missing
-values for complete cases of \code{behav}.}
+are found in \code{behav}. If \code{"fail"}, an error will be thrown. If \code{"exclude"},
+missing values will be excluded from the analysis but kept in the output.
+Note complete cases are intersection of \code{conmat}, \code{behav} and \code{confounds}
+if provided.}
 }
 \value{
 A list with the following components:

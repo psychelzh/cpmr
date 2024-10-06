@@ -102,6 +102,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav)
         Number of observations: 10
+          Complete cases: 10
         Number of edges: 10
         Parameters:
           Confounds:        FALSE
@@ -135,7 +136,7 @@
           ]
         }
       },
-      "value": [-0.19751643, -0.60963073, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.92500993, -0.19751643, -0.60963073, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.92500993, -0.19751643, -0.64179503, -0.45834504, -0.33241485, -0.33241485, -0.45834504, -0.34916862, -0.19751643, -0.34916862, -0.64179503]
+      "value": [-0.52088375, -0.49608397, -0.49608397, -0.40383885, -0.16736493, -0.39106847, -0.39106847, -0.16736493, -0.40383885, -0.52088375, -0.52088375, -0.49608397, -0.49608397, -0.40383885, -0.16736493, -0.39106847, -0.39106847, -0.16736493, -0.40383885, -0.52088375, -0.52088375, -0.49608397, -0.49608397, -0.40383885, -0.16736493, -0.39106847, -0.39106847, -0.16736493, -0.40383885, -0.52088375]
     }
 
 ---
@@ -163,7 +164,7 @@
           ]
         }
       },
-      "value": [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      "value": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     }
 
 ---
@@ -214,6 +215,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, kfolds = 5)
         Number of observations: 10
+          Complete cases: 10
         Number of edges: 10
         Parameters:
           Confounds:        FALSE
@@ -326,6 +328,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, thresh_method = "sparsity")
         Number of observations: 10
+          Complete cases: 10
         Number of edges: 10
         Parameters:
           Confounds:        FALSE
@@ -438,6 +441,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, thresh_level = 0.1)
         Number of observations: 10
+          Complete cases: 10
         Number of edges: 10
         Parameters:
           Confounds:        FALSE
@@ -550,6 +554,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, confounds = confounds)
         Number of observations: 10
+          Complete cases: 10
         Number of edges: 10
         Parameters:
           Confounds:        TRUE
@@ -566,6 +571,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, return_edges = "none")
         Number of observations: 10
+          Complete cases: 10
         Number of edges: unknown
         Parameters:
           Confounds:        FALSE
@@ -602,7 +608,7 @@
           ]
         }
       },
-      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
     }
 
 ---
@@ -613,6 +619,7 @@
       CPM results:
         Call: cpm(conmat = conmat, behav = behav, return_edges = "all")
         Number of observations: 10
+          Complete cases: 10
         Number of edges: 10
         Parameters:
           Confounds:        FALSE
@@ -623,73 +630,52 @@
 
 # `na_action` argument works
 
-    {
-      "type": "double",
-      "attributes": {},
-      "value": [0.25688371, -0.24669188, -0.3475426, -0.95161857, -0.04502772, -0.78490447, -1.66794194, -0.38022652, 0.91899661]
-    }
+    Code
+      result
+    Output
+      CPM results:
+        Call: cpm(conmat = conmat, behav = behav, na_action = "exclude")
+        Number of observations: 10
+          Complete cases: 9
+        Number of edges: 10
+        Parameters:
+          Confounds:        FALSE
+          Threshold method: alpha
+          Threshold level:  0.01
+          CV folds:         9
+          Bias correction:  TRUE
 
 ---
 
-    {
-      "type": "double",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [9, 3]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["both", "pos", "neg"]
-            }
-          ]
-        }
-      },
-      "value": [-0.43811964, -0.37517269, -0.36256635, -0.28705685, -0.40038071, -0.30789611, -0.19751643, -0.35848086, -0.52088375, -0.43811964, -0.37517269, -0.36256635, -0.28705685, -0.40038071, -0.30789611, -0.19751643, -0.35848086, -0.52088375, -0.43811964, -0.37517269, -0.36256635, -0.28705685, -0.40038071, -0.30789611, -0.19751643, -0.35848086, -0.52088375]
-    }
+    Code
+      result
+    Output
+      CPM results:
+        Call: cpm(conmat = conmat, behav = behav, confounds = confounds, na_action = "exclude")
+        Number of observations: 10
+          Complete cases: 8
+        Number of edges: 10
+        Parameters:
+          Confounds:        TRUE
+          Threshold method: alpha
+          Threshold level:  0.01
+          CV folds:         8
+          Bias correction:  TRUE
 
 ---
 
-    {
-      "type": "double",
-      "attributes": {},
-      "value": ["NA", 0.25688371, -0.24669188, -0.3475426, -0.95161857, -0.04502772, -0.78490447, -1.66794194, -0.38022652, 0.91899661]
-    }
-
----
-
-    {
-      "type": "double",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [10, 3]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["both", "pos", "neg"]
-            }
-          ]
-        }
-      },
-      "value": ["NA", -0.43811964, -0.37517269, -0.36256635, -0.28705685, -0.40038071, -0.30789611, -0.19751643, -0.35848086, -0.52088375, "NA", -0.43811964, -0.37517269, -0.36256635, -0.28705685, -0.40038071, -0.30789611, -0.19751643, -0.35848086, -0.52088375, "NA", -0.43811964, -0.37517269, -0.36256635, -0.28705685, -0.40038071, -0.30789611, -0.19751643, -0.35848086, -0.52088375]
-    }
+    Code
+      result
+    Output
+      CPM results:
+        Call: cpm(conmat = conmat, behav = behav, confounds = confounds, na_action = "exclude")
+        Number of observations: 10
+          Complete cases: 8
+        Number of edges: 10
+        Parameters:
+          Confounds:        TRUE
+          Threshold method: alpha
+          Threshold level:  0.01
+          CV folds:         8
+          Bias correction:  TRUE
 

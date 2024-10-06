@@ -125,16 +125,20 @@ test_that("`na_action` argument works", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
   behav[1] <- NA
-  expect_error(cpm(conmat, behav), "Missing values found in `behav`.")
-  result <- cpm(conmat, behav, na_action = "omit")
-  expect_snapshot_value(result$real, style = "json2")
-  expect_snapshot_value(result$pred, style = "json2")
+  expect_error(cpm(conmat, behav), "Missing values found in `behav`")
   result <- cpm(conmat, behav, na_action = "exclude")
-  expect_snapshot_value(result$real, style = "json2")
-  expect_snapshot_value(result$pred, style = "json2")
+  expect_equal(sum(complete.cases(result$real)), 9)
+  expect_equal(sum(complete.cases(result$pred)), 9)
+  expect_snapshot(result)
+  confounds <- matrix(rnorm(10), ncol = 1)
+  confounds[2, 1] <- NA
+  result <- cpm(conmat, behav, confounds = confounds, na_action = "exclude")
+  expect_equal(sum(complete.cases(result$real)), sum(complete.cases(behav)))
+  expect_equal(sum(complete.cases(result$pred)), 8)
+  expect_snapshot(result)
   conmat[1, 1] <- NA
-  expect_error(
-    cpm(conmat, behav),
-    "Missing values are not allowed in `conmat`."
-  )
+  result <- cpm(conmat, behav, confounds = confounds, na_action = "exclude")
+  expect_equal(sum(complete.cases(result$real)), sum(complete.cases(behav)))
+  expect_equal(sum(complete.cases(result$pred)), 8)
+  expect_snapshot(result)
 })
