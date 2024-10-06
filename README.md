@@ -52,6 +52,7 @@ res
 #> CPM results:
 #>   Call: cpm(conmat = conmat, behav = behav, kfolds = 10, return_edges = "sum")
 #>   Number of observations: 100
+#>     Complete cases: 100
 #>   Number of edges: 1000
 #>   Parameters:
 #>     Confounds:        FALSE
@@ -62,11 +63,11 @@ res
 summary(res)
 #> CPM summary:
 #>   Performance (Pearson):
-#>     Positive: -0.238
-#>     Negative: -0.232
-#>     Combined: -0.294
+#>     Positive: -0.114
+#>     Negative: -0.270
+#>     Combined: -0.225
 #>   Prop. edges (50% folds):
-#>     Positive: 0.30%
+#>     Positive: 0.40%
 #>     Negative: 0.10%
 ```
 
