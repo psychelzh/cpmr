@@ -13,7 +13,8 @@ cpm(
   thresh_level = 0.01,
   kfolds = NULL,
   bias_correct = TRUE,
-  return_edges = c("sum", "none", "all")
+  return_edges = c("sum", "none", "all"),
+  na_action = c("fail", "omit", "exclude")
 )
 }
 \arguments{
@@ -48,6 +49,13 @@ prediction. See Rapuano et al. (2020) for more details.}
 selected edges. If \code{"none"}, no edges are returned. If \code{"sum"}, the sum of
 selected edges across folds is returned. If \code{"all"}, the selected edges for
 each fold is returned, which is a 3D array and memory-consuming.}
+
+\item{na_action}{A character string indicating the action when missing values
+are found in \code{behav}. If \code{"fail"}, an error will be thrown. If \code{"omit"},
+missing values will be omitted. If \code{"exclude"}, missing values will be
+excluded from the analysis and added back to the output. Note \code{conmat} must
+not contain any missing values, and \code{confounds} must not contain missing
+values for complete cases of \code{behav}.}
 }
 \value{
 A list with the following components:

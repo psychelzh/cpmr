@@ -4,6 +4,7 @@
 
 * Added `summary()` method to summarize the results of the CPM analysis.
 * Added `tidy()` method to tidy the results of the CPM analysis.
+* Support `na_action` argument in `cpm()` function to handle missing values in the input data (#2).
 
 ## Enhancements
 
