@@ -60,7 +60,8 @@ use it.</p>
 <span>  thresh_level <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  kfolds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bias_correct <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  return_edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sum"</span>, <span class="st">"none"</span>, <span class="st">"all"</span><span class="op">)</span></span>
+<span>  return_edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sum"</span>, <span class="st">"none"</span>, <span class="st">"all"</span><span class="op">)</span>,</span>
+<span>  na_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fail"</span>, <span class="st">"omit"</span>, <span class="st">"exclude"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -114,6 +115,15 @@ prediction. See Rapuano et al. (2020) for more details.</p></dd>
 selected edges. If <code>"none"</code>, no edges are returned. If <code>"sum"</code>, the sum of
 selected edges across folds is returned. If <code>"all"</code>, the selected edges for
 each fold is returned, which is a 3D array and memory-consuming.</p></dd>
+
+
+<dt id="arg-na-action">na_action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
+<dd><p>A character string indicating the action when missing values
+are found in <code>behav</code>. If <code>"fail"</code>, an error will be thrown. If <code>"omit"</code>,
+missing values will be omitted. If <code>"exclude"</code>, missing values will be
+excluded from the analysis and added back to the output. Note <code>conmat</code> must
+not contain any missing values, and <code>confounds</code> must not contain missing
+values for complete cases of <code>behav</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
