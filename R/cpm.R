@@ -38,6 +38,12 @@
 #'   selected edges. If `"none"`, no edges are returned. If `"sum"`, the sum of
 #'   selected edges across folds is returned. If `"all"`, the selected edges for
 #'   each fold is returned, which is a 3D array and memory-consuming.
+#' @param na_action A character string indicating the action when missing values
+#'   are found in `behav`. If `"fail"`, an error will be thrown. If `"omit"`,
+#'   missing values will be omitted. If `"exclude"`, missing values will be
+#'   excluded from the analysis and added back to the output. Note `conmat` must
+#'   not contain any missing values, and `confounds` must not contain missing
+#'   values for complete cases of `behav`.
 #' @return A list with the following components:
 #'
 #'   \item{folds}{The corresponding fold for each observation when used as test
@@ -90,11 +96,13 @@ cpm <- function(conmat, behav, ...,
                 thresh_level = 0.01,
                 kfolds = NULL,
                 bias_correct = TRUE,
-                return_edges = c("sum", "none", "all")) {
+                return_edges = c("sum", "none", "all"),
+                na_action = c("fail", "omit", "exclude")) {
   call <- match.call()
   thresh_method <- match.arg(thresh_method)
   return_edges <- match.arg(return_edges)
-  # ensure `behav` is a vector
+  na_action <- match.arg(na_action)
+  # ensure `behav` is a vector, name and length match
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {
     stop("Behavior data must be a numeric vector.")
@@ -109,38 +117,58 @@ cpm <- function(conmat, behav, ...,
       stop("Case numbers of `confounds` and `behav` must match.")
     }
     check_names(confounds, behav)
-    conmat <- regress_counfounds(conmat, confounds)
-    behav <- regress_counfounds(behav, confounds)
+  }
+  # `conmat` cannot contain any missing values
+  stopifnot("Missing values are not allowed in `conmat`." = !anyNA(conmat))
+  # handle missing values in `behav`
+  include_cases <- switch(na_action,
+    fail = {
+      stopifnot("Missing values found in `behav`." = !anyNA(behav))
+      rep(TRUE, length(behav))
+    },
+    omit = ,
+    exclude = !is.na(behav)
+  )
+  conmat_use <- conmat[include_cases, , drop = FALSE]
+  behav_use <- behav[include_cases]
+  if (!is.null(confounds)) {
+    confounds_use <- confounds[include_cases, , drop = FALSE]
+    stopifnot(
+      "Missing values found for used cases in `confounds`." =
+        !anyNA(confounds_use)
+    )
+    conmat_use <- regress_counfounds(conmat_use, confounds_use)
+    behav_use <- regress_counfounds(behav_use, confounds_use)
   }
   # default to leave-one-subject-out
-  if (is.null(kfolds)) kfolds <- length(behav)
-  folds <- crossv_kfold(length(behav), kfolds)
+  if (is.null(kfolds)) kfolds <- length(behav_use)
+  folds <- crossv_kfold(length(behav_use), kfolds)
   # pre-allocation
   edges <- switch(return_edges,
     all = array(
-      dim = c(dim(conmat)[2], length(networks), kfolds),
+      dim = c(dim(conmat_use)[2], length(networks), kfolds),
       dimnames = list(NULL, networks, NULL)
     ),
     sum = array(
       0,
-      dim = c(dim(conmat)[2], length(networks)),
+      dim = c(dim(conmat_use)[2], length(networks)),
       dimnames = list(NULL, networks)
     )
   )
   pred <- matrix(
-    nrow = length(behav),
+    nrow = length(behav_use),
     ncol = length(includes),
-    dimnames = list(names(behav), includes)
+    dimnames = list(names(behav_use), includes)
   )
   for (fold in seq_len(kfolds)) {
     rows_train <- folds != fold
-    conmat_train <- conmat[rows_train, , drop = FALSE]
-    behav_train <- behav[rows_train]
+    conmat_train <- conmat_use[rows_train, , drop = FALSE]
+    behav_train <- behav_use[rows_train]
     cur_edges <- select_edges(
       conmat_train, behav_train,
       thresh_method, thresh_level
     )
-    conmat_test <- conmat[!rows_train, , drop = FALSE]
+    conmat_test <- conmat_use[!rows_train, , drop = FALSE]
     cur_pred <- predict_cpm(
       conmat_train, behav_train, conmat_test,
       cur_edges, bias_correct
@@ -152,10 +180,21 @@ cpm <- function(conmat, behav, ...,
       edges <- edges + cur_edges
     }
   }
+  # add back missing values when `na_action` is "exclude"
+  if (na_action == "exclude") {
+    behav_use <- behav
+    pred_all <- matrix(
+      nrow = length(behav),
+      ncol = length(includes),
+      dimnames = list(names(behav), includes)
+    )
+    pred_all[include_cases, ] <- pred
+    pred <- pred_all
+  }
   structure(
     list(
       folds = folds,
-      real = behav,
+      real = behav_use,
       pred = pred,
       edges = edges,
       call = call,

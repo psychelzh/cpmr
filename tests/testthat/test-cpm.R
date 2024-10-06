@@ -119,3 +119,22 @@ test_that("Throw informative error if data checking not pass", {
     "Case numbers of `confounds` and `behav` must match."
   )
 })
+
+test_that("`na_action` argument works", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+  behav[1] <- NA
+  expect_error(cpm(conmat, behav), "Missing values found in `behav`.")
+  result <- cpm(conmat, behav, na_action = "omit")
+  expect_snapshot_value(result$real, style = "json2")
+  expect_snapshot_value(result$pred, style = "json2")
+  result <- cpm(conmat, behav, na_action = "exclude")
+  expect_snapshot_value(result$real, style = "json2")
+  expect_snapshot_value(result$pred, style = "json2")
+  conmat[1, 1] <- NA
+  expect_error(
+    cpm(conmat, behav),
+    "Missing values are not allowed in `conmat`."
+  )
+})
