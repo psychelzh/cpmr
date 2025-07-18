@@ -20,9 +20,12 @@
 #'
 #'   \item{params}{A list of parameters used in the summary.}
 #' @export
-summary.cpm <- function(object, ...,
-                        method = c("pearson", "spearman"),
-                        edge_level = 0.5) {
+summary.cpm <- function(
+  object,
+  ...,
+  method = c("pearson", "spearman"),
+  edge_level = 0.5
+) {
   method <- match.arg(method)
   # summary prediction performance
   performance <- stats::cor(object$real, object$pred, method = method)

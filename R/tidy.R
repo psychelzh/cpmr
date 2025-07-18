@@ -35,7 +35,8 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
   component <- match.arg(component)
   params <- tibble::as_tibble(x$params)
   sum_x <- summary(x, ...)
-  switch(component,
+  switch(
+    component,
     performance = tibble::tibble(
       params,
       method = sum_x$params$method,

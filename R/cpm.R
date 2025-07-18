@@ -89,14 +89,18 @@
 #' childhood. Developmental Cognitive Neuroscience, 46, 100878.
 #' https://doi.org/10.1016/j.dcn.2020.100878
 #' @export
-cpm <- function(conmat, behav, ...,
-                confounds = NULL,
-                thresh_method = c("alpha", "sparsity"),
-                thresh_level = 0.01,
-                kfolds = NULL,
-                bias_correct = TRUE,
-                return_edges = c("sum", "none", "all"),
-                na_action = c("fail", "exclude")) {
+cpm <- function(
+  conmat,
+  behav,
+  ...,
+  confounds = NULL,
+  thresh_method = c("alpha", "sparsity"),
+  thresh_level = 0.01,
+  kfolds = NULL,
+  bias_correct = TRUE,
+  return_edges = c("sum", "none", "all"),
+  na_action = c("fail", "exclude")
+) {
   call <- match.call()
   thresh_method <- match.arg(thresh_method)
   return_edges <- match.arg(return_edges)
@@ -112,7 +116,9 @@ cpm <- function(conmat, behav, ...,
   }
   check_names(conmat, behav)
   if (!is.null(confounds)) {
-    if (is.vector(confounds)) confounds <- as.matrix(confounds)
+    if (is.vector(confounds)) {
+      confounds <- as.matrix(confounds)
+    }
     if (nrow(confounds) != length(behav)) {
       stop("Case numbers of `confounds` and `behav` must match.")
     }
@@ -120,13 +126,14 @@ cpm <- function(conmat, behav, ...,
   }
 
   # handle missing cases
-  include_cases <- switch(na_action,
+  include_cases <- switch(
+    na_action,
     fail = {
       stopifnot(
         "Missing values found in `conmat`" = !anyNA(conmat),
         "Missing values found in `behav`" = !anyNA(behav),
-        "Missing values found in `confounds`" =
-          is.null(confounds) || !anyNA(confounds)
+        "Missing values found in `confounds`" = is.null(confounds) ||
+          !anyNA(confounds)
       )
       seq_along(behav)
     },
@@ -157,11 +164,14 @@ cpm <- function(conmat, behav, ...,
   }
 
   # prepare for cross-validation
-  if (is.null(kfolds)) kfolds <- length(include_cases) # default to LOOCV
+  if (is.null(kfolds)) {
+    kfolds <- length(include_cases)
+  } # default to LOOCV
   folds <- crossv_kfold(include_cases, kfolds)
 
   # pre-allocation
-  edges <- switch(return_edges,
+  edges <- switch(
+    return_edges,
     all = array(
       dim = c(dim(conmat)[2], length(networks), kfolds),
       dimnames = list(NULL, networks, NULL)
@@ -185,17 +195,22 @@ cpm <- function(conmat, behav, ...,
     conmat_train <- conmat[rows_train, , drop = FALSE]
     behav_train <- behav[rows_train]
     cur_edges <- select_edges(
-      conmat_train, behav_train,
-      thresh_method, thresh_level
+      conmat_train,
+      behav_train,
+      thresh_method,
+      thresh_level
     )
     conmat_test <- conmat[rows_test, , drop = FALSE]
     cur_pred <- predict_cpm(
-      conmat_train, behav_train, conmat_test,
-      cur_edges, bias_correct
+      conmat_train,
+      behav_train,
+      conmat_test,
+      cur_edges,
+      bias_correct
     )
     pred[rows_test, ] <- cur_pred
     if (return_edges == "all") {
-      edges[, , fold] <- cur_edges
+      edges[,, fold] <- cur_edges
     } else if (return_edges == "sum") {
       edges <- edges + cur_edges
     }
@@ -259,7 +274,8 @@ check_names <- function(data, behav) {
 
 select_edges <- function(conmat, behav, method, level) {
   r_mat <- stats::cor(conmat, behav)
-  r_crit <- switch(method,
+  r_crit <- switch(
+    method,
     alpha = {
       thresh <- critical_r(nrow(conmat), level)
       c(-thresh, thresh)
@@ -294,7 +310,8 @@ predict_cpm <- function(conmat, behav, conmat_new, edges, bias_correct) {
   allocate_predictors <- function(nrow) {
     matrix(
       1,
-      nrow = nrow, ncol = length(networks) + 1,
+      nrow = nrow,
+      ncol = length(networks) + 1,
       dimnames = list(NULL, c("(Intercept)", networks))
     )
   }
