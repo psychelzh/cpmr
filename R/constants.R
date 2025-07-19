@@ -1,2 +1,2 @@
-networks <- c("pos", "neg")
-includes <- c("both", networks)
+corr_types <- c("pos", "neg")
+inc_edges <- c("both", corr_types)

@@ -1,5 +1,9 @@
 # cpmr (development version)
 
+## Enhancements
+
+* Renamed internal constant `networks` and `includes` to `corr_types` and `inc_edges`, respectively, to better reflect their purpose. In addition, the documentation which mentioned `networks` has been updated to use correlation types to better reflect their meaning.
+
 # cpmr 0.1.0
 
 ## New features

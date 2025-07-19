@@ -59,9 +59,9 @@
 #'
 #'   \item{edges}{The selected edges, if `return_edges` is not `"none"`. If
 #'     `return_edges` is `"sum"`, it is a matrix with rows corresponding to
-#'     edges and columns corresponding to networks. If `return_edges` is
-#'     `"all"`, it is a 3D array with dimensions corresponding to edges,
-#'     networks and folds.}
+#'     edges and columns corresponding to correlation types (i.e., `"pos"` and
+#'     `"neg"`). If `return_edges` is `"all"`, it is a 3D array with dimensions
+#'     corresponding to edges, correlation types and folds.}
 #'
 #'   \item{call}{The matched call.}
 #'
@@ -173,19 +173,19 @@ cpm <- function(
   edges <- switch(
     return_edges,
     all = array(
-      dim = c(dim(conmat)[2], length(networks), kfolds),
-      dimnames = list(NULL, networks, NULL)
+      dim = c(dim(conmat)[2], length(corr_types), kfolds),
+      dimnames = list(NULL, corr_types, NULL)
     ),
     sum = array(
       0,
-      dim = c(dim(conmat)[2], length(networks)),
-      dimnames = list(NULL, networks)
+      dim = c(dim(conmat)[2], length(corr_types)),
+      dimnames = list(NULL, corr_types)
     )
   )
   pred <- matrix(
     nrow = length(behav),
-    ncol = length(includes),
-    dimnames = list(names(behav), includes)
+    ncol = length(inc_edges),
+    dimnames = list(names(behav), inc_edges)
   )
 
   # process each fold of CPM
@@ -296,7 +296,7 @@ select_edges <- function(conmat, behav, method, level) {
   matrix(
     c(r_mat >= r_crit[2], r_mat <= r_crit[1]),
     ncol = 2,
-    dimnames = list(NULL, networks)
+    dimnames = list(NULL, corr_types)
   )
 }
 
@@ -311,35 +311,35 @@ predict_cpm <- function(conmat, behav, conmat_new, edges, bias_correct) {
     matrix(
       1,
       nrow = nrow,
-      ncol = length(networks) + 1,
-      dimnames = list(NULL, c("(Intercept)", networks))
+      ncol = length(corr_types) + 1,
+      dimnames = list(NULL, c("(Intercept)", corr_types))
     )
   }
   x <- allocate_predictors(dim(conmat)[1])
   x_new <- allocate_predictors(dim(conmat_new)[1])
-  for (network in networks) {
-    x[, network] <- rowsums(
-      conmat[, edges[, network], drop = FALSE]
+  for (corr_type in corr_types) {
+    x[, corr_type] <- rowsums(
+      conmat[, edges[, corr_type], drop = FALSE]
     )
-    x_new[, network] <- rowsums(
-      conmat_new[, edges[, network], drop = FALSE]
+    x_new[, corr_type] <- rowsums(
+      conmat_new[, edges[, corr_type], drop = FALSE]
     )
   }
   pred <- matrix(
     nrow = dim(conmat_new)[1],
-    ncol = length(includes),
-    dimnames = list(NULL, includes)
+    ncol = length(inc_edges),
+    dimnames = list(NULL, inc_edges)
   )
-  for (include in includes) {
-    if (include == "both") {
+  for (inc_edge in inc_edges) {
+    if (inc_edge == "both") {
       cur_x <- x
       cur_x_new <- x_new
     } else {
-      cur_x <- x[, c("(Intercept)", include)]
-      cur_x_new <- x_new[, c("(Intercept)", include)]
+      cur_x <- x[, c("(Intercept)", inc_edge)]
+      cur_x_new <- x_new[, c("(Intercept)", inc_edge)]
     }
     model <- stats::.lm.fit(cur_x, behav)
-    pred[, include] <- cur_x_new %*% model$coefficients
+    pred[, inc_edge] <- cur_x_new %*% model$coefficients
   }
   pred
 }
