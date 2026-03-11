@@ -23,8 +23,8 @@ select_edges <- function(conmat, behav, method, level) {
     sparsity = {
       k <- round(level * length(r_mat))
       thresh <- c(
-        nth(r_mat, k),
-        nth(r_mat, k, descending = TRUE)
+        Rfast::nth(r_mat, k),
+        Rfast::nth(r_mat, k, descending = TRUE)
       )
       if (thresh[[1]] > 0 || thresh[[2]] < 0) {
         warning("Not enough positive or negative correlation values.") # nocov
@@ -42,8 +42,8 @@ select_edges <- function(conmat, behav, method, level) {
 
 predict_cpm <- function(conmat, behav, conmat_new, edges, bias_correct) {
   if (bias_correct) {
-    center <- colmeans(conmat)
-    scale <- colVars(conmat, std = TRUE)
+    center <- Rfast::colmeans(conmat)
+    scale <- Rfast::colVars(conmat, std = TRUE)
     conmat <- fscale(conmat, center, scale)
     conmat_new <- fscale(conmat_new, center, scale)
   }
@@ -58,10 +58,10 @@ predict_cpm <- function(conmat, behav, conmat_new, edges, bias_correct) {
   x <- allocate_predictors(dim(conmat)[1])
   x_new <- allocate_predictors(dim(conmat_new)[1])
   for (corr_type in corr_types) {
-    x[, corr_type] <- rowsums(
+    x[, corr_type] <- Rfast::rowsums(
       conmat[, edges[, corr_type], drop = FALSE]
     )
-    x_new[, corr_type] <- rowsums(
+    x_new[, corr_type] <- Rfast::rowsums(
       conmat_new[, edges[, corr_type], drop = FALSE]
     )
   }
@@ -84,7 +84,7 @@ predict_cpm <- function(conmat, behav, conmat_new, edges, bias_correct) {
   pred
 }
 
-regress_counfounds <- function(resp, confounds) {
+regress_confounds <- function(resp, confounds) {
   stats::.lm.fit(cbind(1, confounds), resp)$residuals
 }
 
@@ -99,5 +99,5 @@ crossv_kfold <- function(x, k) {
 }
 
 fscale <- function(x, center, scale) {
-  eachrow(eachrow(x, center, "-"), scale, "/")
+  Rfast::eachrow(Rfast::eachrow(x, center, "-"), scale, "/")
 }
