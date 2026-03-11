@@ -16,5 +16,4 @@ test_that("regress_covariates returns linear-model residuals", {
 
   expect_equal(residuals_actual, residuals_expected)
   expect_lt(abs(stats::cor(residuals_actual, covariates[, 1])), 1e-10)
-  expect_equal(regress_confounds(resp, covariates), residuals_expected)
 })
