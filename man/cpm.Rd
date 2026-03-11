@@ -8,6 +8,7 @@ cpm(
   conmat,
   behav,
   ...,
+  covariates = NULL,
   confounds = NULL,
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
@@ -27,9 +28,11 @@ matrix, which will be converted to a vector using \code{\link[=drop]{drop()}}.}
 
 \item{...}{For future extension. Currently ignored.}
 
-\item{confounds}{A matrix of confounding variables. Observations in row,
-variables in column. If \code{NULL}, no confounding variables are used. Note if
-a vector is provided, it will be converted to a column matrix.}
+\item{covariates}{A matrix of covariates. Observations in row, variables in
+column. If \code{NULL}, no covariates are used. Note if a vector is provided, it
+will be converted to a column matrix.}
+
+\item{confounds}{Deprecated alias of \code{covariates}.}
 
 \item{thresh_method, thresh_level}{The threshold method and level used in edge
 selection. If method is set to be \code{"alpha"}, the edge selection is based on
@@ -53,7 +56,7 @@ each fold is returned, which is a 3D array and memory-consuming.}
 \item{na_action}{A character string indicating the action when missing values
 are found in \code{behav}. If \code{"fail"}, an error will be thrown. If \code{"exclude"},
 missing values will be excluded from the analysis but kept in the output.
-Note complete cases are intersection of \code{conmat}, \code{behav} and \code{confounds}
+Note complete cases are intersection of \code{conmat}, \code{behav} and \code{covariates}
 if provided.}
 }
 \value{
@@ -63,8 +66,8 @@ A list with the following components:
 group in cross-validation.}
 
 \item{real}{The real behavior data. This is the same as the input \code{behav}
-if \code{confounds} is \code{NULL}, otherwise it is the residual of \code{behav} after
-regressing out \code{confounds}.}
+if \code{covariates} is \code{NULL}, otherwise it is the fold-wise residual of
+\code{behav} after regressing out \code{covariates} in cross-validation.}
 
 \item{pred}{The predicted behavior data, with each column corresponding to
 a model, i.e., both edges, positive edges, negative edges, and the row
@@ -81,7 +84,7 @@ corresponding to edges, correlation types and folds.}
 
 \item{params}{A list of parameters used in the function, including:
 \itemize{
-\item \code{confounds} indicating if confounds are used
+\item \code{covariates} indicating if covariates are used
 \item \code{thresh_method} indicating the threshold method
 \item \code{thresh_level} indicating the threshold level
 \item \code{kfolds} indicating the number of folds in cross-validation

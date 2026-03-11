@@ -55,7 +55,7 @@ res
 #>     Complete cases: 100
 #>   Number of edges: 1000
 #>   Parameters:
-#>     Confounds:        FALSE
+#>     Covariates:       FALSE
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
 #>     CV folds:         10

@@ -16,7 +16,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct", "method", "both", "pos", "neg"]
+          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct", "method", "both", "pos", "neg"]
         }
       },
       "value": [
@@ -86,7 +86,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct", "level", "pos", "neg"]
+          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct", "level", "pos", "neg"]
         }
       },
       "value": [

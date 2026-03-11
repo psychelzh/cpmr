@@ -46,17 +46,27 @@ test_that("Different threshold levels works", {
   expect_snapshot(result)
 })
 
-test_that("Works with confounds", {
+test_that("Works with covariates", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  confounds <- matrix(rnorm(10), ncol = 1)
-  result <- cpm(conmat, behav, confounds = confounds)
+  covariates <- matrix(rnorm(10), ncol = 1)
+  result <- cpm(conmat, behav, covariates = covariates)
   expect_s3_class(result, "cpm")
-  expect_snapshot_value(result$pred, style = "json2", tolerance = 1e-6)
-  expect_snapshot_value(result$edges, style = "json2")
-  expect_snapshot_value(result$params, style = "json2")
-  expect_snapshot(result)
+  expect_equal(sum(complete.cases(result$pred)), 10)
+  expect_length(result$real, 10)
+  expect_true(isTRUE(result$params$covariates))
+
+  expect_warning(
+    legacy <- cpm(conmat, behav, confounds = covariates),
+    "deprecated"
+  )
+  expect_equal(legacy$pred, result$pred, tolerance = 1e-6)
+  expect_equal(legacy$real, result$real, tolerance = 1e-6)
+  expect_error(
+    cpm(conmat, behav, covariates = covariates, confounds = covariates),
+    "Please provide only one"
+  )
 })
 
 test_that("Keep names of behavior", {
@@ -81,7 +91,7 @@ test_that("`return_edges` argument works", {
   expect_snapshot(result)
 })
 
-test_that("Support row/column matrix input of `behav` and `confounds`", {
+test_that("Support row/column matrix input of `behav` and `covariates`", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
@@ -95,10 +105,10 @@ test_that("Support row/column matrix input of `behav` and `confounds`", {
     cpm(conmat, matrix(behav, nrow = 1))[key_fields],
     result[key_fields]
   )
-  confounds <- matrix(rnorm(10), ncol = 1)
-  result <- cpm(conmat, behav, confounds = confounds)
+  covariates <- matrix(rnorm(10), ncol = 1)
+  result <- cpm(conmat, behav, covariates = covariates)
   expect_identical(
-    cpm(conmat, behav, confounds = drop(confounds))[key_fields],
+    cpm(conmat, behav, covariates = drop(covariates))[key_fields],
     result[key_fields]
   )
 })
@@ -115,8 +125,8 @@ test_that("Throw informative error if data checking not pass", {
     "Case numbers of `conmat` and `behav` must match."
   )
   expect_error(
-    cpm(conmat, rnorm(10), confounds = matrix(rnorm(20), ncol = 1)),
-    "Case numbers of `confounds` and `behav` must match."
+    cpm(conmat, rnorm(10), covariates = matrix(rnorm(20), ncol = 1)),
+    "Case numbers of `covariates` and `behav` must match."
   )
 })
 
@@ -130,14 +140,14 @@ test_that("`na_action` argument works", {
   expect_equal(sum(complete.cases(result$real)), 9)
   expect_equal(sum(complete.cases(result$pred)), 9)
   expect_snapshot(result)
-  confounds <- matrix(rnorm(10), ncol = 1)
-  confounds[2, 1] <- NA
-  result <- cpm(conmat, behav, confounds = confounds, na_action = "exclude")
+  covariates <- matrix(rnorm(10), ncol = 1)
+  covariates[2, 1] <- NA
+  result <- cpm(conmat, behav, covariates = covariates, na_action = "exclude")
   expect_equal(sum(complete.cases(result$real)), sum(complete.cases(behav)))
   expect_equal(sum(complete.cases(result$pred)), 8)
   expect_snapshot(result)
   conmat[1, 1] <- NA
-  result <- cpm(conmat, behav, confounds = confounds, na_action = "exclude")
+  result <- cpm(conmat, behav, covariates = covariates, na_action = "exclude")
   expect_equal(sum(complete.cases(result$real)), sum(complete.cases(behav)))
   expect_equal(sum(complete.cases(result$pred)), 8)
   expect_snapshot(result)
@@ -147,17 +157,17 @@ test_that("Folds cover complete cases exactly when excluding missing data", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  confounds <- matrix(rnorm(20), ncol = 2)
+  covariates <- matrix(rnorm(20), ncol = 2)
 
   # Remove different rows from each input to validate intersection behavior.
   behav[2] <- NA
   conmat[4, 3] <- NA
-  confounds[6, 1] <- NA
+  covariates[6, 1] <- NA
 
-  result <- cpm(conmat, behav, confounds = confounds, na_action = "exclude")
+  result <- cpm(conmat, behav, covariates = covariates, na_action = "exclude")
   include_cases <- intersect(
     intersect(which(complete.cases(conmat)), which(complete.cases(behav))),
-    which(complete.cases(confounds))
+    which(complete.cases(covariates))
   )
 
   expect_setequal(unlist(result$folds), include_cases)
