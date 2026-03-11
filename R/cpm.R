@@ -162,8 +162,19 @@ print.cpm <- function(x, ...) {
   } else {
     cat("  Number of edges: unknown\n")
   }
+  covariates_param <- if (!is.null(x$params$covariates)) {
+    x$params$covariates
+  } else if (!is.null(x$params$confounds)) {
+    warning(
+      "`x$params$confounds` is deprecated; using it as `covariates` in print.cpm().",
+      call. = FALSE
+    )
+    x$params$confounds
+  } else {
+    NA
+  }
   cat("  Parameters:\n")
-  cat(sprintf("    Covariates:       %s\n", x$params$covariates))
+  cat(sprintf("    Covariates:       %s\n", covariates_param))
   cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
   cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
   cat(sprintf("    CV folds:         %d\n", x$params$kfolds))

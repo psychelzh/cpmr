@@ -63,3 +63,29 @@ test_that("resolve_covariates handles deprecated alias", {
     "Please provide only one"
   )
 })
+
+test_that("print.cpm falls back to legacy confounds param", {
+  old_obj <- structure(
+    list(
+      call = quote(cpm(conmat = conmat, behav = behav, confounds = confounds)),
+      real = c(1, 2),
+      pred = matrix(c(1, 2), ncol = 1),
+      edges = NULL,
+      folds = list(1, 2),
+      params = list(
+        confounds = TRUE,
+        thresh_method = "alpha",
+        thresh_level = 0.01,
+        kfolds = 2,
+        bias_correct = TRUE
+      )
+    ),
+    class = "cpm"
+  )
+
+  expect_warning(
+    output <- capture.output(print(old_obj)),
+    "deprecated"
+  )
+  expect_true(any(grepl("Covariates:\\s+TRUE", output)))
+})
