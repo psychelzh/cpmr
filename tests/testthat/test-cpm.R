@@ -142,3 +142,24 @@ test_that("`na_action` argument works", {
   expect_equal(sum(complete.cases(result$pred)), 8)
   expect_snapshot(result)
 })
+
+test_that("Folds cover complete cases exactly when excluding missing data", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  confounds <- matrix(rnorm(20), ncol = 2)
+
+  # Remove different rows from each input to validate intersection behavior.
+  behav[2] <- NA
+  conmat[4, 3] <- NA
+  confounds[6, 1] <- NA
+
+  result <- cpm(conmat, behav, confounds = confounds, na_action = "exclude")
+  include_cases <- intersect(
+    intersect(which(complete.cases(conmat)), which(complete.cases(behav))),
+    which(complete.cases(confounds))
+  )
+
+  expect_setequal(unlist(result$folds), include_cases)
+  expect_equal(sum(complete.cases(result$pred)), length(include_cases))
+})

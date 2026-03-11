@@ -106,8 +106,71 @@ cpm <- function(
   return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
 
-  # check input data
-  behav <- drop(behav) # convert to vector
+  normalized <- normalize_inputs(conmat, behav, confounds)
+  behav <- normalized$behav
+  confounds <- normalized$confounds
+
+  include_cases <- resolve_include_cases(conmat, behav, confounds, na_action)
+  regressed <- apply_confounds_regression(conmat, behav, confounds, include_cases)
+  conmat <- regressed$conmat
+  behav <- regressed$behav
+
+  kfolds <- resolve_kfolds(kfolds, include_cases)
+  folds <- crossv_kfold(include_cases, kfolds)
+  edges <- init_edges(return_edges, conmat, kfolds)
+  pred <- init_pred(behav)
+  cv_result <- fit_predict_cv(
+    conmat,
+    behav,
+    include_cases,
+    folds,
+    thresh_method,
+    thresh_level,
+    bias_correct,
+    return_edges,
+    pred,
+    edges
+  )
+
+  compose_cpm(
+    call = call,
+    folds = folds,
+    behav = behav,
+    pred = cv_result$pred,
+    edges = cv_result$edges,
+    params = list(
+      confounds = !is.null(confounds),
+      thresh_method = thresh_method,
+      thresh_level = thresh_level,
+      kfolds = kfolds,
+      bias_correct = bias_correct
+    )
+  )
+}
+
+#' @export
+print.cpm <- function(x, ...) {
+  cat("CPM results:\n")
+  cat("  Call: ")
+  print(x$call)
+  cat(sprintf("  Number of observations: %d\n", length(x$real)))
+  cat(sprintf("    Complete cases: %d\n", sum(stats::complete.cases(x$pred))))
+  if (!is.null(x$edges)) {
+    cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
+  } else {
+    cat("  Number of edges: unknown\n")
+  }
+  cat("  Parameters:\n")
+  cat(sprintf("    Confounds:        %s\n", x$params$confounds))
+  cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
+  cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
+  cat(sprintf("    CV folds:         %d\n", x$params$kfolds))
+  cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
+  invisible(x)
+}
+
+normalize_inputs <- function(conmat, behav, confounds) {
+  behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {
     stop("Behavior data must be a numeric vector.")
   }
@@ -115,6 +178,7 @@ cpm <- function(
     stop("Case numbers of `conmat` and `behav` must match.")
   }
   check_names(conmat, behav)
+
   if (!is.null(confounds)) {
     if (is.vector(confounds)) {
       confounds <- as.matrix(confounds)
@@ -125,8 +189,14 @@ cpm <- function(
     check_names(confounds, behav)
   }
 
-  # handle missing cases
-  include_cases <- switch(
+  list(
+    behav = behav,
+    confounds = confounds
+  )
+}
+
+resolve_include_cases <- function(conmat, behav, confounds, na_action) {
+  switch(
     na_action,
     fail = {
       stopifnot(
@@ -150,27 +220,34 @@ cpm <- function(
       )
     )
   )
+}
 
-  # confounds regression
-  if (!is.null(confounds)) {
-    conmat[include_cases, ] <- regress_confounds(
-      conmat[include_cases, , drop = FALSE],
-      confounds[include_cases, , drop = FALSE]
-    )
-    behav[include_cases] <- regress_confounds(
-      behav[include_cases],
-      confounds[include_cases, , drop = FALSE]
-    )
+apply_confounds_regression <- function(conmat, behav, confounds, include_cases) {
+  if (is.null(confounds)) {
+    return(list(conmat = conmat, behav = behav))
   }
 
-  # prepare for cross-validation
-  if (is.null(kfolds)) {
-    kfolds <- length(include_cases)
-  } # default to LOOCV
-  folds <- crossv_kfold(include_cases, kfolds)
+  conmat[include_cases, ] <- regress_confounds(
+    conmat[include_cases, , drop = FALSE],
+    confounds[include_cases, , drop = FALSE]
+  )
+  behav[include_cases] <- regress_confounds(
+    behav[include_cases],
+    confounds[include_cases, , drop = FALSE]
+  )
 
-  # pre-allocation
-  edges <- switch(
+  list(conmat = conmat, behav = behav)
+}
+
+resolve_kfolds <- function(kfolds, include_cases) {
+  if (is.null(kfolds)) {
+    return(length(include_cases))
+  }
+  kfolds
+}
+
+init_edges <- function(return_edges, conmat, kfolds) {
+  switch(
     return_edges,
     all = array(
       dim = c(dim(conmat)[2], length(corr_types), kfolds),
@@ -182,13 +259,29 @@ cpm <- function(
       dimnames = list(NULL, corr_types)
     )
   )
-  pred <- matrix(
+}
+
+init_pred <- function(behav) {
+  matrix(
     nrow = length(behav),
     ncol = length(inc_edges),
     dimnames = list(names(behav), inc_edges)
   )
+}
 
-  # process each fold of CPM
+fit_predict_cv <- function(
+    conmat,
+    behav,
+    include_cases,
+    folds,
+    thresh_method,
+    thresh_level,
+    bias_correct,
+    return_edges,
+    pred,
+    edges
+) {
+  kfolds <- length(folds)
   for (fold in seq_len(kfolds)) {
     rows_test <- folds[[fold]]
     rows_train <- setdiff(include_cases, rows_test)
@@ -210,13 +303,16 @@ cpm <- function(
     )
     pred[rows_test, ] <- cur_pred
     if (return_edges == "all") {
-      edges[,, fold] <- cur_edges
+      edges[, , fold] <- cur_edges
     } else if (return_edges == "sum") {
       edges <- edges + cur_edges
     }
   }
 
-  # compose output object
+  list(pred = pred, edges = edges)
+}
+
+compose_cpm <- function(call, folds, behav, pred, edges, params) {
   structure(
     list(
       folds = folds,
@@ -224,35 +320,8 @@ cpm <- function(
       pred = pred,
       edges = edges,
       call = call,
-      params = list(
-        confounds = !is.null(confounds),
-        thresh_method = thresh_method,
-        thresh_level = thresh_level,
-        kfolds = kfolds,
-        bias_correct = bias_correct
-      )
+      params = params
     ),
     class = "cpm"
   )
-}
-
-#' @export
-print.cpm <- function(x, ...) {
-  cat("CPM results:\n")
-  cat("  Call: ")
-  print(x$call)
-  cat(sprintf("  Number of observations: %d\n", length(x$real)))
-  cat(sprintf("    Complete cases: %d\n", sum(stats::complete.cases(x$pred))))
-  if (!is.null(x$edges)) {
-    cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
-  } else {
-    cat("  Number of edges: unknown\n")
-  }
-  cat("  Parameters:\n")
-  cat(sprintf("    Confounds:        %s\n", x$params$confounds))
-  cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
-  cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
-  cat(sprintf("    CV folds:         %d\n", x$params$kfolds))
-  cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
-  invisible(x)
 }
