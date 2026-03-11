@@ -1,4 +1,6 @@
 test_that("normalize_inputs validates and normalizes data", {
+  normalize_inputs <- getFromNamespace("normalize_inputs", "cpmr")
+
   conmat <- matrix(rnorm(20), ncol = 2)
   behav <- matrix(rnorm(10), ncol = 1)
   confounds <- rnorm(10)
@@ -12,6 +14,8 @@ test_that("normalize_inputs validates and normalizes data", {
 })
 
 test_that("resolve_include_cases returns intersection in exclude mode", {
+  resolve_include_cases <- getFromNamespace("resolve_include_cases", "cpmr")
+
   conmat <- matrix(rnorm(30), ncol = 3)
   behav <- rnorm(10)
   confounds <- matrix(rnorm(10), ncol = 1)
@@ -31,6 +35,8 @@ test_that("resolve_include_cases returns intersection in exclude mode", {
 })
 
 test_that("init_edges allocates expected structures", {
+  init_edges <- getFromNamespace("init_edges", "cpmr")
+
   conmat <- matrix(rnorm(40), ncol = 4)
 
   edges_sum <- init_edges("sum", conmat, kfolds = 5)
@@ -44,6 +50,9 @@ test_that("init_edges allocates expected structures", {
 })
 
 test_that("apply_confounds_regression is no-op when confounds are NULL", {
+  apply_confounds_regression <-
+    getFromNamespace("apply_confounds_regression", "cpmr")
+
   conmat <- matrix(rnorm(20), ncol = 2)
   behav <- rnorm(10)
 
