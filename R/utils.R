@@ -84,8 +84,12 @@ predict_cpm <- function(conmat, behav, conmat_new, edges, bias_correct) {
   pred
 }
 
+regress_covariates <- function(resp, covariates) {
+  stats::.lm.fit(cbind(1, covariates), resp)$residuals
+}
+
 regress_confounds <- function(resp, confounds) {
-  stats::.lm.fit(cbind(1, confounds), resp)$residuals
+  regress_covariates(resp, confounds)
 }
 
 critical_r <- function(n, alpha) {

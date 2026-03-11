@@ -271,7 +271,7 @@ init_pred <- function(behav) {
 fit_predict_cv <- function(
     conmat,
     behav,
-  covariates,
+    covariates,
     include_cases,
     folds,
     thresh_method,
@@ -293,7 +293,7 @@ fit_predict_cv <- function(
       behav_train <- behav[rows_train]
       behav_test <- behav[rows_test]
     } else {
-      regressed <- regress_foldwise(
+      regressed <- regress_covariates_foldwise(
         conmat,
         behav,
         covariates,
@@ -331,17 +331,23 @@ fit_predict_cv <- function(
   list(pred = pred, edges = edges, real = real)
 }
 
-regress_foldwise <- function(conmat, behav, covariates, rows_train, rows_test) {
+regress_covariates_foldwise <- function(
+    conmat,
+    behav,
+    covariates,
+    rows_train,
+    rows_test
+) {
   covariates_train <- covariates[rows_train, , drop = FALSE]
   covariates_test <- covariates[rows_test, , drop = FALSE]
 
-  conmat_regressed <- regress_confounds_by_train(
+  conmat_regressed <- regress_covariates_by_train(
     conmat[rows_train, , drop = FALSE],
     conmat[rows_test, , drop = FALSE],
     covariates_train,
     covariates_test
   )
-  behav_regressed <- regress_confounds_by_train(
+  behav_regressed <- regress_covariates_by_train(
     behav[rows_train],
     behav[rows_test],
     covariates_train,
@@ -356,7 +362,7 @@ regress_foldwise <- function(conmat, behav, covariates, rows_train, rows_test) {
   )
 }
 
-regress_confounds_by_train <- function(resp_train, resp_test, cov_train, cov_test) {
+regress_covariates_by_train <- function(resp_train, resp_test, cov_train, cov_test) {
   x_train <- cbind(1, cov_train)
   model <- stats::.lm.fit(x_train, resp_train)
   x_test <- cbind(1, cov_test)
