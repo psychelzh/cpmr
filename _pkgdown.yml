@@ -6,4 +6,3 @@ navbar:
   structure:
     left: [reference, articles]
     right: [search, github]
-
