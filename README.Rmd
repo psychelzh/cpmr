@@ -52,6 +52,10 @@ res
 summary(res)
 ```
 
+## Documentation
+
+- Leakage-safe covariate handling article: <https://psychelzh.github.io/cpmr/articles/anti-leakage-covariates.html>
+
 ## Code of Conduct
 
 Please note that the cpmr project is released with a [Contributor Code of Conduct](https://psychelzh.github.io/cpmr/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.

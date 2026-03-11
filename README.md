@@ -71,6 +71,10 @@ summary(res)
 #>     Negative: 0.10%
 ```
 
+## Documentation
+
+- Leakage-safe covariate handling article: <https://psychelzh.github.io/cpmr/articles/anti-leakage-covariates.html>
+
 ## Code of Conduct
 
 Please note that the cpmr project is released with a [Contributor Code
