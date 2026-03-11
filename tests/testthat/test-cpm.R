@@ -69,6 +69,36 @@ test_that("Works with covariates", {
   )
 })
 
+test_that("Fold-wise covariate regression differs from global pre-CV regression", {
+  # Verifies that the implementation actually uses fold-wise regression
+  # (leakage-safe), not global regression applied before CV.
+  # If global regression were used, results would differ because test-fold
+  # residuals would have been influenced by information from those same cases
+  # during the global fit.
+  withr::local_seed(42)
+  n <- 30
+  p <- 20
+  # Covariate correlated with both connectome and behavior to make leakage detectable
+  cov <- rnorm(n)
+  conmat <- matrix(rnorm(n * p) + rep(cov, p), nrow = n, ncol = p)
+  behav <- cov * 2 + rnorm(n)
+  covariates <- matrix(cov, ncol = 1)
+
+  # Fold-wise (leakage-safe) — current implementation
+  result_foldwise <- cpm(conmat, behav, covariates = covariates, kfolds = 5)
+
+  # Global pre-CV regression (leaky) — manually regress out covariate on full
+  # data, then run CPM without covariates
+  regress_covariates <- getFromNamespace("regress_covariates", "cpmr")
+  behav_global <- regress_covariates(behav, covariates)
+  result_global <- cpm(conmat, behav_global, kfolds = 5)
+
+  # The two approaches should produce different predictions
+  expect_false(isTRUE(all.equal(result_foldwise$pred, result_global$pred)))
+  # And different residualised behavior values
+  expect_false(isTRUE(all.equal(result_foldwise$real, result_global$real)))
+})
+
 test_that("Keep names of behavior", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
