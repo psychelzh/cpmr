@@ -1,8 +1,17 @@
-# cpmr (development version)
+# cpmr 0.1.1
 
 ## Enhancements
 
 * Renamed internal constant `networks` and `includes` to `corr_types` and `inc_edges`, respectively, to better reflect their purpose. In addition, the documentation which mentioned `networks` has been updated to use correlation types to better reflect their meaning.
+* Reorganized `R/cpm.R` so `cpm()` remains the entry-point function at the top, followed by `print.cpm()`, with internal helpers grouped below.
+* Improved test architecture with explicit internal-helper coverage and complete-case fold invariants.
+
+## Maintenance
+
+* Refactored the internal `cpm()` workflow into smaller helpers (`normalize_inputs`, `resolve_include_cases`, `apply_confounds_regression`, etc.) while preserving user-facing behavior.
+* Removed the obsolete internal alias `regress_counfounds()`.
+* Removed broad `Rfast` namespace import in favor of explicit `Rfast::` calls.
+* Updated `summary.cpm()` edge summarization path to avoid mutating local object fields.
 
 # cpmr 0.1.0
 
