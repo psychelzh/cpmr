@@ -88,10 +88,6 @@ regress_confounds <- function(resp, confounds) {
   stats::.lm.fit(cbind(1, confounds), resp)$residuals
 }
 
-regress_counfounds <- function(resp, confounds) {
-  regress_confounds(resp, confounds)
-}
-
 critical_r <- function(n, alpha) {
   df <- n - 2
   ct <- stats::qt(alpha / 2, df, lower.tail = FALSE)
