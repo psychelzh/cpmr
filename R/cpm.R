@@ -88,6 +88,66 @@
 #' (2020). Behavioral and brain signatures of substance use vulnerability in
 #' childhood. Developmental Cognitive Neuroscience, 46, 100878.
 #' https://doi.org/10.1016/j.dcn.2020.100878
+#' @export
+cpm <- function(
+  conmat,
+  behav,
+  ...,
+  confounds = NULL,
+  thresh_method = c("alpha", "sparsity"),
+  thresh_level = 0.01,
+  kfolds = NULL,
+  bias_correct = TRUE,
+  return_edges = c("sum", "none", "all"),
+  na_action = c("fail", "exclude")
+) {
+  call <- match.call()
+  thresh_method <- match.arg(thresh_method)
+  return_edges <- match.arg(return_edges)
+  na_action <- match.arg(na_action)
+
+  normalized <- normalize_inputs(conmat, behav, confounds)
+  behav <- normalized$behav
+  confounds <- normalized$confounds
+
+  include_cases <- resolve_include_cases(conmat, behav, confounds, na_action)
+  regressed <- apply_confounds_regression(conmat, behav, confounds, include_cases)
+  conmat <- regressed$conmat
+  behav <- regressed$behav
+
+  kfolds <- resolve_kfolds(kfolds, include_cases)
+  folds <- crossv_kfold(include_cases, kfolds)
+  edges <- init_edges(return_edges, conmat, kfolds)
+  pred <- init_pred(behav)
+  cv_result <- fit_predict_cv(
+    conmat,
+    behav,
+    include_cases,
+    folds,
+    thresh_method,
+    thresh_level,
+    bias_correct,
+    return_edges,
+    pred,
+    edges
+  )
+
+  compose_cpm(
+    call = call,
+    folds = folds,
+    behav = behav,
+    pred = cv_result$pred,
+    edges = cv_result$edges,
+    params = list(
+      confounds = !is.null(confounds),
+      thresh_method = thresh_method,
+      thresh_level = thresh_level,
+      kfolds = kfolds,
+      bias_correct = bias_correct
+    )
+  )
+}
+
 normalize_inputs <- function(conmat, behav, confounds) {
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {
@@ -242,66 +302,6 @@ compose_cpm <- function(call, folds, behav, pred, edges, params) {
       params = params
     ),
     class = "cpm"
-  )
-}
-
-#' @export
-cpm <- function(
-  conmat,
-  behav,
-  ...,
-  confounds = NULL,
-  thresh_method = c("alpha", "sparsity"),
-  thresh_level = 0.01,
-  kfolds = NULL,
-  bias_correct = TRUE,
-  return_edges = c("sum", "none", "all"),
-  na_action = c("fail", "exclude")
-) {
-  call <- match.call()
-  thresh_method <- match.arg(thresh_method)
-  return_edges <- match.arg(return_edges)
-  na_action <- match.arg(na_action)
-
-  normalized <- normalize_inputs(conmat, behav, confounds)
-  behav <- normalized$behav
-  confounds <- normalized$confounds
-
-  include_cases <- resolve_include_cases(conmat, behav, confounds, na_action)
-  regressed <- apply_confounds_regression(conmat, behav, confounds, include_cases)
-  conmat <- regressed$conmat
-  behav <- regressed$behav
-
-  kfolds <- resolve_kfolds(kfolds, include_cases)
-  folds <- crossv_kfold(include_cases, kfolds)
-  edges <- init_edges(return_edges, conmat, kfolds)
-  pred <- init_pred(behav)
-  cv_result <- fit_predict_cv(
-    conmat,
-    behav,
-    include_cases,
-    folds,
-    thresh_method,
-    thresh_level,
-    bias_correct,
-    return_edges,
-    pred,
-    edges
-  )
-
-  compose_cpm(
-    call = call,
-    folds = folds,
-    behav = behav,
-    pred = cv_result$pred,
-    edges = cv_result$edges,
-    params = list(
-      confounds = !is.null(confounds),
-      thresh_method = thresh_method,
-      thresh_level = thresh_level,
-      kfolds = kfolds,
-      bias_correct = bias_correct
-    )
   )
 }
 
