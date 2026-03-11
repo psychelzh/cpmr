@@ -148,6 +148,27 @@ cpm <- function(
   )
 }
 
+#' @export
+print.cpm <- function(x, ...) {
+  cat("CPM results:\n")
+  cat("  Call: ")
+  print(x$call)
+  cat(sprintf("  Number of observations: %d\n", length(x$real)))
+  cat(sprintf("    Complete cases: %d\n", sum(stats::complete.cases(x$pred))))
+  if (!is.null(x$edges)) {
+    cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
+  } else {
+    cat("  Number of edges: unknown\n")
+  }
+  cat("  Parameters:\n")
+  cat(sprintf("    Confounds:        %s\n", x$params$confounds))
+  cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
+  cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
+  cat(sprintf("    CV folds:         %d\n", x$params$kfolds))
+  cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
+  invisible(x)
+}
+
 normalize_inputs <- function(conmat, behav, confounds) {
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {
@@ -303,25 +324,4 @@ compose_cpm <- function(call, folds, behav, pred, edges, params) {
     ),
     class = "cpm"
   )
-}
-
-#' @export
-print.cpm <- function(x, ...) {
-  cat("CPM results:\n")
-  cat("  Call: ")
-  print(x$call)
-  cat(sprintf("  Number of observations: %d\n", length(x$real)))
-  cat(sprintf("    Complete cases: %d\n", sum(stats::complete.cases(x$pred))))
-  if (!is.null(x$edges)) {
-    cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
-  } else {
-    cat("  Number of edges: unknown\n")
-  }
-  cat("  Parameters:\n")
-  cat(sprintf("    Confounds:        %s\n", x$params$confounds))
-  cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
-  cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
-  cat(sprintf("    CV folds:         %d\n", x$params$kfolds))
-  cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
-  invisible(x)
 }
