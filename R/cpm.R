@@ -153,11 +153,11 @@ cpm <- function(
 
   # confounds regression
   if (!is.null(confounds)) {
-    conmat[include_cases, ] <- regress_counfounds(
+    conmat[include_cases, ] <- regress_confounds(
       conmat[include_cases, , drop = FALSE],
       confounds[include_cases, , drop = FALSE]
     )
-    behav[include_cases] <- regress_counfounds(
+    behav[include_cases] <- regress_confounds(
       behav[include_cases],
       confounds[include_cases, , drop = FALSE]
     )
