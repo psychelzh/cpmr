@@ -5,3 +5,15 @@ test_that("Error if names exist but do not match", {
   y <- 1:2
   expect_silent(check_names(x, y))
 })
+
+test_that("regress_confounds returns linear-model residuals", {
+  withr::local_seed(123)
+  confounds <- matrix(rnorm(50), ncol = 1)
+  resp <- 2 + 3 * confounds[, 1] + rnorm(50, sd = 0.1)
+
+  residuals_expected <- stats::.lm.fit(cbind(1, confounds), resp)$residuals
+  residuals_actual <- regress_confounds(resp, confounds)
+
+  expect_equal(residuals_actual, residuals_expected)
+  expect_lt(abs(stats::cor(residuals_actual, confounds[, 1])), 1e-10)
+})
