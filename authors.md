@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/psychelzh/cpmr/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/psychelzh/cpmr/blob/v0.1.1/DESCRIPTION)
 
 Zhang L (2026). *cpmr: Connectome Predictive Modelling in R*. R package
 version 0.1.1, <https://github.com/psychelzh/cpmr>.
