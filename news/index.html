@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">cpmr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,10 +33,19 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="cpmr-development-version">cpmr (development version)<a class="anchor" aria-label="anchor" href="#cpmr-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.1" id="cpmr-011">cpmr 0.1.1<a class="anchor" aria-label="anchor" href="#cpmr-011"></a></h2>
 <div class="section level3">
-<h3 id="enhancements-development-version">Enhancements<a class="anchor" aria-label="anchor" href="#enhancements-development-version"></a></h3>
+<h3 id="enhancements-0-1-1">Enhancements<a class="anchor" aria-label="anchor" href="#enhancements-0-1-1"></a></h3>
 <ul><li>Renamed internal constant <code>networks</code> and <code>includes</code> to <code>corr_types</code> and <code>inc_edges</code>, respectively, to better reflect their purpose. In addition, the documentation which mentioned <code>networks</code> has been updated to use correlation types to better reflect their meaning.</li>
+<li>Reorganized <code>R/cpm.R</code> so <code><a href="../reference/cpm.html">cpm()</a></code> remains the entry-point function at the top, followed by <code>print.cpm()</code>, with internal helpers grouped below.</li>
+<li>Improved test architecture with explicit internal-helper coverage and complete-case fold invariants.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="maintenance-0-1-1">Maintenance<a class="anchor" aria-label="anchor" href="#maintenance-0-1-1"></a></h3>
+<ul><li>Refactored the internal <code><a href="../reference/cpm.html">cpm()</a></code> workflow into smaller helpers (<code>normalize_inputs</code>, <code>resolve_include_cases</code>, <code>apply_confounds_regression</code>, etc.) while preserving user-facing behavior.</li>
+<li>Removed the obsolete internal alias <code>regress_counfounds()</code>.</li>
+<li>Removed broad <code>Rfast</code> namespace import in favor of explicit <code>Rfast::</code> calls.</li>
+<li>Updated <code><a href="../reference/summary.cpm.html">summary.cpm()</a></code> edge summarization path to avoid mutating local object fields.</li>
 </ul></div>
 </div>
     <div class="section level2">

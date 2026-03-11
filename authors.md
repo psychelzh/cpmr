@@ -11,12 +11,12 @@ Source:
 [`DESCRIPTION`](https://github.com/psychelzh/cpmr/blob/main/DESCRIPTION)
 
 Zhang L (2026). *cpmr: Connectome Predictive Modelling in R*. R package
-version 0.1.0.9000, <https://github.com/psychelzh/cpmr>.
+version 0.1.1, <https://github.com/psychelzh/cpmr>.
 
     @Manual{,
       title = {cpmr: Connectome Predictive Modelling in R},
       author = {Liang Zhang},
       year = {2026},
-      note = {R package version 0.1.0.9000},
+      note = {R package version 0.1.1},
       url = {https://github.com/psychelzh/cpmr},
     }
