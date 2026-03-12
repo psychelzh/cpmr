@@ -20,9 +20,10 @@
 #'   number of observations in `conmat`. Note `behav` could also be a row/column
 #'   matrix, which will be converted to a vector using [drop()].
 #' @param ... For future extension. Currently ignored.
-#' @param confounds A matrix of confounding variables. Observations in row,
-#'   variables in column. If `NULL`, no confounding variables are used. Note if
-#'   a vector is provided, it will be converted to a column matrix.
+#' @param covariates A matrix of covariates. Observations in row, variables in
+#'   column. If `NULL`, no covariates are used. Note if a vector is provided, it
+#'   will be converted to a column matrix.
+#' @param confounds Deprecated alias of `covariates`.
 #' @param thresh_method,thresh_level The threshold method and level used in edge
 #'   selection. If method is set to be `"alpha"`, the edge selection is based on
 #'   the critical value of correlation coefficient. If method is set to be
@@ -41,7 +42,7 @@
 #' @param na_action A character string indicating the action when missing values
 #'   are found in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
 #'   missing values will be excluded from the analysis but kept in the output.
-#'   Note complete cases are intersection of `conmat`, `behav` and `confounds`
+#'   Note complete cases are intersection of `conmat`, `behav` and `covariates`
 #'   if provided.
 #' @return A list with the following components:
 #'
@@ -49,8 +50,8 @@
 #'     group in cross-validation.}
 #'
 #'   \item{real}{The real behavior data. This is the same as the input `behav`
-#'     if `confounds` is `NULL`, otherwise it is the residual of `behav` after
-#'     regressing out `confounds`.}
+#'     if `covariates` is `NULL`, otherwise it is the fold-wise residual of
+#'     `behav` after regressing out `covariates` in cross-validation.}
 #'
 #'   \item{pred}{The predicted behavior data, with each column corresponding to
 #'     a model, i.e., both edges, positive edges, negative edges, and the row
@@ -67,7 +68,7 @@
 #'
 #'   \item{params}{A list of parameters used in the function, including:
 #'
-#'   * `confounds` indicating if confounds are used
+#'   * `covariates` indicating if covariates are used
 #'
 #'   * `thresh_method` indicating the threshold method
 #'
@@ -93,6 +94,7 @@ cpm <- function(
   conmat,
   behav,
   ...,
+  covariates = NULL,
   confounds = NULL,
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
@@ -106,14 +108,13 @@ cpm <- function(
   return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
 
-  normalized <- normalize_inputs(conmat, behav, confounds)
-  behav <- normalized$behav
-  confounds <- normalized$confounds
+  covariates <- resolve_covariates(covariates, confounds)
 
-  include_cases <- resolve_include_cases(conmat, behav, confounds, na_action)
-  regressed <- apply_confounds_regression(conmat, behav, confounds, include_cases)
-  conmat <- regressed$conmat
-  behav <- regressed$behav
+  normalized <- normalize_inputs(conmat, behav, covariates)
+  behav <- normalized$behav
+  covariates <- normalized$covariates
+
+  include_cases <- resolve_include_cases(conmat, behav, covariates, na_action)
 
   kfolds <- resolve_kfolds(kfolds, include_cases)
   folds <- crossv_kfold(include_cases, kfolds)
@@ -122,6 +123,7 @@ cpm <- function(
   cv_result <- fit_predict_cv(
     conmat,
     behav,
+    covariates,
     include_cases,
     folds,
     thresh_method,
@@ -135,11 +137,11 @@ cpm <- function(
   compose_cpm(
     call = call,
     folds = folds,
-    behav = behav,
+    behav = cv_result$real,
     pred = cv_result$pred,
     edges = cv_result$edges,
     params = list(
-      confounds = !is.null(confounds),
+      covariates = !is.null(covariates),
       thresh_method = thresh_method,
       thresh_level = thresh_level,
       kfolds = kfolds,
@@ -160,8 +162,19 @@ print.cpm <- function(x, ...) {
   } else {
     cat("  Number of edges: unknown\n")
   }
+  covariates_param <- if (!is.null(x$params$covariates)) {
+    x$params$covariates
+  } else if (!is.null(x$params$confounds)) {
+    warning(
+      "`x$params$confounds` is deprecated; using it as `covariates` in print.cpm().",
+      call. = FALSE
+    )
+    x$params$confounds
+  } else {
+    NA
+  }
   cat("  Parameters:\n")
-  cat(sprintf("    Confounds:        %s\n", x$params$confounds))
+  cat(sprintf("    Covariates:       %s\n", covariates_param))
   cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
   cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
   cat(sprintf("    CV folds:         %d\n", x$params$kfolds))
@@ -169,7 +182,21 @@ print.cpm <- function(x, ...) {
   invisible(x)
 }
 
-normalize_inputs <- function(conmat, behav, confounds) {
+resolve_covariates <- function(covariates, confounds) {
+  if (!is.null(covariates) && !is.null(confounds)) {
+    stop("Please provide only one of `covariates` or `confounds`.")
+  }
+  if (!is.null(confounds)) {
+    warning(
+      "`confounds` is deprecated; please use `covariates` instead.",
+      call. = FALSE
+    )
+    return(confounds)
+  }
+  covariates
+}
+
+normalize_inputs <- function(conmat, behav, covariates) {
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {
     stop("Behavior data must be a numeric vector.")
@@ -179,31 +206,31 @@ normalize_inputs <- function(conmat, behav, confounds) {
   }
   check_names(conmat, behav)
 
-  if (!is.null(confounds)) {
-    if (is.vector(confounds)) {
-      confounds <- as.matrix(confounds)
+  if (!is.null(covariates)) {
+    if (is.vector(covariates)) {
+      covariates <- as.matrix(covariates)
     }
-    if (nrow(confounds) != length(behav)) {
-      stop("Case numbers of `confounds` and `behav` must match.")
+    if (nrow(covariates) != length(behav)) {
+      stop("Case numbers of `covariates` and `behav` must match.")
     }
-    check_names(confounds, behav)
+    check_names(covariates, behav)
   }
 
   list(
     behav = behav,
-    confounds = confounds
+    covariates = covariates
   )
 }
 
-resolve_include_cases <- function(conmat, behav, confounds, na_action) {
+resolve_include_cases <- function(conmat, behav, covariates, na_action) {
   switch(
     na_action,
     fail = {
       stopifnot(
         "Missing values found in `conmat`" = !anyNA(conmat),
         "Missing values found in `behav`" = !anyNA(behav),
-        "Missing values found in `confounds`" = is.null(confounds) ||
-          !anyNA(confounds)
+        "Missing values found in `covariates`" = is.null(covariates) ||
+          !anyNA(covariates)
       )
       seq_along(behav)
     },
@@ -212,31 +239,14 @@ resolve_include_cases <- function(conmat, behav, confounds, na_action) {
       list(
         which(stats::complete.cases(conmat)),
         which(stats::complete.cases(behav)),
-        if (!is.null(confounds)) {
-          which(stats::complete.cases(confounds))
+        if (!is.null(covariates)) {
+          which(stats::complete.cases(covariates))
         } else {
           seq_along(behav)
         }
       )
     )
   )
-}
-
-apply_confounds_regression <- function(conmat, behav, confounds, include_cases) {
-  if (is.null(confounds)) {
-    return(list(conmat = conmat, behav = behav))
-  }
-
-  conmat[include_cases, ] <- regress_confounds(
-    conmat[include_cases, , drop = FALSE],
-    confounds[include_cases, , drop = FALSE]
-  )
-  behav[include_cases] <- regress_confounds(
-    behav[include_cases],
-    confounds[include_cases, , drop = FALSE]
-  )
-
-  list(conmat = conmat, behav = behav)
 }
 
 resolve_kfolds <- function(kfolds, include_cases) {
@@ -272,6 +282,7 @@ init_pred <- function(behav) {
 fit_predict_cv <- function(
     conmat,
     behav,
+    covariates,
     include_cases,
     folds,
     thresh_method,
@@ -281,19 +292,37 @@ fit_predict_cv <- function(
     pred,
     edges
 ) {
+  real <- behav
   kfolds <- length(folds)
   for (fold in seq_len(kfolds)) {
     rows_test <- folds[[fold]]
     rows_train <- setdiff(include_cases, rows_test)
-    conmat_train <- conmat[rows_train, , drop = FALSE]
-    behav_train <- behav[rows_train]
+
+    if (is.null(covariates)) {
+      conmat_train <- conmat[rows_train, , drop = FALSE]
+      conmat_test <- conmat[rows_test, , drop = FALSE]
+      behav_train <- behav[rows_train]
+      behav_test <- behav[rows_test]
+    } else {
+      regressed <- regress_covariates_foldwise(
+        conmat,
+        behav,
+        covariates,
+        rows_train,
+        rows_test
+      )
+      conmat_train <- regressed$conmat_train
+      conmat_test <- regressed$conmat_test
+      behav_train <- regressed$behav_train
+      behav_test <- regressed$behav_test
+    }
+
     cur_edges <- select_edges(
       conmat_train,
       behav_train,
       thresh_method,
       thresh_level
     )
-    conmat_test <- conmat[rows_test, , drop = FALSE]
     cur_pred <- predict_cpm(
       conmat_train,
       behav_train,
@@ -302,6 +331,7 @@ fit_predict_cv <- function(
       bias_correct
     )
     pred[rows_test, ] <- cur_pred
+    real[rows_test] <- behav_test
     if (return_edges == "all") {
       edges[, , fold] <- cur_edges
     } else if (return_edges == "sum") {
@@ -309,7 +339,48 @@ fit_predict_cv <- function(
     }
   }
 
-  list(pred = pred, edges = edges)
+  list(pred = pred, edges = edges, real = real)
+}
+
+regress_covariates_foldwise <- function(
+    conmat,
+    behav,
+    covariates,
+    rows_train,
+    rows_test
+) {
+  covariates_train <- covariates[rows_train, , drop = FALSE]
+  covariates_test <- covariates[rows_test, , drop = FALSE]
+
+  conmat_regressed <- regress_covariates_by_train(
+    conmat[rows_train, , drop = FALSE],
+    conmat[rows_test, , drop = FALSE],
+    covariates_train,
+    covariates_test
+  )
+  behav_regressed <- regress_covariates_by_train(
+    behav[rows_train],
+    behav[rows_test],
+    covariates_train,
+    covariates_test
+  )
+
+  list(
+    conmat_train = conmat_regressed$train,
+    conmat_test = conmat_regressed$test,
+    behav_train = behav_regressed$train,
+    behav_test = drop(behav_regressed$test)
+  )
+}
+
+regress_covariates_by_train <- function(resp_train, resp_test, cov_train, cov_test) {
+  x_train <- cbind(1, cov_train)
+  model <- stats::.lm.fit(x_train, resp_train)
+  x_test <- cbind(1, cov_test)
+  list(
+    train = model$residuals,
+    test = resp_test - x_test %*% model$coefficients
+  )
 }
 
 compose_cpm <- function(call, folds, behav, pred, edges, params) {

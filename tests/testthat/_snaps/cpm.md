@@ -62,7 +62,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
         }
       },
       "value": [
@@ -105,7 +105,7 @@
           Complete cases: 10
         Number of edges: 10
         Parameters:
-          Confounds:        FALSE
+          Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
           CV folds:         10
@@ -175,7 +175,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
         }
       },
       "value": [
@@ -218,7 +218,7 @@
           Complete cases: 10
         Number of edges: 10
         Parameters:
-          Confounds:        FALSE
+          Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
           CV folds:         5
@@ -288,7 +288,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
         }
       },
       "value": [
@@ -331,7 +331,7 @@
           Complete cases: 10
         Number of edges: 10
         Parameters:
-          Confounds:        FALSE
+          Covariates:       FALSE
           Threshold method: sparsity
           Threshold level:  0.01
           CV folds:         10
@@ -401,7 +401,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
         }
       },
       "value": [
@@ -444,122 +444,9 @@
           Complete cases: 10
         Number of edges: 10
         Parameters:
-          Confounds:        FALSE
+          Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.10
-          CV folds:         10
-          Bias correction:  TRUE
-
-# Works with confounds
-
-    {
-      "type": "double",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [10, 3]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["both", "pos", "neg"]
-            }
-          ]
-        }
-      },
-      "value": [0.03747695, -0.08184062, -0.00361471, -0.00804253, 0.05332356, -0.04522479, 0.03893979, 0.14452379, 0.00353565, -0.13907709, 0.03747695, -0.08184062, -0.00361471, -0.00804253, 0.05332356, -0.04522479, 0.03893979, 0.14452379, 0.00353565, -0.13907709, 0.03747695, -0.08184062, -0.00361471, 0.76576079, 0.05332356, -0.04522479, 0.03893979, 0.14452379, 0.00353565, -0.13907709]
-    }
-
----
-
-    {
-      "type": "double",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [10, 2]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pos", "neg"]
-            }
-          ]
-        }
-      },
-      "value": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
-    }
-
----
-
-    {
-      "type": "list",
-      "attributes": {
-        "names": {
-          "type": "character",
-          "attributes": {},
-          "value": ["confounds", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
-        }
-      },
-      "value": [
-        {
-          "type": "logical",
-          "attributes": {},
-          "value": [true]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["alpha"]
-        },
-        {
-          "type": "double",
-          "attributes": {},
-          "value": [0.01]
-        },
-        {
-          "type": "integer",
-          "attributes": {},
-          "value": [10]
-        },
-        {
-          "type": "logical",
-          "attributes": {},
-          "value": [true]
-        }
-      ]
-    }
-
----
-
-    Code
-      result
-    Output
-      CPM results:
-        Call: cpm(conmat = conmat, behav = behav, confounds = confounds)
-        Number of observations: 10
-          Complete cases: 10
-        Number of edges: 10
-        Parameters:
-          Confounds:        TRUE
-          Threshold method: alpha
-          Threshold level:  0.01
           CV folds:         10
           Bias correction:  TRUE
 
@@ -574,7 +461,7 @@
           Complete cases: 10
         Number of edges: unknown
         Parameters:
-          Confounds:        FALSE
+          Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
           CV folds:         10
@@ -622,7 +509,7 @@
           Complete cases: 10
         Number of edges: 10
         Parameters:
-          Confounds:        FALSE
+          Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
           CV folds:         10
@@ -639,7 +526,7 @@
           Complete cases: 9
         Number of edges: 10
         Parameters:
-          Confounds:        FALSE
+          Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
           CV folds:         9
@@ -651,12 +538,13 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav, confounds = confounds, na_action = "exclude")
+        Call: cpm(conmat = conmat, behav = behav, covariates = covariates, 
+          na_action = "exclude")
         Number of observations: 10
           Complete cases: 8
         Number of edges: 10
         Parameters:
-          Confounds:        TRUE
+          Covariates:       TRUE
           Threshold method: alpha
           Threshold level:  0.01
           CV folds:         8
@@ -668,12 +556,13 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav, confounds = confounds, na_action = "exclude")
+        Call: cpm(conmat = conmat, behav = behav, covariates = covariates, 
+          na_action = "exclude")
         Number of observations: 10
           Complete cases: 8
         Number of edges: 10
         Parameters:
-          Confounds:        TRUE
+          Covariates:       TRUE
           Threshold method: alpha
           Threshold level:  0.01
           CV folds:         8
