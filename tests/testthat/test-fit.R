@@ -48,3 +48,16 @@ test_that("fit.cpm_spec and cpm preserve entry-point call", {
   expect_identical(as.character(fitted_spec$call[[1]]), "fit")
   expect_identical(as.character(fitted_cpm$call[[1]]), "cpm")
 })
+
+test_that("print.cpm_spec shows auto folds when kfolds is NULL", {
+  spec <- cpm_spec()
+
+  expect_output(print(spec), "CPM model specification")
+  expect_output(print(spec), "CV folds:         auto")
+})
+
+test_that("print.cpm_spec shows explicit folds when kfolds is set", {
+  spec <- cpm_spec(kfolds = 5)
+
+  expect_output(print(spec), "CV folds:         5")
+})
