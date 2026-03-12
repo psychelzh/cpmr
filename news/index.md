@@ -1,6 +1,10 @@
 # Changelog
 
+## cpmr (development version)
+
 ## cpmr 0.1.1
+
+CRAN release: 2026-03-11
 
 ### Enhancements
 
