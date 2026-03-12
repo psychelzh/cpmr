@@ -32,7 +32,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -80,7 +85,7 @@
 <span><span class="co">#&gt;     Complete cases: 100</span></span>
 <span><span class="co">#&gt;   Number of edges: 1000</span></span>
 <span><span class="co">#&gt;   Parameters:</span></span>
-<span><span class="co">#&gt;     Confounds:        FALSE</span></span>
+<span><span class="co">#&gt;     Covariates:       FALSE</span></span>
 <span><span class="co">#&gt;     Threshold method: alpha</span></span>
 <span><span class="co">#&gt;     Threshold level:  0.01</span></span>
 <span><span class="co">#&gt;     CV folds:         10</span></span>

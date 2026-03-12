@@ -13,6 +13,7 @@ cpm(
   conmat,
   behav,
   ...,
+  covariates = NULL,
   confounds = NULL,
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
@@ -41,11 +42,15 @@ cpm(
 
   For future extension. Currently ignored.
 
+- covariates:
+
+  A matrix of covariates. Observations in row, variables in column. If
+  `NULL`, no covariates are used. Note if a vector is provided, it will
+  be converted to a column matrix.
+
 - confounds:
 
-  A matrix of confounding variables. Observations in row, variables in
-  column. If `NULL`, no confounding variables are used. Note if a vector
-  is provided, it will be converted to a column matrix.
+  Deprecated alias of `covariates`.
 
 - thresh_method, thresh_level:
 
@@ -80,7 +85,7 @@ cpm(
   in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
   missing values will be excluded from the analysis but kept in the
   output. Note complete cases are intersection of `conmat`, `behav` and
-  `confounds` if provided.
+  `covariates` if provided.
 
 ## Value
 
@@ -94,8 +99,8 @@ A list with the following components:
 - real:
 
   The real behavior data. This is the same as the input `behav` if
-  `confounds` is `NULL`, otherwise it is the residual of `behav` after
-  regressing out `confounds`.
+  `covariates` is `NULL`, otherwise it is the fold-wise residual of
+  `behav` after regressing out `covariates` in cross-validation.
 
 - pred:
 
@@ -120,7 +125,7 @@ A list with the following components:
 
   A list of parameters used in the function, including:
 
-  - `confounds` indicating if confounds are used
+  - `covariates` indicating if covariates are used
 
   - `thresh_method` indicating the threshold method
 
@@ -156,7 +161,7 @@ cpm(conmat, behav)
 #>     Complete cases: 100
 #>   Number of edges: 100
 #>   Parameters:
-#>     Confounds:        FALSE
+#>     Covariates:       FALSE
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
 #>     CV folds:         100
@@ -170,7 +175,7 @@ cpm(conmat, behav, thresh_method = "sparsity", thresh_level = 0.05)
 #>     Complete cases: 100
 #>   Number of edges: 100
 #>   Parameters:
-#>     Confounds:        FALSE
+#>     Covariates:       FALSE
 #>     Threshold method: sparsity
 #>     Threshold level:  0.05
 #>     CV folds:         100
@@ -183,7 +188,7 @@ cpm(conmat, behav, kfolds = 10)
 #>     Complete cases: 100
 #>   Number of edges: 100
 #>   Parameters:
-#>     Confounds:        FALSE
+#>     Covariates:       FALSE
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
 #>     CV folds:         10

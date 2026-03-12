@@ -1,0 +1,103 @@
+# Leakage-Safe Covariate Handling in CPM
+
+## Why This Matters
+
+When covariates are regressed out on the full dataset before
+cross-validation, held-out test information leaks into the training
+pipeline. This can inflate or distort out-of-sample performance.
+
+In `cpmr`, leakage-safe behavior means:
+
+- fit covariate regression on each fold’s training split only;
+- apply the learned regression parameters to both train and test data
+  inside the same fold;
+- keep other parameter-learning steps (for example scaling or model
+  selection) inside CV as well.
+
+## Minimal Example with Synthetic Data
+
+``` r
+library(cpmr)
+
+set.seed(123)
+n <- 80
+p <- 120
+
+# Synthetic connectivity matrix (rows = subjects, cols = edges)
+conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
+
+# A synthetic covariate (for example age-like nuisance variable)
+covariates <- matrix(rnorm(n), ncol = 1)
+
+# Build behavior with both signal and covariate effects
+edge_signal <- rowMeans(conmat[, 1:10, drop = FALSE])
+behav <- 0.7 * edge_signal + 0.6 * covariates[, 1] + rnorm(n, sd = 0.5)
+
+# Leakage-safe call: covariates are handled fold-wise inside CV
+fit <- cpm(
+  conmat = conmat,
+  behav = behav,
+  covariates = covariates,
+  kfolds = 5
+)
+
+summary(fit)
+#> CPM summary:
+#>   Performance (Pearson):
+#>     Positive: 0.279
+#>     Negative: -0.104
+#>     Combined: 0.259
+#>   Prop. edges (50% folds):
+#>     Positive: 1.67%
+#>     Negative: 0.00%
+```
+
+## Migration from `confounds` to `covariates`
+
+`covariates` is now the primary argument name.
+
+``` r
+# Preferred
+fit_new <- cpm(conmat, behav, covariates = covariates, kfolds = 5)
+```
+
+The old name `confounds` is still accepted as a deprecated alias for
+backward compatibility.
+
+``` r
+# Backward-compatible alias (deprecated)
+fit_old <- cpm(conmat, behav, confounds = covariates, kfolds = 5)
+#> Warning: `confounds` is deprecated; please use `covariates` instead.
+```
+
+Do not pass both in the same call.
+
+``` r
+cpm(conmat, behav, covariates = covariates, confounds = covariates)
+#> Error in `resolve_covariates()`:
+#> ! Please provide only one of `covariates` or `confounds`.
+```
+
+## Anti-Leakage Checklist
+
+Use this checklist when building CPM workflows:
+
+- Split train/test folds before any parameter-learning step.
+- Fit covariate regression on the training split only.
+- Apply training-fitted covariate regression to the fold’s test split.
+- Keep scaling and feature selection inside each fold.
+- If comparing multiple settings, use nested CV for model selection.
+- Report the CV design and covariate strategy explicitly.
+
+## References
+
+- Snoek L, Miletic S, Scholte HS (2019). How to control for confounds in
+  decoding analyses of neuroimaging data. NeuroImage.
+  <https://doi.org/10.1016/j.neuroimage.2018.09.074>
+- Scheinost D, Noble S, Horien C, et al. (2019). Ten simple rules for
+  predictive modeling of individual differences in neuroimaging.
+  NeuroImage. <https://doi.org/10.1016/j.neuroimage.2019.02.057>
+- Rosenblatt M, Tejavibulya L, Jiang R, Noble S, Scheinost D (2024).
+  Data leakage inflates prediction performance in connectome-based
+  machine learning models. Nature Communications.
+  <https://doi.org/10.1038/s41467-024-46150-w>
