@@ -27,6 +27,31 @@ jobs:
           extra-packages: any::covr, any::xml2
           needs: coverage
 
+      - name: Run tests (JUnit)
+        id: test_junit
+        continue-on-error: true
+        run: |
+          junit_path <- file.path(Sys.getenv("GITHUB_WORKSPACE"), "junit.xml")
+          install.packages(".", repos = NULL, type = "source")
+          testthat::test_dir(
+            "tests/testthat",
+            package = "cpmr",
+            load_package = "installed",
+            reporter = testthat::JunitReporter$new(file = junit_path)
+          )
+        shell: Rscript {0}
+
+      - name: Upload test results to Codecov
+        if: ${{ always() && !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          # Fail if error if not on PR, or if on PR and token is given
+          fail_ci_if_error: ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN }}
+          files: ${{ github.workspace }}/junit.xml
+          report_type: test_results
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Test coverage
         run: |
           cov <- covr::package_coverage(
@@ -38,7 +63,9 @@ jobs:
           covr::to_cobertura(cov)
         shell: Rscript {0}
 
-      - uses: codecov/codecov-action@v5
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        if: ${{ always() && !cancelled() }}
         with:
           # Fail if error if not on PR, or if on PR and token is given
           fail_ci_if_error: ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN }}
@@ -46,6 +73,13 @@ jobs:
           plugins: noop
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Fail if tests failed
+        if: ${{ steps.test_junit.outcome == 'failure' }}
+        run: |
+          echo "JUnit test run failed."
+          exit 1
+        shell: bash
 
       - name: Show testthat output
         if: always()
