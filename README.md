@@ -41,34 +41,23 @@ correlation matrix (removed diagonal and duplicated values, e.g., lower
 triangular data) for each subject, and your behavior data a vector and
 feed them in `cpm()` function.
 
+Starting from the fit API migration, the recommended workflow is to first
+define a model specification with `cpm_spec()`, then call `fit()`. The
+`cpm()` function is still available as a compatibility wrapper.
+
 ``` r
 library(cpmr)
 
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-res <- cpm(conmat, behav, kfolds = 10, return_edges = "sum")
+spec <- cpm_spec(kfolds = 10, return_edges = "sum")
+res <- fit(spec, conmat = conmat, behav = behav)
 res
-#> CPM results:
-#>   Call: cpm(conmat = conmat, behav = behav, kfolds = 10, return_edges = "sum")
-#>   Number of observations: 100
-#>     Complete cases: 100
-#>   Number of edges: 1000
-#>   Parameters:
-#>     Covariates:       FALSE
-#>     Threshold method: alpha
-#>     Threshold level:  0.01
-#>     CV folds:         10
-#>     Bias correction:  TRUE
 summary(res)
-#> CPM summary:
-#>   Performance (Pearson):
-#>     Positive: -0.114
-#>     Negative: -0.270
-#>     Combined: -0.225
-#>   Prop. edges (50% folds):
-#>     Positive: 0.40%
-#>     Negative: 0.10%
+
+# compatibility wrapper (legacy entry-point)
+res_legacy <- cpm(conmat, behav, kfolds = 10, return_edges = "sum")
 ```
 
 ## Code of Conduct

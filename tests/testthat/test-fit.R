@@ -35,6 +35,50 @@ test_that("fit.cpm_spec matches cpm workflow", {
   expect_identical(fitted_spec$params, fitted_cpm$params)
 })
 
+test_that("fit.cpm_spec matches cpm workflow with covariates", {
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+  covariates <- matrix(rnorm(10), ncol = 1)
+
+  withr::local_seed(123)
+  fitted_spec <- fit(
+    cpm_spec(kfolds = 5, return_edges = "sum"),
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates
+  )
+
+  withr::local_seed(123)
+  fitted_cpm <- cpm(
+    conmat,
+    behav,
+    kfolds = 5,
+    return_edges = "sum",
+    covariates = covariates
+  )
+
+  expect_identical(fitted_spec$real, fitted_cpm$real)
+  expect_identical(fitted_spec$pred, fitted_cpm$pred)
+  expect_identical(fitted_spec$edges, fitted_cpm$edges)
+  expect_identical(fitted_spec$params, fitted_cpm$params)
+})
+
+test_that("fit.cpm_spec supports deprecated confounds alias", {
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+  confounds <- matrix(rnorm(10), ncol = 1)
+
+  expect_warning(
+    fit(
+      cpm_spec(kfolds = 5),
+      conmat = conmat,
+      behav = behav,
+      confounds = confounds
+    ),
+    "deprecated"
+  )
+})
+
 test_that("fit.cpm_spec and cpm preserve entry-point call", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)

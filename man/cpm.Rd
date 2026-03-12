@@ -95,12 +95,14 @@ corresponding to edges, correlation types and folds.}
 The connectome-based predictive modeling (CPM) is a data-driven approach to
 predict individual behavior from brain connectivity data. Originally proposed
 by Shen et al. (2017), the CPM has been widely used in various studies. This
-function implements the CPM algorithm and provides a convenient interface to
-use it.
+function keeps the legacy entry-point and forwards to
+\code{fit(cpm_spec(...), conmat = ..., behav = ...)}.
 }
 \examples{
 conmat <- matrix(rnorm(100 * 100), nrow = 100)
 behav <- rnorm(100)
+fit(cpm_spec(), conmat = conmat, behav = behav)
+# compatibility wrapper
 cpm(conmat, behav)
 # use different threshold method and level
 cpm(conmat, behav, thresh_method = "sparsity", thresh_level = 0.05)
