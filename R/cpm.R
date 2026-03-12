@@ -160,7 +160,7 @@ print.cpm <- function(x, ...) {
   if (!is.null(x$edges)) {
     cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
   } else {
-    cat("  Number of edges: not stored (return_edges = \"none\")\n")
+    cat("  Number of edges: not stored\n")
   }
   covariates_param <- if (!is.null(x$params$covariates)) {
     x$params$covariates

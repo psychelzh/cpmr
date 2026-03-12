@@ -31,10 +31,11 @@ summary.cpm <- function(
   performance <- stats::cor(object$real, object$pred, method = method)
   # summary edge selection
   edges <- if (!is.null(object$edges)) {
+    folds_count <- length(object$folds)
     kfolds <- if (!is.null(object$params$kfolds)) {
-      object$params$kfolds
+      min(object$params$kfolds, folds_count)
     } else {
-      length(unique(object$folds))
+      folds_count
     }
     edges_count <- object$edges
     if (length(dim(object$edges)) == 3) {
