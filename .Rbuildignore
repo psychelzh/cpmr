@@ -10,3 +10,5 @@
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$
 ^CODE_OF_CONDUCT\.md$
+^[.]?air[.]toml$
+^\.vscode$
