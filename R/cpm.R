@@ -280,17 +280,17 @@ init_pred <- function(behav) {
 }
 
 fit_predict_cv <- function(
-    conmat,
-    behav,
-    covariates,
-    include_cases,
-    folds,
-    thresh_method,
-    thresh_level,
-    bias_correct,
-    return_edges,
-    pred,
-    edges
+  conmat,
+  behav,
+  covariates,
+  include_cases,
+  folds,
+  thresh_method,
+  thresh_level,
+  bias_correct,
+  return_edges,
+  pred,
+  edges
 ) {
   real <- behav
   kfolds <- length(folds)
@@ -333,7 +333,7 @@ fit_predict_cv <- function(
     pred[rows_test, ] <- cur_pred
     real[rows_test] <- behav_test
     if (return_edges == "all") {
-      edges[, , fold] <- cur_edges
+      edges[,, fold] <- cur_edges
     } else if (return_edges == "sum") {
       edges <- edges + cur_edges
     }
@@ -343,11 +343,11 @@ fit_predict_cv <- function(
 }
 
 regress_covariates_foldwise <- function(
-    conmat,
-    behav,
-    covariates,
-    rows_train,
-    rows_test
+  conmat,
+  behav,
+  covariates,
+  rows_train,
+  rows_test
 ) {
   covariates_train <- covariates[rows_train, , drop = FALSE]
   covariates_test <- covariates[rows_test, , drop = FALSE]
@@ -373,7 +373,12 @@ regress_covariates_foldwise <- function(
   )
 }
 
-regress_covariates_by_train <- function(resp_train, resp_test, cov_train, cov_test) {
+regress_covariates_by_train <- function(
+  resp_train,
+  resp_test,
+  cov_train,
+  cov_test
+) {
   x_train <- cbind(1, cov_train)
   model <- stats::.lm.fit(x_train, resp_train)
   x_test <- cbind(1, cov_test)
