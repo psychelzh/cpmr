@@ -155,7 +155,14 @@ print.cpm <- function(x, ...) {
   invisible(x)
 }
 
-fit_cpm_workflow <- function(call, object, conmat, behav, covariates, confounds) {
+fit_cpm_workflow <- function(
+  call,
+  object,
+  conmat,
+  behav,
+  covariates,
+  confounds
+) {
   params <- object$params
   covariates <- resolve_covariates(covariates, confounds)
 
