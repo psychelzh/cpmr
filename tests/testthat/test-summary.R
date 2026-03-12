@@ -22,7 +22,11 @@ test_that("summary.cpm falls back to folds when params$kfolds is missing", {
         ncol = 3,
         dimnames = list(NULL, c("both", "pos", "neg"))
       ),
-      edges = matrix(c(2, 0, 1, 2), ncol = 2, dimnames = list(NULL, c("pos", "neg"))),
+      edges = matrix(
+        c(2, 0, 1, 2),
+        ncol = 2,
+        dimnames = list(NULL, c("pos", "neg"))
+      ),
       folds = list(1:2, 3:4),
       params = list()
     ),
