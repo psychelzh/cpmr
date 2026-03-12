@@ -104,50 +104,23 @@ cpm <- function(
   na_action = c("fail", "exclude")
 ) {
   call <- match.call()
-  thresh_method <- match.arg(thresh_method)
-  return_edges <- match.arg(return_edges)
-  na_action <- match.arg(na_action)
-
-  covariates <- resolve_covariates(covariates, confounds)
-
-  normalized <- normalize_inputs(conmat, behav, covariates)
-  behav <- normalized$behav
-  covariates <- normalized$covariates
-
-  include_cases <- resolve_include_cases(conmat, behav, covariates, na_action)
-
-  kfolds <- resolve_kfolds(kfolds, include_cases)
-  folds <- crossv_kfold(include_cases, kfolds)
-  edges <- init_edges(return_edges, conmat, kfolds)
-  pred <- init_pred(behav)
-  cv_result <- fit_predict_cv(
-    conmat,
-    behav,
-    covariates,
-    include_cases,
-    folds,
-    thresh_method,
-    thresh_level,
-    bias_correct,
-    return_edges,
-    pred,
-    edges
-  )
-
-  new_cpm(
-    call = call,
-    folds = folds,
-    behav = cv_result$real,
-    pred = cv_result$pred,
-    edges = cv_result$edges,
-    params = list(
-      covariates = !is.null(covariates),
+  result <- fit(
+    cpm_spec(
       thresh_method = thresh_method,
       thresh_level = thresh_level,
       kfolds = kfolds,
-      bias_correct = bias_correct
-    )
+      bias_correct = bias_correct,
+      return_edges = return_edges,
+      na_action = na_action
+    ),
+    conmat = conmat,
+    behav = behav,
+    ...,
+    covariates = covariates,
+    confounds = confounds
   )
+  result$call <- call
+  result
 }
 
 #' @export
@@ -180,6 +153,55 @@ print.cpm <- function(x, ...) {
   cat(sprintf("    CV folds:         %d\n", x$params$kfolds))
   cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
   invisible(x)
+}
+
+fit_cpm_workflow <- function(call, object, conmat, behav, covariates, confounds) {
+  params <- object$params
+  covariates <- resolve_covariates(covariates, confounds)
+
+  normalized <- normalize_inputs(conmat, behav, covariates)
+  behav <- normalized$behav
+  covariates <- normalized$covariates
+
+  include_cases <- resolve_include_cases(
+    conmat,
+    behav,
+    covariates,
+    params$na_action
+  )
+
+  kfolds <- resolve_kfolds(params$kfolds, include_cases)
+  folds <- crossv_kfold(include_cases, kfolds)
+  edges <- init_edges(params$return_edges, conmat, kfolds)
+  pred <- init_pred(behav)
+  cv_result <- fit_predict_cv(
+    conmat,
+    behav,
+    covariates,
+    include_cases,
+    folds,
+    params$thresh_method,
+    params$thresh_level,
+    params$bias_correct,
+    params$return_edges,
+    pred,
+    edges
+  )
+
+  new_cpm(
+    call = call,
+    folds = folds,
+    behav = cv_result$real,
+    pred = cv_result$pred,
+    edges = cv_result$edges,
+    params = list(
+      covariates = !is.null(covariates),
+      thresh_method = params$thresh_method,
+      thresh_level = params$thresh_level,
+      kfolds = kfolds,
+      bias_correct = params$bias_correct
+    )
+  )
 }
 
 resolve_covariates <- function(covariates, confounds) {

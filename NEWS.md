@@ -3,6 +3,7 @@
 ## Enhancements
 
 * Clarified `print.cpm()` output when edges are not stored and hardened `summary.cpm()` fold fallback for legacy objects.
+* Added a new `cpm_spec()` model specification object and `fit()` method as the first migration step toward a generics-based modeling API, while keeping `cpm()` as a compatibility wrapper.
 
 ## Maintenance
 
