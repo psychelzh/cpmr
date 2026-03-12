@@ -459,7 +459,7 @@
         Call: cpm(conmat = conmat, behav = behav, return_edges = "none")
         Number of observations: 10
           Complete cases: 10
-        Number of edges: unknown
+        Number of edges: not stored
         Parameters:
           Covariates:       FALSE
           Threshold method: alpha

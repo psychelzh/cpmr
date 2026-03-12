@@ -134,7 +134,7 @@ cpm <- function(
     edges
   )
 
-  compose_cpm(
+  new_cpm(
     call = call,
     folds = folds,
     behav = cv_result$real,
@@ -160,7 +160,7 @@ print.cpm <- function(x, ...) {
   if (!is.null(x$edges)) {
     cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
   } else {
-    cat("  Number of edges: unknown\n")
+    cat("  Number of edges: not stored\n")
   }
   covariates_param <- if (!is.null(x$params$covariates)) {
     x$params$covariates
@@ -267,7 +267,8 @@ init_edges <- function(return_edges, conmat, kfolds) {
       0,
       dim = c(dim(conmat)[2], length(corr_types)),
       dimnames = list(NULL, corr_types)
-    )
+    ),
+    none = NULL
   )
 }
 
@@ -388,7 +389,7 @@ regress_covariates_by_train <- function(
   )
 }
 
-compose_cpm <- function(call, folds, behav, pred, edges, params) {
+new_cpm <- function(call, folds, behav, pred, edges, params) {
   structure(
     list(
       folds = folds,
