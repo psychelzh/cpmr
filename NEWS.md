@@ -1,5 +1,13 @@
 # cpmr (development version)
 
+## Enhancements
+
+* Clarified `print.cpm()` output when edges are not stored and hardened `summary.cpm()` fold fallback for legacy objects.
+
+## Maintenance
+
+* Stabilized GitHub Actions uploads for Codecov coverage and Test Analytics by generating and uploading JUnit test results from an explicit workspace path.
+
 # cpmr 0.1.1
 
 ## Enhancements
