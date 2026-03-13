@@ -24,6 +24,18 @@ print.cpm <- function(x, ...) {
   invisible(x)
 }
 
+#' Collect selected edges from a CPM fit
+#'
+#' @param x A `cpm` object.
+#' @param ... For future extension. Currently ignored.
+#'
+#' @return A matrix for `return_edges = "sum"`, a 3D array for
+#'   `return_edges = "all"`, or `NULL` for `return_edges = "none"`.
+#' @export
+collect_edges.cpm <- function(x, ...) {
+  x$edges
+}
+
 normalize_inputs <- function(conmat, behav, covariates) {
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {

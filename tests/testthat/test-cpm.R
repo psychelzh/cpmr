@@ -93,9 +93,11 @@ test_that("`return_edges` argument works", {
   behav <- rnorm(10)
   result <- fit(cpm_spec(), conmat, behav, return_edges = "none")
   expect_null(result$edges)
+  expect_null(collect_edges(result))
   expect_snapshot(result)
   result <- fit(cpm_spec(), conmat, behav, return_edges = "all")
   expect_snapshot_value(result$edges, style = "json2")
+  expect_equal(collect_edges(result), result$edges)
   expect_snapshot(result)
 })
 

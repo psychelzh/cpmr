@@ -29,7 +29,19 @@ validate_resamples <- function(resamples, include_cases) {
     if (!is.numeric(idx) || anyNA(idx) || any(!is.finite(idx))) {
       stop("Each element in `resamples` must contain finite numeric indices.")
     }
-    unique(as.integer(idx))
+    if (any(idx %% 1 != 0)) {
+      stop("Each element in `resamples` must contain integer-valued indices.")
+    }
+
+    idx <- as.integer(idx)
+    if (any(idx <= 0L)) {
+      stop("Each element in `resamples` must contain positive indices.")
+    }
+    if (anyDuplicated(idx)) {
+      stop("Each element in `resamples` must not contain duplicates.")
+    }
+
+    idx
   })
 
   all_assessment <- unlist(normalized, use.names = FALSE)

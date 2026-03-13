@@ -61,9 +61,11 @@ matrix, which will be converted to a vector using \code{\link[=drop]{drop()}}.}
 column. If \code{NULL}, no covariates are used. Note if a vector is provided, it
 will be converted to a column matrix.}
 
-\item{return_edges}{A character string controlling edge storage from
-resampling. If \code{"none"}, no edges are stored. If \code{"sum"}, fold-level edges
-are summed across folds. If \code{"all"}, edges are stored for each fold.}
+\item{return_edges}{A character string indicating the return value of the
+selected edges. If \code{"none"}, no edges are returned/stored. If \code{"sum"}, edge
+masks are returned for single-fit and summed across folds for resampling.
+If \code{"all"}, single-fit stores a 3D array with a singleton third dimension
+while resampling stores fold-wise edge arrays.}
 
 \item{na_action}{A character string indicating the action when missing values
 are found in \code{behav}. If \code{"fail"}, an error will be thrown. If \code{"exclude"},

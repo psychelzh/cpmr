@@ -151,6 +151,36 @@ test_that("fit_resamples validates custom resamples", {
     "must cover all complete-case rows exactly once",
     fixed = TRUE
   )
+  expect_error(
+    fit_resamples(
+      spec,
+      conmat = conmat,
+      behav = behav,
+      resamples = list(c(1.5, 2.5), 3:10)
+    ),
+    "integer-valued indices",
+    fixed = FALSE
+  )
+  expect_error(
+    fit_resamples(
+      spec,
+      conmat = conmat,
+      behav = behav,
+      resamples = list(c(0, 1), 2:10)
+    ),
+    "positive indices",
+    fixed = FALSE
+  )
+  expect_error(
+    fit_resamples(
+      spec,
+      conmat = conmat,
+      behav = behav,
+      resamples = list(c(1, 1), 2:10)
+    ),
+    "must not contain duplicates",
+    fixed = FALSE
+  )
 })
 
 test_that("fit_resamples can store summed edges", {
