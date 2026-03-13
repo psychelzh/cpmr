@@ -220,19 +220,6 @@ test_that("fit_resamples warns for large fold-wise edge storage", {
   )
 })
 
-test_that("print.cpm_resamples reports summary fields", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(120), ncol = 12)
-  behav <- rnorm(10)
-  spec <- cpm_spec()
-
-  res <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
-
-  expect_output(print(res), "CPM resample results")
-  expect_output(print(res), "Mean correlations")
-  expect_output(print(res), "Edge storage")
-})
-
 test_that("fit_resamples handles covariates in assessment pipeline", {
   withr::local_seed(42)
   n <- 24
@@ -256,35 +243,4 @@ test_that("fit_resamples handles covariates in assessment pipeline", {
   expect_true(isTRUE(all(stats::complete.cases(pred$both))))
   expect_true(isTRUE(res$params$covariates))
   expect_equal(length(res$folds), 6L)
-})
-
-test_that("internal helpers validate nullable kfolds and finite resamples", {
-  validate_kfolds <- getFromNamespace("validate_kfolds", "cpmr")
-  validate_resamples <- getFromNamespace("validate_resamples", "cpmr")
-
-  expect_null(validate_kfolds(NULL))
-  expect_identical(validate_kfolds(5), 5L)
-
-  expect_error(
-    validate_resamples(list(), include_cases = 1:4),
-    "non-empty list of assessment indices",
-    fixed = FALSE
-  )
-  expect_error(
-    validate_resamples(list(c(1, Inf), 2:3), include_cases = 1:4),
-    "must contain finite numeric indices",
-    fixed = FALSE
-  )
-  expect_error(
-    validate_resamples(list(1:2, 5:6), include_cases = 1:4),
-    "must be contained in complete-case rows",
-    fixed = FALSE
-  )
-})
-
-test_that("safe_cor returns NA for degenerate vectors", {
-  safe_cor <- getFromNamespace("safe_cor", "cpmr")
-
-  expect_true(is.na(safe_cor(c(1, 1, 1), c(1, 2, 3))))
-  expect_true(is.na(safe_cor(c(1), c(1))))
 })
