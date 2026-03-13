@@ -2,16 +2,41 @@
 #' @export
 generics::fit
 
+#' Fit a model specification on resamples
+#'
+#' Generic for fitting model specifications across resamples.
+#'
+#' @param object A model specification object.
+#' @param ... Additional arguments passed to method implementations.
+#'
+#' @return A resampling result object.
 #' @export
 fit_resamples <- function(object, ...) {
   UseMethod("fit_resamples")
 }
 
+#' Collect fold-level metrics from resampling results
+#'
+#' Generic for extracting fold-level metrics from resampling result objects.
+#'
+#' @param x A resampling result object.
+#' @param ... Additional arguments passed to method implementations.
+#'
+#' @return A data frame or tibble with one row per fold.
 #' @export
 collect_metrics <- function(x, ...) {
   UseMethod("collect_metrics")
 }
 
+#' Collect observation-level predictions from resampling results
+#'
+#' Generic for extracting observation-level predictions from resampling result
+#' objects.
+#'
+#' @param x A resampling result object.
+#' @param ... Additional arguments passed to method implementations.
+#'
+#' @return A data frame or tibble with one row per observation.
 #' @export
 collect_predictions <- function(x, ...) {
   UseMethod("collect_predictions")
@@ -215,7 +240,7 @@ fit_resamples.cpm_spec <- function(
     real[rows_test] <- behav_test
 
     if (params$return_edges == "all") {
-      edges[, , fold] <- fit_call$edges[, , 1]
+      edges[,, fold] <- fit_call$edges[,, 1]
     } else if (params$return_edges == "sum") {
       edges <- edges + fit_call$edges
     }
@@ -435,7 +460,10 @@ fit_cpm_single <- function(
       conmat[include_cases, , drop = FALSE],
       covariates_train
     )
-    behav_train <- drop(regress_covariates(behav[include_cases], covariates_train))
+    behav_train <- drop(regress_covariates(
+      behav[include_cases],
+      covariates_train
+    ))
   }
 
   cur_edges <- select_edges(
@@ -461,7 +489,7 @@ fit_cpm_single <- function(
         dim = c(dim(cur_edges), 1L),
         dimnames = list(NULL, corr_types, NULL)
       )
-      edge_array[, , 1] <- cur_edges
+      edge_array[,, 1] <- cur_edges
       edge_array
     }
   )
