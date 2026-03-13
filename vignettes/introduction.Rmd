@@ -14,102 +14,186 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Overview
+## What is CPM?
 
-`cpmr` implements connectome predictive modeling (CPM) for behavioral prediction
-from functional connectivity features.
+Connectome Predictive Modeling (CPM) is a method for predicting individual
+differences in behavior from brain functional connectivity data. The core idea
+is straightforward:
 
-This vignette gives a minimal workflow for:
+1. Measure how strongly each **brain edge** (pair of regions) correlates with
+   the behavior of interest — across subjects.
+2. Keep only edges that pass a significance threshold (the "predictive network").
+3. Summarize those edges into a single score per subject (e.g., by summing their
+   connectivity values).
+4. Use that score to predict behavior via linear regression.
 
-- preparing inputs;
-- fitting a single CPM model;
-- running cross-validated resampling;
-- collecting and inspecting outputs.
+`cpmr` implements this pipeline in a tidy, cross-validation–friendly way.
+This vignette walks you through a complete workflow from raw data to interpreted
+results.
 
-## Data Shape
-
-CPM in `cpmr` expects:
-
-- `conmat`: a numeric matrix with rows as subjects and columns as edges;
-- `behav`: a numeric vector with one value per subject;
-- optional `covariates`: numeric matrix/vector with one row per subject.
+## Setup
 
 ```{r}
 library(cpmr)
+```
 
+## Prepare Your Data
+
+CPM takes three inputs:
+
+| Argument | What it is | Shape |
+|---|---|---|
+| `conmat` | Connectivity matrix — one row per subject, one column per edge | `n × p` matrix |
+| `behav` | Behavioral score — one value per subject | length-`n` vector |
+| `covariates` | Nuisance variables to regress out (optional) | `n × q` matrix |
+
+Below we simulate a small dataset for illustration. In real analyses, `conmat`
+would come from your neuroimaging pipeline (e.g., a Fisher-z transformed
+correlation matrix for each subject), and `behav` from a cognitive or clinical
+measure.
+
+```{r}
 withr::local_seed(123)
-n <- 80
-p <- 200
+n <- 80   # subjects
+p <- 200  # brain edges (in practice, tens of thousands)
+
+# Simulate connectivity data
 conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
+
+# Make behavior correlated with the first 12 edges so CPM has signal to detect
 behav <- rowMeans(conmat[, 1:12, drop = FALSE]) + rnorm(n, sd = 0.5)
+
+# One nuisance covariate (e.g., head motion, age)
 covariates <- matrix(rnorm(n), ncol = 1)
 ```
 
-## Single-Fit Workflow
+## Configure the Model
 
-Use `fit()` when you want one in-sample fitted object.
+Before fitting, create a model specification with `cpm_spec()`. This bundles
+all algorithm choices into a single reusable object.
 
 ```{r}
 spec <- cpm_spec(
-  thresh_method = "alpha",
-  thresh_level = 0.05,
-  bias_correct = TRUE
+  thresh_method = "alpha",  # select edges by p-value
+  thresh_level  = 0.05,     # keep edges with p < 0.05
+  bias_correct  = TRUE      # apply bias correction to edge–behavior correlation
 )
+```
 
+`thresh_method = "alpha"` is the classic CPM approach: include any edge whose
+correlation with behavior is significant at the chosen alpha level. You can
+also threshold by the raw correlation magnitude (`thresh_method = "spearman"`
+or `"pearson"`) if you prefer.
+
+## Step 1 — Fit on the Full Sample
+
+`fit()` trains a CPM model using all subjects at once. This is useful for
+**inspecting the selected network** or for hypothesis-driven analyses where
+cross-validation is not needed.
+
+```{r}
 fit_obj <- fit(
   spec,
-  conmat = conmat,
-  behav = behav,
+  conmat     = conmat,
+  behav      = behav,
   covariates = covariates,
-  return_edges = "sum",
-  na_action = "exclude"
+  return_edges = "sum",   # store per-network edge sums for each subject
+  na_action  = "exclude"  # silently drop subjects with any missing value
 )
 
 fit_obj
 summary(fit_obj)
 ```
 
-## Resampling Workflow
+`summary()` reports the Pearson and Spearman correlation between the model's
+predicted scores and the observed behavior — one row for the positive network
+and one for the negative network.
 
-Use `fit_resamples()` for cross-validated or custom resampling workflows.
+## Step 2 — Cross-Validated Resampling
+
+A single in-sample fit is **optimistic**: the model is evaluated on the same
+data it was trained on, so the performance estimate is inflated. To get an
+honest generalization estimate, use **k-fold cross-validation** via
+`fit_resamples()`.
+
+In k-fold CV, the data are split into *k* non-overlapping folds. Each fold
+takes a turn as the held-out test set while the model trains on the remaining
+*k − 1* folds. This way, every subject contributes exactly one out-of-sample
+prediction.
 
 ```{r}
 set.seed(123)
 res_obj <- fit_resamples(
   spec,
-  conmat = conmat,
-  behav = behav,
+  conmat     = conmat,
+  behav      = behav,
   covariates = covariates,
-  kfolds = 5,
+  kfolds     = 5,           # 5-fold cross-validation
   return_edges = "sum",
-  na_action = "exclude"
+  na_action  = "exclude"
 )
 
 res_obj
 ```
 
-## Collect Results
+## Step 3 — Extract Results
 
-`cpmr` provides standardized accessors for downstream inspection.
+`cpmr` provides three accessor functions to pull results out of a resampling
+object.
+
+### Performance metrics
+
+`collect_metrics()` returns the predictive performance for each fold and
+network, expressed as the correlation between predicted and observed behavior.
 
 ```{r}
 metrics <- collect_metrics(res_obj)
-predictions <- collect_predictions(res_obj)
-edges <- collect_edges(res_obj)
-
 head(metrics)
+```
+
+Each row is one fold × network combination. The `.estimate` column is the
+out-of-sample Pearson *r*, and `.estimator` tells you which correlation method
+was used. Averaging across folds gives you the overall cross-validated
+performance of the model.
+
+### Out-of-sample predictions
+
+`collect_predictions()` returns the raw predicted value for every subject in
+every fold they were held out.
+
+```{r}
+predictions <- collect_predictions(res_obj)
 head(predictions)
+```
+
+You can use these to compute custom metrics, plot predicted vs. observed, or
+inspect individual subjects.
+
+### Selected edges
+
+`collect_edges()` returns which edges were selected (and their summed
+connectivity values) in each fold.
+
+```{r}
+edges <- collect_edges(res_obj)
 str(edges)
 ```
 
-## Custom Resamples
+Consistently selected edges across folds are the most reliable candidates for
+a "predictive network".
 
-You can pass a custom `resamples` list where each element stores assessment row
-indices for one fold. The `resamples` list is validated to (a) have non-overlapping
-assessment sets and (b) cover all complete-case rows exactly once. When
-`na_action = "exclude"`, indices must refer to rows in the complete-case data.
+## Advanced: Custom Resamples
+
+By default, `fit_resamples()` generates random k-fold splits internally. You
+can override this with your own partition scheme — useful when you need
+**site-stratified**, **family-aware**, or **repeated** splits.
+
+Pass a list where each element is a vector of **held-out row indices** for that
+fold. `cpmr` validates that the sets are non-overlapping and together cover
+every subject exactly once.
 
 ```{r}
+# Manual 5-fold split: subjects 1–16, 17–32, …
 custom_resamples <- list(
   1:16,
   17:32,
@@ -120,10 +204,10 @@ custom_resamples <- list(
 
 custom_res_obj <- fit_resamples(
   spec,
-  conmat = conmat,
-  behav = behav,
+  conmat    = conmat,
+  behav     = behav,
   resamples = custom_resamples,
-  return_edges = "none"
+  return_edges = "none"   # skip edge storage to save memory
 )
 
 collect_metrics(custom_res_obj)
@@ -131,5 +215,8 @@ collect_metrics(custom_res_obj)
 
 ## Next Steps
 
-- See the leakage-focused vignette for covariate leakage control details.
-- Use `summary()` and `tidy()` for reporting and post-processing.
+- **Covariate leakage**: If your covariates include site, age, or motion, read
+  the leakage-focused vignette to see how `cpmr` prevents data leakage during
+  covariate regression.
+- **Reporting**: `tidy()` converts a `cpm` object into a tidy data frame
+  suitable for tables and plots; `summary()` gives a quick console summary.
