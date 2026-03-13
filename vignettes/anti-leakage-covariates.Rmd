@@ -59,17 +59,37 @@ collect_metrics(fit)
 
 ## Current API
 
-Use `fit(cpm_spec(...), ...)` for single fitting and `fit_resamples()` for CV.
+Use `fit(cpm_spec(...), ...)` for a single fit and `fit_resamples()` for CV.
 
 ```{r}
-fit_new <- fit_resamples(
+single_fit <- fit(
+  cpm_spec(),
+  conmat = conmat,
+  behav = behav,
+  covariates = covariates,
+  return_edges = "sum"
+)
+
+resamples_fit <- fit_resamples(
   cpm_spec(),
   conmat = conmat,
   behav = behav,
   covariates = covariates,
   kfolds = 5
 )
+
+collect_metrics(resamples_fit)
+collect_predictions(resamples_fit)
+collect_edges(resamples_fit, format = "index")
 ```
+
+## Edge Storage Tips
+
+For large feature spaces, fold-wise edge storage can grow quickly.
+
+- Use `return_edges = "sum"` to keep only fold-aggregated edge counts.
+- Use `collect_edges(..., format = "index")` to export sparse indices.
+- Use `return_edges = "none"` if you only need predictive performance.
 
 ## Anti-Leakage Checklist
 

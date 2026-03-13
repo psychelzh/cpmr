@@ -5,15 +5,25 @@
 * **`cpm()` removed.** The legacy entry-point function `cpm()` has been
   deleted. Use `fit(cpm_spec(...), conmat, behav)` instead. The `confounds`
   parameter (deprecated alias of `covariates`) is also removed.
+* `fit()` now performs a single fit. Cross-validation/resampling workflows are
+  handled by `fit_resamples()`.
 
 ## Enhancements
 
 * Added `cpm_spec()` model specification object and `fit()` dispatch as the
   primary API for connectome-based predictive modeling.
 * `print.cpm_spec()` provides a concise summary of all modeling parameters.
+* Added the `cpm_resamples` result class with dedicated methods:
+  `collect_metrics()`, `collect_predictions()`, and `collect_edges()`.
+* Added edge export support via `collect_edges(format = "index")` for sparse
+  index output when edge storage is large.
 
 ## Maintenance
 
+* Refactored fit internals into focused modules (`fit-generics`, `cpm-spec`,
+  `cpm-resamples`, and `fit-internals`) to improve maintainability.
+* Updated and expanded tests for internal helper branches and edge/summary
+  coverage paths.
 * Stabilized GitHub Actions uploads for Codecov coverage and Test Analytics by generating and uploading JUnit test results from an explicit workspace path.
 
 # cpmr 0.1.1
