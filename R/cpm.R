@@ -16,10 +16,16 @@ print.cpm <- function(x, ...) {
     NA
   }
   cat("  Parameters:\n")
+  fit_mode <- if (!is.null(x$params$fit_mode)) {
+    x$params$fit_mode
+  } else {
+    "cv"
+  }
   cat(sprintf("    Covariates:       %s\n", covariates_param))
+  cat(sprintf("    Fit mode:         %s\n", fit_mode))
   cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
   cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
-  cat(sprintf("    CV folds:         %d\n", x$params$kfolds))
+  cat(sprintf("    Stored splits:    %d\n", length(x$folds)))
   cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
   invisible(x)
 }
@@ -217,13 +223,14 @@ regress_covariates_by_train <- function(
   )
 }
 
-new_cpm <- function(call, folds, behav, pred, edges, spec, params) {
+new_cpm <- function(call, folds, behav, pred, edges, model, spec, params) {
   structure(
     list(
       folds = folds,
       real = behav,
       pred = pred,
       edges = edges,
+      model = model,
       spec = spec,
       call = call,
       params = params

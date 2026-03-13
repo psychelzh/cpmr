@@ -16,10 +16,15 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct", "method", "both", "pos", "neg"]
+          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct", "method", "both", "pos", "neg"]
         }
       },
       "value": [
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["single"]
+        },
         {
           "type": "logical",
           "attributes": {},
@@ -38,7 +43,7 @@
         {
           "type": "integer",
           "attributes": {},
-          "value": [10]
+          "value": [1]
         },
         {
           "type": "logical",
@@ -53,17 +58,17 @@
         {
           "type": "double",
           "attributes": {},
-          "value": [-1]
+          "value": ["NA"]
         },
         {
           "type": "double",
           "attributes": {},
-          "value": [-1]
+          "value": ["NA"]
         },
         {
           "type": "double",
           "attributes": {},
-          "value": [-0.97688332]
+          "value": ["NA"]
         }
       ]
     }
@@ -86,10 +91,15 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct", "level", "pos", "neg"]
+          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct", "level", "pos", "neg"]
         }
       },
       "value": [
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["single"]
+        },
         {
           "type": "logical",
           "attributes": {},
@@ -108,7 +118,7 @@
         {
           "type": "integer",
           "attributes": {},
-          "value": [10]
+          "value": [1]
         },
         {
           "type": "logical",

@@ -26,8 +26,9 @@ the critical value of correlation coefficient. If method is set to be
 \code{"sparsity"}, the edge selection is based on the quantile of correlation
 coefficient, thus network sparsity is controlled.}
 
-\item{kfolds}{Folds number of cross-validation. If \code{NULL}, it will be set to
-be equal to the number of observations, i.e., leave-one-subject-out.}
+\item{kfolds}{Number of folds used by \code{fit_resamples()} when \code{resamples} is
+\code{NULL}. If \code{NULL}, it will be set to be equal to the number of
+observations, i.e., leave-one-subject-out.}
 
 \item{bias_correct}{Logical value indicating if the connectome data should be
 bias-corrected. If \code{TRUE}, the connectome data will be centered and scaled
@@ -65,7 +66,7 @@ Each element must be an integer vector indexing rows in \code{conmat}. If
 \value{
 A \code{cpm_spec} object storing parameters for later fitting.
 
-A fitted \code{cpm} object.
+A fitted \code{cpm} object from a single in-sample fit.
 
 A \code{cpm_resamples} object containing fold-level metrics and
 observation-level predictions.

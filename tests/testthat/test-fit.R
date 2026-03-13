@@ -65,13 +65,13 @@ test_that("print.cpm_spec shows auto folds when kfolds is NULL", {
   spec <- cpm_spec()
 
   expect_output(print(spec), "CPM model specification")
-  expect_output(print(spec), "CV folds:         auto")
+  expect_output(print(spec), "Resample folds:   auto")
 })
 
 test_that("print.cpm_spec shows explicit folds when kfolds is set", {
   spec <- cpm_spec(kfolds = 5)
 
-  expect_output(print(spec), "CV folds:         5")
+  expect_output(print(spec), "Resample folds:   5")
 })
 
 test_that("fit_resamples returns fold metrics and predictions", {

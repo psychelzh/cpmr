@@ -10,12 +10,15 @@ test_that("Default threshold method works", {
   expect_snapshot(result)
 })
 
-test_that("`kfolds` works", {
+test_that("`fit()` is single-fit and keeps spec kfolds for resampling", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
   result <- fit(cpm_spec(kfolds = 5), conmat, behav)
   expect_s3_class(result, "cpm")
+  expect_identical(length(result$folds), 1L)
+  expect_identical(result$params$kfolds, 1L)
+  expect_identical(result$spec$params$kfolds, 5)
   expect_snapshot_value(result$pred, style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
   expect_snapshot_value(result$params, style = "json2")
@@ -58,9 +61,7 @@ test_that("Works with covariates", {
   expect_true(isTRUE(result$params$covariates))
 })
 
-test_that("Fold-wise covariate regression differs from global pre-CV regression", {
-  # Verifies that the implementation actually uses fold-wise regression
-  # (leakage-safe), not global regression applied before CV.
+test_that("fit with covariates uses in-sample residualized target scale", {
   withr::local_seed(42)
   n <- 30
   p <- 20
@@ -69,19 +70,13 @@ test_that("Fold-wise covariate regression differs from global pre-CV regression"
   behav <- cov * 2 + rnorm(n)
   covariates <- matrix(cov, ncol = 1)
 
-  result_foldwise <- fit(
-    cpm_spec(kfolds = 5),
-    conmat,
-    behav,
-    covariates = covariates
-  )
+  result <- fit(cpm_spec(), conmat, behav, covariates = covariates)
 
   regress_covariates <- getFromNamespace("regress_covariates", "cpmr")
-  behav_global <- regress_covariates(behav, covariates)
-  result_global <- fit(cpm_spec(kfolds = 5), conmat, behav_global)
+  behav_resid <- drop(regress_covariates(behav, covariates))
 
-  expect_false(isTRUE(all.equal(result_foldwise$pred, result_global$pred)))
-  expect_false(isTRUE(all.equal(result_foldwise$real, result_global$real)))
+  expect_equal(result$real, behav_resid)
+  expect_true(isTRUE(all(stats::complete.cases(result$pred))))
 })
 
 test_that("Keep names of behavior", {

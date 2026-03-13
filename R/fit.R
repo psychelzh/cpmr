@@ -28,8 +28,9 @@ collect_predictions <- function(x, ...) {
 #'   the critical value of correlation coefficient. If method is set to be
 #'   `"sparsity"`, the edge selection is based on the quantile of correlation
 #'   coefficient, thus network sparsity is controlled.
-#' @param kfolds Folds number of cross-validation. If `NULL`, it will be set to
-#'   be equal to the number of observations, i.e., leave-one-subject-out.
+#' @param kfolds Number of folds used by `fit_resamples()` when `resamples` is
+#'   `NULL`. If `NULL`, it will be set to be equal to the number of
+#'   observations, i.e., leave-one-subject-out.
 #' @param bias_correct Logical value indicating if the connectome data should be
 #'   bias-corrected. If `TRUE`, the connectome data will be centered and scaled
 #'   to have unit variance based on the training data before model fitting and
@@ -87,7 +88,7 @@ print.cpm_spec <- function(x, ...) {
   cat("CPM model specification:\n")
   cat(sprintf("  Threshold method: %s\n", x$params$thresh_method))
   cat(sprintf("  Threshold level:  %.2f\n", x$params$thresh_level))
-  cat(sprintf("  CV folds:         %s\n", x$params$kfolds %||% "auto"))
+  cat(sprintf("  Resample folds:   %s\n", x$params$kfolds %||% "auto"))
   cat(sprintf("  Bias correction:  %s\n", x$params$bias_correct))
   cat(sprintf("  Return edges:     %s\n", x$params$return_edges))
   cat(sprintf("  NA action:        %s\n", x$params$na_action))
@@ -108,7 +109,7 @@ print.cpm_spec <- function(x, ...) {
 #'   column. If `NULL`, no covariates are used. Note if a vector is provided, it
 #'   will be converted to a column matrix.
 #'
-#' @return A fitted `cpm` object.
+#' @return A fitted `cpm` object from a single in-sample fit.
 #' @export
 fit.cpm_spec <- function(
   object,
@@ -119,7 +120,7 @@ fit.cpm_spec <- function(
 ) {
   call <- match.call()
   call[[1]] <- quote(fit)
-  fit_cpm_workflow(
+  fit_cpm_single(
     call = call,
     object = object,
     conmat = conmat,
@@ -169,22 +170,59 @@ fit_resamples.cpm_spec <- function(
 
   pred <- init_pred(behav)
   edges <- init_edges(params$return_edges, conmat, kfolds)
-  cv_result <- fit_predict_cv(
-    conmat,
-    behav,
-    covariates,
-    include_cases,
-    folds,
-    params$thresh_method,
-    params$thresh_level,
-    params$bias_correct,
-    params$return_edges,
-    pred,
-    edges
-  )
+  real <- behav
 
-  metrics <- compute_fold_metrics(cv_result$real, cv_result$pred, folds)
-  predictions <- compute_fold_predictions(cv_result$real, cv_result$pred, folds)
+  for (fold in seq_len(kfolds)) {
+    rows_test <- folds[[fold]]
+    rows_train <- setdiff(include_cases, rows_test)
+
+    fit_call <- fit(
+      object,
+      conmat = conmat[rows_train, , drop = FALSE],
+      behav = behav[rows_train],
+      covariates = if (is.null(covariates)) {
+        NULL
+      } else {
+        covariates[rows_train, , drop = FALSE]
+      }
+    )
+
+    if (is.null(covariates)) {
+      conmat_test <- conmat[rows_test, , drop = FALSE]
+      behav_test <- behav[rows_test]
+    } else {
+      covariates_train <- covariates[rows_train, , drop = FALSE]
+      covariates_test <- covariates[rows_test, , drop = FALSE]
+
+      conmat_regressed <- regress_covariates_by_train(
+        conmat[rows_train, , drop = FALSE],
+        conmat[rows_test, , drop = FALSE],
+        covariates_train,
+        covariates_test
+      )
+      behav_regressed <- regress_covariates_by_train(
+        behav[rows_train],
+        behav[rows_test],
+        covariates_train,
+        covariates_test
+      )
+
+      conmat_test <- conmat_regressed$test
+      behav_test <- drop(behav_regressed$test)
+    }
+
+    pred[rows_test, ] <- predict_cpm_model(fit_call$model, conmat_test)
+    real[rows_test] <- behav_test
+
+    if (params$return_edges == "all") {
+      edges[, , fold] <- fit_call$edges[, , 1]
+    } else if (params$return_edges == "sum") {
+      edges <- edges + fit_call$edges
+    }
+  }
+
+  metrics <- compute_fold_metrics(real, pred, folds)
+  predictions <- compute_fold_predictions(real, pred, folds)
 
   new_cpm_resamples(
     spec = object,
@@ -366,7 +404,7 @@ new_cpm_resamples <- function(spec, folds, metrics, predictions, params) {
   )
 }
 
-fit_cpm_workflow <- function(
+fit_cpm_single <- function(
   call,
   object,
   conmat,
@@ -386,37 +424,140 @@ fit_cpm_workflow <- function(
     params$na_action
   )
 
-  kfolds <- resolve_kfolds(params$kfolds, include_cases)
-  folds <- crossv_kfold(include_cases, kfolds)
-  edges <- init_edges(params$return_edges, conmat, kfolds)
   pred <- init_pred(behav)
-  cv_result <- fit_predict_cv(
-    conmat,
-    behav,
-    covariates,
-    include_cases,
-    folds,
+
+  if (is.null(covariates)) {
+    conmat_train <- conmat[include_cases, , drop = FALSE]
+    behav_train <- behav[include_cases]
+  } else {
+    covariates_train <- covariates[include_cases, , drop = FALSE]
+    conmat_train <- regress_covariates(
+      conmat[include_cases, , drop = FALSE],
+      covariates_train
+    )
+    behav_train <- drop(regress_covariates(behav[include_cases], covariates_train))
+  }
+
+  cur_edges <- select_edges(
+    conmat_train,
+    behav_train,
     params$thresh_method,
-    params$thresh_level,
-    params$bias_correct,
-    params$return_edges,
-    pred,
-    edges
+    params$thresh_level
   )
+  model <- train_cpm_model(
+    conmat_train,
+    behav_train,
+    cur_edges,
+    params$bias_correct
+  )
+  pred[include_cases, ] <- predict_cpm_model(model, conmat_train)
+
+  edges <- switch(
+    params$return_edges,
+    none = NULL,
+    sum = cur_edges,
+    all = {
+      edge_array <- array(
+        dim = c(dim(cur_edges), 1L),
+        dimnames = list(NULL, corr_types, NULL)
+      )
+      edge_array[, , 1] <- cur_edges
+      edge_array
+    }
+  )
+
+  real <- behav
+  real[include_cases] <- behav_train
 
   new_cpm(
     call = call,
-    folds = folds,
-    behav = cv_result$real,
-    pred = cv_result$pred,
-    edges = cv_result$edges,
+    folds = list(include_cases),
+    behav = real,
+    pred = pred,
+    edges = edges,
+    model = model,
     spec = object,
     params = list(
+      fit_mode = "single",
       covariates = !is.null(covariates),
       thresh_method = params$thresh_method,
       thresh_level = params$thresh_level,
-      kfolds = kfolds,
+      kfolds = 1L,
       bias_correct = params$bias_correct
     )
   )
+}
+
+train_cpm_model <- function(conmat, behav, edges, bias_correct) {
+  center <- NULL
+  scale <- NULL
+  if (bias_correct) {
+    center <- Rfast::colmeans(conmat)
+    scale <- Rfast::colVars(conmat, std = TRUE)
+    conmat <- fscale(conmat, center, scale)
+  }
+
+  x <- matrix(
+    1,
+    nrow = dim(conmat)[1],
+    ncol = length(corr_types) + 1,
+    dimnames = list(NULL, c("(Intercept)", corr_types))
+  )
+  for (corr_type in corr_types) {
+    x[, corr_type] <- Rfast::rowsums(
+      conmat[, edges[, corr_type], drop = FALSE]
+    )
+  }
+
+  models <- lapply(inc_edges, function(inc_edge) {
+    cur_x <- if (inc_edge == "both") {
+      x
+    } else {
+      x[, c("(Intercept)", inc_edge)]
+    }
+    stats::.lm.fit(cur_x, behav)$coefficients
+  })
+  names(models) <- inc_edges
+
+  list(
+    bias_correct = bias_correct,
+    center = center,
+    scale = scale,
+    edges = edges,
+    models = models
+  )
+}
+
+predict_cpm_model <- function(model, conmat_new) {
+  if (model$bias_correct) {
+    conmat_new <- fscale(conmat_new, model$center, model$scale)
+  }
+
+  x_new <- matrix(
+    1,
+    nrow = dim(conmat_new)[1],
+    ncol = length(corr_types) + 1,
+    dimnames = list(NULL, c("(Intercept)", corr_types))
+  )
+  for (corr_type in corr_types) {
+    x_new[, corr_type] <- Rfast::rowsums(
+      conmat_new[, model$edges[, corr_type], drop = FALSE]
+    )
+  }
+
+  pred <- matrix(
+    nrow = dim(conmat_new)[1],
+    ncol = length(inc_edges),
+    dimnames = list(NULL, inc_edges)
+  )
+  for (inc_edge in inc_edges) {
+    cur_x_new <- if (inc_edge == "both") {
+      x_new
+    } else {
+      x_new[, c("(Intercept)", inc_edge)]
+    }
+    pred[, inc_edge] <- cur_x_new %*% model$models[[inc_edge]]
+  }
+
+  pred
 }

@@ -28,7 +28,28 @@ summary.cpm <- function(
 ) {
   method <- match.arg(method)
   # summary prediction performance
-  performance <- stats::cor(object$real, object$pred, method = method)
+  performance <- matrix(
+    vapply(
+      colnames(object$pred),
+      function(edge_type) {
+        x <- object$real
+        y <- object$pred[, edge_type]
+        valid <- stats::complete.cases(x, y)
+        if (sum(valid) < 2) {
+          return(NA_real_)
+        }
+        x <- x[valid]
+        y <- y[valid]
+        if (stats::sd(x) == 0 || stats::sd(y) == 0) {
+          return(NA_real_)
+        }
+        stats::cor(x, y, method = method)
+      },
+      numeric(1)
+    ),
+    nrow = 1,
+    dimnames = list(NULL, colnames(object$pred))
+  )
   # summary edge selection
   edges <- if (!is.null(object$edges)) {
     folds_count <- length(object$folds)
