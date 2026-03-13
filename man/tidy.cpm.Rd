@@ -15,7 +15,7 @@
 }
 \value{
 A \link[tibble:tibble-package]{tibble} with columns storing parameters of the
-\code{\link[=cpm]{cpm()}} object and further columns depending on the \code{component} argument:
+\code{cpm} object and further columns depending on the \code{component} argument:
 
 For \code{component = "performance"}:
 

@@ -100,7 +100,7 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav)
         Number of observations: 10
           Complete cases: 10
         Number of edges: 10
@@ -213,7 +213,7 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav, kfolds = 5)
+        Call: fit(object = cpm_spec(kfolds = 5), conmat = conmat, behav = behav)
         Number of observations: 10
           Complete cases: 10
         Number of edges: 10
@@ -326,7 +326,8 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav, thresh_method = "sparsity")
+        Call: fit(object = cpm_spec(thresh_method = "sparsity"), conmat = conmat, 
+          behav = behav)
         Number of observations: 10
           Complete cases: 10
         Number of edges: 10
@@ -439,7 +440,7 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav, thresh_level = 0.1)
+        Call: fit(object = cpm_spec(thresh_level = 0.1), conmat = conmat, behav = behav)
         Number of observations: 10
           Complete cases: 10
         Number of edges: 10
@@ -456,7 +457,8 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav, return_edges = "none")
+        Call: fit(object = cpm_spec(return_edges = "none"), conmat = conmat, 
+          behav = behav)
         Number of observations: 10
           Complete cases: 10
         Number of edges: not stored
@@ -504,7 +506,8 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav, return_edges = "all")
+        Call: fit(object = cpm_spec(return_edges = "all"), conmat = conmat, 
+          behav = behav)
         Number of observations: 10
           Complete cases: 10
         Number of edges: 10
@@ -521,7 +524,8 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav, na_action = "exclude")
+        Call: fit(object = cpm_spec(na_action = "exclude"), conmat = conmat, 
+          behav = behav)
         Number of observations: 10
           Complete cases: 9
         Number of edges: 10
@@ -538,8 +542,8 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav, covariates = covariates, 
-          na_action = "exclude")
+        Call: fit(object = cpm_spec(na_action = "exclude"), conmat = conmat, 
+          behav = behav, covariates = covariates)
         Number of observations: 10
           Complete cases: 8
         Number of edges: 10
@@ -556,8 +560,8 @@
       result
     Output
       CPM results:
-        Call: cpm(conmat = conmat, behav = behav, covariates = covariates, 
-          na_action = "exclude")
+        Call: fit(object = cpm_spec(na_action = "exclude"), conmat = conmat, 
+          behav = behav, covariates = covariates)
         Number of observations: 10
           Complete cases: 8
         Number of edges: 10
