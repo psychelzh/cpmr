@@ -62,7 +62,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -87,9 +87,14 @@
           "value": [0.01]
         },
         {
-          "type": "integer",
+          "type": "character",
           "attributes": {},
-          "value": [1]
+          "value": ["sum"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         },
         {
           "type": "logical",
@@ -117,7 +122,7 @@
           Stored splits:    1
           Bias correction:  TRUE
 
-# `fit()` is single-fit and keeps spec kfolds for resampling
+# `fit()` is single-fit
 
     {
       "type": "double",
@@ -181,7 +186,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -206,9 +211,14 @@
           "value": [0.01]
         },
         {
-          "type": "integer",
+          "type": "character",
           "attributes": {},
-          "value": [1]
+          "value": ["sum"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         },
         {
           "type": "logical",
@@ -224,7 +234,7 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(kfolds = 5), conmat = conmat, behav = behav)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav)
         Number of observations: 10
           Complete cases: 10
         Number of edges: 10
@@ -300,7 +310,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -325,9 +335,14 @@
           "value": [0.01]
         },
         {
-          "type": "integer",
+          "type": "character",
           "attributes": {},
-          "value": [1]
+          "value": ["sum"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         },
         {
           "type": "logical",
@@ -420,7 +435,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -445,9 +460,14 @@
           "value": [0.1]
         },
         {
-          "type": "integer",
+          "type": "character",
           "attributes": {},
-          "value": [1]
+          "value": ["sum"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         },
         {
           "type": "logical",
@@ -481,8 +501,7 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(return_edges = "none"), conmat = conmat, 
-          behav = behav)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, return_edges = "none")
         Number of observations: 10
           Complete cases: 10
         Number of edges: not stored
@@ -531,8 +550,7 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(return_edges = "all"), conmat = conmat, 
-          behav = behav)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, return_edges = "all")
         Number of observations: 10
           Complete cases: 10
         Number of edges: 10
@@ -550,8 +568,7 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(na_action = "exclude"), conmat = conmat, 
-          behav = behav)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, na_action = "exclude")
         Number of observations: 10
           Complete cases: 9
         Number of edges: 10
@@ -569,8 +586,8 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(na_action = "exclude"), conmat = conmat, 
-          behav = behav, covariates = covariates)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, covariates = covariates, 
+          na_action = "exclude")
         Number of observations: 10
           Complete cases: 8
         Number of edges: 10
@@ -588,8 +605,8 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(na_action = "exclude"), conmat = conmat, 
-          behav = behav, covariates = covariates)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, covariates = covariates, 
+          na_action = "exclude")
         Number of observations: 10
           Complete cases: 8
         Number of edges: 10

@@ -42,6 +42,19 @@ collect_predictions <- function(x, ...) {
   UseMethod("collect_predictions")
 }
 
+#' Collect selected edges from fitted objects
+#'
+#' Generic for extracting stored selected-edge outputs.
+#'
+#' @param x A fitted object.
+#' @param ... Additional arguments passed to method implementations.
+#'
+#' @return A matrix, array, or `NULL` depending on how edges were stored.
+#' @export
+collect_edges <- function(x, ...) {
+  UseMethod("collect_edges")
+}
+
 #' Define a CPM model specification
 #'
 #' Create a lightweight specification object that stores the modeling
@@ -53,25 +66,15 @@ collect_predictions <- function(x, ...) {
 #'   the critical value of correlation coefficient. If method is set to be
 #'   `"sparsity"`, the edge selection is based on the quantile of correlation
 #'   coefficient, thus network sparsity is controlled.
-#' @param kfolds Number of folds used by `fit_resamples()` when `resamples` is
-#'   `NULL`. If `NULL`, it will be set to be equal to the number of
-#'   observations, i.e., leave-one-subject-out.
 #' @param bias_correct Logical value indicating if the connectome data should be
 #'   bias-corrected. If `TRUE`, the connectome data will be centered and scaled
 #'   to have unit variance based on the training data before model fitting and
 #'   prediction. See Rapuano et al. (2020) for more details.
-#' @param return_edges A character string indicating the return value of the
-#'   selected edges. If `"none"`, no edges are returned. If `"sum"`, the sum of
-#'   selected edges across folds is returned. If `"all"`, the selected edges for
-#'   each fold is returned, which is a 3D array and memory-consuming.
-#' @param na_action A character string indicating the action when missing values
-#'   are found in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
-#'   missing values will be excluded from the analysis but kept in the output.
 #'
 #' @return A `cpm_spec` object storing parameters for later fitting.
 #'
 #' @examples
-#' spec <- cpm_spec(kfolds = 10, return_edges = "sum")
+#' spec <- cpm_spec(thresh_level = 0.01)
 #' spec
 #'
 #' conmat <- matrix(rnorm(100 * 100), nrow = 100)
@@ -81,29 +84,20 @@ collect_predictions <- function(x, ...) {
 cpm_spec <- function(
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
-  kfolds = NULL,
-  bias_correct = TRUE,
-  return_edges = c("sum", "none", "all"),
-  na_action = c("fail", "exclude")
+  bias_correct = TRUE
 ) {
   validate_cpm_spec_params(
     thresh_level = thresh_level,
-    kfolds = kfolds,
     bias_correct = bias_correct
   )
 
   thresh_method <- match.arg(thresh_method)
-  return_edges <- match.arg(return_edges)
-  na_action <- match.arg(na_action)
 
   new_cpm_spec(
     params = list(
       thresh_method = thresh_method,
       thresh_level = thresh_level,
-      kfolds = kfolds,
-      bias_correct = bias_correct,
-      return_edges = return_edges,
-      na_action = na_action
+      bias_correct = bias_correct
     )
   )
 }
@@ -113,10 +107,7 @@ print.cpm_spec <- function(x, ...) {
   cat("CPM model specification:\n")
   cat(sprintf("  Threshold method: %s\n", x$params$thresh_method))
   cat(sprintf("  Threshold level:  %.2f\n", x$params$thresh_level))
-  cat(sprintf("  Resample folds:   %s\n", x$params$kfolds %||% "auto"))
   cat(sprintf("  Bias correction:  %s\n", x$params$bias_correct))
-  cat(sprintf("  Return edges:     %s\n", x$params$return_edges))
-  cat(sprintf("  NA action:        %s\n", x$params$na_action))
   invisible(x)
 }
 
@@ -133,6 +124,13 @@ print.cpm_spec <- function(x, ...) {
 #' @param covariates A matrix of covariates. Observations in row, variables in
 #'   column. If `NULL`, no covariates are used. Note if a vector is provided, it
 #'   will be converted to a column matrix.
+#' @param return_edges A character string indicating the return value of the
+#'   selected edges. If `"none"`, no edges are returned. If `"sum"`, the sum of
+#'   selected edges is returned. If `"all"`, the selected edges are returned as
+#'   a 3D array with a singleton third dimension.
+#' @param na_action A character string indicating the action when missing values
+#'   are found in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
+#'   missing values will be excluded from the analysis but kept in the output.
 #'
 #' @return A fitted `cpm` object from a single in-sample fit.
 #' @export
@@ -141,16 +139,24 @@ fit.cpm_spec <- function(
   conmat,
   behav,
   ...,
-  covariates = NULL
+  covariates = NULL,
+  return_edges = c("sum", "none", "all"),
+  na_action = c("fail", "exclude")
 ) {
   call <- match.call()
   call[[1]] <- quote(fit)
+
+  return_edges <- match.arg(return_edges)
+  na_action <- match.arg(na_action)
+
   fit_cpm_single(
     call = call,
     object = object,
     conmat = conmat,
     behav = behav,
-    covariates = covariates
+    covariates = covariates,
+    return_edges = return_edges,
+    na_action = na_action
   )
 }
 
@@ -159,7 +165,15 @@ fit.cpm_spec <- function(
 #' @rdname cpm_spec
 #' @param resamples Optional list of assessment indices defining resamples.
 #'   Each element must be an integer vector indexing rows in `conmat`. If
-#'   `NULL`, folds are generated from `kfolds` in `object`.
+#'   `NULL`, folds are generated from `kfolds`.
+#' @param kfolds Number of folds used when `resamples` is `NULL`. If `NULL`,
+#'   it is set to the number of complete-case observations (LOOCV).
+#' @param return_edges A character string controlling edge storage from
+#'   resampling. If `"none"`, no edges are stored. If `"sum"`, fold-level edges
+#'   are summed across folds. If `"all"`, edges are stored for each fold.
+#' @param na_action A character string indicating the action when missing values
+#'   are found in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
+#'   missing values will be excluded from the analysis but kept in the output.
 #'
 #' @return A `cpm_resamples` object containing fold-level metrics and
 #'   observation-level predictions.
@@ -170,9 +184,14 @@ fit_resamples.cpm_spec <- function(
   behav,
   ...,
   covariates = NULL,
-  resamples = NULL
+  resamples = NULL,
+  kfolds = NULL,
+  return_edges = c("none", "sum", "all"),
+  na_action = c("fail", "exclude")
 ) {
   params <- object$params
+  return_edges <- match.arg(return_edges)
+  na_action <- match.arg(na_action)
 
   normalized <- normalize_inputs(conmat, behav, covariates)
   behav <- normalized$behav
@@ -182,19 +201,24 @@ fit_resamples.cpm_spec <- function(
     conmat,
     behav,
     covariates,
-    params$na_action
+    na_action
   )
 
   if (is.null(resamples)) {
-    kfolds <- resolve_kfolds(params$kfolds, include_cases)
+    kfolds <- resolve_kfolds(validate_kfolds(kfolds), include_cases)
     folds <- crossv_kfold(include_cases, kfolds)
   } else {
+    if (!is.null(kfolds)) {
+      stop("Specify either `resamples` or `kfolds`, not both.")
+    }
     folds <- validate_resamples(resamples, include_cases)
     kfolds <- length(folds)
   }
 
+  maybe_warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
+
   pred <- init_pred(behav)
-  edges <- init_edges(params$return_edges, conmat, kfolds)
+  edges <- init_edges(return_edges, conmat, kfolds)
   real <- behav
 
   for (fold in seq_len(kfolds)) {
@@ -205,6 +229,8 @@ fit_resamples.cpm_spec <- function(
       object,
       conmat = conmat[rows_train, , drop = FALSE],
       behav = behav[rows_train],
+      return_edges = if (return_edges == "none") "none" else "sum",
+      na_action = "fail",
       covariates = if (is.null(covariates)) {
         NULL
       } else {
@@ -239,9 +265,9 @@ fit_resamples.cpm_spec <- function(
     pred[rows_test, ] <- predict_cpm_model(fit_call$model, conmat_test)
     real[rows_test] <- behav_test
 
-    if (params$return_edges == "all") {
-      edges[,, fold] <- fit_call$edges[,, 1]
-    } else if (params$return_edges == "sum") {
+    if (return_edges == "all") {
+      edges[,, fold] <- fit_call$edges
+    } else if (return_edges == "sum") {
       edges <- edges + fit_call$edges
     }
   }
@@ -252,6 +278,7 @@ fit_resamples.cpm_spec <- function(
   new_cpm_resamples(
     spec = object,
     folds = folds,
+    edges = edges,
     metrics = metrics,
     predictions = predictions,
     params = list(
@@ -260,8 +287,8 @@ fit_resamples.cpm_spec <- function(
       thresh_level = params$thresh_level,
       kfolds = kfolds,
       bias_correct = params$bias_correct,
-      return_edges = params$return_edges,
-      na_action = params$na_action
+      return_edges = return_edges,
+      na_action = na_action
     )
   )
 }
@@ -271,6 +298,7 @@ print.cpm_resamples <- function(x, ...) {
   cat("CPM resample results:\n")
   cat(sprintf("  Number of folds: %d\n", length(x$folds)))
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
+  cat(sprintf("  Edge storage: %s\n", x$params$return_edges))
   cat("  Mean correlations:\n")
   cat(sprintf("    Both: %.3f\n", mean(x$metrics$both, na.rm = TRUE)))
   cat(sprintf("    Pos:  %.3f\n", mean(x$metrics$pos, na.rm = TRUE)))
@@ -300,6 +328,27 @@ collect_predictions.cpm_resamples <- function(x, ...) {
   tibble::as_tibble(x$predictions)
 }
 
+#' Collect selected edges from CPM resamples
+#'
+#' @param x A `cpm_resamples` object.
+#' @param format Output format for edges. Use `"raw"` to return the stored
+#'   matrix/array directly. Use `"index"` to return sparse edge indices.
+#' @param ... For future extension. Currently ignored.
+#'
+#' @return A matrix for `return_edges = "sum"`, a 3D array for
+#'   `return_edges = "all"`, or `NULL` for `return_edges = "none"` when
+#'   `format = "raw"`. For `format = "index"`, returns sparse edge indices.
+#' @export
+collect_edges.cpm_resamples <- function(x, format = c("raw", "index"), ...) {
+  format <- match.arg(format)
+
+  if (format == "raw") {
+    return(x$edges)
+  }
+
+  edges_to_index(x$edges, x$params$return_edges)
+}
+
 new_cpm_spec <- function(params) {
   structure(
     list(params = params),
@@ -307,7 +356,7 @@ new_cpm_spec <- function(params) {
   )
 }
 
-validate_cpm_spec_params <- function(thresh_level, kfolds, bias_correct) {
+validate_cpm_spec_params <- function(thresh_level, bias_correct) {
   if (
     !is.numeric(thresh_level) ||
       length(thresh_level) != 1L ||
@@ -319,6 +368,18 @@ validate_cpm_spec_params <- function(thresh_level, kfolds, bias_correct) {
     stop("`thresh_level` must be a single number between 0 and 1.")
   }
 
+  if (
+    !is.logical(bias_correct) ||
+      length(bias_correct) != 1L ||
+      is.na(bias_correct)
+  ) {
+    stop("`bias_correct` must be either TRUE or FALSE.")
+  }
+
+  invisible()
+}
+
+validate_kfolds <- function(kfolds) {
   if (
     !is.null(kfolds) &&
       (!is.numeric(kfolds) ||
@@ -333,15 +394,11 @@ validate_cpm_spec_params <- function(thresh_level, kfolds, bias_correct) {
     )
   }
 
-  if (
-    !is.logical(bias_correct) ||
-      length(bias_correct) != 1L ||
-      is.na(bias_correct)
-  ) {
-    stop("`bias_correct` must be either TRUE or FALSE.")
+  if (is.null(kfolds)) {
+    return(NULL)
   }
 
-  invisible()
+  as.integer(kfolds)
 }
 
 validate_resamples <- function(resamples, include_cases) {
@@ -370,6 +427,50 @@ validate_resamples <- function(resamples, include_cases) {
   }
 
   normalized
+}
+
+maybe_warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
+  if (return_edges != "all") {
+    return(invisible())
+  }
+
+  estimated_bytes <- as.double(n_edges) * length(corr_types) * kfolds * 4
+  threshold_bytes <- 10 * 1024^2
+  if (estimated_bytes > threshold_bytes) {
+    warning(
+      sprintf(
+        paste0(
+          "Storing fold-wise edges (`return_edges = \"all\"`) may consume ",
+          "large memory (~%.1f MB). Consider `return_edges = \"sum\"` or ",
+          "`collect_edges(format = \"index\")` for sparse export."
+        ),
+        estimated_bytes / 1024^2
+      )
+    )
+  }
+
+  invisible()
+}
+
+edges_to_index <- function(edges, return_edges) {
+  if (return_edges == "none" || is.null(edges)) {
+    return(NULL)
+  }
+
+  if (return_edges == "sum") {
+    return(list(
+      pos = which(edges[, "pos"] > 0),
+      neg = which(edges[, "neg"] > 0)
+    ))
+  }
+
+  lapply(seq_len(dim(edges)[3]), function(fold) {
+    list(
+      fold = fold,
+      pos = which(edges[, "pos", fold]),
+      neg = which(edges[, "neg", fold])
+    )
+  })
 }
 
 compute_fold_metrics <- function(real, pred, folds) {
@@ -416,11 +517,19 @@ safe_cor <- function(x, y) {
   stats::cor(x, y)
 }
 
-new_cpm_resamples <- function(spec, folds, metrics, predictions, params) {
+new_cpm_resamples <- function(
+  spec,
+  folds,
+  edges,
+  metrics,
+  predictions,
+  params
+) {
   structure(
     list(
       spec = spec,
       folds = folds,
+      edges = edges,
       metrics = metrics,
       predictions = predictions,
       params = params
@@ -434,7 +543,9 @@ fit_cpm_single <- function(
   object,
   conmat,
   behav,
-  covariates
+  covariates,
+  return_edges,
+  na_action
 ) {
   params <- object$params
 
@@ -446,7 +557,7 @@ fit_cpm_single <- function(
     conmat,
     behav,
     covariates,
-    params$na_action
+    na_action
   )
 
   pred <- init_pred(behav)
@@ -481,7 +592,7 @@ fit_cpm_single <- function(
   pred[include_cases, ] <- predict_cpm_model(model, conmat_train)
 
   edges <- switch(
-    params$return_edges,
+    return_edges,
     none = NULL,
     sum = cur_edges,
     all = {
@@ -510,7 +621,8 @@ fit_cpm_single <- function(
       covariates = !is.null(covariates),
       thresh_method = params$thresh_method,
       thresh_level = params$thresh_level,
-      kfolds = 1L,
+      return_edges = return_edges,
+      na_action = na_action,
       bias_correct = params$bias_correct
     )
   )

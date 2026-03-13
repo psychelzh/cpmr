@@ -34,8 +34,8 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-spec <- cpm_spec(kfolds = 10, return_edges = "sum")
-res <- fit(spec, conmat = conmat, behav = behav)
+spec <- cpm_spec()
+res <- fit(spec, conmat = conmat, behav = behav, return_edges = "sum")
 res
 #> CPM results:
 #>   Call: fit(object = spec, conmat = conmat, behav = behav)

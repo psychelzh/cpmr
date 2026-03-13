@@ -10,15 +10,13 @@ test_that("Default threshold method works", {
   expect_snapshot(result)
 })
 
-test_that("`fit()` is single-fit and keeps spec kfolds for resampling", {
+test_that("`fit()` is single-fit", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- fit(cpm_spec(kfolds = 5), conmat, behav)
+  result <- fit(cpm_spec(), conmat, behav)
   expect_s3_class(result, "cpm")
   expect_identical(length(result$folds), 1L)
-  expect_identical(result$params$kfolds, 1L)
-  expect_identical(result$spec$params$kfolds, 5)
   expect_snapshot_value(result$pred, style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
   expect_snapshot_value(result$params, style = "json2")
@@ -93,10 +91,10 @@ test_that("`return_edges` argument works", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- fit(cpm_spec(return_edges = "none"), conmat, behav)
+  result <- fit(cpm_spec(), conmat, behav, return_edges = "none")
   expect_null(result$edges)
   expect_snapshot(result)
-  result <- fit(cpm_spec(return_edges = "all"), conmat, behav)
+  result <- fit(cpm_spec(), conmat, behav, return_edges = "all")
   expect_snapshot_value(result$edges, style = "json2")
   expect_snapshot(result)
 })
@@ -154,27 +152,29 @@ test_that("`na_action` argument works", {
     fit(cpm_spec(), conmat, behav),
     "Missing values found in `behav`"
   )
-  result <- fit(cpm_spec(na_action = "exclude"), conmat, behav)
+  result <- fit(cpm_spec(), conmat, behav, na_action = "exclude")
   expect_equal(sum(complete.cases(result$real)), 9)
   expect_equal(sum(complete.cases(result$pred)), 9)
   expect_snapshot(result)
   covariates <- matrix(rnorm(10), ncol = 1)
   covariates[2, 1] <- NA
   result <- fit(
-    cpm_spec(na_action = "exclude"),
+    cpm_spec(),
     conmat,
     behav,
-    covariates = covariates
+    covariates = covariates,
+    na_action = "exclude"
   )
   expect_equal(sum(complete.cases(result$real)), sum(complete.cases(behav)))
   expect_equal(sum(complete.cases(result$pred)), 8)
   expect_snapshot(result)
   conmat[1, 1] <- NA
   result <- fit(
-    cpm_spec(na_action = "exclude"),
+    cpm_spec(),
     conmat,
     behav,
-    covariates = covariates
+    covariates = covariates,
+    na_action = "exclude"
   )
   expect_equal(sum(complete.cases(result$real)), sum(complete.cases(behav)))
   expect_equal(sum(complete.cases(result$pred)), 8)
@@ -192,10 +192,11 @@ test_that("Folds cover complete cases exactly when excluding missing data", {
   covariates[6, 1] <- NA
 
   result <- fit(
-    cpm_spec(na_action = "exclude"),
+    cpm_spec(),
     conmat,
     behav,
-    covariates = covariates
+    covariates = covariates,
+    na_action = "exclude"
   )
   include_cases <- intersect(
     intersect(which(complete.cases(conmat)), which(complete.cases(behav))),

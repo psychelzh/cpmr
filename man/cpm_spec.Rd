@@ -9,15 +9,30 @@
 cpm_spec(
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
-  kfolds = NULL,
-  bias_correct = TRUE,
+  bias_correct = TRUE
+)
+
+\method{fit}{cpm_spec}(
+  object,
+  conmat,
+  behav,
+  ...,
+  covariates = NULL,
   return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 )
 
-\method{fit}{cpm_spec}(object, conmat, behav, ..., covariates = NULL)
-
-\method{fit_resamples}{cpm_spec}(object, conmat, behav, ..., covariates = NULL, resamples = NULL)
+\method{fit_resamples}{cpm_spec}(
+  object,
+  conmat,
+  behav,
+  ...,
+  covariates = NULL,
+  resamples = NULL,
+  kfolds = NULL,
+  return_edges = c("none", "sum", "all"),
+  na_action = c("fail", "exclude")
+)
 }
 \arguments{
 \item{thresh_method, thresh_level}{The threshold method and level used in edge
@@ -26,23 +41,10 @@ the critical value of correlation coefficient. If method is set to be
 \code{"sparsity"}, the edge selection is based on the quantile of correlation
 coefficient, thus network sparsity is controlled.}
 
-\item{kfolds}{Number of folds used by \code{fit_resamples()} when \code{resamples} is
-\code{NULL}. If \code{NULL}, it will be set to be equal to the number of
-observations, i.e., leave-one-subject-out.}
-
 \item{bias_correct}{Logical value indicating if the connectome data should be
 bias-corrected. If \code{TRUE}, the connectome data will be centered and scaled
 to have unit variance based on the training data before model fitting and
 prediction. See Rapuano et al. (2020) for more details.}
-
-\item{return_edges}{A character string indicating the return value of the
-selected edges. If \code{"none"}, no edges are returned. If \code{"sum"}, the sum of
-selected edges across folds is returned. If \code{"all"}, the selected edges for
-each fold is returned, which is a 3D array and memory-consuming.}
-
-\item{na_action}{A character string indicating the action when missing values
-are found in \code{behav}. If \code{"fail"}, an error will be thrown. If \code{"exclude"},
-missing values will be excluded from the analysis but kept in the output.}
 
 \item{object}{A \code{cpm_spec} object.}
 
@@ -59,9 +61,20 @@ matrix, which will be converted to a vector using \code{\link[=drop]{drop()}}.}
 column. If \code{NULL}, no covariates are used. Note if a vector is provided, it
 will be converted to a column matrix.}
 
+\item{return_edges}{A character string controlling edge storage from
+resampling. If \code{"none"}, no edges are stored. If \code{"sum"}, fold-level edges
+are summed across folds. If \code{"all"}, edges are stored for each fold.}
+
+\item{na_action}{A character string indicating the action when missing values
+are found in \code{behav}. If \code{"fail"}, an error will be thrown. If \code{"exclude"},
+missing values will be excluded from the analysis but kept in the output.}
+
 \item{resamples}{Optional list of assessment indices defining resamples.
 Each element must be an integer vector indexing rows in \code{conmat}. If
-\code{NULL}, folds are generated from \code{kfolds} in \code{object}.}
+\code{NULL}, folds are generated from \code{kfolds}.}
+
+\item{kfolds}{Number of folds used when \code{resamples} is \code{NULL}. If \code{NULL},
+it is set to the number of complete-case observations (LOOCV).}
 }
 \value{
 A \code{cpm_spec} object storing parameters for later fitting.
@@ -77,7 +90,7 @@ parameters required to fit a connectome-based predictive model later with
 \code{\link[=fit]{fit()}}.
 }
 \examples{
-spec <- cpm_spec(kfolds = 10, return_edges = "sum")
+spec <- cpm_spec(thresh_level = 0.01)
 spec
 
 conmat <- matrix(rnorm(100 * 100), nrow = 100)

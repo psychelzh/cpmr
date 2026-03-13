@@ -16,7 +16,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct", "method", "both", "pos", "neg"]
+          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct", "method", "both", "pos", "neg"]
         }
       },
       "value": [
@@ -41,9 +41,14 @@
           "value": [0.01]
         },
         {
-          "type": "integer",
+          "type": "character",
           "attributes": {},
-          "value": [1]
+          "value": ["sum"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         },
         {
           "type": "logical",
@@ -91,7 +96,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct", "level", "pos", "neg"]
+          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct", "level", "pos", "neg"]
         }
       },
       "value": [
@@ -116,9 +121,14 @@
           "value": [0.01]
         },
         {
-          "type": "integer",
+          "type": "character",
           "attributes": {},
-          "value": [1]
+          "value": ["sum"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         },
         {
           "type": "logical",
