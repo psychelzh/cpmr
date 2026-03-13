@@ -121,20 +121,36 @@ new_cpm_spec <- function(params) {
 }
 
 validate_cpm_spec_params <- function(thresh_level, kfolds, bias_correct) {
-  if (!is.numeric(thresh_level) || length(thresh_level) != 1L ||
-    is.na(thresh_level) || !is.finite(thresh_level) ||
-    thresh_level < 0 || thresh_level > 1) {
+  if (
+    !is.numeric(thresh_level) ||
+      length(thresh_level) != 1L ||
+      is.na(thresh_level) ||
+      !is.finite(thresh_level) ||
+      thresh_level < 0 ||
+      thresh_level > 1
+  ) {
     stop("`thresh_level` must be a single number between 0 and 1.")
   }
 
-  if (!is.null(kfolds) &&
-    (!is.numeric(kfolds) || length(kfolds) != 1L || is.na(kfolds) ||
-      !is.finite(kfolds) || kfolds < 2 || kfolds %% 1 != 0)) {
-    stop("`kfolds` must be NULL or a single integer greater than or equal to 2.")
+  if (
+    !is.null(kfolds) &&
+      (!is.numeric(kfolds) ||
+        length(kfolds) != 1L ||
+        is.na(kfolds) ||
+        !is.finite(kfolds) ||
+        kfolds < 2 ||
+        kfolds %% 1 != 0)
+  ) {
+    stop(
+      "`kfolds` must be NULL or a single integer greater than or equal to 2."
+    )
   }
 
-  if (!is.logical(bias_correct) || length(bias_correct) != 1L ||
-    is.na(bias_correct)) {
+  if (
+    !is.logical(bias_correct) ||
+      length(bias_correct) != 1L ||
+      is.na(bias_correct)
+  ) {
     stop("`bias_correct` must be either TRUE or FALSE.")
   }
 
