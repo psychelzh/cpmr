@@ -1,0 +1,132 @@
+---
+title: "Getting Started with cpmr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with cpmr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+`cpmr` implements connectome predictive modeling (CPM) for behavioral prediction
+from functional connectivity features.
+
+This vignette gives a minimal workflow for:
+
+- preparing inputs;
+- fitting a single CPM model;
+- running cross-validated resampling;
+- collecting and inspecting outputs.
+
+## Data Shape
+
+CPM in `cpmr` expects:
+
+- `conmat`: a numeric matrix with rows as subjects and columns as edges;
+- `behav`: a numeric vector with one value per subject;
+- optional `covariates`: numeric matrix/vector with one row per subject.
+
+```{r}
+library(cpmr)
+
+withr::local_seed(123)
+n <- 80
+p <- 200
+conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
+behav <- rowMeans(conmat[, 1:12, drop = FALSE]) + rnorm(n, sd = 0.5)
+covariates <- matrix(rnorm(n), ncol = 1)
+```
+
+## Single-Fit Workflow
+
+Use `fit()` when you want one in-sample fitted object.
+
+```{r}
+spec <- cpm_spec(
+  thresh_method = "alpha",
+  thresh_level = 0.05,
+  bias_correct = TRUE
+)
+
+fit_obj <- fit(
+  spec,
+  conmat = conmat,
+  behav = behav,
+  covariates = covariates,
+  return_edges = "sum",
+  na_action = "exclude"
+)
+
+fit_obj
+summary(fit_obj)
+```
+
+## Resampling Workflow
+
+Use `fit_resamples()` for cross-validated or custom resampling workflows.
+
+```{r}
+res_obj <- fit_resamples(
+  spec,
+  conmat = conmat,
+  behav = behav,
+  covariates = covariates,
+  kfolds = 5,
+  return_edges = "sum",
+  na_action = "exclude"
+)
+
+res_obj
+```
+
+## Collect Results
+
+`cpmr` provides standardized accessors for downstream inspection.
+
+```{r}
+metrics <- collect_metrics(res_obj)
+predictions <- collect_predictions(res_obj)
+edges <- collect_edges(res_obj)
+
+head(metrics)
+head(predictions)
+str(edges)
+```
+
+## Custom Resamples
+
+You can pass a custom `resamples` list where each element stores assessment row
+indices for one fold.
+
+```{r}
+custom_resamples <- list(
+  1:16,
+  17:32,
+  33:48,
+  49:64,
+  65:80
+)
+
+custom_res_obj <- fit_resamples(
+  spec,
+  conmat = conmat,
+  behav = behav,
+  resamples = custom_resamples,
+  return_edges = "none"
+)
+
+collect_metrics(custom_res_obj)
+```
+
+## Next Steps
+
+- See the leakage-focused vignette for covariate leakage control details.
+- Use `summary()` and `tidy()` for reporting and post-processing.
