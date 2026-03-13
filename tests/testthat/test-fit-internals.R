@@ -1,7 +1,4 @@
 test_that("internal helpers validate nullable kfolds and finite resamples", {
-  validate_kfolds <- getFromNamespace("validate_kfolds", "cpmr")
-  validate_resamples <- getFromNamespace("validate_resamples", "cpmr")
-
   expect_null(validate_kfolds(NULL))
   expect_identical(validate_kfolds(5), 5L)
 
@@ -23,11 +20,6 @@ test_that("internal helpers validate nullable kfolds and finite resamples", {
 })
 
 test_that("large fold-wise edge storage warning is emitted", {
-  maybe_warn_large_edge_storage <- getFromNamespace(
-    "maybe_warn_large_edge_storage",
-    "cpmr"
-  )
-
   expect_warning(
     maybe_warn_large_edge_storage(
       n_edges = 140000,
