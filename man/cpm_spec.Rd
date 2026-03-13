@@ -54,8 +54,6 @@ matrix, which will be converted to a vector using \code{\link[=drop]{drop()}}.}
 \item{covariates}{A matrix of covariates. Observations in row, variables in
 column. If \code{NULL}, no covariates are used. Note if a vector is provided, it
 will be converted to a column matrix.}
-
-\item{confounds}{Deprecated alias of \code{covariates}.}
 }
 \value{
 A \code{cpm_spec} object storing parameters for later fitting.

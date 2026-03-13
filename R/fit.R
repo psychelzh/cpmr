@@ -86,7 +86,6 @@ print.cpm_spec <- function(x, ...) {
 #' @param covariates A matrix of covariates. Observations in row, variables in
 #'   column. If `NULL`, no covariates are used. Note if a vector is provided, it
 #'   will be converted to a column matrix.
-#' @param confounds Deprecated alias of `covariates`.
 #'
 #' @return A fitted `cpm` object.
 #' @export

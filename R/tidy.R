@@ -8,7 +8,7 @@ generics::tidy
 #' @param ... Additional arguments passed to `summary()`.
 #' @param component A character vector indicating the component to tidy.
 #' @return A [tibble][tibble::tibble-package] with columns storing parameters of the
-#'   [cpm()] object and further columns depending on the `component` argument:
+#'   `cpm` object and further columns depending on the `component` argument:
 #'
 #'   For `component = "performance"`:
 #'
@@ -46,7 +46,7 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
       if (is.null(sum_x$edges)) {
         warning(
           "No edges stored in the object.\n",
-          "* You probably called `cpm()` with `return_edges = \"none\"`."
+          "* You probably called `fit(cpm_spec(...), ...)` with `return_edges = \"none\"`."
         )
         return(tibble::tibble())
       }
