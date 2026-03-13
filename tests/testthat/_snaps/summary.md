@@ -5,11 +5,11 @@
     Output
       CPM summary:
         Performance (Pearson):
-          Positive: 0.897
-          Negative: -0.119
-          Combined: 0.809
+          Positive: 0.988
+          Negative: 0.934
+          Combined: 0.989
         Prop. edges (50% folds):
-          Positive: 0.50%
+          Positive: 1.00%
           Negative: 0.30%
 
 ---
@@ -19,9 +19,9 @@
     Output
       CPM summary:
         Performance (Pearson):
-          Positive: 0.897
-          Negative: -0.119
-          Combined: 0.809
+          Positive: 0.988
+          Negative: 0.934
+          Combined: 0.989
 
 ---
 
@@ -30,10 +30,10 @@
     Output
       CPM summary:
         Performance (Pearson):
-          Positive: 0.897
-          Negative: -0.119
-          Combined: 0.809
+          Positive: 0.988
+          Negative: 0.934
+          Combined: 0.989
         Prop. edges (50% folds):
-          Positive: 0.50%
+          Positive: 1.00%
           Negative: 0.30%
 

@@ -40,50 +40,6 @@ select_edges <- function(conmat, behav, method, level) {
   )
 }
 
-predict_cpm <- function(conmat, behav, conmat_new, edges, bias_correct) {
-  if (bias_correct) {
-    center <- Rfast::colmeans(conmat)
-    scale <- Rfast::colVars(conmat, std = TRUE)
-    conmat <- fscale(conmat, center, scale)
-    conmat_new <- fscale(conmat_new, center, scale)
-  }
-  allocate_predictors <- function(nrow) {
-    matrix(
-      1,
-      nrow = nrow,
-      ncol = length(corr_types) + 1,
-      dimnames = list(NULL, c("(Intercept)", corr_types))
-    )
-  }
-  x <- allocate_predictors(dim(conmat)[1])
-  x_new <- allocate_predictors(dim(conmat_new)[1])
-  for (corr_type in corr_types) {
-    x[, corr_type] <- Rfast::rowsums(
-      conmat[, edges[, corr_type], drop = FALSE]
-    )
-    x_new[, corr_type] <- Rfast::rowsums(
-      conmat_new[, edges[, corr_type], drop = FALSE]
-    )
-  }
-  pred <- matrix(
-    nrow = dim(conmat_new)[1],
-    ncol = length(inc_edges),
-    dimnames = list(NULL, inc_edges)
-  )
-  for (inc_edge in inc_edges) {
-    if (inc_edge == "both") {
-      cur_x <- x
-      cur_x_new <- x_new
-    } else {
-      cur_x <- x[, c("(Intercept)", inc_edge)]
-      cur_x_new <- x_new[, c("(Intercept)", inc_edge)]
-    }
-    model <- stats::.lm.fit(cur_x, behav)
-    pred[, inc_edge] <- cur_x_new %*% model$coefficients
-  }
-  pred
-}
-
 regress_covariates <- function(resp, covariates) {
   stats::.lm.fit(cbind(1, covariates), resp)$residuals
 }

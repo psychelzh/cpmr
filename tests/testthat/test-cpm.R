@@ -10,12 +10,13 @@ test_that("Default threshold method works", {
   expect_snapshot(result)
 })
 
-test_that("`kfolds` works", {
+test_that("`fit()` is single-fit", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- fit(cpm_spec(kfolds = 5), conmat, behav)
+  result <- fit(cpm_spec(), conmat, behav)
   expect_s3_class(result, "cpm")
+  expect_identical(length(result$folds), 1L)
   expect_snapshot_value(result$pred, style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
   expect_snapshot_value(result$params, style = "json2")
@@ -58,9 +59,7 @@ test_that("Works with covariates", {
   expect_true(isTRUE(result$params$covariates))
 })
 
-test_that("Fold-wise covariate regression differs from global pre-CV regression", {
-  # Verifies that the implementation actually uses fold-wise regression
-  # (leakage-safe), not global regression applied before CV.
+test_that("fit with covariates uses in-sample residualized target scale", {
   withr::local_seed(42)
   n <- 30
   p <- 20
@@ -69,19 +68,12 @@ test_that("Fold-wise covariate regression differs from global pre-CV regression"
   behav <- cov * 2 + rnorm(n)
   covariates <- matrix(cov, ncol = 1)
 
-  result_foldwise <- fit(
-    cpm_spec(kfolds = 5),
-    conmat,
-    behav,
-    covariates = covariates
-  )
+  result <- fit(cpm_spec(), conmat, behav, covariates = covariates)
 
-  regress_covariates <- getFromNamespace("regress_covariates", "cpmr")
-  behav_global <- regress_covariates(behav, covariates)
-  result_global <- fit(cpm_spec(kfolds = 5), conmat, behav_global)
+  behav_resid <- drop(regress_covariates(behav, covariates))
 
-  expect_false(isTRUE(all.equal(result_foldwise$pred, result_global$pred)))
-  expect_false(isTRUE(all.equal(result_foldwise$real, result_global$real)))
+  expect_equal(result$real, behav_resid)
+  expect_true(isTRUE(all(stats::complete.cases(result$pred))))
 })
 
 test_that("Keep names of behavior", {
@@ -98,11 +90,13 @@ test_that("`return_edges` argument works", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- fit(cpm_spec(return_edges = "none"), conmat, behav)
+  result <- fit(cpm_spec(), conmat, behav, return_edges = "none")
   expect_null(result$edges)
+  expect_null(collect_edges(result))
   expect_snapshot(result)
-  result <- fit(cpm_spec(return_edges = "all"), conmat, behav)
+  result <- fit(cpm_spec(), conmat, behav, return_edges = "all")
   expect_snapshot_value(result$edges, style = "json2")
+  expect_equal(collect_edges(result), result$edges)
   expect_snapshot(result)
 })
 
@@ -159,27 +153,29 @@ test_that("`na_action` argument works", {
     fit(cpm_spec(), conmat, behav),
     "Missing values found in `behav`"
   )
-  result <- fit(cpm_spec(na_action = "exclude"), conmat, behav)
+  result <- fit(cpm_spec(), conmat, behav, na_action = "exclude")
   expect_equal(sum(complete.cases(result$real)), 9)
   expect_equal(sum(complete.cases(result$pred)), 9)
   expect_snapshot(result)
   covariates <- matrix(rnorm(10), ncol = 1)
   covariates[2, 1] <- NA
   result <- fit(
-    cpm_spec(na_action = "exclude"),
+    cpm_spec(),
     conmat,
     behav,
-    covariates = covariates
+    covariates = covariates,
+    na_action = "exclude"
   )
   expect_equal(sum(complete.cases(result$real)), sum(complete.cases(behav)))
   expect_equal(sum(complete.cases(result$pred)), 8)
   expect_snapshot(result)
   conmat[1, 1] <- NA
   result <- fit(
-    cpm_spec(na_action = "exclude"),
+    cpm_spec(),
     conmat,
     behav,
-    covariates = covariates
+    covariates = covariates,
+    na_action = "exclude"
   )
   expect_equal(sum(complete.cases(result$real)), sum(complete.cases(behav)))
   expect_equal(sum(complete.cases(result$pred)), 8)
@@ -197,10 +193,11 @@ test_that("Folds cover complete cases exactly when excluding missing data", {
   covariates[6, 1] <- NA
 
   result <- fit(
-    cpm_spec(na_action = "exclude"),
+    cpm_spec(),
     conmat,
     behav,
-    covariates = covariates
+    covariates = covariates,
+    na_action = "exclude"
   )
   include_cases <- intersect(
     intersect(which(complete.cases(conmat)), which(complete.cases(behav))),
@@ -209,4 +206,9 @@ test_that("Folds cover complete cases exactly when excluding missing data", {
 
   expect_setequal(unlist(result$folds), include_cases)
   expect_equal(sum(complete.cases(result$pred)), length(include_cases))
+})
+
+test_that("resolve_kfolds uses complete-case count when NULL", {
+  expect_identical(resolve_kfolds(NULL, include_cases = c(2L, 4L, 7L)), 3L)
+  expect_identical(resolve_kfolds(5L, include_cases = c(2L, 4L, 7L)), 5L)
 })
