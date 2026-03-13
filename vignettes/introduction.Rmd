@@ -74,6 +74,7 @@ summary(fit_obj)
 Use `fit_resamples()` for cross-validated or custom resampling workflows.
 
 ```{r}
+set.seed(123)
 res_obj <- fit_resamples(
   spec,
   conmat = conmat,
@@ -104,7 +105,9 @@ str(edges)
 ## Custom Resamples
 
 You can pass a custom `resamples` list where each element stores assessment row
-indices for one fold.
+indices for one fold. The `resamples` list is validated to (a) have non-overlapping
+assessment sets and (b) cover all complete-case rows exactly once. When
+`na_action = "exclude"`, indices must refer to rows in the complete-case data.
 
 ```{r}
 custom_resamples <- list(
