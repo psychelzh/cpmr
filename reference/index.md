@@ -2,9 +2,8 @@
 
 ## All functions
 
-- [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-  [`fit(`*`<cpm_spec>`*`)`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-  : Define a CPM model specification
+- [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) : Perform
+  Connectome-based Predictive Modeling (CPM)
 
 - [`summary(`*`<cpm>`*`)`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)
   [`print(`*`<cpm_summary>`*`)`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)

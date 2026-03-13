@@ -27,7 +27,8 @@ It is very simple to use this package. Just shape your connectivity
 matrix as a subjects by edges matrix, i.e., each row contains the
 correlation matrix (removed diagonal and duplicated values, e.g., lower
 triangular data) for each subject, and your behavior data a vector and
-feed them to [`fit()`](https://generics.r-lib.org/reference/fit.html).
+feed them in
+[`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) function.
 
 ``` r
 library(cpmr)
@@ -35,11 +36,10 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-spec <- cpm_spec(kfolds = 10, return_edges = "sum")
-res <- fit(spec, conmat = conmat, behav = behav)
+res <- cpm(conmat, behav, kfolds = 10, return_edges = "sum")
 res
 #> CPM results:
-#>   Call: fit(object = spec, conmat = conmat, behav = behav)
+#>   Call: cpm(conmat = conmat, behav = behav, kfolds = 10, return_edges = "sum")
 #>   Number of observations: 100
 #>     Complete cases: 100
 #>   Number of edges: 1000

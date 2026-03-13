@@ -27,8 +27,9 @@ tidy(x, ..., component = c("performance", "edges"))
 ## Value
 
 A [tibble](https://tibble.tidyverse.org/reference/tibble-package.html)
-with columns storing parameters of the `cpm` object and further columns
-depending on the `component` argument:
+with columns storing parameters of the
+[`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) object and
+further columns depending on the `component` argument:
 
 For `component = "performance"`:
 
