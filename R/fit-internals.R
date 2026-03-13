@@ -24,6 +24,9 @@ validate_resamples <- function(resamples, include_cases) {
   if (!is.list(resamples) || length(resamples) == 0L) {
     stop("`resamples` must be a non-empty list of assessment indices.")
   }
+  if (length(resamples) < 2L) {
+    stop("`resamples` must contain at least 2 assessment sets.")
+  }
 
   normalized <- lapply(resamples, function(idx) {
     if (!is.numeric(idx) || anyNA(idx) || any(!is.finite(idx))) {

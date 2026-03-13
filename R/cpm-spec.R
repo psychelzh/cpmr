@@ -145,6 +145,13 @@ fit_resamples.cpm_spec <- function(
     na_action
   )
 
+  if (length(include_cases) == 0L) {
+    stop("No complete-case observations available for resampling.")
+  }
+  if (length(include_cases) < 2L) {
+    stop("At least 2 complete-case observations are required for resampling.")
+  }
+
   if (is.null(resamples)) {
     kfolds <- resolve_kfolds(validate_kfolds(kfolds), include_cases)
     folds <- crossv_kfold(include_cases, kfolds)
@@ -166,7 +173,7 @@ fit_resamples.cpm_spec <- function(
     rows_test <- folds[[fold]]
     rows_train <- setdiff(include_cases, rows_test)
 
-    fit_call <- fit(
+    fold_fit <- fit(
       object,
       conmat = conmat[rows_train, , drop = FALSE],
       behav = behav[rows_train],
@@ -203,13 +210,13 @@ fit_resamples.cpm_spec <- function(
       behav_test <- drop(behav_regressed$test)
     }
 
-    pred[rows_test, ] <- predict_cpm_model(fit_call$model, conmat_test)
+    pred[rows_test, ] <- predict_cpm_model(fold_fit$model, conmat_test)
     real[rows_test] <- behav_test
 
     if (return_edges == "all") {
-      edges[,, fold] <- fit_call$edges
+      edges[,, fold] <- fold_fit$edges
     } else if (return_edges == "sum") {
-      edges <- edges + fit_call$edges
+      edges <- edges + fold_fit$edges
     }
   }
 

@@ -148,8 +148,8 @@ test_that("fit_resamples validates custom resamples", {
   )
   expect_error(
     fit_resamples(spec, conmat = conmat, behav = behav, resamples = list(1:5)),
-    "must cover all complete-case rows exactly once",
-    fixed = TRUE
+    "at least 2 assessment sets",
+    fixed = FALSE
   )
   expect_error(
     fit_resamples(
@@ -180,6 +180,36 @@ test_that("fit_resamples validates custom resamples", {
     ),
     "must not contain duplicates",
     fixed = FALSE
+  )
+  expect_error(
+    fit_resamples(
+      spec,
+      conmat = conmat,
+      behav = behav,
+      resamples = list(1:4, 5:8)
+    ),
+    "must cover all complete-case rows exactly once",
+    fixed = TRUE
+  )
+})
+
+test_that("fit_resamples errors clearly for insufficient complete cases", {
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rep(NA_real_, 10)
+  spec <- cpm_spec()
+
+  expect_error(
+    fit_resamples(spec, conmat = conmat, behav = behav, na_action = "exclude"),
+    "No complete-case observations available for resampling.",
+    fixed = TRUE
+  )
+
+  behav[] <- NA_real_
+  behav[1] <- 1
+  expect_error(
+    fit_resamples(spec, conmat = conmat, behav = behav, na_action = "exclude"),
+    "At least 2 complete-case observations are required for resampling.",
+    fixed = TRUE
   )
 })
 
