@@ -34,11 +34,11 @@ edge_signal <- rowMeans(conmat[, 1:10, drop = FALSE])
 behav <- 0.7 * edge_signal + 0.6 * covariates[, 1] + rnorm(n, sd = 0.5)
 
 # Leakage-safe call: covariates are handled fold-wise inside CV
-fit <- cpm(
+fit <- fit(
+  cpm_spec(kfolds = 5),
   conmat = conmat,
   behav = behav,
-  covariates = covariates,
-  kfolds = 5
+  covariates = covariates
 )
 
 summary(fit)
@@ -52,30 +52,17 @@ summary(fit)
 #>     Negative: 0.00%
 ```
 
-## Migration from `confounds` to `covariates`
+## Current API
 
-`covariates` is now the primary argument name.
-
-``` r
-# Preferred
-fit_new <- cpm(conmat, behav, covariates = covariates, kfolds = 5)
-```
-
-The old name `confounds` is still accepted as a deprecated alias for
-backward compatibility.
+Use `fit(cpm_spec(...), ...)` as the modeling entry-point.
 
 ``` r
-# Backward-compatible alias (deprecated)
-fit_old <- cpm(conmat, behav, confounds = covariates, kfolds = 5)
-#> Warning: `confounds` is deprecated; please use `covariates` instead.
-```
-
-Do not pass both in the same call.
-
-``` r
-cpm(conmat, behav, covariates = covariates, confounds = covariates)
-#> Error in `resolve_covariates()`:
-#> ! Please provide only one of `covariates` or `confounds`.
+fit_new <- fit(
+  cpm_spec(kfolds = 5),
+  conmat = conmat,
+  behav = behav,
+  covariates = covariates
+)
 ```
 
 ## Anti-Leakage Checklist

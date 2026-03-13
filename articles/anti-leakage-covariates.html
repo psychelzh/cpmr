@@ -100,11 +100,11 @@ selection) inside CV as well.</li>
 <span><span class="va">behav</span> <span class="op">&lt;-</span> <span class="fl">0.7</span> <span class="op">*</span> <span class="va">edge_signal</span> <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> <span class="va">covariates</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Leakage-safe call: covariates are handled fold-wise inside CV</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm.html">cpm</a></span><span class="op">(</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="../reference/cpm_spec.html">cpm_spec</a></span><span class="op">(</span>kfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
 <span>  conmat <span class="op">=</span> <span class="va">conmat</span>,</span>
 <span>  behav <span class="op">=</span> <span class="va">behav</span>,</span>
-<span>  covariates <span class="op">=</span> <span class="va">covariates</span>,</span>
-<span>  kfolds <span class="op">=</span> <span class="fl">5</span></span>
+<span>  covariates <span class="op">=</span> <span class="va">covariates</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
@@ -118,24 +118,17 @@ selection) inside CV as well.</li>
 <span><span class="co">#&gt;     Negative: 0.00%</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="migration-from-confounds-to-covariates">Migration from <code>confounds</code> to
-<code>covariates</code><a class="anchor" aria-label="anchor" href="#migration-from-confounds-to-covariates"></a>
+<h2 id="current-api">Current API<a class="anchor" aria-label="anchor" href="#current-api"></a>
 </h2>
-<p><code>covariates</code> is now the primary argument name.</p>
+<p>Use <code>fit(cpm_spec(...), ...)</code> as the modeling
+entry-point.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Preferred</span></span>
-<span><span class="va">fit_new</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm.html">cpm</a></span><span class="op">(</span><span class="va">conmat</span>, <span class="va">behav</span>, covariates <span class="op">=</span> <span class="va">covariates</span>, kfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<p>The old name <code>confounds</code> is still accepted as a deprecated
-alias for backward compatibility.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Backward-compatible alias (deprecated)</span></span>
-<span><span class="va">fit_old</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm.html">cpm</a></span><span class="op">(</span><span class="va">conmat</span>, <span class="va">behav</span>, confounds <span class="op">=</span> <span class="va">covariates</span>, kfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: `confounds` is deprecated; please use `covariates` instead.</span></span></code></pre></div>
-<p>Do not pass both in the same call.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/cpm.html">cpm</a></span><span class="op">(</span><span class="va">conmat</span>, <span class="va">behav</span>, covariates <span class="op">=</span> <span class="va">covariates</span>, confounds <span class="op">=</span> <span class="va">covariates</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `resolve_covariates()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Please provide only one of `covariates` or `confounds`.</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">fit_new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="../reference/cpm_spec.html">cpm_spec</a></span><span class="op">(</span>kfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
+<span>  conmat <span class="op">=</span> <span class="va">conmat</span>,</span>
+<span>  behav <span class="op">=</span> <span class="va">behav</span>,</span>
+<span>  covariates <span class="op">=</span> <span class="va">covariates</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="anti-leakage-checklist">Anti-Leakage Checklist<a class="anchor" aria-label="anchor" href="#anti-leakage-checklist"></a>
