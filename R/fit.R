@@ -114,10 +114,6 @@ new_cpm_spec <- function(params) {
   )
 }
 
-`%||%` <- function(x, y) {
-  if (is.null(x)) y else x
-}
-
 fit_cpm_workflow <- function(
   call,
   object,
