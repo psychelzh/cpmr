@@ -97,7 +97,7 @@ fit_obj <- fit(
   conmat     = conmat,
   behav      = behav,
   covariates = covariates,
-  return_edges = "sum",   # store edge selection counts (edges × networks matrix)
+  return_edges = "sum",   # store edge selection mask: p × 2 matrix (pos / neg columns)
   na_action  = "exclude"  # silently drop subjects with any missing value
 )
 
@@ -160,8 +160,9 @@ performance of the model.
 
 ### Out-of-sample predictions
 
-`collect_predictions()` returns the raw predicted value for every subject in
-every fold they were held out.
+`collect_predictions()` returns one row per original observation. The `fold`
+column records which fold held out that subject; subjects excluded by
+`na_action = "exclude"` appear with `fold = NA` and `NA` predicted values.
 
 ```{r}
 predictions <- collect_predictions(res_obj)
@@ -173,7 +174,7 @@ inspect individual subjects.
 
 ### Selected edges
 
-`collect_edges()` returns a matrix of edge selection counts across folds
+`collect_edges()` returns a `p × 2` matrix with columns `pos` and `neg`
 (for `return_edges = "sum"`): each cell records how many folds selected that
 edge. Higher counts indicate more consistently selected edges.
 
@@ -193,8 +194,9 @@ can override this with your own partition scheme — useful when you need
 
 Pass a list where each element is a vector of **held-out row indices** for that
 fold. `cpmr` validates that the sets (a) are non-overlapping and (b) together
-cover every complete-case subject exactly once. When `na_action = "exclude"`,
-indices refer to rows in the complete-case data, not the original data.
+cover every complete-case subject exactly once. Indices must be **original row
+numbers** from the full dataset, restricted to complete-case rows — they are
+*not* renumbered after subjects with missing data are excluded.
 
 ```{r}
 # Manual 5-fold split: subjects 1–16, 17–32, …
