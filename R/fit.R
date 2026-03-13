@@ -617,7 +617,6 @@ fit_cpm_single <- function(
     model = model,
     spec = object,
     params = list(
-      fit_mode = "single",
       covariates = !is.null(covariates),
       thresh_method = params$thresh_method,
       thresh_level = params$thresh_level,

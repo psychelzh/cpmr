@@ -62,15 +62,10 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["single"]
-        },
         {
           "type": "logical",
           "attributes": {},
@@ -116,7 +111,6 @@
         Number of edges: 10
         Parameters:
           Covariates:       FALSE
-          Fit mode:         single
           Threshold method: alpha
           Threshold level:  0.01
           Stored splits:    1
@@ -186,15 +180,10 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["single"]
-        },
         {
           "type": "logical",
           "attributes": {},
@@ -240,7 +229,6 @@
         Number of edges: 10
         Parameters:
           Covariates:       FALSE
-          Fit mode:         single
           Threshold method: alpha
           Threshold level:  0.01
           Stored splits:    1
@@ -310,15 +298,10 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["single"]
-        },
         {
           "type": "logical",
           "attributes": {},
@@ -365,7 +348,6 @@
         Number of edges: 10
         Parameters:
           Covariates:       FALSE
-          Fit mode:         single
           Threshold method: sparsity
           Threshold level:  0.01
           Stored splits:    1
@@ -435,15 +417,10 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["single"]
-        },
         {
           "type": "logical",
           "attributes": {},
@@ -489,7 +466,6 @@
         Number of edges: 10
         Parameters:
           Covariates:       FALSE
-          Fit mode:         single
           Threshold method: alpha
           Threshold level:  0.10
           Stored splits:    1
@@ -507,7 +483,6 @@
         Number of edges: not stored
         Parameters:
           Covariates:       FALSE
-          Fit mode:         single
           Threshold method: alpha
           Threshold level:  0.01
           Stored splits:    1
@@ -556,7 +531,6 @@
         Number of edges: 10
         Parameters:
           Covariates:       FALSE
-          Fit mode:         single
           Threshold method: alpha
           Threshold level:  0.01
           Stored splits:    1
@@ -574,7 +548,6 @@
         Number of edges: 10
         Parameters:
           Covariates:       FALSE
-          Fit mode:         single
           Threshold method: alpha
           Threshold level:  0.01
           Stored splits:    1
@@ -593,7 +566,6 @@
         Number of edges: 10
         Parameters:
           Covariates:       TRUE
-          Fit mode:         single
           Threshold method: alpha
           Threshold level:  0.01
           Stored splits:    1
@@ -612,7 +584,6 @@
         Number of edges: 10
         Parameters:
           Covariates:       TRUE
-          Fit mode:         single
           Threshold method: alpha
           Threshold level:  0.01
           Stored splits:    1

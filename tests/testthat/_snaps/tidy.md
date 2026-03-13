@@ -16,15 +16,10 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct", "method", "both", "pos", "neg"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct", "method", "both", "pos", "neg"]
         }
       },
       "value": [
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["single"]
-        },
         {
           "type": "logical",
           "attributes": {},
@@ -96,15 +91,10 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["fit_mode", "covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct", "level", "pos", "neg"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct", "level", "pos", "neg"]
         }
       },
       "value": [
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["single"]
-        },
         {
           "type": "logical",
           "attributes": {},
