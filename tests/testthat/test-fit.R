@@ -73,3 +73,67 @@ test_that("print.cpm_spec shows explicit folds when kfolds is set", {
 
   expect_output(print(spec), "CV folds:         5")
 })
+
+test_that("fit_resamples returns fold metrics and predictions", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+  spec <- cpm_spec(kfolds = 5)
+
+  res <- fit_resamples(spec, conmat = conmat, behav = behav)
+
+  expect_s3_class(res, "cpm_resamples")
+  expect_s3_class(res$spec, "cpm_spec")
+  expect_identical(length(res$folds), 5L)
+  expect_equal(nrow(collect_metrics(res)), 5)
+  expect_equal(nrow(collect_predictions(res)), 10)
+  expect_named(
+    collect_metrics(res),
+    c("fold", "n_assess", "both", "pos", "neg")
+  )
+  expect_named(
+    collect_predictions(res),
+    c("row", "fold", "real", "both", "pos", "neg")
+  )
+})
+
+test_that("fit_resamples accepts custom resample indices", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  spec <- cpm_spec(na_action = "exclude")
+
+  resamples <- list(1:3, 4:6, 7:10)
+  res <- fit_resamples(
+    spec,
+    conmat = conmat,
+    behav = behav,
+    resamples = resamples
+  )
+
+  expect_identical(length(res$folds), length(resamples))
+  expect_identical(res$folds, resamples)
+})
+
+test_that("fit_resamples validates custom resamples", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+  spec <- cpm_spec()
+
+  expect_error(
+    fit_resamples(
+      spec,
+      conmat = conmat,
+      behav = behav,
+      resamples = list(1:6, 6:10)
+    ),
+    "must not overlap",
+    fixed = FALSE
+  )
+  expect_error(
+    fit_resamples(spec, conmat = conmat, behav = behav, resamples = list(1:5)),
+    "must cover all complete-case rows exactly once",
+    fixed = TRUE
+  )
+})

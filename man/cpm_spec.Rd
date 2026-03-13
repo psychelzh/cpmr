@@ -3,6 +3,7 @@
 \name{cpm_spec}
 \alias{cpm_spec}
 \alias{fit.cpm_spec}
+\alias{fit_resamples.cpm_spec}
 \title{Define a CPM model specification}
 \usage{
 cpm_spec(
@@ -15,6 +16,8 @@ cpm_spec(
 )
 
 \method{fit}{cpm_spec}(object, conmat, behav, ..., covariates = NULL)
+
+\method{fit_resamples}{cpm_spec}(object, conmat, behav, ..., covariates = NULL, resamples = NULL)
 }
 \arguments{
 \item{thresh_method, thresh_level}{The threshold method and level used in edge
@@ -54,11 +57,18 @@ matrix, which will be converted to a vector using \code{\link[=drop]{drop()}}.}
 \item{covariates}{A matrix of covariates. Observations in row, variables in
 column. If \code{NULL}, no covariates are used. Note if a vector is provided, it
 will be converted to a column matrix.}
+
+\item{resamples}{Optional list of assessment indices defining resamples.
+Each element must be an integer vector indexing rows in \code{conmat}. If
+\code{NULL}, folds are generated from \code{kfolds} in \code{object}.}
 }
 \value{
 A \code{cpm_spec} object storing parameters for later fitting.
 
 A fitted \code{cpm} object.
+
+A \code{cpm_resamples} object containing fold-level metrics and
+observation-level predictions.
 }
 \description{
 Create a lightweight specification object that stores the modeling
