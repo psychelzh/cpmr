@@ -217,13 +217,14 @@ regress_covariates_by_train <- function(
   )
 }
 
-new_cpm <- function(call, folds, behav, pred, edges, params) {
+new_cpm <- function(call, folds, behav, pred, edges, spec, params) {
   structure(
     list(
       folds = folds,
       real = behav,
       pred = pred,
       edges = edges,
+      spec = spec,
       call = call,
       params = params
     ),

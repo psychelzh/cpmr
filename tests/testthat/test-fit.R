@@ -24,6 +24,41 @@ test_that("fit.cpm_spec returns a cpm object with correct call", {
   result <- fit(spec, conmat = conmat, behav = behav)
   expect_s3_class(result, "cpm")
   expect_identical(as.character(result$call[[1]]), "fit")
+  expect_s3_class(result$spec, "cpm_spec")
+  expect_identical(result$spec, spec)
+})
+
+test_that("cpm_spec validates scalar parameter values", {
+  expect_error(
+    cpm_spec(thresh_level = -0.1),
+    "`thresh_level` must be a single number between 0 and 1.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_spec(thresh_level = c(0.1, 0.2)),
+    "`thresh_level` must be a single number between 0 and 1.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_spec(kfolds = 1),
+    "`kfolds` must be NULL or a single integer greater than or equal to 2.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_spec(kfolds = 2.5),
+    "`kfolds` must be NULL or a single integer greater than or equal to 2.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_spec(bias_correct = NA),
+    "`bias_correct` must be either TRUE or FALSE.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_spec(bias_correct = c(TRUE, FALSE)),
+    "`bias_correct` must be either TRUE or FALSE.",
+    fixed = TRUE
+  )
 })
 
 test_that("print.cpm_spec shows auto folds when kfolds is NULL", {

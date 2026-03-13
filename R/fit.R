@@ -45,6 +45,12 @@ cpm_spec <- function(
   return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 ) {
+  validate_cpm_spec_params(
+    thresh_level = thresh_level,
+    kfolds = kfolds,
+    bias_correct = bias_correct
+  )
+
   thresh_method <- match.arg(thresh_method)
   return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
@@ -114,6 +120,27 @@ new_cpm_spec <- function(params) {
   )
 }
 
+validate_cpm_spec_params <- function(thresh_level, kfolds, bias_correct) {
+  if (!is.numeric(thresh_level) || length(thresh_level) != 1L ||
+    is.na(thresh_level) || !is.finite(thresh_level) ||
+    thresh_level < 0 || thresh_level > 1) {
+    stop("`thresh_level` must be a single number between 0 and 1.")
+  }
+
+  if (!is.null(kfolds) &&
+    (!is.numeric(kfolds) || length(kfolds) != 1L || is.na(kfolds) ||
+      !is.finite(kfolds) || kfolds < 2 || kfolds %% 1 != 0)) {
+    stop("`kfolds` must be NULL or a single integer greater than or equal to 2.")
+  }
+
+  if (!is.logical(bias_correct) || length(bias_correct) != 1L ||
+    is.na(bias_correct)) {
+    stop("`bias_correct` must be either TRUE or FALSE.")
+  }
+
+  invisible()
+}
+
 fit_cpm_workflow <- function(
   call,
   object,
@@ -158,6 +185,7 @@ fit_cpm_workflow <- function(
     behav = cv_result$real,
     pred = cv_result$pred,
     edges = cv_result$edges,
+    spec = object,
     params = list(
       covariates = !is.null(covariates),
       thresh_method = params$thresh_method,
