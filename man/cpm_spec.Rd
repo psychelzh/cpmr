@@ -2,9 +2,8 @@
 % Please edit documentation in R/fit.R
 \name{cpm_spec}
 \alias{cpm_spec}
-\alias{print.cpm_spec}
 \alias{fit.cpm_spec}
-\title{Define and fit a CPM model specification}
+\title{Define a CPM model specification}
 \usage{
 cpm_spec(
   thresh_method = c("alpha", "sparsity"),
@@ -15,16 +14,7 @@ cpm_spec(
   na_action = c("fail", "exclude")
 )
 
-\method{print}{cpm_spec}(x, ...)
-
-\method{fit}{cpm_spec}(
-  object,
-  conmat,
-  behav,
-  ...,
-  covariates = NULL,
-  confounds = NULL
-)
+\method{fit}{cpm_spec}(object, conmat, behav, ..., covariates = NULL, confounds = NULL)
 }
 \arguments{
 \item{thresh_method, thresh_level}{The threshold method and level used in edge
@@ -50,10 +40,6 @@ each fold is returned, which is a 3D array and memory-consuming.}
 are found in \code{behav}. If \code{"fail"}, an error will be thrown. If \code{"exclude"},
 missing values will be excluded from the analysis but kept in the output.}
 
-\item{x}{A \code{cpm_spec} object.}
-
-\item{...}{For future extension. Currently ignored.}
-
 \item{object}{A \code{cpm_spec} object.}
 
 \item{conmat}{A matrix of connectome data. Observations in row, edges in
@@ -63,6 +49,8 @@ column (assumed that duplicated edges are removed).}
 number of observations in \code{conmat}. Note \code{behav} could also be a row/column
 matrix, which will be converted to a vector using \code{\link[=drop]{drop()}}.}
 
+\item{...}{For future extension. Currently ignored.}
+
 \item{covariates}{A matrix of covariates. Observations in row, variables in
 column. If \code{NULL}, no covariates are used. Note if a vector is provided, it
 will be converted to a column matrix.}
@@ -70,13 +58,14 @@ will be converted to a column matrix.}
 \item{confounds}{Deprecated alias of \code{covariates}.}
 }
 \value{
-\code{cpm_spec()} returns a \code{cpm_spec} object storing parameters for later fitting.
+A \code{cpm_spec} object storing parameters for later fitting.
 
-\code{fit.cpm_spec()} returns a fitted \code{cpm} object.
+A fitted \code{cpm} object.
 }
 \description{
-\code{cpm_spec()} creates a lightweight specification object for connectome-based
-predictive modeling. Fit the specification later with \code{\link[=fit]{fit()}}.
+Create a lightweight specification object that stores the modeling
+parameters required to fit a connectome-based predictive model later with
+\code{\link[=fit]{fit()}}.
 }
 \examples{
 spec <- cpm_spec(kfolds = 10, return_edges = "sum")
