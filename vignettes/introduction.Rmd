@@ -76,14 +76,14 @@ all algorithm choices into a single reusable object.
 spec <- cpm_spec(
   thresh_method = "alpha",  # select edges by p-value
   thresh_level  = 0.05,     # keep edges with p < 0.05
-  bias_correct  = TRUE      # apply bias correction to edge–behavior correlation
+  bias_correct  = TRUE      # center and scale connectivity features using training-set statistics
 )
 ```
 
 `thresh_method = "alpha"` is the classic CPM approach: include any edge whose
 correlation with behavior is significant at the chosen alpha level. You can
-also threshold by the raw correlation magnitude (`thresh_method = "spearman"`
-or `"pearson"`) if you prefer.
+also use `thresh_method = "sparsity"` to keep the top-*k* % of edges by
+correlation magnitude (controlling network sparsity rather than significance).
 
 ## Step 1 — Fit on the Full Sample
 
@@ -97,7 +97,7 @@ fit_obj <- fit(
   conmat     = conmat,
   behav      = behav,
   covariates = covariates,
-  return_edges = "sum",   # store per-network edge sums for each subject
+  return_edges = "sum",   # store edge selection counts (edges × networks matrix)
   na_action  = "exclude"  # silently drop subjects with any missing value
 )
 
@@ -105,9 +105,10 @@ fit_obj
 summary(fit_obj)
 ```
 
-`summary()` reports the Pearson and Spearman correlation between the model's
-predicted scores and the observed behavior — one row for the positive network
-and one for the negative network.
+`summary()` reports the correlation between predicted scores and observed behavior.
+It returns a single row with three columns — `both`, `pos`, and `neg` — corresponding
+to the combined network, the positive network, and the negative network respectively.
+The default method is Pearson; pass `method = "spearman"` to use Spearman instead.
 
 ## Step 2 — Cross-Validated Resampling
 
@@ -151,9 +152,10 @@ metrics <- collect_metrics(res_obj)
 head(metrics)
 ```
 
-Each row is one fold × network combination. The `.estimate` column is the
-out-of-sample Pearson *r*, and `.estimator` tells you which correlation method
-was used. Averaging across folds gives you the overall cross-validated
+Each row is one fold. The columns `both`, `pos`, and `neg` give the
+out-of-sample Pearson *r* for the combined, positive, and negative networks
+respectively. `n_assess` records how many subjects were in that fold's
+held-out set. Averaging across folds gives you the overall cross-validated
 performance of the model.
 
 ### Out-of-sample predictions
@@ -171,8 +173,9 @@ inspect individual subjects.
 
 ### Selected edges
 
-`collect_edges()` returns which edges were selected (and their summed
-connectivity values) in each fold.
+`collect_edges()` returns a matrix of edge selection counts across folds
+(for `return_edges = "sum"`): each cell records how many folds selected that
+edge. Higher counts indicate more consistently selected edges.
 
 ```{r}
 edges <- collect_edges(res_obj)
@@ -189,8 +192,9 @@ can override this with your own partition scheme — useful when you need
 **site-stratified**, **family-aware**, or **repeated** splits.
 
 Pass a list where each element is a vector of **held-out row indices** for that
-fold. `cpmr` validates that the sets are non-overlapping and together cover
-every subject exactly once.
+fold. `cpmr` validates that the sets (a) are non-overlapping and (b) together
+cover every complete-case subject exactly once. When `na_action = "exclude"`,
+indices refer to rows in the complete-case data, not the original data.
 
 ```{r}
 # Manual 5-fold split: subjects 1–16, 17–32, …
