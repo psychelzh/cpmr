@@ -23,13 +23,13 @@
           ]
         }
       },
-      "value": [-0.36089704, -0.46837374, -0.4124209, -0.40121526, -0.33409571, -0.43482802, -0.3526195, -0.25450422, -0.39758371, -0.54194184, -0.36089704, -0.46837374, -0.4124209, -0.40121526, -0.33409571, -0.43482802, -0.3526195, -0.25450422, -0.39758371, -0.54194184, -0.36089704, -0.53040432, -0.4124209, -0.40121526, -0.33409571, -0.43482802, -0.3526195, -0.25450422, -0.39758371, -0.54194184]
+      "value": [-0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799]
     }
 
 ---
 
     {
-      "type": "double",
+      "type": "logical",
       "attributes": {
         "dim": {
           "type": "integer",
@@ -51,7 +51,7 @@
           ]
         }
       },
-      "value": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
     }
 
 ---
@@ -62,7 +62,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -82,9 +82,14 @@
           "value": [0.01]
         },
         {
-          "type": "integer",
+          "type": "character",
           "attributes": {},
-          "value": [10]
+          "value": ["sum"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         },
         {
           "type": "logical",
@@ -108,10 +113,10 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          CV folds:         10
+          Stored splits:    1
           Bias correction:  TRUE
 
-# `kfolds` works
+# `fit()` is single-fit
 
     {
       "type": "double",
@@ -136,13 +141,13 @@
           ]
         }
       },
-      "value": [-0.52088375, -0.49608397, -0.49608397, -0.40383885, -0.16736493, -0.39106847, -0.39106847, -0.16736493, -0.40383885, -0.52088375, -0.52088375, -0.49608397, -0.49608397, -0.40383885, -0.16736493, -0.39106847, -0.39106847, -0.16736493, -0.40383885, -0.52088375, -0.52088375, -0.49608397, -0.49608397, -0.40383885, -0.16736493, -0.39106847, -0.39106847, -0.16736493, -0.40383885, -0.52088375]
+      "value": [-0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799]
     }
 
 ---
 
     {
-      "type": "double",
+      "type": "logical",
       "attributes": {
         "dim": {
           "type": "integer",
@@ -164,7 +169,7 @@
           ]
         }
       },
-      "value": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
     }
 
 ---
@@ -175,7 +180,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -195,9 +200,14 @@
           "value": [0.01]
         },
         {
-          "type": "double",
+          "type": "character",
           "attributes": {},
-          "value": [5]
+          "value": ["sum"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         },
         {
           "type": "logical",
@@ -213,7 +223,7 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(kfolds = 5), conmat = conmat, behav = behav)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav)
         Number of observations: 10
           Complete cases: 10
         Number of edges: 10
@@ -221,7 +231,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          CV folds:         5
+          Stored splits:    1
           Bias correction:  TRUE
 
 # Alternative threshold method works
@@ -249,13 +259,13 @@
           ]
         }
       },
-      "value": [-0.4483117, -0.93444812, -0.28979535, -1.0184311, -1.22715776, 0.27139805, 0.49221098, 0.39722219, -0.27275375, -1.05667388, -0.4727088, -1.13102784, -0.30731623, -0.39982201, -0.81405633, 0.45584186, 0.55325269, -0.03339286, -0.562466, -0.73762965, -0.38224409, -0.1340772, -0.3410544, -1.25039233, -0.98049407, -0.32868202, -0.1470275, 0.54417272, -0.06844446, -1.13204492]
+      "value": [-0.47986299, -0.4235422, -0.31121857, -0.76666707, -1.27905638, 0.29190563, -0.53251339, -0.6619815, -0.29101707, 0.4954736, -0.50153461, -0.77729984, -0.33661358, -0.40260447, -0.95285926, 0.3039217, -0.1406691, -0.83778146, -0.53134056, 0.21830125, -0.41713269, -0.08233393, -0.33073634, -0.91491306, -1.13193216, -0.06866617, -0.82542811, -0.36418378, -0.1220451, 0.29889139]
     }
 
 ---
 
     {
-      "type": "double",
+      "type": "logical",
       "attributes": {
         "dim": {
           "type": "integer",
@@ -277,7 +287,7 @@
           ]
         }
       },
-      "value": [9, 9, 9, 1, 2, 9, 9, 9, 9, 0, 1, 1, 1, 9, 8, 1, 1, 1, 1, 10]
+      "value": [true, true, true, false, false, true, true, true, true, false, false, false, false, true, true, false, false, false, false, true]
     }
 
 ---
@@ -288,7 +298,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -308,9 +318,14 @@
           "value": [0.01]
         },
         {
-          "type": "integer",
+          "type": "character",
           "attributes": {},
-          "value": [10]
+          "value": ["sum"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         },
         {
           "type": "logical",
@@ -335,7 +350,7 @@
           Covariates:       FALSE
           Threshold method: sparsity
           Threshold level:  0.01
-          CV folds:         10
+          Stored splits:    1
           Bias correction:  TRUE
 
 # Different threshold levels works
@@ -363,13 +378,13 @@
           ]
         }
       },
-      "value": [-0.36089704, -0.46837374, -0.4124209, -0.40121526, -0.33409571, -0.43482802, -0.3526195, -0.25450422, -0.39758371, -0.39395137, -0.36089704, -0.46837374, -0.4124209, -0.40121526, -0.33409571, -0.43482802, -0.3526195, -0.25450422, -0.39758371, -0.83412333, -0.66417678, -0.53040432, -0.30399265, 0.25624007, -0.82873672, 0.15696941, -1.57202923, -0.36423604, -0.01093361, 0.06133675]
+      "value": [-0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.67019166, -0.45072701, -0.2980433, 0.1292616, -0.85121814, 0.11563021, -1.25882169, -0.93600393, -0.06411956, 0.32575354]
     }
 
 ---
 
     {
-      "type": "double",
+      "type": "logical",
       "attributes": {
         "dim": {
           "type": "integer",
@@ -391,7 +406,7 @@
           ]
         }
       },
-      "value": [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 10]
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true]
     }
 
 ---
@@ -402,7 +417,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "kfolds", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -422,9 +437,14 @@
           "value": [0.1]
         },
         {
-          "type": "integer",
+          "type": "character",
           "attributes": {},
-          "value": [10]
+          "value": ["sum"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         },
         {
           "type": "logical",
@@ -448,7 +468,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.10
-          CV folds:         10
+          Stored splits:    1
           Bias correction:  TRUE
 
 # `return_edges` argument works
@@ -457,8 +477,7 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(return_edges = "none"), conmat = conmat, 
-          behav = behav)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, return_edges = "none")
         Number of observations: 10
           Complete cases: 10
         Number of edges: not stored
@@ -466,7 +485,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          CV folds:         10
+          Stored splits:    1
           Bias correction:  TRUE
 
 ---
@@ -477,7 +496,7 @@
         "dim": {
           "type": "integer",
           "attributes": {},
-          "value": [10, 2, 10]
+          "value": [10, 2, 1]
         },
         "dimnames": {
           "type": "list",
@@ -497,7 +516,7 @@
           ]
         }
       },
-      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
     }
 
 ---
@@ -506,8 +525,7 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(return_edges = "all"), conmat = conmat, 
-          behav = behav)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, return_edges = "all")
         Number of observations: 10
           Complete cases: 10
         Number of edges: 10
@@ -515,7 +533,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          CV folds:         10
+          Stored splits:    1
           Bias correction:  TRUE
 
 # `na_action` argument works
@@ -524,8 +542,7 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(na_action = "exclude"), conmat = conmat, 
-          behav = behav)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, na_action = "exclude")
         Number of observations: 10
           Complete cases: 9
         Number of edges: 10
@@ -533,7 +550,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          CV folds:         9
+          Stored splits:    1
           Bias correction:  TRUE
 
 ---
@@ -542,8 +559,8 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(na_action = "exclude"), conmat = conmat, 
-          behav = behav, covariates = covariates)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, covariates = covariates, 
+          na_action = "exclude")
         Number of observations: 10
           Complete cases: 8
         Number of edges: 10
@@ -551,7 +568,7 @@
           Covariates:       TRUE
           Threshold method: alpha
           Threshold level:  0.01
-          CV folds:         8
+          Stored splits:    1
           Bias correction:  TRUE
 
 ---
@@ -560,8 +577,8 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(na_action = "exclude"), conmat = conmat, 
-          behav = behav, covariates = covariates)
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, covariates = covariates, 
+          na_action = "exclude")
         Number of observations: 10
           Complete cases: 8
         Number of edges: 10
@@ -569,6 +586,6 @@
           Covariates:       TRUE
           Threshold method: alpha
           Threshold level:  0.01
-          CV folds:         8
+          Stored splits:    1
           Bias correction:  TRUE
 

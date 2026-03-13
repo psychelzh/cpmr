@@ -5,10 +5,14 @@ test_that("Works for basic summary", {
   summary_result <- summary(fit(cpm_spec(), conmat, behav))
   expect_s3_class(summary_result, "cpm_summary")
   expect_snapshot(summary_result)
-  summary_result <- summary(fit(cpm_spec(return_edges = "none"), conmat, behav))
+  summary_result <- summary(
+    fit(cpm_spec(), conmat, behav, return_edges = "none")
+  )
   expect_s3_class(summary_result, "cpm_summary")
   expect_snapshot(summary_result)
-  summary_result <- summary(fit(cpm_spec(return_edges = "all"), conmat, behav))
+  summary_result <- summary(
+    fit(cpm_spec(), conmat, behav, return_edges = "all")
+  )
   expect_s3_class(summary_result, "cpm_summary")
   expect_snapshot(summary_result)
 })
@@ -37,4 +41,26 @@ test_that("summary.cpm falls back to folds when params$kfolds is missing", {
 
   expect_s3_class(summary_result, "cpm_summary")
   expect_identical(summary_result$edges, legacy_object$edges > 1)
+})
+
+test_that("summary.cpm returns NA when fewer than two valid pairs", {
+  sparse_object <- structure(
+    list(
+      real = c(NA_real_, 2, NA_real_),
+      pred = matrix(
+        c(1, 2, 3, 1, 2, 3, 1, 2, 3),
+        ncol = 3,
+        dimnames = list(NULL, c("both", "pos", "neg"))
+      ),
+      edges = NULL,
+      folds = list(1:3),
+      params = list()
+    ),
+    class = "cpm"
+  )
+
+  summary_result <- summary(sparse_object)
+
+  expect_true(all(is.na(summary_result$performance)))
+  expect_null(summary_result$edges)
 })

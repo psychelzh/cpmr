@@ -45,29 +45,51 @@ covariates <- matrix(rnorm(n), ncol = 1)
 edge_signal <- rowMeans(conmat[, 1:10, drop = FALSE])
 behav <- 0.7 * edge_signal + 0.6 * covariates[, 1] + rnorm(n, sd = 0.5)
 
-# Leakage-safe call: covariates are handled fold-wise inside CV
-fit <- fit(
-  cpm_spec(kfolds = 5),
+# Leakage-safe CV call: covariates are handled fold-wise inside resampling
+fit <- fit_resamples(
+  cpm_spec(),
   conmat = conmat,
   behav = behav,
-  covariates = covariates
+  covariates = covariates,
+  kfolds = 5
 )
 
-summary(fit)
+collect_metrics(fit)
 ```
 
 ## Current API
 
-Use `fit(cpm_spec(...), ...)` as the modeling entry-point.
+Use `fit(cpm_spec(...), ...)` for a single fit and `fit_resamples()` for CV.
 
 ```{r}
-fit_new <- fit(
-  cpm_spec(kfolds = 5),
+single_fit <- fit(
+  cpm_spec(),
   conmat = conmat,
   behav = behav,
-  covariates = covariates
+  covariates = covariates,
+  return_edges = "sum"
 )
+
+resamples_fit <- fit_resamples(
+  cpm_spec(),
+  conmat = conmat,
+  behav = behav,
+  covariates = covariates,
+  kfolds = 5
+)
+
+collect_metrics(resamples_fit)
+collect_predictions(resamples_fit)
+collect_edges(resamples_fit, format = "index")
 ```
+
+## Edge Storage Tips
+
+For large feature spaces, fold-wise edge storage can grow quickly.
+
+- Use `return_edges = "sum"` to keep only fold-aggregated edge counts.
+- Use `collect_edges(..., format = "index")` to export sparse indices.
+- Use `return_edges = "none"` if you only need predictive performance.
 
 ## Anti-Leakage Checklist
 
