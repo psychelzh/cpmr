@@ -4,10 +4,15 @@
 
 ### Breaking changes
 
-- **`cpm()` removed.** The legacy entry-point function `cpm()` has been
+- **[`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md)
+  removed.** The legacy entry-point function
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) has been
   deleted. Use `fit(cpm_spec(...), conmat, behav)` instead. The
   `confounds` parameter (deprecated alias of `covariates`) is also
   removed.
+- [`fit()`](https://generics.r-lib.org/reference/fit.html) now performs
+  a single fit. Cross-validation/resampling workflows are handled by
+  [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md).
 
 ### Enhancements
 
@@ -18,9 +23,21 @@
   the primary API for connectome-based predictive modeling.
 - `print.cpm_spec()` provides a concise summary of all modeling
   parameters.
+- Added the `cpm_resamples` result class with dedicated methods:
+  [`collect_metrics()`](https://psychelzh.github.io/cpmr/reference/collect_metrics.md),
+  [`collect_predictions()`](https://psychelzh.github.io/cpmr/reference/collect_predictions.md),
+  and
+  [`collect_edges()`](https://psychelzh.github.io/cpmr/reference/collect_edges.md).
+- Added edge export support via `collect_edges(format = "index")` for
+  sparse index output when edge storage is large.
 
 ### Maintenance
 
+- Refactored fit internals into focused modules (`fit-generics`,
+  `cpm-spec`, `cpm-resamples`, and `fit-internals`) to improve
+  maintainability.
+- Updated and expanded tests for internal helper branches and
+  edge/summary coverage paths.
 - Stabilized GitHub Actions uploads for Codecov coverage and Test
   Analytics by generating and uploading JUnit test results from an
   explicit workspace path.
@@ -35,16 +52,18 @@ CRAN release: 2026-03-11
   and `inc_edges`, respectively, to better reflect their purpose. In
   addition, the documentation which mentioned `networks` has been
   updated to use correlation types to better reflect their meaning.
-- Reorganized `R/cpm.R` so `cpm()` remains the entry-point function at
-  the top, followed by `print.cpm()`, with internal helpers grouped
-  below.
+- Reorganized `R/cpm.R` so
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) remains
+  the entry-point function at the top, followed by `print.cpm()`, with
+  internal helpers grouped below.
 - Improved test architecture with explicit internal-helper coverage and
   complete-case fold invariants.
 
 ### Maintenance
 
-- Refactored the internal `cpm()` workflow into smaller helpers
-  (`normalize_inputs`, `resolve_include_cases`,
+- Refactored the internal
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) workflow
+  into smaller helpers (`normalize_inputs`, `resolve_include_cases`,
   `apply_confounds_regression`, etc.) while preserving user-facing
   behavior.
 - Removed the obsolete internal alias `regress_counfounds()`.
@@ -66,13 +85,16 @@ CRAN release: 2024-10-06
 - Added [`tidy()`](https://generics.r-lib.org/reference/tidy.html)
   method to tidy the results of the CPM analysis
   ([\#10](https://github.com/psychelzh/cpmr/issues/10)).
-- Support `na_action` argument in `cpm()` function to handle missing
-  values in the input data
+- Support `na_action` argument in
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) function
+  to handle missing values in the input data
   ([\#2](https://github.com/psychelzh/cpmr/issues/2)).
 
 ### Enhancements
 
-- Added `params` to `cpm()` output to store the input arguments
+- Added `params` to
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) output to
+  store the input arguments
   ([\#14](https://github.com/psychelzh/cpmr/issues/14)).
 - Let `"sum"` be the default value for `return_edges` argument.
 - Let the first two dimensions of `edges` in the output be edges and

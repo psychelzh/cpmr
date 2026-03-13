@@ -35,11 +35,11 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-spec <- cpm_spec(kfolds = 10, return_edges = "sum")
-res <- fit(spec, conmat = conmat, behav = behav)
+spec <- cpm_spec()
+res <- fit(spec, conmat = conmat, behav = behav, return_edges = "sum")
 res
 #> CPM results:
-#>   Call: fit(object = spec, conmat = conmat, behav = behav)
+#>   Call: fit(object = spec, conmat = conmat, behav = behav, return_edges = "sum")
 #>   Number of observations: 100
 #>     Complete cases: 100
 #>   Number of edges: 1000
@@ -47,17 +47,17 @@ res
 #>     Covariates:       FALSE
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
-#>     CV folds:         10
+#>     Stored splits:    1
 #>     Bias correction:  TRUE
 summary(res)
 #> CPM summary:
 #>   Performance (Pearson):
-#>     Positive: -0.114
-#>     Negative: -0.270
-#>     Combined: -0.225
+#>     Positive: 0.595
+#>     Negative: 0.387
+#>     Combined: 0.676
 #>   Prop. edges (50% folds):
-#>     Positive: 0.40%
-#>     Negative: 0.10%
+#>     Positive: 0.70%
+#>     Negative: 0.20%
 ```
 
 ## Code of Conduct

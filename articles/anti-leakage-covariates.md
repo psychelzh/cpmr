@@ -33,37 +33,84 @@ covariates <- matrix(rnorm(n), ncol = 1)
 edge_signal <- rowMeans(conmat[, 1:10, drop = FALSE])
 behav <- 0.7 * edge_signal + 0.6 * covariates[, 1] + rnorm(n, sd = 0.5)
 
-# Leakage-safe call: covariates are handled fold-wise inside CV
-fit <- fit(
-  cpm_spec(kfolds = 5),
+# Leakage-safe CV call: covariates are handled fold-wise inside resampling
+fit <- fit_resamples(
+  cpm_spec(),
   conmat = conmat,
   behav = behav,
-  covariates = covariates
+  covariates = covariates,
+  kfolds = 5
 )
 
-summary(fit)
-#> CPM summary:
-#>   Performance (Pearson):
-#>     Positive: 0.279
-#>     Negative: -0.104
-#>     Combined: 0.259
-#>   Prop. edges (50% folds):
-#>     Positive: 1.67%
-#>     Negative: 0.00%
+collect_metrics(fit)
+#> # A tibble: 5 × 5
+#>    fold n_assess    both     pos    neg
+#>   <int>    <int>   <dbl>   <dbl>  <dbl>
+#> 1     1       16  0.142   0.142  NA    
+#> 2     2       16  0.447   0.447  NA    
+#> 3     3       16  0.163   0.294  -0.270
+#> 4     4       16  0.694   0.694  NA    
+#> 5     5       16 -0.0624 -0.0624 NA
 ```
 
 ## Current API
 
-Use `fit(cpm_spec(...), ...)` as the modeling entry-point.
+Use `fit(cpm_spec(...), ...)` for a single fit and
+[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
+for CV.
 
 ``` r
-fit_new <- fit(
-  cpm_spec(kfolds = 5),
+single_fit <- fit(
+  cpm_spec(),
   conmat = conmat,
   behav = behav,
-  covariates = covariates
+  covariates = covariates,
+  return_edges = "sum"
 )
+
+resamples_fit <- fit_resamples(
+  cpm_spec(),
+  conmat = conmat,
+  behav = behav,
+  covariates = covariates,
+  kfolds = 5
+)
+
+collect_metrics(resamples_fit)
+#> # A tibble: 5 × 5
+#>    fold n_assess   both    pos     neg
+#>   <int>    <int>  <dbl>  <dbl>   <dbl>
+#> 1     1       16  0.273  0.361 -0.195 
+#> 2     2       16 -0.219 -0.202 -0.0348
+#> 3     3       16  0.330  0.330 NA     
+#> 4     4       16  0.502  0.502 NA     
+#> 5     5       16  0.182  0.182 NA
+collect_predictions(resamples_fit)
+#> # A tibble: 80 × 6
+#>      row  fold     real    both     pos       neg
+#>    <int> <int>    <dbl>   <dbl>   <dbl>     <dbl>
+#>  1     1     4 -0.586   -0.137  -0.137   1.65e-17
+#>  2     2     4  0.726   -0.0626 -0.0626  1.65e-17
+#>  3     3     2  0.478    0.112   0.0806  6.62e- 2
+#>  4     4     3  0.426    0.147   0.147  -1.73e-17
+#>  5     5     5 -1.53    -0.0774 -0.0774 -1.04e-17
+#>  6     6     3  0.500    0.568   0.568  -1.73e-17
+#>  7     7     5 -0.272   -0.0547 -0.0547 -1.04e-17
+#>  8     8     4 -0.00964 -0.238  -0.238   1.65e-17
+#>  9     9     5  0.201    0.0220  0.0220 -1.04e-17
+#> 10    10     3  0.556    0.150   0.150  -1.73e-17
+#> # ℹ 70 more rows
+collect_edges(resamples_fit, format = "index")
+#> NULL
 ```
+
+## Edge Storage Tips
+
+For large feature spaces, fold-wise edge storage can grow quickly.
+
+- Use `return_edges = "sum"` to keep only fold-aggregated edge counts.
+- Use `collect_edges(..., format = "index")` to export sparse indices.
+- Use `return_edges = "none"` if you only need predictive performance.
 
 ## Anti-Leakage Checklist
 
