@@ -118,6 +118,11 @@ test_that("fit_resamples validates kfolds", {
     fixed = TRUE
   )
   expect_error(
+    fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 11),
+    "`kfolds` must be less than or equal to complete-case observations.",
+    fixed = TRUE
+  )
+  expect_error(
     fit_resamples(
       spec,
       conmat = conmat,
@@ -259,25 +264,6 @@ test_that("fit_resamples can store fold-wise edges", {
   expect_length(index_edges, 5)
   expect_named(index_edges[[1]], c("fold", "pos", "neg"))
   expect_identical(index_edges[[1]]$fold, 1L)
-})
-
-test_that("fit_resamples warns for large fold-wise edge storage", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(20 * 140000), nrow = 20)
-  behav <- rnorm(20)
-  spec <- cpm_spec()
-
-  expect_warning(
-    fit_resamples(
-      spec,
-      conmat = conmat,
-      behav = behav,
-      kfolds = 10,
-      return_edges = "all"
-    ),
-    "may consume large memory",
-    fixed = TRUE
-  )
 })
 
 test_that("fit_resamples handles covariates in assessment pipeline", {

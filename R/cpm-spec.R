@@ -154,6 +154,9 @@ fit_resamples.cpm_spec <- function(
 
   if (is.null(resamples)) {
     kfolds <- resolve_kfolds(validate_kfolds(kfolds), include_cases)
+    if (kfolds > length(include_cases)) {
+      stop("`kfolds` must be less than or equal to complete-case observations.")
+    }
     folds <- crossv_kfold(include_cases, kfolds)
   } else {
     if (!is.null(kfolds)) {

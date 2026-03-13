@@ -1,13 +1,20 @@
 #' @export
 print.cpm_resamples <- function(x, ...) {
+  safe_mean <- function(x) {
+    if (all(is.na(x))) {
+      return(NA_real_)
+    }
+    mean(x, na.rm = TRUE)
+  }
+
   cat("CPM resample results:\n")
   cat(sprintf("  Number of folds: %d\n", length(x$folds)))
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
   cat(sprintf("  Edge storage: %s\n", x$params$return_edges))
   cat("  Mean correlations:\n")
-  cat(sprintf("    Both: %.3f\n", mean(x$metrics$both, na.rm = TRUE)))
-  cat(sprintf("    Pos:  %.3f\n", mean(x$metrics$pos, na.rm = TRUE)))
-  cat(sprintf("    Neg:  %.3f\n", mean(x$metrics$neg, na.rm = TRUE)))
+  cat(sprintf("    Both: %.3f\n", safe_mean(x$metrics$both)))
+  cat(sprintf("    Pos:  %.3f\n", safe_mean(x$metrics$pos)))
+  cat(sprintf("    Neg:  %.3f\n", safe_mean(x$metrics$neg)))
   invisible(x)
 }
 

@@ -21,3 +21,20 @@ test_that("internal helpers validate nullable kfolds and finite resamples", {
     fixed = FALSE
   )
 })
+
+test_that("large fold-wise edge storage warning is emitted", {
+  maybe_warn_large_edge_storage <- getFromNamespace(
+    "maybe_warn_large_edge_storage",
+    "cpmr"
+  )
+
+  expect_warning(
+    maybe_warn_large_edge_storage(
+      n_edges = 140000,
+      kfolds = 10,
+      return_edges = "all"
+    ),
+    "may consume large memory",
+    fixed = TRUE
+  )
+})
