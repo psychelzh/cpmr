@@ -1,10 +1,16 @@
 # cpmr (development version)
 
+## Breaking changes
+
+* **`cpm()` removed.** The legacy entry-point function `cpm()` has been
+  deleted. Use `fit(cpm_spec(...), conmat, behav)` instead. The `confounds`
+  parameter (deprecated alias of `covariates`) is also removed.
+
 ## Enhancements
 
-* Clarified `print.cpm()` output when edges are not stored and hardened `summary.cpm()` fold fallback for legacy objects.
-* Added a new `cpm_spec()` model specification object and `fit()` method as the first migration step toward a generics-based modeling API, while keeping `cpm()` as a compatibility wrapper.
-* Updated user-facing examples to present `fit(cpm_spec(), ...)` as the preferred entry-point while retaining `cpm()` as a compatibility path.
+* Added `cpm_spec()` model specification object and `fit()` dispatch as the
+  primary API for connectome-based predictive modeling.
+* `print.cpm_spec()` provides a concise summary of all modeling parameters.
 
 ## Maintenance
 

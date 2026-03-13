@@ -14,7 +14,7 @@ cpm_spec(
   na_action = c("fail", "exclude")
 )
 
-\method{fit}{cpm_spec}(object, conmat, behav, ..., covariates = NULL, confounds = NULL)
+\method{fit}{cpm_spec}(object, conmat, behav, ..., covariates = NULL)
 }
 \arguments{
 \item{thresh_method, thresh_level}{The threshold method and level used in edge

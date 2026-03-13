@@ -17,80 +17,13 @@ test_that("cpm_spec stores model parameters", {
   expect_identical(spec$params$na_action, "exclude")
 })
 
-test_that("fit.cpm_spec matches cpm workflow", {
+test_that("fit.cpm_spec returns a cpm object with correct call", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  spec <- cpm_spec(kfolds = 5, return_edges = "sum")
-
-  withr::local_seed(123)
-  fitted_spec <- fit(spec, conmat = conmat, behav = behav)
-
-  withr::local_seed(123)
-  fitted_cpm <- cpm(conmat, behav, kfolds = 5, return_edges = "sum")
-
-  expect_s3_class(fitted_spec, "cpm")
-  expect_identical(fitted_spec$real, fitted_cpm$real)
-  expect_identical(fitted_spec$pred, fitted_cpm$pred)
-  expect_identical(fitted_spec$edges, fitted_cpm$edges)
-  expect_identical(fitted_spec$params, fitted_cpm$params)
-})
-
-test_that("fit.cpm_spec matches cpm workflow with covariates", {
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
-  covariates <- matrix(rnorm(10), ncol = 1)
-
-  withr::local_seed(123)
-  fitted_spec <- fit(
-    cpm_spec(kfolds = 5, return_edges = "sum"),
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates
-  )
-
-  withr::local_seed(123)
-  fitted_cpm <- cpm(
-    conmat,
-    behav,
-    kfolds = 5,
-    return_edges = "sum",
-    covariates = covariates
-  )
-
-  expect_identical(fitted_spec$real, fitted_cpm$real)
-  expect_identical(fitted_spec$pred, fitted_cpm$pred)
-  expect_identical(fitted_spec$edges, fitted_cpm$edges)
-  expect_identical(fitted_spec$params, fitted_cpm$params)
-})
-
-test_that("fit.cpm_spec supports deprecated confounds alias", {
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
-  confounds <- matrix(rnorm(10), ncol = 1)
-
-  expect_warning(
-    fit(
-      cpm_spec(kfolds = 5),
-      conmat = conmat,
-      behav = behav,
-      confounds = confounds
-    ),
-    "deprecated"
-  )
-})
-
-test_that("fit.cpm_spec and cpm preserve entry-point call", {
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
-
-  withr::local_seed(123)
-  fitted_spec <- fit(cpm_spec(kfolds = 5), conmat = conmat, behav = behav)
-
-  withr::local_seed(123)
-  fitted_cpm <- cpm(conmat, behav, kfolds = 5)
-
-  expect_identical(as.character(fitted_spec$call[[1]]), "fit")
-  expect_identical(as.character(fitted_cpm$call[[1]]), "cpm")
+  spec <- cpm_spec(kfolds = 5)
+  result <- fit(spec, conmat = conmat, behav = behav)
+  expect_s3_class(result, "cpm")
+  expect_identical(as.character(result$call[[1]]), "fit")
 })
 
 test_that("print.cpm_spec shows auto folds when kfolds is NULL", {

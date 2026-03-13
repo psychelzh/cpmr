@@ -26,12 +26,7 @@ install.packages("cpmr", repos = c("https://psychelzh.r-universe.dev", getOption
 
 ## Example
 
-It is very simple to use this package. Just shape your connectivity matrix as a subjects by edges matrix, i.e., each row contains the correlation matrix (removed diagonal and duplicated values, e.g., lower triangular data) for each subject, and your behavior data a vector and feed them in `cpm()` function.
-
-Starting from the fit API migration, the recommended workflow is to first
-define a model specification with `cpm_spec()`, then call `fit()`. The
-`cpm()` function is still available as a compatibility wrapper.
-
+It is very simple to use this package. Just shape your connectivity matrix as a subjects by edges matrix, i.e., each row contains the correlation matrix (removed diagonal and duplicated values, e.g., lower triangular data) for each subject, and your behavior data a vector and feed them to `fit()`.
 
 ``` r
 library(cpmr)
@@ -62,9 +57,6 @@ summary(res)
 #>   Prop. edges (50% folds):
 #>     Positive: 0.40%
 #>     Negative: 0.10%
-
-# compatibility wrapper (legacy entry-point)
-res_legacy <- cpm(conmat, behav, kfolds = 10, return_edges = "sum")
 ```
 
 ## Code of Conduct
