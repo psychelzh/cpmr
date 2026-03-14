@@ -31,6 +31,8 @@
   - `0003-migration-and-deprecation.md` (phased migration plan).
 * Started phase-A core refactor by introducing internal `core_*` helpers and
   routing `fit.cpm_spec()` / `fit_resamples.cpm_spec()` through the core layer.
+* Added dedicated core-engine contract tests for single-fit parity, train/test
+  covariate handling, and insufficient-complete-case error paths.
 
 # cpmr 0.1.1
 
