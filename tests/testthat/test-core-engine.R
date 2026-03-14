@@ -28,6 +28,39 @@ test_that("core_fit_single matches fit() outputs on single data", {
   expect_equal(core_result$model$models, api_result$model$models)
 })
 
+test_that("core_fit_resamples matches fit_resamples() outputs", {
+  withr::local_seed(321)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  spec <- cpm_spec(thresh_method = "sparsity", thresh_level = 0.2)
+
+  withr::local_seed(999)
+  core_result <- core_fit_resamples(
+    object = spec,
+    conmat = conmat,
+    behav = behav,
+    covariates = NULL,
+    resamples = NULL,
+    kfolds = 5,
+    return_edges = "sum",
+    na_action = "fail"
+  )
+  withr::local_seed(999)
+  api_result <- fit_resamples(
+    spec,
+    conmat = conmat,
+    behav = behav,
+    kfolds = 5,
+    return_edges = "sum",
+    na_action = "fail"
+  )
+
+  expect_identical(core_result$folds, api_result$folds)
+  expect_equal(core_result$edges, api_result$edges)
+  expect_equal(core_result$metrics, api_result$metrics)
+  expect_equal(core_result$predictions, api_result$predictions)
+})
+
 test_that("core_prepare_* keeps covariate handling train-only", {
   withr::local_seed(456)
   n <- 20
