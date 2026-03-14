@@ -116,6 +116,14 @@ fit_cpm_single <- function(
   return_edges,
   na_action
 ) {
+  if (
+    !is.logical(return_edges) ||
+      length(return_edges) != 1L ||
+      is.na(return_edges)
+  ) {
+    stop("`return_edges` must be either TRUE or FALSE in `fit_cpm_single()`.")
+  }
+
   params <- object$params
 
   normalized <- normalize_inputs(conmat, behav, covariates)
@@ -159,14 +167,6 @@ fit_cpm_single <- function(
     params$bias_correct
   )
   pred[include_cases, ] <- predict_cpm_model(model, conmat_train)
-
-  if (
-    !is.logical(return_edges) ||
-      length(return_edges) != 1L ||
-      is.na(return_edges)
-  ) {
-    stop("`return_edges` must be either TRUE or FALSE in `fit_cpm_single()`.")
-  }
 
   real <- behav
   real[include_cases] <- behav_train
