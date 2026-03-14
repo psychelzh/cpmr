@@ -120,7 +120,7 @@ core_fit_single <- function(
   return_edges,
   na_action
 ) {
-  fit_cpm_single(
+  core_fit_single_impl(
     call = call,
     object = object,
     conmat = conmat,
@@ -128,6 +128,92 @@ core_fit_single <- function(
     covariates = covariates,
     return_edges = return_edges,
     na_action = na_action
+  )
+}
+
+core_fit_single_impl <- function(
+  call,
+  object,
+  conmat,
+  behav,
+  covariates,
+  return_edges,
+  na_action
+) {
+  params <- object$params
+
+  normalized <- core_normalize_inputs(conmat, behav, covariates)
+  behav <- normalized$behav
+  covariates <- normalized$covariates
+
+  include_cases <- core_resolve_include_cases(
+    conmat,
+    behav,
+    covariates,
+    na_action
+  )
+  if (length(include_cases) == 0L) {
+    stop("No complete-case observations available for fitting.")
+  }
+  if (length(include_cases) < 3L) {
+    stop("At least 3 complete-case observations are required for fitting.")
+  }
+
+  pred <- core_init_pred(behav)
+  training <- core_prepare_training_data(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    rows_train = include_cases
+  )
+
+  cur_edges <- core_select_edges(
+    conmat = training$conmat,
+    behav = training$behav,
+    method = params$thresh_method,
+    level = params$thresh_level
+  )
+  model <- core_train_model(
+    conmat = training$conmat,
+    behav = training$behav,
+    edges = cur_edges,
+    bias_correct = params$bias_correct
+  )
+  pred[include_cases, ] <- core_predict_model(model, training$conmat)
+
+  edges <- switch(
+    return_edges,
+    none = NULL,
+    sum = cur_edges,
+    all = {
+      edge_array <- array(
+        dim = c(dim(cur_edges), 1L),
+        dimnames = list(NULL, corr_types, NULL)
+      )
+      edge_array[,, 1] <- cur_edges
+      edge_array
+    }
+  )
+
+  real <- behav
+  real[include_cases] <- training$behav
+
+  new_cpm(
+    call = call,
+    folds = list(include_cases),
+    behav = real,
+    pred = pred,
+    edges = edges,
+    model = model,
+    spec = object,
+    params = list(
+      covariates = !is.null(covariates),
+      thresh_method = params$thresh_method,
+      thresh_level = params$thresh_level,
+      return_edges = return_edges,
+      na_action = na_action,
+      bias_correct = params$bias_correct
+    )
   )
 }
 

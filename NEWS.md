@@ -25,8 +25,8 @@
 * Updated and expanded tests for internal helper branches and edge/summary
   coverage paths.
 * Stabilized GitHub Actions uploads for Codecov coverage and Test Analytics by generating and uploading JUnit test results from an explicit workspace path.
-* Added architecture RFC documents under `design/rfc/` and started the
-  internal core-layer refactor.
+* Added architecture RFC documents under `design/rfc/`, started the internal
+  core-layer refactor, and added dedicated core-engine contract tests.
 
 # cpmr 0.1.1
 
