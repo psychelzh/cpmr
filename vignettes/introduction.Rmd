@@ -97,7 +97,7 @@ fit_obj <- fit(
   conmat     = conmat,
   behav      = behav,
   covariates = covariates,
-  return_edges = "sum",   # store edge selection counts (edges × networks matrix)
+  return_edges = TRUE,      # store selected-edge mask for this single fit
   na_action  = "exclude"  # silently drop subjects with any missing value
 )
 

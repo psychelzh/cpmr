@@ -477,7 +477,7 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, return_edges = "none")
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, return_edges = FALSE)
         Number of observations: 10
           Complete cases: 10
         Number of edges: not stored
@@ -496,7 +496,7 @@
         "dim": {
           "type": "integer",
           "attributes": {},
-          "value": [10, 2, 1]
+          "value": [10, 2]
         },
         "dimnames": {
           "type": "list",
@@ -509,9 +509,6 @@
               "type": "character",
               "attributes": {},
               "value": ["pos", "neg"]
-            },
-            {
-              "type": "NULL"
             }
           ]
         }
@@ -525,7 +522,7 @@
       result
     Output
       CPM results:
-        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, return_edges = "all")
+        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, return_edges = TRUE)
         Number of observations: 10
           Complete cases: 10
         Number of edges: 10

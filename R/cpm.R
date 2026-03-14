@@ -29,8 +29,8 @@ print.cpm <- function(x, ...) {
 #' @param x A `cpm` object.
 #' @param ... For future extension. Currently ignored.
 #'
-#' @return A matrix for `return_edges = "sum"`, a 3D array for
-#'   `return_edges = "all"`, or `NULL` for `return_edges = "none"`.
+#' @return A matrix when `fit(..., return_edges = TRUE)` and `NULL` when
+#'   `fit(..., return_edges = FALSE)`.
 #' @export
 collect_edges.cpm <- function(x, ...) {
   x$edges

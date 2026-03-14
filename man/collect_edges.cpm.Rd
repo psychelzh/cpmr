@@ -12,8 +12,8 @@
 \item{...}{For future extension. Currently ignored.}
 }
 \value{
-A matrix for \code{return_edges = "sum"}, a 3D array for
-\code{return_edges = "all"}, or \code{NULL} for \code{return_edges = "none"}.
+A matrix when \code{fit(..., return_edges = TRUE)} and \code{NULL} when
+\code{fit(..., return_edges = FALSE)}.
 }
 \description{
 Collect selected edges from a CPM fit
