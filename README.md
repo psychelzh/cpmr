@@ -59,7 +59,7 @@ res
 #>     Covariates:       FALSE
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
-#>     Stored splits:    1
+#>     Return edges:     TRUE
 #>     Bias correction:  TRUE
 summary(res)
 #> CPM summary:
@@ -67,7 +67,7 @@ summary(res)
 #>     Positive: 0.595
 #>     Negative: 0.387
 #>     Combined: 0.676
-#>   Prop. edges (50% folds):
+#>   Selected edges:
 #>     Positive: 0.70%
 #>     Negative: 0.20%
 ```

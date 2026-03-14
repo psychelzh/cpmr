@@ -8,8 +8,6 @@
 #' @param ... Other parameters passed to the function.
 #' @param method A character vector indicating the method used to calculate the
 #'   correlation between the real and predicted values.
-#' @param edge_level Deprecated, ignored for `cpm` objects (use
-#'   `summary.cpm_resamples` if you need fold-level thresholding).
 #' @return A list of class \code{cpm_summary} containing two elements:
 #'   \item{performance}{A matrix of prediction performance, including the
 #'     correlation between the real and predicted values for both edges,
