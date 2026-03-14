@@ -63,6 +63,37 @@ core_validate_resamples <- function(resamples, include_cases) {
   normalized
 }
 
+core_resolve_resample_folds <- function(resamples, kfolds, include_cases) {
+  if (is.null(resamples)) {
+    kfolds <- core_resolve_kfolds(
+      core_validate_kfolds(kfolds),
+      include_cases
+    )
+    if (kfolds > length(include_cases)) {
+      stop("`kfolds` must be less than or equal to complete-case observations.")
+    }
+    folds <- core_crossv_kfold(include_cases, kfolds)
+  } else {
+    if (!is.null(kfolds)) {
+      stop("Specify either `resamples` or `kfolds`, not both.")
+    }
+    folds <- core_validate_resamples(resamples, include_cases)
+    kfolds <- length(folds)
+  }
+
+  train_sizes <- length(include_cases) - lengths(folds)
+  if (any(train_sizes < 3L)) {
+    stop(
+      "Each resample must leave at least 3 complete-case training observations."
+    )
+  }
+
+  list(
+    folds = folds,
+    kfolds = kfolds
+  )
+}
+
 core_crossv_kfold <- function(x, k) {
   split(sample(x), cut(seq_along(x), breaks = k, labels = FALSE))
 }
@@ -183,8 +214,7 @@ core_fit_resamples <- function(
   conmat,
   behav,
   covariates = NULL,
-  resamples = NULL,
-  kfolds = NULL,
+  folds,
   return_edges = c("none", "sum", "all"),
   na_action = c("fail", "exclude")
 ) {
@@ -210,29 +240,8 @@ core_fit_resamples <- function(
     stop("At least 2 complete-case observations are required for resampling.")
   }
 
-  if (is.null(resamples)) {
-    kfolds <- core_resolve_kfolds(
-      core_validate_kfolds(kfolds),
-      include_cases
-    )
-    if (kfolds > length(include_cases)) {
-      stop("`kfolds` must be less than or equal to complete-case observations.")
-    }
-    folds <- core_crossv_kfold(include_cases, kfolds)
-  } else {
-    if (!is.null(kfolds)) {
-      stop("Specify either `resamples` or `kfolds`, not both.")
-    }
-    folds <- core_validate_resamples(resamples, include_cases)
-    kfolds <- length(folds)
-  }
-
-  train_sizes <- length(include_cases) - lengths(folds)
-  if (any(train_sizes < 3L)) {
-    stop(
-      "Each resample must leave at least 3 complete-case training observations."
-    )
-  }
+  folds <- core_validate_resamples(folds, include_cases)
+  kfolds <- length(folds)
 
   core_warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
 

@@ -35,22 +35,23 @@ test_that("core_fit_resamples matches fit_resamples() outputs", {
   spec <- cpm_spec(thresh_method = "sparsity", thresh_level = 0.2)
 
   withr::local_seed(999)
+  folds <- core_crossv_kfold(seq_along(behav), 5)
+
+  withr::local_seed(999)
   core_result <- core_fit_resamples(
     object = spec,
     conmat = conmat,
     behav = behav,
     covariates = NULL,
-    resamples = NULL,
-    kfolds = 5,
+    folds = folds,
     return_edges = "sum",
     na_action = "fail"
   )
-  withr::local_seed(999)
   api_result <- fit_resamples(
     spec,
     conmat = conmat,
     behav = behav,
-    kfolds = 5,
+    resamples = folds,
     return_edges = "sum",
     na_action = "fail"
   )
@@ -59,6 +60,29 @@ test_that("core_fit_resamples matches fit_resamples() outputs", {
   expect_equal(core_result$edges, api_result$edges)
   expect_equal(core_result$metrics, api_result$metrics)
   expect_equal(core_result$predictions, api_result$predictions)
+})
+
+test_that("core_resolve_resample_folds generates and validates public folds", {
+  include_cases <- 1:10
+
+  withr::local_seed(222)
+  resolved <- core_resolve_resample_folds(
+    resamples = NULL,
+    kfolds = 5,
+    include_cases = include_cases
+  )
+
+  expect_length(resolved$folds, 5)
+  expect_identical(sort(unname(unlist(resolved$folds))), include_cases)
+  expect_identical(resolved$kfolds, 5L)
+
+  explicit <- core_resolve_resample_folds(
+    resamples = list(1:2, 3:4, 5:6, 7:8, 9:10),
+    kfolds = NULL,
+    include_cases = include_cases
+  )
+  expect_identical(explicit$folds, list(1:2, 3:4, 5:6, 7:8, 9:10))
+  expect_identical(explicit$kfolds, 5L)
 })
 
 test_that("core_prepare_* keeps covariate handling train-only", {
@@ -179,6 +203,43 @@ test_that("core_fit_single errors clearly on insufficient complete cases", {
       call = call
     ),
     "At least 3 complete-case observations are required for fitting.",
+    fixed = TRUE
+  )
+})
+
+test_that("core_fit_resamples errors clearly on insufficient complete cases", {
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rep(NA_real_, 10)
+  spec <- cpm_spec()
+  folds <- list(1:5, 6:10)
+
+  expect_error(
+    core_fit_resamples(
+      object = spec,
+      conmat = conmat,
+      behav = behav,
+      covariates = NULL,
+      folds = folds,
+      return_edges = "sum",
+      na_action = "exclude"
+    ),
+    "No complete-case observations available for resampling.",
+    fixed = TRUE
+  )
+
+  behav[] <- NA_real_
+  behav[1] <- 1
+  expect_error(
+    core_fit_resamples(
+      object = spec,
+      conmat = conmat,
+      behav = behav,
+      covariates = NULL,
+      folds = list(1L),
+      return_edges = "sum",
+      na_action = "exclude"
+    ),
+    "At least 2 complete-case observations are required for resampling.",
     fixed = TRUE
   )
 })

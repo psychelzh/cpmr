@@ -130,13 +130,39 @@ fit_resamples.cpm_spec <- function(
   return_edges = c("none", "sum", "all"),
   na_action = c("fail", "exclude")
 ) {
+  return_edges <- match.arg(return_edges)
+  na_action <- match.arg(na_action)
+
+  normalized <- core_normalize_inputs(conmat, behav, covariates)
+  behav <- normalized$behav
+  covariates <- normalized$covariates
+
+  include_cases <- core_resolve_include_cases(
+    conmat,
+    behav,
+    covariates,
+    na_action
+  )
+
+  if (length(include_cases) == 0L) {
+    stop("No complete-case observations available for resampling.")
+  }
+  if (length(include_cases) < 2L) {
+    stop("At least 2 complete-case observations are required for resampling.")
+  }
+
+  resolved <- core_resolve_resample_folds(
+    resamples = resamples,
+    kfolds = kfolds,
+    include_cases = include_cases
+  )
+
   core_fit_resamples(
     object = object,
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    resamples = resamples,
-    kfolds = kfolds,
+    folds = resolved$folds,
     return_edges = return_edges,
     na_action = na_action
   )
