@@ -54,8 +54,14 @@ test_that("summary.cpm aggregates 3D edge arrays across folds", {
       ),
       edges = array(
         c(
-          TRUE, FALSE, FALSE, TRUE,
-          TRUE, TRUE, FALSE, FALSE
+          TRUE,
+          FALSE,
+          FALSE,
+          TRUE,
+          TRUE,
+          TRUE,
+          FALSE,
+          FALSE
         ),
         dim = c(2, 2, 2),
         dimnames = list(NULL, c("pos", "neg"), NULL)
