@@ -94,13 +94,13 @@ fit.cpm_spec <- function(
   na_action <- match.arg(na_action)
 
   core_fit_single(
-    call = call,
     object = object,
     conmat = conmat,
     behav = behav,
     covariates = covariates,
     return_edges = return_edges,
-    na_action = na_action
+    na_action = na_action,
+    call = call
   )
 }
 

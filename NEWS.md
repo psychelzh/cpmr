@@ -31,6 +31,8 @@
   complete-case training observations.
 * Moved training/prediction primitives into the core layer and kept
   `fit-internals.R` helpers as compatibility wrappers during phase A.
+* Split phase-A core internals into RFC-aligned module files and moved legacy
+  helper names into `compat-legacy-api.R`.
 
 # cpmr 0.1.1
 
