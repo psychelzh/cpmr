@@ -180,6 +180,8 @@ fit_resamples.cpm_spec <- function(
   real <- behav
 
   for (fold in seq_len(kfolds)) {
+    # `fit_resamples()` owns fold orchestration only; each fold still uses the
+    # shared training/evaluation primitives that define single-fit behavior.
     rows_test <- folds[[fold]]
     rows_train <- setdiff(include_cases, rows_test)
 

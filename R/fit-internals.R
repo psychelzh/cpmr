@@ -107,6 +107,9 @@ edges_to_index <- function(edges, return_edges) {
   })
 }
 
+# `fit()` and `fit_resamples()` share the same training-data contract:
+# residualize covariates on training rows only, then pass the transformed
+# training data into the common edge-selection/model-training primitives.
 prepare_training_data <- function(conmat, behav, covariates, rows) {
   if (is.null(covariates)) {
     return(list(
@@ -130,6 +133,8 @@ prepare_training_data <- function(conmat, behav, covariates, rows) {
   )
 }
 
+# Assessment rows must reuse nuisance-regression coefficients learned from the
+# paired training rows only so resampling never leaks test information back.
 prepare_assessment_data <- function(
   conmat,
   behav,

@@ -50,3 +50,30 @@ test_that("fit_cpm_single validates logical return_edges", {
     fixed = TRUE
   )
 })
+
+test_that("prepare_assessment_data derives training covariates when omitted", {
+  withr::local_seed(2)
+  conmat <- matrix(rnorm(120), ncol = 6)
+  behav <- rnorm(20)
+  covariates <- matrix(rnorm(40), ncol = 2)
+  rows_train <- c(1L, 3L, 5L, 7L, 9L, 11L)
+  rows_test <- c(2L, 4L, 6L)
+
+  expected <- prepare_assessment_data(
+    conmat,
+    behav,
+    covariates,
+    rows_train,
+    rows_test,
+    covariates_train = covariates[rows_train, , drop = FALSE]
+  )
+  derived <- prepare_assessment_data(
+    conmat,
+    behav,
+    covariates,
+    rows_train,
+    rows_test
+  )
+
+  expect_equal(derived, expected)
+})
