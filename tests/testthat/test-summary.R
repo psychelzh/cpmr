@@ -43,6 +43,41 @@ test_that("summary.cpm falls back to folds when params$kfolds is missing", {
   expect_identical(summary_result$edges, legacy_object$edges > 1)
 })
 
+test_that("summary.cpm aggregates 3D edge arrays across folds", {
+  legacy_array_object <- structure(
+    list(
+      real = c(1, 2, 3, 4),
+      pred = matrix(
+        c(1, 2, 3, 4, 1, 2, 3, 4, 4, 3, 2, 1),
+        ncol = 3,
+        dimnames = list(NULL, c("both", "pos", "neg"))
+      ),
+      edges = array(
+        c(
+          TRUE, FALSE, FALSE, TRUE,
+          TRUE, TRUE, FALSE, FALSE
+        ),
+        dim = c(2, 2, 2),
+        dimnames = list(NULL, c("pos", "neg"), NULL)
+      ),
+      folds = list(1:2, 3:4),
+      params = list()
+    ),
+    class = "cpm"
+  )
+
+  summary_result <- summary(legacy_array_object, edge_level = 0.5)
+
+  expect_identical(
+    summary_result$edges,
+    matrix(
+      c(TRUE, FALSE, FALSE, FALSE),
+      ncol = 2,
+      dimnames = list(NULL, c("pos", "neg"))
+    )
+  )
+})
+
 test_that("summary.cpm returns NA when fewer than two valid pairs", {
   sparse_object <- structure(
     list(

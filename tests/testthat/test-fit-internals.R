@@ -30,3 +30,23 @@ test_that("large fold-wise edge storage warning is emitted", {
     fixed = TRUE
   )
 })
+
+test_that("fit_cpm_single validates logical return_edges", {
+  withr::local_seed(1)
+  conmat <- matrix(rnorm(200), ncol = 10)
+  behav <- rnorm(20)
+
+  expect_error(
+    fit_cpm_single(
+      call = quote(fit(cpm_spec(), conmat, behav)),
+      object = cpm_spec(thresh_method = "sparsity", thresh_level = 0.2),
+      conmat = conmat,
+      behav = behav,
+      covariates = NULL,
+      return_edges = "sum",
+      na_action = "fail"
+    ),
+    "`return_edges` must be either TRUE or FALSE in `fit_cpm_single()`.",
+    fixed = TRUE
+  )
+})
