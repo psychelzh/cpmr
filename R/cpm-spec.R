@@ -90,7 +90,11 @@ fit.cpm_spec <- function(
   call <- match.call()
   call[[1]] <- quote(fit)
 
-  if (!is.logical(return_edges) || length(return_edges) != 1L || is.na(return_edges)) {
+  if (
+    !is.logical(return_edges) ||
+      length(return_edges) != 1L ||
+      is.na(return_edges)
+  ) {
     stop("`return_edges` must be either TRUE or FALSE for `fit()`.")
   }
 
