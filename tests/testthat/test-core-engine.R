@@ -105,12 +105,14 @@ test_that("core_prepare_* keeps covariate handling train-only", {
     expected_cov_train,
     covariates[rows_test, , drop = FALSE]
   )$test
-  expected_assess_behav <- drop(regress_covariates_by_train(
-    behav[rows_train],
-    behav[rows_test],
-    expected_cov_train,
-    covariates[rows_test, , drop = FALSE]
-  )$test)
+  expected_assess_behav <- drop(
+    regress_covariates_by_train(
+      behav[rows_train],
+      behav[rows_test],
+      expected_cov_train,
+      covariates[rows_test, , drop = FALSE]
+    )$test
+  )
 
   expect_equal(assessment$conmat, expected_assess_conmat)
   expect_equal(assessment$behav, expected_assess_behav)
