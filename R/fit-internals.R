@@ -146,7 +146,7 @@ fit_cpm_single <- function(
     ))
   }
 
-  cur_edges <- select_edges(
+  edges <- select_edges(
     conmat_train,
     behav_train,
     params$thresh_method,
@@ -155,7 +155,7 @@ fit_cpm_single <- function(
   model <- train_cpm_model(
     conmat_train,
     behav_train,
-    cur_edges,
+    edges,
     params$bias_correct
   )
   pred[include_cases, ] <- predict_cpm_model(model, conmat_train)
@@ -168,8 +168,6 @@ fit_cpm_single <- function(
     stop("`return_edges` must be either TRUE or FALSE in `fit_cpm_single()`.")
   }
 
-  edges <- if (return_edges) cur_edges else NULL
-
   real <- behav
   real[include_cases] <- behav_train
 
@@ -178,7 +176,7 @@ fit_cpm_single <- function(
     folds = list(include_cases),
     behav = real,
     pred = pred,
-    edges = edges,
+    edges = if (return_edges) edges,
     model = model,
     spec = object,
     params = list(
