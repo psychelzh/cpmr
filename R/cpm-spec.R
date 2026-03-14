@@ -98,7 +98,6 @@ fit.cpm_spec <- function(
     stop("`return_edges` must be either TRUE or FALSE for `fit()`.")
   }
 
-  return_edges <- if (return_edges) "sum" else "none"
   na_action <- match.arg(na_action)
 
   fit_cpm_single(

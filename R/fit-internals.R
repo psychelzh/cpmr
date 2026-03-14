@@ -160,19 +160,11 @@ fit_cpm_single <- function(
   )
   pred[include_cases, ] <- predict_cpm_model(model, conmat_train)
 
-  edges <- switch(
-    return_edges,
-    none = NULL,
-    sum = cur_edges,
-    all = {
-      edge_array <- array(
-        dim = c(dim(cur_edges), 1L),
-        dimnames = list(NULL, corr_types, NULL)
-      )
-      edge_array[,, 1] <- cur_edges
-      edge_array
-    }
-  )
+  if (!is.logical(return_edges) || length(return_edges) != 1L || is.na(return_edges)) {
+    stop("`return_edges` must be either TRUE or FALSE in `fit_cpm_single()`.")
+  }
+
+  edges <- if (return_edges) cur_edges else NULL
 
   real <- behav
   real[include_cases] <- behav_train
@@ -189,7 +181,7 @@ fit_cpm_single <- function(
       covariates = !is.null(covariates),
       thresh_method = params$thresh_method,
       thresh_level = params$thresh_level,
-      return_edges = return_edges == "sum",
+      return_edges = return_edges,
       na_action = na_action,
       bias_correct = params$bias_correct
     )
