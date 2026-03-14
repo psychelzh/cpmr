@@ -175,7 +175,9 @@ fit_resamples.cpm_spec <- function(
 
   train_sizes <- length(include_cases) - lengths(folds)
   if (any(train_sizes < 3L)) {
-    stop("Each resample must leave at least 3 complete-case training observations.")
+    stop(
+      "Each resample must leave at least 3 complete-case training observations."
+    )
   }
 
   maybe_warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
