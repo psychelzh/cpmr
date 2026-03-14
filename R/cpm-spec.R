@@ -67,11 +67,11 @@ print.cpm_spec <- function(x, ...) {
 #' @param covariates A matrix of covariates. Observations in row, variables in
 #'   column. If `NULL`, no covariates are used. Note if a vector is provided, it
 #'   will be converted to a column matrix.
-#' @param return_edges A character string indicating the return value of the
-#'   selected edges. If `"none"`, no edges are returned/stored. If `"sum"`, edge
-#'   masks are returned for single-fit and summed across folds for resampling.
-#'   If `"all"`, single-fit stores a 3D array with a singleton third dimension
-#'   while resampling stores fold-wise edge arrays.
+#' @param return_edges Controls how selected edges are stored. For [fit()], use
+#'   a logical value where `TRUE` stores selected-edge masks and `FALSE` stores
+#'   no edges. For [fit_resamples()], use one of `"none"`, `"sum"`, or `"all"`.
+#'   `"sum"` stores edge-count masks summed across folds and `"all"` stores
+#'   fold-wise edge arrays.
 #' @param na_action A character string indicating the action when missing values
 #'   are found in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
 #'   missing values will be excluded from the analysis but kept in the output.
@@ -84,13 +84,17 @@ fit.cpm_spec <- function(
   behav,
   ...,
   covariates = NULL,
-  return_edges = c("sum", "none", "all"),
+  return_edges = TRUE,
   na_action = c("fail", "exclude")
 ) {
   call <- match.call()
   call[[1]] <- quote(fit)
 
-  return_edges <- match.arg(return_edges)
+  if (!is.logical(return_edges) || length(return_edges) != 1L || is.na(return_edges)) {
+    stop("`return_edges` must be either TRUE or FALSE for `fit()`.")
+  }
+
+  return_edges <- if (return_edges) "sum" else "none"
   na_action <- match.arg(na_action)
 
   fit_cpm_single(
@@ -180,7 +184,7 @@ fit_resamples.cpm_spec <- function(
       object,
       conmat = conmat[rows_train, , drop = FALSE],
       behav = behav[rows_train],
-      return_edges = if (return_edges == "none") "none" else "sum",
+      return_edges = return_edges != "none",
       na_action = "fail",
       covariates = if (is.null(covariates)) {
         NULL

@@ -6,12 +6,12 @@ test_that("Works for basic summary", {
   expect_s3_class(summary_result, "cpm_summary")
   expect_snapshot(summary_result)
   summary_result <- summary(
-    fit(cpm_spec(), conmat, behav, return_edges = "none")
+    fit(cpm_spec(), conmat, behav, return_edges = FALSE)
   )
   expect_s3_class(summary_result, "cpm_summary")
   expect_snapshot(summary_result)
   summary_result <- summary(
-    fit(cpm_spec(), conmat, behav, return_edges = "all")
+    fit(cpm_spec(), conmat, behav, return_edges = TRUE)
   )
   expect_s3_class(summary_result, "cpm_summary")
   expect_snapshot(summary_result)

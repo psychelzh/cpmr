@@ -90,14 +90,26 @@ test_that("`return_edges` argument works", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- fit(cpm_spec(), conmat, behav, return_edges = "none")
+  result <- fit(cpm_spec(), conmat, behav, return_edges = FALSE)
   expect_null(result$edges)
   expect_null(collect_edges(result))
   expect_snapshot(result)
-  result <- fit(cpm_spec(), conmat, behav, return_edges = "all")
+  result <- fit(cpm_spec(), conmat, behav, return_edges = TRUE)
   expect_snapshot_value(result$edges, style = "json2")
   expect_equal(collect_edges(result), result$edges)
   expect_snapshot(result)
+})
+
+test_that("`fit()` validates logical `return_edges`", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+
+  expect_error(
+    fit(cpm_spec(), conmat, behav, return_edges = "sum"),
+    "`return_edges` must be either TRUE or FALSE for `fit()`.",
+    fixed = TRUE
+  )
 })
 
 test_that("Support row/column matrix input of `behav` and `covariates`", {

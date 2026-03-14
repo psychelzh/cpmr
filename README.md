@@ -48,10 +48,10 @@ withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
 spec <- cpm_spec()
-res <- fit(spec, conmat = conmat, behav = behav, return_edges = "sum")
+res <- fit(spec, conmat = conmat, behav = behav, return_edges = TRUE)
 res
 #> CPM results:
-#>   Call: fit(object = spec, conmat = conmat, behav = behav, return_edges = "sum")
+#>   Call: fit(object = spec, conmat = conmat, behav = behav, return_edges = TRUE)
 #>   Number of observations: 100
 #>     Complete cases: 100
 #>   Number of edges: 1000
