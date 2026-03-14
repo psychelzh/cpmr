@@ -29,6 +29,8 @@
   core-layer refactor, added dedicated core-engine contract tests, and
   hardened resample validation so each fold must retain at least 3
   complete-case training observations.
+* Moved training/prediction primitives into the core layer and kept
+  `fit-internals.R` helpers as compatibility wrappers during phase A.
 
 # cpmr 0.1.1
 
