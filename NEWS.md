@@ -33,6 +33,8 @@
   routing `fit.cpm_spec()` / `fit_resamples.cpm_spec()` through the core layer.
 * Added dedicated core-engine contract tests for single-fit parity, train/test
   covariate handling, and insufficient-complete-case error paths.
+* Hardened resample validation so each fold must retain at least 3
+  complete-case training observations.
 
 # cpmr 0.1.1
 
