@@ -188,6 +188,8 @@ fit_resamples.cpm_spec <- function(
       conmat = conmat[rows_train, , drop = FALSE],
       behav = behav[rows_train],
       return_edges = return_edges != "none",
+      # rows_train is already restricted to complete cases; keep fold size fixed
+      # and fail loudly instead of silently excluding rows again within fold.
       na_action = "fail",
       covariates = if (is.null(covariates)) {
         NULL
