@@ -25,10 +25,12 @@
 * Updated and expanded tests for internal helper branches and edge/summary
   coverage paths.
 * Stabilized GitHub Actions uploads for Codecov coverage and Test Analytics by generating and uploading JUnit test results from an explicit workspace path.
-* Added architecture RFC documents under `docs/rfc/`:
+* Added architecture RFC documents under `design/rfc/`:
   - `0001-core-engine.md` (core engine stabilization),
   - `0002-tidymodels-adapter.md` (tidymodels integration design),
   - `0003-migration-and-deprecation.md` (phased migration plan).
+* Started phase-A core refactor by introducing internal `core_*` helpers and
+  routing `fit.cpm_spec()` / `fit_resamples.cpm_spec()` through the core layer.
 
 # cpmr 0.1.1
 
