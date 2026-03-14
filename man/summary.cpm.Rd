@@ -18,6 +18,9 @@
 correlation between the real and predicted values.}
 
 \item{x}{An object of class \code{cpm_summary}.}
+
+\item{edge_level}{Deprecated, ignored for \code{cpm} objects (use
+\code{summary.cpm_resamples} if you need fold-level thresholding).}
 }
 \value{
 A list of class \code{cpm_summary} containing two elements:
