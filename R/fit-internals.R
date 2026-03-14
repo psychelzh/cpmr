@@ -189,7 +189,7 @@ fit_cpm_single <- function(
       covariates = !is.null(covariates),
       thresh_method = params$thresh_method,
       thresh_level = params$thresh_level,
-      return_edges = return_edges,
+      return_edges = return_edges == "sum",
       na_action = na_action,
       bias_correct = params$bias_correct
     )

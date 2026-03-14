@@ -19,6 +19,12 @@ print.cpm <- function(x, ...) {
   cat(sprintf("    Covariates:       %s\n", covariates_param))
   cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
   cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
+  return_edges_param <- if (!is.null(x$params$return_edges)) {
+    x$params$return_edges
+  } else {
+    !is.null(x$edges)
+  }
+  cat(sprintf("    Return edges:     %s\n", return_edges_param))
   cat(sprintf("    Stored splits:    %d\n", length(x$folds)))
   cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
   invisible(x)

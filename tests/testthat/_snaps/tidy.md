@@ -36,9 +36,9 @@
           "value": [0.01]
         },
         {
-          "type": "character",
+          "type": "logical",
           "attributes": {},
-          "value": ["sum"]
+          "value": [true]
         },
         {
           "type": "character",
@@ -111,9 +111,9 @@
           "value": [0.01]
         },
         {
-          "type": "character",
+          "type": "logical",
           "attributes": {},
-          "value": ["sum"]
+          "value": [true]
         },
         {
           "type": "character",

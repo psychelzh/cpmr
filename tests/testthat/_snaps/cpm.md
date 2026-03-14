@@ -82,9 +82,9 @@
           "value": [0.01]
         },
         {
-          "type": "character",
+          "type": "logical",
           "attributes": {},
-          "value": ["sum"]
+          "value": [true]
         },
         {
           "type": "character",
@@ -113,6 +113,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
+          Return edges:     TRUE
           Stored splits:    1
           Bias correction:  TRUE
 
@@ -200,9 +201,9 @@
           "value": [0.01]
         },
         {
-          "type": "character",
+          "type": "logical",
           "attributes": {},
-          "value": ["sum"]
+          "value": [true]
         },
         {
           "type": "character",
@@ -231,6 +232,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
+          Return edges:     TRUE
           Stored splits:    1
           Bias correction:  TRUE
 
@@ -318,9 +320,9 @@
           "value": [0.01]
         },
         {
-          "type": "character",
+          "type": "logical",
           "attributes": {},
-          "value": ["sum"]
+          "value": [true]
         },
         {
           "type": "character",
@@ -350,6 +352,7 @@
           Covariates:       FALSE
           Threshold method: sparsity
           Threshold level:  0.01
+          Return edges:     TRUE
           Stored splits:    1
           Bias correction:  TRUE
 
@@ -437,9 +440,9 @@
           "value": [0.1]
         },
         {
-          "type": "character",
+          "type": "logical",
           "attributes": {},
-          "value": ["sum"]
+          "value": [true]
         },
         {
           "type": "character",
@@ -468,6 +471,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.10
+          Return edges:     TRUE
           Stored splits:    1
           Bias correction:  TRUE
 
@@ -485,6 +489,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
+          Return edges:     FALSE
           Stored splits:    1
           Bias correction:  TRUE
 
@@ -530,6 +535,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
+          Return edges:     TRUE
           Stored splits:    1
           Bias correction:  TRUE
 
@@ -547,6 +553,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
+          Return edges:     TRUE
           Stored splits:    1
           Bias correction:  TRUE
 
@@ -565,6 +572,7 @@
           Covariates:       TRUE
           Threshold method: alpha
           Threshold level:  0.01
+          Return edges:     TRUE
           Stored splits:    1
           Bias correction:  TRUE
 
@@ -583,6 +591,7 @@
           Covariates:       TRUE
           Threshold method: alpha
           Threshold level:  0.01
+          Return edges:     TRUE
           Stored splits:    1
           Bias correction:  TRUE
 

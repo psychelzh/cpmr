@@ -67,7 +67,7 @@ single_fit <- fit(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
-  return_edges = "sum"
+  return_edges = TRUE
 )
 
 resamples_fit <- fit_resamples(
@@ -87,9 +87,13 @@ collect_edges(resamples_fit, format = "index")
 
 For large feature spaces, fold-wise edge storage can grow quickly.
 
-- Use `return_edges = "sum"` to keep only fold-aggregated edge counts.
+- For `fit()`, use `return_edges = TRUE` to store selected edges, or `FALSE`
+  when you only need predictions/performance.
+- For `fit_resamples()`, use `return_edges = "sum"` to keep fold-aggregated edge
+  counts.
 - Use `collect_edges(..., format = "index")` to export sparse indices.
-- Use `return_edges = "none"` if you only need predictive performance.
+- For `fit_resamples()`, use `return_edges = "none"` if you only need predictive
+  performance.
 
 ## Anti-Leakage Checklist
 

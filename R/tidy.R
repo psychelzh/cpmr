@@ -46,7 +46,7 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
       if (is.null(sum_x$edges)) {
         warning(
           "No edges stored in the object.\n",
-          "* You probably called `fit(cpm_spec(...), ..., return_edges = \"none\")`."
+          "* You probably called `fit(cpm_spec(...), ..., return_edges = FALSE)`."
         )
         return(tibble::tibble())
       }
