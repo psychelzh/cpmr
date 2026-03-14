@@ -111,34 +111,6 @@ test_that("`fit()` validates logical `return_edges`", {
   )
 })
 
-test_that("print.cpm infers `return_edges` for legacy objects", {
-  legacy_object <- structure(
-    list(
-      call = quote(fit(cpm_spec(), conmat, behav)),
-      real = c(1, 2, 3),
-      pred = matrix(
-        c(1, 2, 3, 1, 2, 3, 1, 2, 3),
-        ncol = 3,
-        dimnames = list(NULL, c("both", "pos", "neg"))
-      ),
-      edges = matrix(
-        c(TRUE, FALSE, FALSE, TRUE),
-        ncol = 2,
-        dimnames = list(NULL, c("pos", "neg"))
-      ),
-      params = list(
-        covariates = FALSE,
-        thresh_method = "alpha",
-        thresh_level = 0.01,
-        bias_correct = TRUE
-      )
-    ),
-    class = "cpm"
-  )
-
-  expect_output(print(legacy_object), "Return edges:\\s+TRUE")
-})
-
 test_that("Support row/column matrix input of `behav` and `covariates`", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)

@@ -7,6 +7,8 @@
   parameter (deprecated alias of `covariates`) is also removed.
 * `fit()` now performs a single fit. Cross-validation/resampling workflows are
   handled by `fit_resamples()`.
+* Fitted-object methods now require the current development object structure.
+  Older pre-release `cpm` / `cpm_resamples` objects are no longer supported.
 
 ## Enhancements
 
