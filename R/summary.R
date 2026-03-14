@@ -52,12 +52,7 @@ summary.cpm <- function(
   )
   # summary edge selection
   edges <- if (!is.null(object$edges)) {
-    folds_count <- length(object$folds)
-    edges_count <- object$edges
-    if (length(dim(object$edges)) == 3) {
-      edges_count <- apply(object$edges, 1:2, sum)
-    }
-    edges_count > edge_level * folds_count
+    object$edges
   }
   structure(
     list(

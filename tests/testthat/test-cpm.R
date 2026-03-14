@@ -16,7 +16,6 @@ test_that("`fit()` is single-fit", {
   behav <- rnorm(10)
   result <- fit(cpm_spec(), conmat, behav)
   expect_s3_class(result, "cpm")
-  expect_identical(length(result$folds), 1L)
   expect_snapshot_value(result$pred, style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
   expect_snapshot_value(result$params, style = "json2")
@@ -127,7 +126,6 @@ test_that("print.cpm infers `return_edges` for legacy objects", {
         ncol = 2,
         dimnames = list(NULL, c("pos", "neg"))
       ),
-      folds = list(1:3),
       params = list(
         covariates = FALSE,
         thresh_method = "alpha",
@@ -245,7 +243,6 @@ test_that("Folds cover complete cases exactly when excluding missing data", {
     which(complete.cases(covariates))
   )
 
-  expect_setequal(unlist(result$folds), include_cases)
   expect_equal(sum(complete.cases(result$pred)), length(include_cases))
 })
 

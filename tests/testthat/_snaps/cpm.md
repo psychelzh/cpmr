@@ -114,7 +114,6 @@
           Threshold method: alpha
           Threshold level:  0.01
           Return edges:     TRUE
-          Stored splits:    1
           Bias correction:  TRUE
 
 # `fit()` is single-fit
@@ -233,7 +232,6 @@
           Threshold method: alpha
           Threshold level:  0.01
           Return edges:     TRUE
-          Stored splits:    1
           Bias correction:  TRUE
 
 # Alternative threshold method works
@@ -353,7 +351,6 @@
           Threshold method: sparsity
           Threshold level:  0.01
           Return edges:     TRUE
-          Stored splits:    1
           Bias correction:  TRUE
 
 # Different threshold levels works
@@ -472,7 +469,6 @@
           Threshold method: alpha
           Threshold level:  0.10
           Return edges:     TRUE
-          Stored splits:    1
           Bias correction:  TRUE
 
 # `return_edges` argument works
@@ -490,7 +486,6 @@
           Threshold method: alpha
           Threshold level:  0.01
           Return edges:     FALSE
-          Stored splits:    1
           Bias correction:  TRUE
 
 ---
@@ -536,7 +531,6 @@
           Threshold method: alpha
           Threshold level:  0.01
           Return edges:     TRUE
-          Stored splits:    1
           Bias correction:  TRUE
 
 # `na_action` argument works
@@ -554,7 +548,6 @@
           Threshold method: alpha
           Threshold level:  0.01
           Return edges:     TRUE
-          Stored splits:    1
           Bias correction:  TRUE
 
 ---
@@ -573,7 +566,6 @@
           Threshold method: alpha
           Threshold level:  0.01
           Return edges:     TRUE
-          Stored splits:    1
           Bias correction:  TRUE
 
 ---
@@ -592,6 +584,5 @@
           Threshold method: alpha
           Threshold level:  0.01
           Return edges:     TRUE
-          Stored splits:    1
           Bias correction:  TRUE
 

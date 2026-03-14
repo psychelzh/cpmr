@@ -173,7 +173,6 @@ fit_cpm_single <- function(
 
   new_cpm(
     call = call,
-    folds = list(include_cases),
     behav = real,
     pred = pred,
     edges = if (return_edges) edges,

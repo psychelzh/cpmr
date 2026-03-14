@@ -25,7 +25,6 @@ print.cpm <- function(x, ...) {
     !is.null(x$edges)
   }
   cat(sprintf("    Return edges:     %s\n", return_edges_param))
-  cat(sprintf("    Stored splits:    %d\n", length(x$folds)))
   cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
   invisible(x)
 }
@@ -141,10 +140,9 @@ regress_covariates_by_train <- function(
   )
 }
 
-new_cpm <- function(call, folds, behav, pred, edges, model, spec, params) {
+new_cpm <- function(call, behav, pred, edges, model, spec, params) {
   structure(
     list(
-      folds = folds,
       real = behav,
       pred = pred,
       edges = edges,
