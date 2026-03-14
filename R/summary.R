@@ -23,6 +23,11 @@ summary.cpm <- function(
   ...,
   method = c("pearson", "spearman")
 ) {
+  dots <- list(...)
+  if ("edge_level" %in% names(dots)) {
+    stop("`edge_level` is no longer supported for `summary.cpm()`. Use `collect_edges()` for resampling outputs.")
+  }
+
   method <- match.arg(method)
   # summary prediction performance
   performance <- matrix(

@@ -203,6 +203,12 @@ fit_cpm_single <- function(
     covariates,
     na_action
   )
+  if (length(include_cases) == 0L) {
+    stop("No complete-case observations available for fitting.")
+  }
+  if (length(include_cases) < 3L) {
+    stop("At least 3 complete-case observations are required for fitting.")
+  }
 
   pred <- init_pred(behav)
   training <- prepare_training_data(

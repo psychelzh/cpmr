@@ -173,6 +173,11 @@ fit_resamples.cpm_spec <- function(
     kfolds <- length(folds)
   }
 
+  train_sizes <- length(include_cases) - lengths(folds)
+  if (any(train_sizes < 3L)) {
+    stop("Each resample must leave at least 3 complete-case training observations.")
+  }
+
   maybe_warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
 
   pred <- init_pred(behav)

@@ -193,6 +193,25 @@ test_that("`na_action` argument works", {
   expect_snapshot(result)
 })
 
+test_that("fit errors clearly when exclude leaves too few complete cases", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rep(NA_real_, 10)
+
+  expect_error(
+    fit(cpm_spec(), conmat, behav, na_action = "exclude"),
+    "No complete-case observations available for fitting.",
+    fixed = TRUE
+  )
+
+  behav[1:2] <- rnorm(2)
+  expect_error(
+    fit(cpm_spec(), conmat, behav, na_action = "exclude"),
+    "At least 3 complete-case observations are required for fitting.",
+    fixed = TRUE
+  )
+})
+
 test_that("Folds cover complete cases exactly when excluding missing data", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)

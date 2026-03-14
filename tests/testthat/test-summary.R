@@ -37,3 +37,15 @@ test_that("summary.cpm returns NA when fewer than two valid pairs", {
   expect_true(all(is.na(summary_result$performance)))
   expect_null(summary_result$edges)
 })
+
+test_that("summary.cpm rejects removed edge_level argument", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+
+  expect_error(
+    summary(fit(cpm_spec(), conmat, behav), edge_level = 0.5),
+    "`edge_level` is no longer supported for `summary.cpm()`.",
+    fixed = TRUE
+  )
+})
