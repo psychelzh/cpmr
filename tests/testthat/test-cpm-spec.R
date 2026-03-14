@@ -218,6 +218,29 @@ test_that("fit_resamples errors clearly for insufficient complete cases", {
   )
 })
 
+test_that("fit_resamples errors when any fold leaves fewer than 3 training rows", {
+  conmat <- matrix(rnorm(40), ncol = 10)
+  behav <- rnorm(4)
+  spec <- cpm_spec()
+
+  expect_error(
+    fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 2),
+    "Each resample must leave at least 3 complete-case training observations.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    fit_resamples(
+      spec,
+      conmat = conmat,
+      behav = behav,
+      resamples = list(1L, 2:4)
+    ),
+    "Each resample must leave at least 3 complete-case training observations.",
+    fixed = TRUE
+  )
+})
+
 test_that("fit_resamples can store summed edges", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)

@@ -26,7 +26,9 @@
   coverage paths.
 * Stabilized GitHub Actions uploads for Codecov coverage and Test Analytics by generating and uploading JUnit test results from an explicit workspace path.
 * Added architecture RFC documents under `design/rfc/`, started the internal
-  core-layer refactor, and added dedicated core-engine contract tests.
+  core-layer refactor, added dedicated core-engine contract tests, and
+  hardened resample validation so each fold must retain at least 3
+  complete-case training observations.
 
 # cpmr 0.1.1
 
