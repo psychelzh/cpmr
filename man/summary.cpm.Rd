@@ -5,7 +5,7 @@
 \alias{print.cpm_summary}
 \title{Summary of a cpm object.}
 \usage{
-\method{summary}{cpm}(object, ..., method = c("pearson", "spearman"), edge_level = 0.5)
+\method{summary}{cpm}(object, ..., method = c("pearson", "spearman"))
 
 \method{print}{cpm_summary}(x, ...)
 }
@@ -17,9 +17,6 @@
 \item{method}{A character vector indicating the method used to calculate the
 correlation between the real and predicted values.}
 
-\item{edge_level}{A numeric value between 0 and 1 indicating the proportional
-threshold for edge selection.}
-
 \item{x}{An object of class \code{cpm_summary}.}
 }
 \value{
@@ -28,8 +25,8 @@ A list of class \code{cpm_summary} containing two elements:
 correlation between the real and predicted values for both edges,
 positive edges only, and negative edges only.}
 
-\item{edges}{A logical vector indicating whether each edge is selected
-based on the edge_level.}
+\item{edges}{A logical matrix indicating which edges are selected by the
+CPM model (is \code{NULL} if \code{return_edges = FALSE}).}
 
 \item{params}{A list of parameters used in the summary.}
 }

@@ -8,23 +8,22 @@
 #' @param ... Other parameters passed to the function.
 #' @param method A character vector indicating the method used to calculate the
 #'   correlation between the real and predicted values.
-#' @param edge_level A numeric value between 0 and 1 indicating the proportional
-#'   threshold for edge selection.
+#' @param edge_level Deprecated, ignored for `cpm` objects (use
+#'   `summary.cpm_resamples` if you need fold-level thresholding).
 #' @return A list of class \code{cpm_summary} containing two elements:
 #'   \item{performance}{A matrix of prediction performance, including the
 #'     correlation between the real and predicted values for both edges,
 #'     positive edges only, and negative edges only.}
 #'
-#'   \item{edges}{A logical vector indicating whether each edge is selected
-#'     based on the edge_level.}
+#'   \item{edges}{A logical matrix indicating which edges are selected by the
+#'     CPM model (is `NULL` if `return_edges = FALSE`).}
 #'
 #'   \item{params}{A list of parameters used in the summary.}
 #' @export
 summary.cpm <- function(
   object,
   ...,
-  method = c("pearson", "spearman"),
-  edge_level = 0.5
+  method = c("pearson", "spearman")
 ) {
   method <- match.arg(method)
   # summary prediction performance
@@ -51,16 +50,13 @@ summary.cpm <- function(
     dimnames = list(NULL, colnames(object$pred))
   )
   # summary edge selection
-  edges <- if (!is.null(object$edges)) {
-    object$edges
-  }
+  edges <- object$edges
   structure(
     list(
       performance = performance,
       edges = edges,
       params = list(
-        method = method,
-        edge_level = edge_level
+        method = method
       )
     ),
     class = "cpm_summary"
@@ -83,7 +79,7 @@ print.cpm_summary <- function(x, ...) {
   cat(sprintf("    Negative: %.3f\n", x$performance[, "neg"]))
   cat(sprintf("    Combined: %.3f\n", x$performance[, "both"]))
   if (!is.null(x$edges)) {
-    cat(sprintf("  Prop. edges (%.0f%% folds):\n", x$params$edge_level * 100))
+    cat("  Selected edges:\n")
     cat(sprintf("    Positive: %.2f%%\n", mean(x$edges[, "pos"]) * 100))
     cat(sprintf("    Negative: %.2f%%\n", mean(x$edges[, "neg"]) * 100))
   }

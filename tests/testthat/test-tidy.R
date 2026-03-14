@@ -18,10 +18,6 @@ test_that("Support pass arguments of `summary()`", {
     tidy(result, component = "performance", method = "spearman")$method,
     "spearman"
   )
-  expect_equal(
-    tidy(result, component = "edges", edge_level = 0.8)$level,
-    0.8
-  )
 })
 
 test_that("Warning when edges are not stored", {

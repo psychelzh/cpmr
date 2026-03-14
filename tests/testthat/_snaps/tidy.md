@@ -91,7 +91,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct", "level", "pos", "neg"]
+          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct", "pos", "neg"]
         }
       },
       "value": [
@@ -124,11 +124,6 @@
           "type": "logical",
           "attributes": {},
           "value": [true]
-        },
-        {
-          "type": "double",
-          "attributes": {},
-          "value": [0.5]
         },
         {
           "type": "list",

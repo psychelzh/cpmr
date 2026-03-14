@@ -30,13 +30,9 @@ negative edges.}
 
 For \code{component = "edges"}:
 
-\item{level}{The proportional threshold for edge selection.}
+\item{pos}{A logical vector of selected edges (positive).}
 
-\item{pos}{A logical vector indicating whether each edge is selected based
-on the edge_level (positive).}
-
-\item{neg}{A logical vector indicating whether each edge is selected based
-on the edge_level (negative).}
+\item{neg}{A logical vector of selected edges (negative).}
 }
 \description{
 Tidy a \code{cpm} object

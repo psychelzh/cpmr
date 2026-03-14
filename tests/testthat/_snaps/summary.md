@@ -8,7 +8,7 @@
           Positive: 0.988
           Negative: 0.934
           Combined: 0.989
-        Prop. edges (50% folds):
+        Selected edges:
           Positive: 1.00%
           Negative: 0.30%
 
@@ -33,7 +33,7 @@
           Positive: 0.988
           Negative: 0.934
           Combined: 0.989
-        Prop. edges (50% folds):
+        Selected edges:
           Positive: 1.00%
           Negative: 0.30%
 
