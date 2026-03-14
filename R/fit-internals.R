@@ -160,7 +160,11 @@ fit_cpm_single <- function(
   )
   pred[include_cases, ] <- predict_cpm_model(model, conmat_train)
 
-  if (!is.logical(return_edges) || length(return_edges) != 1L || is.na(return_edges)) {
+  if (
+    !is.logical(return_edges) ||
+      length(return_edges) != 1L ||
+      is.na(return_edges)
+  ) {
     stop("`return_edges` must be either TRUE or FALSE in `fit_cpm_single()`.")
   }
 
