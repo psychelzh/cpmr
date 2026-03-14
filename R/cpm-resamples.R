@@ -61,6 +61,27 @@ collect_edges.cpm_resamples <- function(x, format = c("raw", "index"), ...) {
   edges_to_index(x$edges, x$params$return_edges)
 }
 
+edges_to_index <- function(edges, return_edges) {
+  if (return_edges == "none" || is.null(edges)) {
+    return(NULL)
+  }
+
+  if (return_edges == "sum") {
+    return(list(
+      pos = which(edges[, "pos"] > 0),
+      neg = which(edges[, "neg"] > 0)
+    ))
+  }
+
+  lapply(seq_len(dim(edges)[3]), function(fold) {
+    list(
+      fold = fold,
+      pos = which(edges[, "pos", fold]),
+      neg = which(edges[, "neg", fold])
+    )
+  })
+}
+
 compute_fold_metrics <- function(real, pred, folds) {
   fold_metrics <- lapply(seq_along(folds), function(i) {
     rows <- folds[[i]]
@@ -103,25 +124,4 @@ safe_cor <- function(x, y) {
   }
 
   stats::cor(x, y)
-}
-
-new_cpm_resamples <- function(
-  spec,
-  folds,
-  edges,
-  metrics,
-  predictions,
-  params
-) {
-  structure(
-    list(
-      spec = spec,
-      folds = folds,
-      edges = edges,
-      metrics = metrics,
-      predictions = predictions,
-      params = params
-    ),
-    class = "cpm_resamples"
-  )
 }
