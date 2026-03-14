@@ -183,52 +183,40 @@ fit_resamples.cpm_spec <- function(
     rows_test <- folds[[fold]]
     rows_train <- setdiff(include_cases, rows_test)
 
-    fold_fit <- fit(
-      object,
-      conmat = conmat[rows_train, , drop = FALSE],
-      behav = behav[rows_train],
-      return_edges = return_edges != "none",
-      # rows_train is already restricted to complete cases; keep fold size fixed
-      # and fail loudly instead of silently excluding rows again within fold.
-      na_action = "fail",
-      covariates = if (is.null(covariates)) {
-        NULL
-      } else {
-        covariates[rows_train, , drop = FALSE]
-      }
+    training <- prepare_training_data(
+      conmat,
+      behav,
+      covariates,
+      rows_train
+    )
+    fold_edges <- select_edges(
+      training$conmat,
+      training$behav,
+      params$thresh_method,
+      params$thresh_level
+    )
+    fold_model <- train_cpm_model(
+      training$conmat,
+      training$behav,
+      fold_edges,
+      params$bias_correct
+    )
+    assessment <- prepare_assessment_data(
+      conmat,
+      behav,
+      covariates,
+      rows_train,
+      rows_test,
+      training$covariates
     )
 
-    if (is.null(covariates)) {
-      conmat_test <- conmat[rows_test, , drop = FALSE]
-      behav_test <- behav[rows_test]
-    } else {
-      covariates_train <- covariates[rows_train, , drop = FALSE]
-      covariates_test <- covariates[rows_test, , drop = FALSE]
-
-      conmat_regressed <- regress_covariates_by_train(
-        conmat[rows_train, , drop = FALSE],
-        conmat[rows_test, , drop = FALSE],
-        covariates_train,
-        covariates_test
-      )
-      behav_regressed <- regress_covariates_by_train(
-        behav[rows_train],
-        behav[rows_test],
-        covariates_train,
-        covariates_test
-      )
-
-      conmat_test <- conmat_regressed$test
-      behav_test <- drop(behav_regressed$test)
-    }
-
-    pred[rows_test, ] <- predict_cpm_model(fold_fit$model, conmat_test)
-    real[rows_test] <- behav_test
+    pred[rows_test, ] <- predict_cpm_model(fold_model, assessment$conmat)
+    real[rows_test] <- assessment$behav
 
     if (return_edges == "all") {
-      edges[,, fold] <- fold_fit$edges
+      edges[,, fold] <- fold_edges
     } else if (return_edges == "sum") {
-      edges <- edges + fold_fit$edges
+      edges <- edges + fold_edges
     }
   }
 

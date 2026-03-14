@@ -107,6 +107,68 @@ edges_to_index <- function(edges, return_edges) {
   })
 }
 
+prepare_training_data <- function(conmat, behav, covariates, rows) {
+  if (is.null(covariates)) {
+    return(list(
+      conmat = conmat[rows, , drop = FALSE],
+      behav = behav[rows],
+      covariates = NULL
+    ))
+  }
+
+  covariates_train <- covariates[rows, , drop = FALSE]
+  list(
+    conmat = regress_covariates(
+      conmat[rows, , drop = FALSE],
+      covariates_train
+    ),
+    behav = drop(regress_covariates(
+      behav[rows],
+      covariates_train
+    )),
+    covariates = covariates_train
+  )
+}
+
+prepare_assessment_data <- function(
+  conmat,
+  behav,
+  covariates,
+  rows_train,
+  rows_test,
+  covariates_train = NULL
+) {
+  if (is.null(covariates)) {
+    return(list(
+      conmat = conmat[rows_test, , drop = FALSE],
+      behav = behav[rows_test]
+    ))
+  }
+
+  if (is.null(covariates_train)) {
+    covariates_train <- covariates[rows_train, , drop = FALSE]
+  }
+  covariates_test <- covariates[rows_test, , drop = FALSE]
+
+  conmat_regressed <- regress_covariates_by_train(
+    conmat[rows_train, , drop = FALSE],
+    conmat[rows_test, , drop = FALSE],
+    covariates_train,
+    covariates_test
+  )
+  behav_regressed <- regress_covariates_by_train(
+    behav[rows_train],
+    behav[rows_test],
+    covariates_train,
+    covariates_test
+  )
+
+  list(
+    conmat = conmat_regressed$test,
+    behav = drop(behav_regressed$test)
+  )
+}
+
 fit_cpm_single <- function(
   call,
   object,
@@ -138,38 +200,29 @@ fit_cpm_single <- function(
   )
 
   pred <- init_pred(behav)
-
-  if (is.null(covariates)) {
-    conmat_train <- conmat[include_cases, , drop = FALSE]
-    behav_train <- behav[include_cases]
-  } else {
-    covariates_train <- covariates[include_cases, , drop = FALSE]
-    conmat_train <- regress_covariates(
-      conmat[include_cases, , drop = FALSE],
-      covariates_train
-    )
-    behav_train <- drop(regress_covariates(
-      behav[include_cases],
-      covariates_train
-    ))
-  }
+  training <- prepare_training_data(
+    conmat,
+    behav,
+    covariates,
+    include_cases
+  )
 
   edges <- select_edges(
-    conmat_train,
-    behav_train,
+    training$conmat,
+    training$behav,
     params$thresh_method,
     params$thresh_level
   )
   model <- train_cpm_model(
-    conmat_train,
-    behav_train,
+    training$conmat,
+    training$behav,
     edges,
     params$bias_correct
   )
-  pred[include_cases, ] <- predict_cpm_model(model, conmat_train)
+  pred[include_cases, ] <- predict_cpm_model(model, training$conmat)
 
   real <- behav
-  real[include_cases] <- behav_train
+  real[include_cases] <- training$behav
 
   new_cpm(
     call = call,
