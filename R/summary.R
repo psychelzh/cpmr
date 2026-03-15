@@ -138,9 +138,18 @@ print.cpm_resamples_summary <- function(x, ...) {
     )
   )
   cat("    Pooled:\n")
-  cat(sprintf("      Positive: %s\n", format_cor(x$performance["pooled", "pos"])))
-  cat(sprintf("      Negative: %s\n", format_cor(x$performance["pooled", "neg"])))
-  cat(sprintf("      Combined: %s\n", format_cor(x$performance["pooled", "both"])))
+  cat(sprintf(
+    "      Positive: %s\n",
+    format_cor(x$performance["pooled", "pos"])
+  ))
+  cat(sprintf(
+    "      Negative: %s\n",
+    format_cor(x$performance["pooled", "neg"])
+  ))
+  cat(sprintf(
+    "      Combined: %s\n",
+    format_cor(x$performance["pooled", "both"])
+  ))
   cat("    Mean fold:\n")
   cat(
     sprintf(

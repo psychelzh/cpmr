@@ -53,8 +53,14 @@ test_that("summary.cpm_resamples returns pooled and mean-fold summaries", {
   summary_result <- summary(resampled, edge_level = 0.5)
 
   expect_s3_class(summary_result, "cpm_resamples_summary")
-  expect_identical(rownames(summary_result$performance), c("pooled", "fold_mean"))
-  expect_identical(colnames(summary_result$performance), c("both", "pos", "neg"))
+  expect_identical(
+    rownames(summary_result$performance),
+    c("pooled", "fold_mean")
+  )
+  expect_identical(
+    colnames(summary_result$performance),
+    c("both", "pos", "neg")
+  )
   expect_type(summary_result$edges, "logical")
   expect_equal(dim(summary_result$edges), c(ncol(conmat), 2))
   expect_identical(summary_result$params$return_edges, "sum")
@@ -65,7 +71,11 @@ test_that("summary.cpm_resamples returns pooled and mean-fold summaries", {
   expect_true(any(grepl("CPM resamples summary", out, fixed = TRUE)))
   expect_true(any(grepl("Pooled", out, fixed = TRUE)))
   expect_true(any(grepl("Mean fold", out, fixed = TRUE)))
-  expect_true(any(grepl("Selected edges (edge_level = 0.500)", out, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Selected edges (edge_level = 0.500)",
+    out,
+    fixed = TRUE
+  )))
 })
 
 test_that("summary.cpm_resamples edge_level controls binarized edge masks", {
@@ -85,7 +95,9 @@ test_that("summary.cpm_resamples edge_level controls binarized edge masks", {
   high_level <- summary(resampled, edge_level = 1)
 
   expect_true(isTRUE(all(low_level$edges)))
-  expect_true(sum(high_level$edges, na.rm = TRUE) <= sum(low_level$edges, na.rm = TRUE))
+  expect_true(
+    sum(high_level$edges, na.rm = TRUE) <= sum(low_level$edges, na.rm = TRUE)
+  )
 })
 
 test_that("summary.cpm_resamples supports method with no stored edges", {
