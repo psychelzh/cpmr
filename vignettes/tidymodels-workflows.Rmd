@@ -114,6 +114,56 @@ tune_res <- workflow() |>
 collect_metrics(tune_res)
 ```
 
+## Collect Edges Across Resamples
+
+`fit_resamples()` and `tune_grid()` do not retain fold-wise CPM edge masks
+unless we explicitly extract them. The recommended workflow is:
+
+1. use `extract_cpm_edges()` inside `control_resamples()` or
+   `control_grid()`;
+2. call `collect_edges()` on the resulting resample object.
+
+```{r}
+resample_ctrl <- control_resamples(
+  save_pred = TRUE,
+  extract = extract_cpm_edges
+)
+
+resample_res <- workflow() |>
+  add_formula(y ~ .) |>
+  add_model(spec) |>
+  fit_resamples(
+    resamples = folds,
+    metrics = metric_set(rmse, cpm_cor),
+    control = resample_ctrl
+  )
+
+collect_edges(resample_res, type = "sum")
+collect_edges(resample_res, type = "prop")
+```
+
+For tuning results, `collect_edges()` keeps the tuning columns and `.config`
+so we can compare edge stability across parameter settings:
+
+```{r}
+tune_ctrl <- control_grid(
+  save_pred = TRUE,
+  extract = extract_cpm_edges
+)
+
+tune_edges <- workflow() |>
+  add_formula(y ~ .) |>
+  add_model(tuned_spec) |>
+  tune_grid(
+    resamples = folds,
+    grid = tibble::tibble(thresh_level = c(0.15, 0.25, 0.35)),
+    metrics = metric_set(rmse, cpm_cor),
+    control = tune_ctrl
+  )
+
+collect_edges(tune_edges, type = "sum")
+```
+
 ## Leakage-Safe Resampling
 
 CPM is a protocol rather than a single closed-form model. The package

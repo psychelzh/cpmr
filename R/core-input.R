@@ -78,7 +78,7 @@ core_normalize_inputs <- function(conmat, behav, covariates = NULL) {
   }
 
   list(
-    conmat = unname(conmat),
+    conmat = conmat,
     behav = behav,
     covariates = covariates
   )
@@ -124,12 +124,12 @@ core_init_edges <- function(return_edges, conmat, kfolds) {
     return_edges,
     all = array(
       dim = c(dim(conmat)[2], length(edge_signs), kfolds),
-      dimnames = list(NULL, edge_signs, NULL)
+      dimnames = list(colnames(conmat), edge_signs, NULL)
     ),
     sum = array(
       0,
       dim = c(dim(conmat)[2], length(edge_signs)),
-      dimnames = list(NULL, edge_signs)
+      dimnames = list(colnames(conmat), edge_signs)
     ),
     none = NULL
   )

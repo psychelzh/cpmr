@@ -88,19 +88,19 @@ predict(fit_obj, dat[61:80, ])
 #> 19 -0.890 
 #> 20  0.525
 collect_edges(fit_obj)[1:12, , drop = FALSE]
-#>         pos   neg
-#>  [1,]  TRUE FALSE
-#>  [2,] FALSE  TRUE
-#>  [3,]  TRUE FALSE
-#>  [4,] FALSE  TRUE
-#>  [5,] FALSE FALSE
-#>  [6,] FALSE  TRUE
-#>  [7,] FALSE  TRUE
-#>  [8,] FALSE FALSE
-#>  [9,] FALSE FALSE
-#> [10,]  TRUE FALSE
-#> [11,] FALSE FALSE
-#> [12,]  TRUE FALSE
+#>           pos   neg
+#> edge_1   TRUE FALSE
+#> edge_2  FALSE  TRUE
+#> edge_3   TRUE FALSE
+#> edge_4  FALSE  TRUE
+#> edge_5  FALSE FALSE
+#> edge_6  FALSE  TRUE
+#> edge_7  FALSE  TRUE
+#> edge_8  FALSE FALSE
+#> edge_9  FALSE FALSE
+#> edge_10  TRUE FALSE
+#> edge_11 FALSE FALSE
+#> edge_12  TRUE FALSE
 ```
 
 ## Use With Workflows
@@ -177,6 +177,44 @@ collect_metrics(tune_res)
 #> 2         0.15 rmse    standard   1.28      3  0.186  pre0_mod1_post0
 #> 3         0.25 cpm_cor standard   0.444     3  0.0592 pre0_mod2_post0
 #> 4         0.25 rmse    standard   1.30      3  0.125  pre0_mod2_post0
+```
+
+## Inspect Edges Across Resamples
+
+To retain fold-wise edge masks during tidymodels resampling, use
+`extract_cpm_edges()` through the resampling control object and then
+summarize them with `collect_edges()`:
+
+``` r
+resample_ctrl <- control_resamples(
+  save_pred = TRUE,
+  extract = extract_cpm_edges
+)
+
+resample_res <- workflow() |>
+  add_formula(y ~ .) |>
+  add_model(spec) |>
+  fit_resamples(
+    resamples = folds,
+    metrics = metric_set(rmse, cpm_cor),
+    control = resample_ctrl
+  )
+
+collect_edges(resample_res, type = "sum")
+#> # A tibble: 28 × 4
+#>    predictor   pos   neg n_folds
+#>    <chr>     <int> <int>   <int>
+#>  1 edge_1        3     0       3
+#>  2 edge_10       1     1       3
+#>  3 edge_11       0     1       3
+#>  4 edge_12       2     0       3
+#>  5 edge_14       0     3       3
+#>  6 edge_15       3     0       3
+#>  7 edge_16       0     1       3
+#>  8 edge_17       1     0       3
+#>  9 edge_19       1     0       3
+#> 10 edge_2        0     3       3
+#> # ℹ 18 more rows
 ```
 
 ## Design Notes

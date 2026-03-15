@@ -18,6 +18,9 @@
 * Added CPM-aware metrics `cpm_cor()` and `cpm_spearman()`.
 * Added `collect_edges()` methods for fitted CPM engines, parsnip model
   fits, and workflows.
+* Added `extract_cpm_edges()` plus `collect_edges()` support for
+  `fit_resamples()` and `tune_grid()` results when used with
+  `control_resamples(extract = ...)` or `control_grid(extract = ...)`.
 * Added dials parameter helpers for threshold method, threshold level,
   bias correction, and network selection.
 

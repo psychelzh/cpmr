@@ -4,10 +4,18 @@
 \alias{collect_edges}
 \title{Collect stored CPM edge masks}
 \usage{
-collect_edges(x, ...)
+collect_edges(x, type = c("sum", "prop", "all"), selected_only = TRUE, ...)
 }
 \arguments{
 \item{x}{An object with stored CPM edges.}
+
+\item{type}{How to summarize resample-level edge extracts. \code{type = "sum"}
+counts how often each edge was selected, \code{type = "prop"} converts those
+counts to fold-wise proportions, and \code{type = "all"} returns the raw edge
+masks from each fold. Ignored for single fitted CPM objects.}
+
+\item{selected_only}{Should outputs keep only selected edges? Ignored for
+single fitted CPM objects.}
 
 \item{...}{Unused.}
 }

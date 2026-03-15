@@ -14,7 +14,8 @@ connectome-based predictive modeling (CPM). The package includes:
 \item a \code{parsnip} model specification via \code{\link[=cpm_reg]{cpm_reg()}};
 \item integration with \code{workflows}, \code{recipes}, and \code{tune};
 \item CPM-specific metrics such as \code{\link[=cpm_cor]{cpm_cor()}} and \code{\link[=cpm_spearman]{cpm_spearman()}};
-\item helpers to inspect stored CPM edge masks via \code{\link[=collect_edges]{collect_edges()}}.
+\item helpers to inspect stored CPM edge masks via \code{\link[=collect_edges]{collect_edges()}} and
+\code{\link[=extract_cpm_edges]{extract_cpm_edges()}}.
 }
 
 The modeling engine keeps edge selection and model fitting inside each

@@ -6,7 +6,8 @@
 #' - a `parsnip` model specification via [cpm_reg()];
 #' - integration with `workflows`, `recipes`, and `tune`;
 #' - CPM-specific metrics such as [cpm_cor()] and [cpm_spearman()];
-#' - helpers to inspect stored CPM edge masks via [collect_edges()].
+#' - helpers to inspect stored CPM edge masks via [collect_edges()] and
+#'   [extract_cpm_edges()].
 #'
 #' The modeling engine keeps edge selection and model fitting inside each
 #' resampling split so that training and assessment data remain separated.

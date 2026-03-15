@@ -29,6 +29,6 @@ core_select_edges <- function(conmat, behav, method, level) {
   matrix(
     c(r_mat >= r_crit[2], r_mat <= r_crit[1]),
     ncol = 2,
-    dimnames = list(NULL, edge_signs)
+    dimnames = list(colnames(conmat), edge_signs)
   )
 }

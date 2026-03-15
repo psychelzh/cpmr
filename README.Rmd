@@ -122,6 +122,30 @@ tune_res <- workflow() |>
 collect_metrics(tune_res)
 ```
 
+## Inspect Edges Across Resamples
+
+To retain fold-wise edge masks during tidymodels resampling, use
+`extract_cpm_edges()` through the resampling control object and then
+summarize them with `collect_edges()`:
+
+```{r resample-edge-example}
+resample_ctrl <- control_resamples(
+  save_pred = TRUE,
+  extract = extract_cpm_edges
+)
+
+resample_res <- workflow() |>
+  add_formula(y ~ .) |>
+  add_model(spec) |>
+  fit_resamples(
+    resamples = folds,
+    metrics = metric_set(rmse, cpm_cor),
+    control = resample_ctrl
+  )
+
+collect_edges(resample_res, type = "sum")
+```
+
 ## Design Notes
 
 CPM is a protocol, not just a single regression call. In `cpmr`, edge
