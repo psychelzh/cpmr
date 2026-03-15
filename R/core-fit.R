@@ -38,7 +38,7 @@ core_fit_xy <- function(
     bias_correct = bias_correct
   )
 
-  predictor_names <- colnames(as.matrix(conmat))
+  predictor_names <- colnames(conmat)
   outcome_name <- names(behav)
 
   new_cpm_fit(

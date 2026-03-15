@@ -2,7 +2,7 @@
 register_cpm_reg <- function() {
   model_name <- "cpm_reg"
   current_models <- parsnip::get_model_env()$models
-  if (model_name %in% current_models) {
+  if (model_name %in% names(current_models)) {
     return(invisible())
   }
 

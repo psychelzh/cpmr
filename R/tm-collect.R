@@ -58,9 +58,11 @@ collect_edges.resample_results <- function(
   selected_only <- core_validate_selected_only(selected_only)
 
   extracts <- collect_cpm_edge_extracts(x)
+  resample_id_cols <- cpm_resample_id_cols(extracts)
   expanded <- expand_cpm_edge_extracts(
     extracts = extracts,
     meta_cols = character(),
+    resample_id_cols = resample_id_cols,
     type = type,
     selected_only = selected_only
   )
@@ -71,6 +73,7 @@ collect_edges.resample_results <- function(
     summarize_cpm_edge_extracts(
       expanded = expanded,
       meta_cols = character(),
+      resample_id_cols = resample_id_cols,
       type = type,
       selected_only = selected_only
     )
@@ -88,10 +91,12 @@ collect_edges.tune_results <- function(
   selected_only <- core_validate_selected_only(selected_only)
 
   extracts <- collect_cpm_edge_extracts(x)
-  meta_cols <- setdiff(names(extracts), c("id", ".extracts"))
+  resample_id_cols <- cpm_resample_id_cols(extracts)
+  meta_cols <- setdiff(names(extracts), c(resample_id_cols, ".extracts"))
   expanded <- expand_cpm_edge_extracts(
     extracts = extracts,
     meta_cols = meta_cols,
+    resample_id_cols = resample_id_cols,
     type = type,
     selected_only = selected_only
   )
@@ -102,6 +107,7 @@ collect_edges.tune_results <- function(
     summarize_cpm_edge_extracts(
       expanded = expanded,
       meta_cols = meta_cols,
+      resample_id_cols = resample_id_cols,
       type = type,
       selected_only = selected_only
     )
@@ -155,7 +161,17 @@ collect_cpm_edge_extracts <- function(x) {
   extracts
 }
 
-expand_cpm_edge_extracts <- function(extracts, meta_cols, type, selected_only) {
+cpm_resample_id_cols <- function(extracts) {
+  grep("^id[0-9]*$", names(extracts), value = TRUE)
+}
+
+expand_cpm_edge_extracts <- function(
+  extracts,
+  meta_cols,
+  resample_id_cols,
+  type,
+  selected_only
+) {
   rows <- lapply(seq_len(nrow(extracts)), function(i) {
     payload <- extracts$.extracts[[i]]
     out <- tibble::tibble(
@@ -168,7 +184,7 @@ expand_cpm_edge_extracts <- function(extracts, meta_cols, type, selected_only) {
       out <- out[out$pos | out$neg, , drop = FALSE]
     }
 
-    header_cols <- c(meta_cols, "id")
+    header_cols <- c(meta_cols, resample_id_cols)
     if (length(header_cols)) {
       header <- extracts[i, header_cols, drop = FALSE]
       if (!nrow(out)) {
@@ -192,6 +208,7 @@ expand_cpm_edge_extracts <- function(extracts, meta_cols, type, selected_only) {
 summarize_cpm_edge_extracts <- function(
   expanded,
   meta_cols,
+  resample_id_cols,
   type,
   selected_only
 ) {
@@ -212,11 +229,22 @@ summarize_cpm_edge_extracts <- function(
 
   rows <- lapply(groups, function(idx) {
     first <- expanded[idx[1], group_cols, drop = FALSE]
+    fold_key <- if (length(resample_id_cols)) {
+      do.call(
+        interaction,
+        c(
+          expanded[idx, resample_id_cols, drop = FALSE],
+          list(drop = TRUE, lex.order = TRUE)
+        )
+      )
+    } else {
+      seq_along(idx)
+    }
     data.frame(
       first,
       pos = sum(expanded$pos[idx]),
       neg = sum(expanded$neg[idx]),
-      n_folds = length(unique(expanded$id[idx])),
+      n_folds = length(unique(fold_key)),
       row.names = NULL
     )
   })

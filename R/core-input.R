@@ -1,6 +1,26 @@
 edge_signs <- c("pos", "neg")
 prediction_networks <- c("both", edge_signs)
 
+core_repair_predictor_names <- function(conmat) {
+  predictor_names <- colnames(conmat)
+  if (is.null(predictor_names)) {
+    predictor_names <- rep("", ncol(conmat))
+  }
+
+  missing_names <- is.na(predictor_names) | !nzchar(predictor_names)
+  if (any(missing_names)) {
+    predictor_names[missing_names] <- paste0("edge_", seq_len(ncol(conmat)))[
+      missing_names
+    ]
+  }
+  if (anyDuplicated(predictor_names)) {
+    predictor_names <- make.unique(predictor_names, sep = "_")
+  }
+
+  colnames(conmat) <- predictor_names
+  conmat
+}
+
 check_names <- function(data, outcome) {
   if (!is.null(rownames(data)) && !is.null(names(outcome))) {
     if (!identical(rownames(data), names(outcome))) {
@@ -56,6 +76,7 @@ core_normalize_inputs <- function(conmat, behav, covariates = NULL) {
   if (!is.numeric(conmat)) {
     stop("Predictor data must be numeric.")
   }
+  conmat <- core_repair_predictor_names(conmat)
 
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {

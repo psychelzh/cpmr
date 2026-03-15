@@ -28,4 +28,13 @@ test_that("edge selection helpers cover alpha, warnings, and invalid methods", {
     "Invalid threshold method.",
     fixed = TRUE
   )
+
+  expect_no_error(
+    core_select_edges(
+      conmat = matrix(rnorm(30), nrow = 10),
+      behav = rnorm(10),
+      method = "sparsity",
+      level = 0
+    )
+  )
 })

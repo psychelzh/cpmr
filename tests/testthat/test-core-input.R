@@ -7,6 +7,10 @@ test_that("input helpers validate types, sizes, and names", {
 
   normalized <- core_normalize_inputs(conmat, behav, covariates)
   expect_equal(dim(normalized$conmat), c(3, 3))
+  expect_named(
+    as.data.frame(normalized$conmat),
+    c("edge_1", "edge_2", "edge_3")
+  )
   expect_equal(unname(normalized$behav), unname(behav))
   expect_equal(dim(normalized$covariates), c(3, 2))
 
@@ -55,6 +59,14 @@ test_that("input helpers validate types, sizes, and names", {
     core_normalize_inputs(conmat, behav, bad_covariates),
     "Case names of `covariates` must match those of outcome data.",
     fixed = TRUE
+  )
+
+  named_conmat <- conmat
+  colnames(named_conmat) <- c("edge_1", "edge_1", "")
+  repaired <- core_normalize_inputs(named_conmat, behav)
+  expect_named(
+    as.data.frame(repaired$conmat),
+    c("edge_1", "edge_1_1", "edge_3")
   )
 })
 

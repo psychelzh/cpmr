@@ -13,7 +13,7 @@ core_select_edges <- function(conmat, behav, method, level) {
       c(-thresh, thresh)
     },
     sparsity = {
-      k <- round(level * length(r_mat))
+      k <- max(1L, min(length(r_mat), as.integer(round(level * length(r_mat)))))
       thresh <- c(
         Rfast::nth(r_mat, k),
         Rfast::nth(r_mat, k, descending = TRUE)

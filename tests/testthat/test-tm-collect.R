@@ -138,3 +138,50 @@ test_that("collect_edges keeps tuning metadata for tune_grid results", {
   )
   expect_true(all(c(0.15, 0.25) %in% edges_all$thresh_level))
 })
+
+test_that("collect_edges counts repeated resamples using all fold identifiers", {
+  testthat::skip_if_not_installed("rsample")
+  testthat::skip_if_not_installed("tune")
+  testthat::skip_if_not_installed("workflows")
+
+  problem <- simulate_cpm_problem(n = 48, p = 16, seed = 66)
+  spec <- cpm_reg(thresh_method = "sparsity", thresh_level = 0.2)
+
+  wf <- workflows::workflow() |>
+    workflows::add_formula(y ~ .) |>
+    workflows::add_model(spec)
+
+  repeated_res <- tune::fit_resamples(
+    wf,
+    resamples = rsample::vfold_cv(problem$data, v = 3, repeats = 2),
+    control = tune::control_resamples(extract = extract_cpm_edges)
+  )
+
+  edges_sum <- collect_edges(repeated_res, type = "sum", selected_only = FALSE)
+  edges_all <- collect_edges(repeated_res, type = "all", selected_only = FALSE)
+
+  expect_true(all(edges_sum$n_folds == 6L))
+  expect_named(edges_all, c("id", "id2", "predictor", "pos", "neg"))
+
+  tuned_res <- tune::tune_grid(
+    wf |>
+      workflows::update_model(cpm_reg(
+        thresh_method = "sparsity",
+        thresh_level = tune::tune(),
+        network = "both"
+      )),
+    resamples = rsample::vfold_cv(problem$data, v = 3, repeats = 2),
+    grid = tibble::tibble(thresh_level = c(0.15, 0.25)),
+    control = tune::control_grid(extract = extract_cpm_edges)
+  )
+
+  tuned_sum <- collect_edges(tuned_res, type = "sum", selected_only = FALSE)
+  tuned_all <- collect_edges(tuned_res, type = "all", selected_only = FALSE)
+
+  expect_true(all(tuned_sum$n_folds == 6L))
+  expect_false("id2" %in% names(tuned_sum))
+  expect_named(
+    tuned_all,
+    c("thresh_level", ".config", "id", "id2", "predictor", "pos", "neg")
+  )
+})

@@ -99,6 +99,7 @@ test_that("resample edge helpers cover empty and malformed extract states", {
     nrow(expand_cpm_edge_extracts(
       extracts = empty_extracts,
       meta_cols = character(),
+      resample_id_cols = "id",
       type = "all",
       selected_only = TRUE
     )),
@@ -120,6 +121,7 @@ test_that("resample edge helpers cover empty and malformed extract states", {
   expanded_none <- expand_cpm_edge_extracts(
     extracts = none_selected,
     meta_cols = character(),
+    resample_id_cols = "id",
     type = "all",
     selected_only = TRUE
   )
@@ -135,9 +137,23 @@ test_that("resample edge helpers cover empty and malformed extract states", {
   summarized_empty <- summarize_cpm_edge_extracts(
     expanded = expanded_empty,
     meta_cols = character(),
+    resample_id_cols = "id",
     type = "sum",
     selected_only = TRUE
   )
   expect_named(summarized_empty, c("predictor", "pos", "neg", "n_folds"))
   expect_equal(nrow(summarized_empty), 0)
+
+  summarized_without_ids <- summarize_cpm_edge_extracts(
+    expanded = tibble::tibble(
+      predictor = c("edge_1", "edge_1"),
+      pos = c(TRUE, FALSE),
+      neg = c(FALSE, TRUE)
+    ),
+    meta_cols = character(),
+    resample_id_cols = character(),
+    type = "sum",
+    selected_only = FALSE
+  )
+  expect_equal(summarized_without_ids$n_folds, 2)
 })
