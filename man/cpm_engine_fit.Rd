@@ -27,3 +27,4 @@ A \code{cpm_fit} object.
 \description{
 Internal parsnip engine bridge for \code{cpm_reg()}
 }
+\keyword{internal}

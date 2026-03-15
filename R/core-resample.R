@@ -120,68 +120,6 @@ core_warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
   invisible()
 }
 
-core_fit_xy <- function(
-  conmat,
-  behav,
-  thresh_method = "alpha",
-  thresh_level = 0.01,
-  bias_correct = TRUE,
-  network = "both"
-) {
-  thresh_method <- core_validate_thresh_method(thresh_method)
-  thresh_level <- core_validate_thresh_level(thresh_level)
-  bias_correct <- core_validate_bias_correct(bias_correct)
-  network <- core_validate_network(network)
-
-  normalized <- core_normalize_inputs(conmat, behav)
-  conmat <- normalized$conmat
-  behav <- normalized$behav
-
-  include_cases <- core_resolve_include_cases(
-    conmat,
-    behav,
-    covariates = NULL,
-    na_action = "fail"
-  )
-  if (length(include_cases) < 3L) {
-    stop("At least 3 complete observations are required to fit CPM.")
-  }
-
-  edges <- core_select_edges(
-    conmat = conmat,
-    behav = behav,
-    method = thresh_method,
-    level = thresh_level
-  )
-  model <- core_train_model(
-    conmat = conmat,
-    behav = behav,
-    edges = edges,
-    bias_correct = bias_correct
-  )
-
-  predictor_names <- colnames(as.matrix(conmat))
-  outcome_name <- names(behav)
-
-  new_cpm_fit(
-    model = model,
-    edges = edges,
-    network = network,
-    predictors = predictor_names,
-    outcome = outcome_name,
-    params = list(
-      thresh_method = thresh_method,
-      thresh_level = thresh_level,
-      bias_correct = bias_correct
-    )
-  )
-}
-
-core_predict_networks <- function(object, new_data) {
-  predictors <- core_prepare_prediction_matrix(new_data, object$predictors)
-  core_predict_model(object$model, predictors)
-}
-
 core_fit_resamples <- function(
   conmat,
   behav,
@@ -289,50 +227,4 @@ core_fit_resamples <- function(
       na_action = na_action
     )
   )
-}
-
-core_compute_fold_metrics <- function(real, pred, folds, network) {
-  fold_metrics <- lapply(seq_along(folds), function(i) {
-    rows <- folds[[i]]
-    data.frame(
-      fold = i,
-      n_assess = length(rows),
-      both = core_safe_cor(real[rows], pred[rows, "both"]),
-      pos = core_safe_cor(real[rows], pred[rows, "pos"]),
-      neg = core_safe_cor(real[rows], pred[rows, "neg"]),
-      estimate = core_safe_cor(real[rows], pred[rows, network])
-    )
-  })
-  do.call(rbind, fold_metrics)
-}
-
-core_compute_fold_predictions <- function(real, pred, folds, network) {
-  fold_id <- rep(NA_integer_, length(real))
-  for (i in seq_along(folds)) {
-    fold_id[folds[[i]]] <- i
-  }
-  data.frame(
-    row = seq_along(real),
-    fold = fold_id,
-    truth = real,
-    .pred = pred[, network],
-    both = pred[, "both"],
-    pos = pred[, "pos"],
-    neg = pred[, "neg"]
-  )
-}
-
-core_safe_cor <- function(x, y, method = "pearson") {
-  valid <- stats::complete.cases(x, y)
-  if (sum(valid) < 2) {
-    return(NA_real_)
-  }
-
-  x <- x[valid]
-  y <- y[valid]
-  if (stats::sd(x) == 0 || stats::sd(y) == 0) {
-    return(NA_real_)
-  }
-
-  stats::cor(x, y, method = method)
 }

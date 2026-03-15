@@ -82,6 +82,7 @@ update.cpm_reg <- function(
 #'
 #' @return A `cpm_fit` object.
 #' @export
+#' @keywords internal
 cpm_engine_fit <- function(
   x,
   y,
