@@ -164,6 +164,82 @@ tune_edges <- workflow() |>
 collect_edges(tune_edges, type = "sum")
 ```
 
+## Grouped Resampling For Repeated Measures
+
+If rows represent repeated scans or visits from the same subject, place the
+subject identifier in the data frame, exclude it from the predictors, and use
+`group_vfold_cv()` so the same subject never appears in both the analysis and
+assessment portions of a split.
+
+```{r}
+subject_x <- x[rep(seq_len(30), each = 2), , drop = FALSE] +
+  matrix(rnorm(60 * p, sd = 0.15), ncol = p)
+grouped_dat <- data.frame(
+  subject_id = factor(rep(paste0("subj_", seq_len(30)), each = 2)),
+  y = rep(y[1:30], each = 2) + rnorm(60, sd = 0.2),
+  subject_x,
+  check.names = FALSE
+)
+
+group_folds <- group_vfold_cv(grouped_dat, group = subject_id, v = 3)
+
+group_res <- workflow() |>
+  add_formula(y ~ . - subject_id) |>
+  add_model(spec) |>
+  fit_resamples(
+    resamples = group_folds,
+    metrics = metric_set(rmse, cpm_cor),
+    control = control_resamples(extract = extract_cpm_edges)
+  )
+
+collect_metrics(group_res)
+collect_edges(group_res, type = "sum")
+```
+
+## Nested Cross-Validation Pattern
+
+When CPM threshold tuning itself needs an outer unbiased assessment loop, use
+`nested_cv()` and tune the workflow inside each outer split. The pattern below
+is shown without evaluation to keep the vignette fast, but it matches the
+workflow used in the test suite.
+
+```{r, eval = FALSE}
+nested_folds <- nested_cv(
+  grouped_dat,
+  outside = group_vfold_cv(group = subject_id, v = 3),
+  inside = vfold_cv(v = 2)
+)
+
+outer_results <- lapply(seq_len(nrow(nested_folds)), function(i) {
+  inner_res <- tune_grid(
+    workflow() |>
+      add_formula(y ~ . - subject_id) |>
+      add_model(cpm_reg(
+        thresh_method = "sparsity",
+        thresh_level = tune(),
+        network = "both"
+      )),
+    resamples = nested_folds$inner_resamples[[i]],
+    grid = tibble::tibble(thresh_level = c(0.15, 0.25, 0.35)),
+    metrics = metric_set(rmse, cpm_cor)
+  )
+
+  best <- select_best(inner_res, metric = "rmse")
+  final_wf <- finalize_workflow(
+    workflow() |>
+      add_formula(y ~ . - subject_id) |>
+      add_model(cpm_reg(
+        thresh_method = "sparsity",
+        thresh_level = tune(),
+        network = "both"
+      )),
+    best
+  )
+
+  fit(final_wf, data = analysis(nested_folds$splits[[i]]))
+})
+```
+
 ## Leakage-Safe Resampling
 
 CPM is a protocol rather than a single closed-form model. The package

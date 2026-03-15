@@ -217,6 +217,51 @@ collect_edges(resample_res, type = "sum")
 #> # ℹ 18 more rows
 ```
 
+## Repeated Measures
+
+If rows from the same subject can appear multiple times, keep those rows
+together during resampling with `group_vfold_cv()` and exclude the group
+identifier from the predictors:
+
+``` r
+subject_id <- factor(rep(paste0("subj_", seq_len(30)), each = 2))
+grouped_dat <- dat[rep(seq_len(30), each = 2), ]
+grouped_dat <- transform(grouped_dat, subject_id = subject_id)
+
+group_folds <- group_vfold_cv(grouped_dat, group = subject_id, v = 3)
+
+group_res <- workflow() |>
+  add_formula(y ~ . - subject_id) |>
+  add_model(spec) |>
+  fit_resamples(
+    resamples = group_folds,
+    metrics = metric_set(rmse, cpm_cor),
+    control = control_resamples(extract = extract_cpm_edges)
+  )
+
+collect_metrics(group_res)
+#> # A tibble: 2 × 6
+#>   .metric .estimator  mean     n std_err .config        
+#>   <chr>   <chr>      <dbl> <int>   <dbl> <chr>          
+#> 1 cpm_cor standard   0.409     3  0.0446 pre0_mod0_post0
+#> 2 rmse    standard   1.37      3  0.114  pre0_mod0_post0
+collect_edges(group_res, type = "sum")
+#> # A tibble: 26 × 4
+#>    predictor   pos   neg n_folds
+#>    <chr>     <int> <int>   <int>
+#>  1 edge_1        3     0       3
+#>  2 edge_10       1     0       3
+#>  3 edge_12       2     0       3
+#>  4 edge_14       0     1       3
+#>  5 edge_15       2     0       3
+#>  6 edge_16       0     1       3
+#>  7 edge_17       1     0       3
+#>  8 edge_2        0     3       3
+#>  9 edge_22       3     0       3
+#> 10 edge_23       1     0       3
+#> # ℹ 16 more rows
+```
+
 ## Design Notes
 
 CPM is a protocol, not just a single regression call. In `cpmr`, edge
