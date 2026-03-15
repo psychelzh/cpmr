@@ -1,103 +1,87 @@
-# RFC 0003: Migration and Deprecation Strategy
+# RFC 0003: Migration and Release Strategy
 
-- Status: Proposed
+- Status: Implemented
 - Authors: cpmr maintainers
 - Depends on: RFC 0001, RFC 0002
 - Target releases: 0.2.x -> 1.0.0
-- Last updated: 2026-03-14
+- Last updated: 2026-03-15
 
 ## Summary
 
-This RFC defines a phased migration path from the current `cpmr` API to a
-core-plus-adapter architecture. It minimizes disruption by introducing
-compatibility wrappers first and delaying hard deprecations until clear
-migration paths exist.
+This RFC defines the release posture for the tidymodels-first rewrite of
+`cpmr`. The package now treats the development branch as an intentional API
+reset rather than a long compatibility bridge for the previous interface.
 
 ## Objectives
 
-1. Preserve existing user workflows while new architecture lands.
-2. Provide explicit migration timeline and stable deprecation messaging.
-3. Avoid silent behavior changes in leakage-sensitive code paths.
+1. Make the breaking rewrite explicit in docs and NEWS.
+2. Keep the new API surface small and coherent around tidymodels.
+3. Avoid silent leakage-sensitive behavior changes during the rewrite.
 
 ## Current User Surface
 
-Primary functions in use today:
+Primary functions after the rewrite:
 
-1. `cpm_spec()`
-2. `fit(cpm_spec(), ...)`
-3. `fit_resamples(cpm_spec(), ...)`
-4. `collect_metrics()`, `collect_predictions()`, `collect_edges()`
-5. `summary()`, `tidy()`
+1. `cpm_reg()`
+2. `fit()`
+3. `predict()`
+4. `collect_edges()`
+5. `cpm_cor()` and `cpm_spearman()`
 
 ## Target Architecture
 
 1. Core engine: internal stable contracts (RFC 0001).
 2. Tidymodels adapter: workflow integration (RFC 0002).
-3. Legacy compatibility layer: existing API forwarding to core engine.
+3. Documentation and release guidance that reflect the new API directly.
 
-## Migration Phases
+## Release Phases
 
-### Phase A (0.2.x): Internal stabilization, no user breakage
+### Phase A (0.2.x): Breaking rewrite on the development branch
 
 1. Introduce `core-*` modules.
-2. Route existing exported API through compatibility wrappers.
-3. Keep user arguments and result structures unchanged.
+2. Introduce the tidymodels-facing API.
+3. Remove stale legacy entry points and examples.
 
-### Phase B (0.3.x): Adapter introduction
+### Phase B (0.3.x): Adapter expansion
 
-1. Add tidymodels-facing APIs (for example `cpm_reg()` and related helpers).
-2. Keep legacy APIs fully supported.
-3. Add migration guides that map old usage to new workflows.
+1. Expand workflow examples and tuning guides.
+2. Add optional connectome-specific recipe steps if they remain justified.
+3. Add grouped and nested resampling examples.
 
-### Phase C (0.4.x to 0.9.x): Soft deprecation window
+### Phase C (toward 1.0.0): Stabilization
 
-1. Mark legacy-only entry points as superseded where appropriate.
-2. Emit lifecycle-style deprecation warnings only when alternatives are mature.
-3. Maintain compatibility for at least two minor releases after warning starts.
-
-### Phase D (1.0.0): Decide long-term support posture
-
-1. Keep compatibility wrappers if maintenance cost is low.
-2. Otherwise, perform documented removals that were pre-announced in 0.x.
-3. Preserve conversion guidance and examples in docs.
-
-## Deprecation Policy
-
-1. No immediate hard removals for currently documented workflows.
-2. Every deprecation warning must include:
-   replacement API + one-line migration hint.
-3. Major behavioral changes require explicit NEWS and vignette updates.
+1. Polish the parsnip engine and CPM-specific metrics.
+2. Reassess which optional components should become stable public API.
+3. Preserve only the abstractions that still reduce maintenance burden.
 
 ## Risk Register
 
-1. Risk: naming conflict with tidymodels verbs (`fit_resamples`,
-   `collect_metrics`).
-   Mitigation: document namespace strategy and prefer explicit package calls in
-   examples.
+1. Risk: users looking for removed legacy functions.
+   Mitigation: make the breaking rewrite explicit in README, NEWS, and PR
+   notes.
 2. Risk: silent leakage regressions in adapter layer.
    Mitigation: cross-implementation equivalence tests and anti-leakage tests.
-3. Risk: dependency burden for current users.
-   Mitigation: keep adapter dependencies optional (`Suggests`) initially.
+3. Risk: dependency burden for users who only need the core engine.
+   Mitigation: keep workflow-related packages in `Suggests` initially.
 
 ## Documentation Plan
 
 1. Add architecture RFC links in contributor docs.
-2. Add side-by-side migration examples in vignettes.
-3. Include a "Which API should I use?" decision table in README/vignette.
+2. Replace old examples with tidymodels-first examples.
+3. Keep migration notes concise and focused on the new API.
 
 ## Release Checklist
 
 Before each phase release:
 
 1. Update `NEWS.md` with migration status.
-2. Run full test suite and snapshot checks.
-3. Verify examples in both legacy and adapter docs.
-4. Confirm deprecation warnings are actionable and non-ambiguous.
+2. Run full test suite and coverage checks.
+3. Verify README and vignette examples against the new API.
+4. Confirm `devtools::check()` is clean.
 
 ## Acceptance Criteria
 
-1. Existing users can stay on current API with no immediate rewrite.
-2. New users can adopt tidymodels workflow once adapter is released.
-3. Deprecation timeline is clear, documented, and honored.
-4. Leakage-safety guarantees remain explicit across all phases.
-
+1. The package presents a coherent tidymodels-first public API.
+2. No stale legacy examples remain in package docs.
+3. Leakage-safety guarantees remain explicit across release phases.
+4. Validation and coverage are strong enough to support the rewrite.

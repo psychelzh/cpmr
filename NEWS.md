@@ -2,43 +2,36 @@
 
 ## Breaking changes
 
-* **`cpm()` removed.** The legacy entry-point function `cpm()` has been
-  deleted. Use `fit(cpm_spec(...), conmat, behav)` instead. The `confounds`
-  parameter (deprecated alias of `covariates`) is also removed.
-* `fit()` now performs a single fit. Cross-validation/resampling workflows are
-  handled by `fit_resamples()`.
+* Rebuilt the package around a tidymodels-first API.
+* Removed the legacy `cpm()`, `cpm_spec()`, and `fit_resamples()`
+  interfaces.
+* The main entry point is now `cpm_reg()` with `fit()`, `predict()`,
+  `workflows`, and `tune`.
 
 ## Enhancements
 
-* Added `cpm_spec()` model specification object and `fit()` dispatch as the
-  primary API for connectome-based predictive modeling.
-* `print.cpm_spec()` provides a concise summary of all modeling parameters.
-* Added the `cpm_resamples` result class with dedicated methods:
-  `collect_metrics()`, `collect_predictions()`, and `collect_edges()`.
-* Added edge export support via `collect_edges(format = "index")` for sparse
-  index output when edge storage is large.
+* Added the `parsnip` model specification `cpm_reg()` with a native
+  `cpmr` engine.
+* Added workflow integration for formula- and recipe-based
+  preprocessing.
+* Added tuning support for CPM thresholds through `tune_grid()`.
+* Added CPM-aware metrics `cpm_cor()` and `cpm_spearman()`.
+* Added `collect_edges()` methods for fitted CPM engines, parsnip model
+  fits, and workflows.
+* Added dials parameter helpers for threshold method, threshold level,
+  bias correction, and network selection.
 
 ## Maintenance
 
-* Refactored fit internals into focused modules (`fit-generics`, `cpm-spec`,
-  `cpm-resamples`, and `fit-internals`) to improve maintainability.
-* Updated and expanded tests for internal helper branches and edge/summary
-  coverage paths.
-* Stabilized GitHub Actions uploads for Codecov coverage and Test Analytics by generating and uploading JUnit test results from an explicit workspace path.
-* Added architecture RFC documents under `design/rfc/`:
-  - `0001-core-engine.md` (core engine stabilization),
-  - `0002-tidymodels-adapter.md` (tidymodels integration design),
-  - `0003-migration-and-deprecation.md` (phased migration plan).
-* Started phase-A core refactor by introducing internal `core_*` helpers and
-  routing `fit.cpm_spec()` / `fit_resamples.cpm_spec()` through the core layer.
-* Added dedicated core-engine contract tests for single-fit parity, train/test
-  covariate handling, and insufficient-complete-case error paths.
-* Hardened resample validation so each fold must retain at least 3
-  complete-case training observations.
-* Moved training/prediction primitives into the core layer and kept
-  `fit-internals.R` helpers as compatibility wrappers during phase A.
-* Split phase-A core internals into RFC-aligned module files and moved legacy
-  helper names into `compat-legacy-api.R`.
+* Reorganized the codebase around RFC-aligned core modules for input
+  validation, preprocessing, edge selection, train/predict, and
+  resampling.
+* Added a minimal tidymodels adapter layer covering `parsnip`,
+  `workflows`, `tune`, `yardstick`, and edge collection.
+* Replaced the legacy test suite with focused tests for the new core
+  engine and tidymodels integration paths.
+* Moved architecture planning documents under `design/rfc/` and
+  excluded them from package builds.
 
 # cpmr 0.1.1
 

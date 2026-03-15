@@ -21,38 +21,116 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/cpmr)](https://CRAN.R-project.org/package=cpmr)
 <!-- badges: end -->
 
-The cpmr package is specifically designed for the analysis of the connectome predictive modeling (CPM) method in R. This package relies on [Rfast](https://CRAN.R-project.org/package=Rfast) to do row oriented calculation.
+`cpmr` brings connectome-based predictive modeling (CPM) into the
+tidymodels ecosystem. It provides:
+
+- a `parsnip` model specification through `cpm_reg()`;
+- workflow-friendly fitting with formulas or recipes;
+- tuning support for CPM thresholds;
+- CPM-aware metrics such as `cpm_cor()` and `cpm_spearman()`;
+- edge inspection helpers through `collect_edges()`.
+
+The expected predictor layout is one subject per row and one edge per
+column.
 
 ## Installation
 
-You can install the released version of cpmr from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of cpmr from
+[CRAN](https://CRAN.R-project.org) with:
 
 ``` r
 install.packages("cpmr")
 ```
 
-Or you can install the development version of cpmr from [r-universe](https://psychelzh.r-universe.dev) with:
+Or you can install the development version from GitHub with:
 
 ``` r
-install.packages("cpmr", repos = c("https://psychelzh.r-universe.dev", getOption("repos")))
+pak::pak("psychelzh/cpmr")
 ```
 
-## Example
+## Fit A CPM Model
 
-It is very simple to use this package. Just shape your connectivity matrix as a subjects by edges matrix, i.e., each row contains the correlation matrix (removed diagonal and duplicated values, e.g., lower triangular data) for each subject, and your behavior data a vector and feed them to `fit()`.
-
-```{r example}
+```{r fit-example}
 library(cpmr)
+library(parsnip)
 
 withr::local_seed(123)
-conmat <- matrix(rnorm(100 * 1000), nrow = 100)
-behav <- rnorm(100)
-spec <- cpm_spec()
-res <- fit(spec, conmat = conmat, behav = behav, return_edges = "sum")
-res
-summary(res)
+
+n <- 80
+p <- 40
+x <- matrix(rnorm(n * p), nrow = n, ncol = p)
+y <- x[, 1] - x[, 2] + 0.5 * x[, 3] + rnorm(n, sd = 0.5)
+
+dat <- as.data.frame(x)
+names(dat) <- paste0("edge_", seq_len(p))
+dat$y <- y
+
+spec <- cpm_reg(
+  thresh_method = "sparsity",
+  thresh_level = 0.2,
+  network = "both"
+)
+
+fit_obj <- fit(spec, y ~ ., data = dat[1:60, ])
+predict(fit_obj, dat[61:80, ])
+collect_edges(fit_obj)[1:12, , drop = FALSE]
 ```
 
-## Code of Conduct
+## Use With Workflows
 
-Please note that the cpmr project is released with a [Contributor Code of Conduct](https://psychelzh.github.io/cpmr/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+```{r workflow-example}
+suppressPackageStartupMessages({
+  library(recipes)
+  library(workflows)
+})
+
+wf <- workflow() |>
+  add_recipe(
+    recipe(y ~ ., data = dat[1:60, ]) |>
+      step_normalize(all_predictors())
+  ) |>
+  add_model(spec)
+
+wf_fit <- fit(wf, data = dat[1:60, ])
+predict(wf_fit, dat[61:80, ])
+```
+
+## Tune CPM Thresholds
+
+```{r tune-example}
+library(rsample)
+library(tune)
+library(yardstick)
+
+folds <- vfold_cv(dat[1:60, ], v = 3)
+
+tuned_spec <- cpm_reg(
+  thresh_method = "sparsity",
+  thresh_level = tune(),
+  network = "both"
+)
+
+tune_res <- workflow() |>
+  add_formula(y ~ .) |>
+  add_model(tuned_spec) |>
+  tune_grid(
+    resamples = folds,
+    grid = tibble::tibble(thresh_level = c(0.15, 0.25)),
+    metrics = metric_set(rmse, cpm_cor)
+  )
+
+collect_metrics(tune_res)
+```
+
+## Design Notes
+
+CPM is a protocol, not just a single regression call. In `cpmr`, edge
+selection, network aggregation, and model fitting are all kept inside
+each resampling split so that feature selection stays independent from
+assessment data.
+
+## Code Of Conduct
+
+Please note that the cpmr project is released with a [Contributor Code
+of Conduct](https://psychelzh.github.io/cpmr/CODE_OF_CONDUCT.html). By
+contributing to this project, you agree to abide by its terms.

@@ -1,14 +1,14 @@
 # RFC 0001: CPM Core Engine Stabilization
 
-- Status: Proposed
+- Status: Implemented
 - Authors: cpmr maintainers
 - Target release: 0.2.x
-- Last updated: 2026-03-14
+- Last updated: 2026-03-15
 
 ## Summary
 
-This RFC proposes a stable internal "core engine" layer for `cpmr` that is
-independent from any external workflow framework. The core layer will own:
+This RFC defines the stable internal "core engine" layer for `cpmr`. The core
+layer is independent from tidymodels orchestration and owns:
 
 1. Input validation and normalization
 2. Leakage-safe training/assessment preprocessing
@@ -16,29 +16,28 @@ independent from any external workflow framework. The core layer will own:
 4. Model training and prediction
 5. Resample orchestration primitives
 
-The purpose is to preserve correctness and performance while making later
-tidymodels integration a thin adapter instead of a rewrite.
+The purpose is to keep CPM correctness and leakage-safety in one place, so the
+tidymodels surface can remain a thin adapter instead of duplicating modeling
+logic.
 
 ## Motivation
 
-The current code already separates many CPM primitives, but contracts are still
-implicit and distributed across files. To support larger extensions (custom
-resampling objects, tidymodels adapters, richer metrics) without behavior
-drift, we need explicit and testable internal interfaces.
+CPM is a protocol, not a single off-the-shelf model call. To expose it cleanly
+through parsnip, workflows, and tune, `cpmr` needs a stable internal layer for
+input checks, fold-local preprocessing, edge selection, and prediction.
 
 ## Goals
 
 1. Define clear, stable internal function contracts.
 2. Keep anti-leakage behavior explicit and hard to accidentally break.
-3. Preserve user-facing behavior for `fit(cpm_spec(), ...)` and
-   `fit_resamples(cpm_spec(), ...)` during 0.2.x.
-4. Improve maintainability by separating "core engine" and "API compatibility"
-   responsibilities.
+3. Keep the core layer independent from tidymodels packages.
+4. Make the adapter layer call the core layer instead of re-implementing CPM.
 
 ## Non-goals
 
-1. Immediate removal of existing user-facing API.
-2. Adding new modeling families in this phase.
+1. Adding new modeling families beyond standard CPM regression.
+2. Moving preprocessing logic into generic recipe steps when that would weaken
+   leakage guarantees.
 3. Forcing tidymodels dependencies in the core layer.
 
 ## Design Principles
@@ -47,7 +46,8 @@ drift, we need explicit and testable internal interfaces.
    splits.
 2. Deterministic contracts: every core helper documents expected shape/types.
 3. Minimal coupling: core engine does not import tidymodels packages.
-4. Backward compatibility: legacy API becomes a thin wrapper over core engine.
+4. Lean internals: the core layer should not carry workflow-framework
+   abstractions.
 
 ## Proposed Internal Modules
 
@@ -59,10 +59,8 @@ The following files define the target internal organization:
 4. `R/core-train-predict.R`
 5. `R/core-resample-runner.R`
 6. `R/core-objects.R`
-7. `R/compat-legacy-api.R`
-
-Existing files may temporarily re-export or delegate to these modules during
-migration.
+These files now exist and serve as the internal CPM engine used by the
+tidymodels adapter.
 
 ## Internal Contracts
 
@@ -86,7 +84,7 @@ migration.
 
 ### 4) Edge selection
 
-- `core_select_edges(conmat_train, behav_train, thresh_method, thresh_level)`
+- `core_select_edges(conmat_train, behav_train, method, level)`
 - Returns logical matrix `n_edges x 2` with columns `pos` and `neg`.
 
 ### 5) Training and prediction
@@ -98,39 +96,39 @@ migration.
 
 ### 6) Resample runner
 
-- `core_fit_single(spec, conmat, behav, covariates, return_edges, na_action)`
-- `core_fit_resamples(spec, conmat, behav, covariates, folds, return_edges, na_action)`
+- `core_fit_xy(conmat, behav, thresh_method, thresh_level, bias_correct, network)`
+- `core_fit_resamples(conmat, behav, resamples, kfolds, covariates, thresh_method, thresh_level, bias_correct, network, return_edges, na_action)`
 - Runner only orchestrates fold loops and result accumulation.
 
 ## Object Contracts
 
-Core objects remain list-based S3 during 0.2.x:
+Core objects remain list-based S3:
 
-1. `cpm`: single-fit results.
-2. `cpm_resamples`: resampling results.
+1. `cpm_fit`: engine fit object used by parsnip prediction methods.
+2. Internal resample results: a list with `folds`, `edges`, `metrics`,
+   `predictions`, and `params`.
 
 Required fields and semantics are documented in `R/core-objects.R` and
 validated by tests.
 
 ## Testing Plan
 
-1. Keep existing behavior snapshots for `cpm` and summary/tidy outputs.
-2. Add contract tests for each core helper.
-3. Add equivalence tests:
-   legacy wrapper output == direct core runner output.
-4. Keep anti-leakage invariants for covariate handling under resampling.
+1. Add contract tests for each core helper.
+2. Keep anti-leakage invariants for covariate handling under resampling.
+3. Cover both success and validation-error branches for input and resample
+   helpers.
+4. Maintain full test coverage for the core layer.
 
 ## Rollout Plan
 
-1. Move logic into `core-*` modules with no behavior changes.
-2. Redirect existing exported methods to new core functions.
-3. Keep current function names and arguments stable.
-4. Ship with migration notes in NEWS and vignettes.
+1. Implement the module split in `R/core-*`.
+2. Route the tidymodels engine through the core helpers.
+3. Document the internal contracts in this RFC and in tests.
+4. Keep future extensions additive to these contracts.
 
 ## Acceptance Criteria
 
-1. Existing public tests pass unchanged or with equivalent snapshots.
-2. New core contract tests cover all helper branches.
-3. `fit()` and `fit_resamples()` output structures remain backward compatible.
-4. No new required package dependencies for core operation.
-
+1. Core CPM logic is isolated in `R/core-*` files.
+2. The tidymodels adapter calls the core layer instead of duplicating logic.
+3. Anti-leakage guarantees remain explicit and tested.
+4. The core layer has full test coverage.
