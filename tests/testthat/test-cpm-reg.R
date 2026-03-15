@@ -24,7 +24,7 @@ test_that("parsnip fit and predict work with cpm_reg", {
     network = "both"
   )
 
-  fit_obj <- fit(spec, y ~ ., data = train)
+  fit_obj <- parsnip::fit(spec, y ~ ., data = train)
   pred_num <- predict(fit_obj, test)
   pred_raw <- predict(fit_obj, test, type = "raw")
 

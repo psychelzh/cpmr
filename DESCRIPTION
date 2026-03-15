@@ -16,7 +16,6 @@ BugReports: https://github.com/psychelzh/cpmr/issues
 Depends:
     R (>= 4.4.0)
 Imports:
-    generics,
     parsnip,
     Rfast,
     rlang,

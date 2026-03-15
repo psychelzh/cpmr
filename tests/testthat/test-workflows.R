@@ -14,7 +14,7 @@ test_that("workflow with recipe fits and predicts through the cpmr engine", {
       thresh_level = 0.2
     ))
 
-  wf_fit <- fit(wf, data = problem$data[1:40, ])
+  wf_fit <- workflows::fit(wf, data = problem$data[1:40, ])
   pred <- predict(wf_fit, problem$data[41:50, ])
 
   expect_named(pred, ".pred")
