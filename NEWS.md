@@ -12,6 +12,8 @@
 
 * Added `cpm_spec()` model specification object and `fit()` dispatch as the
   primary API for connectome-based predictive modeling.
+* Added direct native helper entry points `cpm_fit()` and
+  `cpm_fit_resamples()` for the common `conmat`/`behav` workflow.
 * `print.cpm_spec()` provides a concise summary of all modeling parameters.
 * Added the `cpm_resamples` result class with dedicated methods:
   `collect_metrics()`, `collect_predictions()`, and `collect_edges()`.
