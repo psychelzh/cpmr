@@ -17,6 +17,8 @@
 * `print.cpm_spec()` provides a concise summary of all modeling parameters.
 * Added the `cpm_resamples` result class with dedicated methods:
   `collect_metrics()`, `collect_predictions()`, and `collect_edges()`.
+* Added `summary.cpm_resamples()` to provide pooled and mean-fold performance
+  summaries plus edge-selection-rate summaries across folds.
 * Added edge export support via `collect_edges(format = "index")` for sparse
   index output when edge storage is large.
 

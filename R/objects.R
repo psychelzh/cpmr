@@ -39,6 +39,6 @@ NULL
 #' }
 #'
 #' @seealso [fit_resamples()], [collect_metrics()], [collect_predictions()],
-#'   [collect_edges()]
+#'   [collect_edges()], [summary.cpm_resamples()]
 #' @name cpm_resamples
 NULL
