@@ -6,3 +6,30 @@ navbar:
   structure:
     left: [reference, articles]
     right: [search, github]
+
+reference:
+  - title: Get Started
+    contents:
+      - cpmr-package
+      - cpm_reg
+
+  - title: Metrics
+    contents:
+      - cpm_cor
+      - cpm_spearman
+
+  - title: Edge Inspection
+    contents:
+      - extract_cpm_edges
+      - collect_edges
+
+  - title: Tuning Parameters
+    contents:
+      - cpm_thresh_method
+      - cpm_network
+      - cpm_bias_correct
+
+  - title: Developer Internals
+    contents:
+      - cpm_fit
+      - cpm_engine_fit
