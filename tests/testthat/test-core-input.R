@@ -14,9 +14,9 @@ test_that("input helpers validate types, sizes, and names", {
   expect_equal(unname(normalized$behav), unname(behav))
   expect_equal(dim(normalized$covariates), c(3, 2))
 
-  expect_identical(core_validate_bias_correct(TRUE), TRUE)
+  expect_identical(validate_bias_correct(TRUE), TRUE)
   expect_error(
-    core_validate_bias_correct(1),
+    validate_bias_correct(1),
     "`bias_correct` must be either TRUE or FALSE.",
     fixed = TRUE
   )
@@ -76,7 +76,7 @@ test_that("missing-value helpers resolve include cases and kfold defaults", {
   covariates <- matrix(c(1, 2, 3, 4, 5, NA), nrow = 3)
 
   expect_equal(
-    core_resolve_include_cases(
+    resolve_include_cases(
       matrix(1:9, nrow = 3),
       behav,
       NULL,
@@ -85,12 +85,12 @@ test_that("missing-value helpers resolve include cases and kfold defaults", {
     1:3
   )
   expect_error(
-    core_resolve_include_cases(conmat, behav, NULL, na_action = "fail"),
+    resolve_include_cases(conmat, behav, NULL, na_action = "fail"),
     "Missing values found in `conmat`",
     fixed = TRUE
   )
   expect_error(
-    core_resolve_include_cases(
+    resolve_include_cases(
       matrix(1:9, nrow = 3),
       c(1, NA, 3),
       NULL,
@@ -100,7 +100,7 @@ test_that("missing-value helpers resolve include cases and kfold defaults", {
     fixed = TRUE
   )
   expect_error(
-    core_resolve_include_cases(
+    resolve_include_cases(
       matrix(1:9, nrow = 3),
       behav,
       matrix(c(1, 2, NA), ncol = 1),
@@ -110,7 +110,7 @@ test_that("missing-value helpers resolve include cases and kfold defaults", {
     fixed = TRUE
   )
   expect_equal(
-    core_resolve_include_cases(
+    resolve_include_cases(
       conmat,
       behav,
       covariates,
@@ -118,17 +118,17 @@ test_that("missing-value helpers resolve include cases and kfold defaults", {
     ),
     1:2
   )
-  expect_equal(core_resolve_kfolds(NULL, 1:4), 4L)
-  expect_equal(core_resolve_kfolds(3L, 1:4), 3L)
+  expect_equal(resolve_kfolds(NULL, 1:4), 4L)
+  expect_equal(resolve_kfolds(3L, 1:4), 3L)
 })
 
 test_that("edge and prediction initializers cover all storage modes", {
   conmat <- matrix(1:12, nrow = 3)
 
-  all_edges <- core_init_edges("all", conmat, 4)
-  sum_edges <- core_init_edges("sum", conmat, 4)
-  none_edges <- core_init_edges("none", conmat, 4)
-  pred <- core_init_pred(c(a = 1, b = 2, c = 3))
+  all_edges <- init_edge_storage("all", conmat, 4)
+  sum_edges <- init_edge_storage("sum", conmat, 4)
+  none_edges <- init_edge_storage("none", conmat, 4)
+  pred <- init_prediction_matrix(c(a = 1, b = 2, c = 3))
 
   expect_equal(dim(all_edges), c(4, 2, 4))
   expect_equal(dim(sum_edges), c(4, 2))
@@ -141,18 +141,18 @@ test_that("edge and prediction initializers cover all storage modes", {
 test_that("prediction matrix preparation enforces numeric aligned predictors", {
   new_data <- data.frame(b = c(3, 4), a = c(1, 2))
 
-  aligned <- core_prepare_prediction_matrix(new_data, c("a", "b"))
+  aligned <- prepare_prediction_matrix(new_data, c("a", "b"))
   expect_equal(colnames(aligned), NULL)
   expect_equal(aligned[, 1], c(1, 2))
   expect_equal(aligned[, 2], c(3, 4))
 
   expect_error(
-    core_prepare_prediction_matrix(data.frame(a = letters[1:2])),
+    prepare_prediction_matrix(data.frame(a = letters[1:2])),
     "`new_data` must contain only numeric predictors.",
     fixed = TRUE
   )
   expect_error(
-    core_prepare_prediction_matrix(
+    prepare_prediction_matrix(
       data.frame(a = 1:2),
       predictor_names = c("a", "b")
     ),
@@ -160,7 +160,7 @@ test_that("prediction matrix preparation enforces numeric aligned predictors", {
     fixed = TRUE
   )
   expect_error(
-    core_prepare_prediction_matrix(
+    prepare_prediction_matrix(
       unname(matrix(1:4, nrow = 2)),
       predictor_names = c("a", "b", "c")
     ),
@@ -168,7 +168,7 @@ test_that("prediction matrix preparation enforces numeric aligned predictors", {
     fixed = TRUE
   )
   expect_error(
-    core_prepare_prediction_matrix(matrix("a", nrow = 2, ncol = 2)),
+    prepare_prediction_matrix(matrix("a", nrow = 2, ncol = 2)),
     "`new_data` must contain only numeric predictors.",
     fixed = TRUE
   )
@@ -176,7 +176,7 @@ test_that("prediction matrix preparation enforces numeric aligned predictors", {
 
 test_that("input validators fail on malformed threshold inputs", {
   expect_error(
-    core_validate_thresh_level(2),
+    validate_thresh_level(2),
     "`thresh_level` must be a single number between 0 and 1.",
     fixed = TRUE
   )

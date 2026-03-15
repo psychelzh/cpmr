@@ -1,4 +1,4 @@
-core_validate_kfolds <- function(kfolds) {
+validate_kfolds <- function(kfolds) {
   if (
     !is.null(kfolds) &&
       (!is.numeric(kfolds) ||
@@ -20,7 +20,7 @@ core_validate_kfolds <- function(kfolds) {
   as.integer(kfolds)
 }
 
-core_validate_resamples <- function(resamples, include_cases) {
+validate_resamples <- function(resamples, include_cases) {
   if (!is.list(resamples) || length(resamples) == 0L) {
     stop("`resamples` must be a non-empty list of assessment indices.")
   }
@@ -63,21 +63,21 @@ core_validate_resamples <- function(resamples, include_cases) {
   normalized
 }
 
-core_resolve_resample_folds <- function(resamples, kfolds, include_cases) {
+resolve_resample_folds <- function(resamples, kfolds, include_cases) {
   if (is.null(resamples)) {
-    kfolds <- core_resolve_kfolds(
-      core_validate_kfolds(kfolds),
+    kfolds <- resolve_kfolds(
+      validate_kfolds(kfolds),
       include_cases
     )
     if (kfolds > length(include_cases)) {
       stop("`kfolds` must be less than or equal to complete-case observations.")
     }
-    folds <- core_crossv_kfold(include_cases, kfolds)
+    folds <- crossv_kfold(include_cases, kfolds)
   } else {
     if (!is.null(kfolds)) {
       stop("Specify either `resamples` or `kfolds`, not both.")
     }
-    folds <- core_validate_resamples(resamples, include_cases)
+    folds <- validate_resamples(resamples, include_cases)
     kfolds <- length(folds)
   }
 
@@ -94,11 +94,11 @@ core_resolve_resample_folds <- function(resamples, kfolds, include_cases) {
   )
 }
 
-core_crossv_kfold <- function(x, k) {
+crossv_kfold <- function(x, k) {
   split(sample(x), cut(seq_along(x), breaks = k, labels = FALSE))
 }
 
-core_warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
+warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
   if (return_edges != "all") {
     return(invisible())
   }
@@ -133,20 +133,20 @@ core_fit_resamples <- function(
   return_edges = c("none", "sum", "all"),
   na_action = c("fail", "exclude")
 ) {
-  thresh_method <- core_validate_thresh_method(thresh_method)
-  thresh_level <- core_validate_thresh_level(thresh_level)
-  bias_correct <- core_validate_bias_correct(bias_correct)
-  network <- core_validate_network(network)
+  thresh_method <- validate_thresh_method(thresh_method)
+  thresh_level <- validate_thresh_level(thresh_level)
+  bias_correct <- validate_bias_correct(bias_correct)
+  network <- validate_network(network)
   return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
-  core_warn_extreme_thresh_level(thresh_method, thresh_level)
+  warn_extreme_thresh_level(thresh_method, thresh_level)
 
   normalized <- core_normalize_inputs(conmat, behav, covariates)
   conmat <- normalized$conmat
   behav <- normalized$behav
   covariates <- normalized$covariates
 
-  include_cases <- core_resolve_include_cases(
+  include_cases <- resolve_include_cases(
     conmat,
     behav,
     covariates,
@@ -159,7 +159,7 @@ core_fit_resamples <- function(
     stop("At least 2 complete-case observations are required for resampling.")
   }
 
-  resolved <- core_resolve_resample_folds(
+  resolved <- resolve_resample_folds(
     resamples = resamples,
     kfolds = kfolds,
     include_cases = include_cases
@@ -167,10 +167,10 @@ core_fit_resamples <- function(
   folds <- resolved$folds
   kfolds <- resolved$kfolds
 
-  core_warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
+  warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
 
-  pred <- core_init_pred(behav)
-  edges <- core_init_edges(return_edges, conmat, kfolds)
+  pred <- init_prediction_matrix(behav)
+  edges <- init_edge_storage(return_edges, conmat, kfolds)
   real <- behav
 
   for (fold in seq_len(kfolds)) {
@@ -217,8 +217,8 @@ core_fit_resamples <- function(
   list(
     folds = folds,
     edges = edges,
-    metrics = core_compute_fold_metrics(real, pred, folds, network),
-    predictions = core_compute_fold_predictions(real, pred, folds, network),
+    metrics = compute_fold_metrics(real, pred, folds, network),
+    predictions = compute_fold_predictions(real, pred, folds, network),
     params = list(
       thresh_method = thresh_method,
       thresh_level = thresh_level,

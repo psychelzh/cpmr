@@ -86,7 +86,7 @@ test_that("resample edge helpers cover empty and malformed extract states", {
     fixed = FALSE
   )
   expect_error(
-    core_validate_selected_only(NA),
+    validate_selected_only(NA),
     "`selected_only` must be `TRUE` or `FALSE`.",
     fixed = TRUE
   )

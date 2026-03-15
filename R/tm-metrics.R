@@ -1,9 +1,9 @@
 cpm_cor_impl <- function(truth, estimate) {
-  core_safe_cor(truth, estimate, method = "pearson")
+  safe_cor(truth, estimate, method = "pearson")
 }
 
 cpm_spearman_impl <- function(truth, estimate) {
-  core_safe_cor(truth, estimate, method = "spearman")
+  safe_cor(truth, estimate, method = "spearman")
 }
 
 #' CPM Pearson correlation metric

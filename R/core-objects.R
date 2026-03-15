@@ -43,7 +43,7 @@ predict.cpm_fit <- function(
   ...
 ) {
   type <- match.arg(type)
-  network <- core_validate_network(network)
+  network <- validate_network(network)
 
   pred <- core_predict_networks(object, new_data)
   switch(

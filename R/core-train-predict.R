@@ -1,4 +1,4 @@
-core_fscale <- function(x, center, scale) {
+fscale <- function(x, center, scale) {
   Rfast::eachrow(Rfast::eachrow(x, center, "-"), scale, "/")
 }
 
@@ -8,7 +8,7 @@ core_train_model <- function(conmat, behav, edges, bias_correct) {
   if (bias_correct) {
     center <- Rfast::colmeans(conmat)
     scale <- Rfast::colVars(conmat, std = TRUE)
-    conmat <- core_fscale(conmat, center, scale)
+    conmat <- fscale(conmat, center, scale)
   }
 
   x <- matrix(
@@ -44,7 +44,7 @@ core_train_model <- function(conmat, behav, edges, bias_correct) {
 
 core_predict_model <- function(model, conmat_new) {
   if (model$bias_correct) {
-    conmat_new <- core_fscale(conmat_new, model$center, model$scale)
+    conmat_new <- fscale(conmat_new, model$center, model$scale)
   }
 
   x_new <- matrix(

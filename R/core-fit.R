@@ -6,17 +6,17 @@ core_fit_xy <- function(
   bias_correct = TRUE,
   network = "both"
 ) {
-  thresh_method <- core_validate_thresh_method(thresh_method)
-  thresh_level <- core_validate_thresh_level(thresh_level)
-  bias_correct <- core_validate_bias_correct(bias_correct)
-  network <- core_validate_network(network)
-  core_warn_extreme_thresh_level(thresh_method, thresh_level)
+  thresh_method <- validate_thresh_method(thresh_method)
+  thresh_level <- validate_thresh_level(thresh_level)
+  bias_correct <- validate_bias_correct(bias_correct)
+  network <- validate_network(network)
+  warn_extreme_thresh_level(thresh_method, thresh_level)
 
   normalized <- core_normalize_inputs(conmat, behav)
   conmat <- normalized$conmat
   behav <- normalized$behav
 
-  include_cases <- core_resolve_include_cases(
+  include_cases <- resolve_include_cases(
     conmat,
     behav,
     covariates = NULL,
@@ -57,6 +57,6 @@ core_fit_xy <- function(
 }
 
 core_predict_networks <- function(object, new_data) {
-  predictors <- core_prepare_prediction_matrix(new_data, object$predictors)
+  predictors <- prepare_prediction_matrix(new_data, object$predictors)
   core_predict_model(object$model, predictors)
 }

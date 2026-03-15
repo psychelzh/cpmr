@@ -1,4 +1,4 @@
-core_critical_r <- function(n, alpha) {
+critical_r <- function(n, alpha) {
   if (alpha <= 0) {
     return(Inf)
   }
@@ -16,7 +16,7 @@ core_select_edges <- function(conmat, behav, method, level) {
   r_crit <- switch(
     method,
     alpha = {
-      thresh <- core_critical_r(nrow(conmat), level)
+      thresh <- critical_r(nrow(conmat), level)
       c(-thresh, thresh)
     },
     sparsity = {

@@ -57,8 +57,10 @@ The following files define the target internal organization:
 2. `R/core-preprocess.R`
 3. `R/core-select-edges.R`
 4. `R/core-train-predict.R`
-5. `R/core-resample-runner.R`
-6. `R/core-objects.R`
+5. `R/core-fit.R`
+6. `R/core-resample.R`
+7. `R/core-eval.R`
+8. `R/core-objects.R`
 These files now exist and serve as the internal CPM engine used by the
 tidymodels adapter.
 
@@ -72,7 +74,7 @@ tidymodels adapter.
 
 ### 2) Include-case resolution
 
-- `core_resolve_include_cases(conmat, behav, covariates, na_action)`
+- `resolve_include_cases(conmat, behav, covariates, na_action)`
 - `na_action` in `c("fail", "exclude")`.
 - Returns integer row indices eligible for fitting/resampling.
 

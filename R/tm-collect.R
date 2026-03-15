@@ -55,7 +55,7 @@ collect_edges.resample_results <- function(
   ...
 ) {
   type <- match.arg(type)
-  selected_only <- core_validate_selected_only(selected_only)
+  selected_only <- validate_selected_only(selected_only)
 
   extracts <- collect_cpm_edge_extracts(x)
   resample_id_cols <- cpm_resample_id_cols(extracts)
@@ -88,7 +88,7 @@ collect_edges.tune_results <- function(
   ...
 ) {
   type <- match.arg(type)
-  selected_only <- core_validate_selected_only(selected_only)
+  selected_only <- validate_selected_only(selected_only)
 
   extracts <- collect_cpm_edge_extracts(x)
   resample_id_cols <- cpm_resample_id_cols(extracts)
@@ -124,7 +124,7 @@ collect_edges.default <- function(x, ...) {
   )
 }
 
-core_validate_selected_only <- function(selected_only) {
+validate_selected_only <- function(selected_only) {
   if (
     !is.logical(selected_only) ||
       length(selected_only) != 1L ||
