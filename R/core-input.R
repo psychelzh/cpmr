@@ -1,5 +1,5 @@
-corr_types <- c("pos", "neg")
-inc_edges <- c("both", corr_types)
+edge_signs <- c("pos", "neg")
+prediction_networks <- c("both", edge_signs)
 
 check_names <- function(data, outcome) {
   if (!is.null(rownames(data)) && !is.null(names(outcome))) {
@@ -48,7 +48,7 @@ core_validate_bias_correct <- function(bias_correct) {
 }
 
 core_validate_network <- function(network) {
-  match.arg(network, inc_edges)
+  match.arg(network, prediction_networks)
 }
 
 core_normalize_inputs <- function(conmat, behav, covariates = NULL) {
@@ -123,13 +123,13 @@ core_init_edges <- function(return_edges, conmat, kfolds) {
   switch(
     return_edges,
     all = array(
-      dim = c(dim(conmat)[2], length(corr_types), kfolds),
-      dimnames = list(NULL, corr_types, NULL)
+      dim = c(dim(conmat)[2], length(edge_signs), kfolds),
+      dimnames = list(NULL, edge_signs, NULL)
     ),
     sum = array(
       0,
-      dim = c(dim(conmat)[2], length(corr_types)),
-      dimnames = list(NULL, corr_types)
+      dim = c(dim(conmat)[2], length(edge_signs)),
+      dimnames = list(NULL, edge_signs)
     ),
     none = NULL
   )
@@ -138,8 +138,8 @@ core_init_edges <- function(return_edges, conmat, kfolds) {
 core_init_pred <- function(behav) {
   matrix(
     nrow = length(behav),
-    ncol = length(inc_edges),
-    dimnames = list(names(behav), inc_edges)
+    ncol = length(prediction_networks),
+    dimnames = list(names(behav), prediction_networks)
   )
 }
 

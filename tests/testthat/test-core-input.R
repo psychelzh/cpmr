@@ -123,7 +123,7 @@ test_that("edge and prediction initializers cover all storage modes", {
   expect_true(all(sum_edges == 0))
   expect_null(none_edges)
   expect_equal(dim(pred), c(3, 3))
-  expect_named(as.data.frame(pred), inc_edges)
+  expect_named(as.data.frame(pred), prediction_networks)
 })
 
 test_that("prediction matrix preparation enforces numeric aligned predictors", {
