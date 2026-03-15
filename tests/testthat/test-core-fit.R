@@ -24,6 +24,32 @@ test_that("core_fit_xy requires at least three complete observations", {
   )
 })
 
+test_that("core_fit_xy handles alpha threshold boundary values", {
+  problem <- simulate_cpm_problem(n = 30, p = 10, seed = 13)
+
+  fit_zero <- core_fit_xy(
+    conmat = problem$x[1:20, , drop = FALSE],
+    behav = problem$y[1:20],
+    thresh_method = "alpha",
+    thresh_level = 0,
+    network = "both"
+  )
+  fit_one <- core_fit_xy(
+    conmat = problem$x[1:20, , drop = FALSE],
+    behav = problem$y[1:20],
+    thresh_method = "alpha",
+    thresh_level = 1,
+    network = "both"
+  )
+
+  expect_false(any(fit_zero$edges))
+  expect_equal(length(predict(fit_zero, problem$x[21:30, , drop = FALSE])), 10)
+  expect_false(anyNA(predict(fit_zero, problem$x[21:30, , drop = FALSE])))
+
+  expect_equal(dim(fit_one$edges), c(10, 2))
+  expect_false(anyNA(fit_one$edges))
+})
+
 test_that("predict.cpm_fit returns numeric and raw predictions", {
   problem <- simulate_cpm_problem(n = 50, p = 25, seed = 12)
   train_rows <- 1:35

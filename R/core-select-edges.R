@@ -1,4 +1,11 @@
 core_critical_r <- function(n, alpha) {
+  if (alpha <= 0) {
+    return(Inf)
+  }
+  if (alpha >= 1) {
+    return(0)
+  }
+
   df <- n - 2
   ct <- stats::qt(alpha / 2, df, lower.tail = FALSE)
   sqrt((ct^2) / ((ct^2) + df))
