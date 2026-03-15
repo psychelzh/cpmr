@@ -110,8 +110,7 @@ core_warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
       sprintf(
         paste0(
           "Storing fold-wise edges (`return_edges = \"all\"`) may consume ",
-          "large memory (~%.1f MB). Consider `return_edges = \"sum\"` or ",
-          "`collect_edges(format = \"index\")` for sparse export."
+          "large memory (~%.1f MB). Consider `return_edges = \"sum\"`."
         ),
         estimated_bytes / 1024^2
       )
@@ -121,108 +120,90 @@ core_warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
   invisible()
 }
 
-core_fit_single <- function(
-  object,
+core_fit_xy <- function(
   conmat,
   behav,
-  covariates = NULL,
-  return_edges = c("none", "sum", "all"),
-  na_action = c("fail", "exclude"),
-  call = NULL
+  thresh_method = "alpha",
+  thresh_level = 0.01,
+  bias_correct = TRUE,
+  network = "both"
 ) {
-  params <- object$params
-  return_edges <- match.arg(return_edges)
-  na_action <- match.arg(na_action)
+  thresh_method <- core_validate_thresh_method(thresh_method)
+  thresh_level <- core_validate_thresh_level(thresh_level)
+  bias_correct <- core_validate_bias_correct(bias_correct)
+  network <- core_validate_network(network)
 
-  normalized <- core_normalize_inputs(conmat, behav, covariates)
+  normalized <- core_normalize_inputs(conmat, behav)
+  conmat <- normalized$conmat
   behav <- normalized$behav
-  covariates <- normalized$covariates
 
   include_cases <- core_resolve_include_cases(
     conmat,
     behav,
-    covariates,
-    na_action
+    covariates = NULL,
+    na_action = "fail"
   )
-  if (length(include_cases) == 0L) {
-    stop("No complete-case observations available for fitting.")
-  }
   if (length(include_cases) < 3L) {
-    stop("At least 3 complete-case observations are required for fitting.")
+    stop("At least 3 complete observations are required to fit CPM.")
   }
 
-  pred <- core_init_pred(behav)
-  training <- core_prepare_training_data(
+  edges <- core_select_edges(
     conmat = conmat,
     behav = behav,
-    covariates = covariates,
-    rows_train = include_cases
-  )
-
-  cur_edges <- core_select_edges(
-    conmat = training$conmat,
-    behav = training$behav,
-    method = params$thresh_method,
-    level = params$thresh_level
+    method = thresh_method,
+    level = thresh_level
   )
   model <- core_train_model(
-    conmat = training$conmat,
-    behav = training$behav,
-    edges = cur_edges,
-    bias_correct = params$bias_correct
-  )
-  pred[include_cases, ] <- core_predict_model(model, training$conmat)
-
-  edges <- switch(
-    return_edges,
-    none = NULL,
-    sum = cur_edges,
-    all = {
-      edge_array <- array(
-        dim = c(dim(cur_edges), 1L),
-        dimnames = list(NULL, corr_types, NULL)
-      )
-      edge_array[,, 1] <- cur_edges
-      edge_array
-    }
-  )
-
-  real <- behav
-  real[include_cases] <- training$behav
-
-  core_new_cpm(
-    call = call,
-    folds = list(include_cases),
-    behav = real,
-    pred = pred,
+    conmat = conmat,
+    behav = behav,
     edges = edges,
+    bias_correct = bias_correct
+  )
+
+  predictor_names <- colnames(as.matrix(conmat))
+  outcome_name <- names(behav)
+
+  new_cpm_fit(
     model = model,
-    spec = object,
+    edges = edges,
+    network = network,
+    predictors = predictor_names,
+    outcome = outcome_name,
     params = list(
-      covariates = !is.null(covariates),
-      thresh_method = params$thresh_method,
-      thresh_level = params$thresh_level,
-      return_edges = return_edges,
-      na_action = na_action,
-      bias_correct = params$bias_correct
+      thresh_method = thresh_method,
+      thresh_level = thresh_level,
+      bias_correct = bias_correct
     )
   )
 }
 
+core_predict_networks <- function(object, new_data) {
+  predictors <- core_prepare_prediction_matrix(new_data, object$predictors)
+  core_predict_model(object$model, predictors)
+}
+
 core_fit_resamples <- function(
-  object,
   conmat,
   behav,
+  resamples = NULL,
+  kfolds = NULL,
   covariates = NULL,
-  folds,
+  thresh_method = "alpha",
+  thresh_level = 0.01,
+  bias_correct = TRUE,
+  network = "both",
   return_edges = c("none", "sum", "all"),
   na_action = c("fail", "exclude")
 ) {
-  params <- object$params
+  thresh_method <- core_validate_thresh_method(thresh_method)
+  thresh_level <- core_validate_thresh_level(thresh_level)
+  bias_correct <- core_validate_bias_correct(bias_correct)
+  network <- core_validate_network(network)
   return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
 
   normalized <- core_normalize_inputs(conmat, behav, covariates)
+  conmat <- normalized$conmat
   behav <- normalized$behav
   covariates <- normalized$covariates
 
@@ -232,7 +213,6 @@ core_fit_resamples <- function(
     covariates,
     na_action
   )
-
   if (length(include_cases) == 0L) {
     stop("No complete-case observations available for resampling.")
   }
@@ -240,8 +220,13 @@ core_fit_resamples <- function(
     stop("At least 2 complete-case observations are required for resampling.")
   }
 
-  folds <- core_validate_resamples(folds, include_cases)
-  kfolds <- length(folds)
+  resolved <- core_resolve_resample_folds(
+    resamples = resamples,
+    kfolds = kfolds,
+    include_cases = include_cases
+  )
+  folds <- resolved$folds
+  kfolds <- resolved$kfolds
 
   core_warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
 
@@ -262,14 +247,14 @@ core_fit_resamples <- function(
     fold_edges <- core_select_edges(
       conmat = training$conmat,
       behav = training$behav,
-      method = params$thresh_method,
-      level = params$thresh_level
+      method = thresh_method,
+      level = thresh_level
     )
     fold_model <- core_train_model(
       conmat = training$conmat,
       behav = training$behav,
       edges = fold_edges,
-      bias_correct = params$bias_correct
+      bias_correct = bias_correct
     )
     assessment <- core_prepare_assessment_data(
       conmat = conmat,
@@ -290,23 +275,64 @@ core_fit_resamples <- function(
     }
   }
 
-  metrics <- compute_fold_metrics(real, pred, folds)
-  predictions <- compute_fold_predictions(real, pred, folds)
-
-  core_new_cpm_resamples(
-    spec = object,
+  list(
     folds = folds,
     edges = edges,
-    metrics = metrics,
-    predictions = predictions,
+    metrics = core_compute_fold_metrics(real, pred, folds, network),
+    predictions = core_compute_fold_predictions(real, pred, folds, network),
     params = list(
-      covariates = !is.null(covariates),
-      thresh_method = params$thresh_method,
-      thresh_level = params$thresh_level,
-      kfolds = kfolds,
-      bias_correct = params$bias_correct,
+      thresh_method = thresh_method,
+      thresh_level = thresh_level,
+      bias_correct = bias_correct,
+      network = network,
       return_edges = return_edges,
       na_action = na_action
     )
   )
+}
+
+core_compute_fold_metrics <- function(real, pred, folds, network) {
+  fold_metrics <- lapply(seq_along(folds), function(i) {
+    rows <- folds[[i]]
+    data.frame(
+      fold = i,
+      n_assess = length(rows),
+      both = core_safe_cor(real[rows], pred[rows, "both"]),
+      pos = core_safe_cor(real[rows], pred[rows, "pos"]),
+      neg = core_safe_cor(real[rows], pred[rows, "neg"]),
+      estimate = core_safe_cor(real[rows], pred[rows, network])
+    )
+  })
+  do.call(rbind, fold_metrics)
+}
+
+core_compute_fold_predictions <- function(real, pred, folds, network) {
+  fold_id <- rep(NA_integer_, length(real))
+  for (i in seq_along(folds)) {
+    fold_id[folds[[i]]] <- i
+  }
+  data.frame(
+    row = seq_along(real),
+    fold = fold_id,
+    truth = real,
+    .pred = pred[, network],
+    both = pred[, "both"],
+    pos = pred[, "pos"],
+    neg = pred[, "neg"]
+  )
+}
+
+core_safe_cor <- function(x, y, method = "pearson") {
+  valid <- stats::complete.cases(x, y)
+  if (sum(valid) < 2) {
+    return(NA_real_)
+  }
+
+  x <- x[valid]
+  y <- y[valid]
+  if (stats::sd(x) == 0 || stats::sd(y) == 0) {
+    return(NA_real_)
+  }
+
+  stats::cor(x, y, method = method)
 }

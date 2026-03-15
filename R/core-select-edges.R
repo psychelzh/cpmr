@@ -19,12 +19,13 @@ core_select_edges <- function(conmat, behav, method, level) {
         Rfast::nth(r_mat, k, descending = TRUE)
       )
       if (thresh[[1]] > 0 || thresh[[2]] < 0) {
-        warning("Not enough positive or negative correlation values.") # nocov
+        warning("Not enough positive or negative correlation values.")
       }
       thresh
     },
     stop("Invalid threshold method.")
   )
+
   matrix(
     c(r_mat >= r_crit[2], r_mat <= r_crit[1]),
     ncol = 2,

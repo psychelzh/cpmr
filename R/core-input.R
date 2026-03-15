@@ -1,7 +1,47 @@
+core_validate_thresh_method <- function(method) {
+  match.arg(method, c("alpha", "sparsity"))
+}
+
+core_validate_thresh_level <- function(level) {
+  if (
+    !is.numeric(level) ||
+      length(level) != 1L ||
+      is.na(level) ||
+      !is.finite(level) ||
+      level < 0 ||
+      level > 1
+  ) {
+    stop("`thresh_level` must be a single number between 0 and 1.")
+  }
+
+  as.numeric(level)
+}
+
+core_validate_bias_correct <- function(bias_correct) {
+  if (
+    !is.logical(bias_correct) ||
+      length(bias_correct) != 1L ||
+      is.na(bias_correct)
+  ) {
+    stop("`bias_correct` must be either TRUE or FALSE.")
+  }
+
+  bias_correct
+}
+
+core_validate_network <- function(network) {
+  match.arg(network, inc_edges)
+}
+
 core_normalize_inputs <- function(conmat, behav, covariates = NULL) {
+  conmat <- as.matrix(conmat)
+  if (!is.numeric(conmat)) {
+    stop("Predictor data must be numeric.")
+  }
+
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {
-    stop("Behavior data must be a numeric vector.")
+    stop("Outcome data must be a numeric vector.")
   }
   if (nrow(conmat) != length(behav)) {
     stop("Case numbers of `conmat` and `behav` must match.")
@@ -9,8 +49,9 @@ core_normalize_inputs <- function(conmat, behav, covariates = NULL) {
   check_names(conmat, behav)
 
   if (!is.null(covariates)) {
-    if (is.vector(covariates)) {
-      covariates <- as.matrix(covariates)
+    covariates <- as.matrix(covariates)
+    if (!is.numeric(covariates)) {
+      stop("Covariates must be numeric.")
     }
     if (nrow(covariates) != length(behav)) {
       stop("Case numbers of `covariates` and `behav` must match.")
@@ -19,6 +60,7 @@ core_normalize_inputs <- function(conmat, behav, covariates = NULL) {
   }
 
   list(
+    conmat = unname(conmat),
     behav = behav,
     covariates = covariates
   )
@@ -55,6 +97,7 @@ core_resolve_kfolds <- function(kfolds, include_cases) {
   if (is.null(kfolds)) {
     return(length(include_cases))
   }
+
   kfolds
 }
 
@@ -80,4 +123,36 @@ core_init_pred <- function(behav) {
     ncol = length(inc_edges),
     dimnames = list(names(behav), inc_edges)
   )
+}
+
+core_prepare_prediction_matrix <- function(new_data, predictor_names = NULL) {
+  if (is.data.frame(new_data)) {
+    if (!all(vapply(new_data, is.numeric, logical(1)))) {
+      stop("`new_data` must contain only numeric predictors.")
+    }
+    new_data <- data.matrix(new_data)
+  } else {
+    new_data <- as.matrix(new_data)
+  }
+
+  if (!is.numeric(new_data)) {
+    stop("`new_data` must contain only numeric predictors.")
+  }
+
+  if (!is.null(predictor_names)) {
+    if (!is.null(colnames(new_data))) {
+      if (!all(predictor_names %in% colnames(new_data))) {
+        stop(
+          "`new_data` must contain the same predictor columns used at fit time."
+        )
+      }
+      new_data <- new_data[, predictor_names, drop = FALSE]
+    } else if (ncol(new_data) != length(predictor_names)) {
+      stop(
+        "`new_data` must have the same number of predictor columns used at fit time."
+      )
+    }
+  }
+
+  unname(new_data)
 }

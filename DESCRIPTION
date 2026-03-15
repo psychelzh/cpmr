@@ -1,13 +1,15 @@
 Package: cpmr
-Title: Connectome Predictive Modelling in R
+Title: Tidymodels Engines for Connectome Predictive Modeling
 Version: 0.1.1.9000
 Authors@R:
     person("Liang", "Zhang", , "psychelzh@outlook.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9041-1150"))
-Description: Connectome Predictive Modelling (CPM) (Shen et al. (2017)
-    <doi:10.1038/nprot.2016.178>) is a method to predict individual
-    differences in behaviour from brain functional connectivity. 'cpmr'
-    provides a simple yet efficient implementation of this method.
+Description: Provides a tidymodels interface for connectome-based
+    predictive modeling (CPM) (Shen et al. (2017)
+    <doi:10.1038/nprot.2016.178>). The package registers a parsnip model
+    specification, integrates with workflows and tune, exposes CPM-aware
+    performance metrics, and keeps the core edge-selection and
+    train/predict steps leakage-safe within resampling.
 License: MIT + file LICENSE
 URL: https://github.com/psychelzh/cpmr, https://psychelzh.github.io/cpmr/
 BugReports: https://github.com/psychelzh/cpmr/issues
@@ -15,14 +17,22 @@ Depends:
     R (>= 4.4.0)
 Imports:
     generics,
+    parsnip,
     Rfast,
+    rlang,
     stats,
-    tibble
+    tibble,
+    yardstick
 Suggests:
+    dials,
     knitr,
+    recipes,
     rmarkdown,
+    rsample,
     testthat (>= 3.0.0),
-    withr
+    tune,
+    withr,
+    workflows
 VignetteBuilder:
     knitr
 Config/testthat/edition: 3

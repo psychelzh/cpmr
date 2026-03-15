@@ -4,9 +4,21 @@
 \name{cpmr-package}
 \alias{cpmr}
 \alias{cpmr-package}
-\title{cpmr: Connectome Predictive Modelling in R}
+\title{cpmr: Tidymodels Interfaces for Connectome Predictive Modeling}
 \description{
-Connectome Predictive Modelling (CPM) (Shen et al. (2017) \doi{10.1038/nprot.2016.178}) is a method to predict individual differences in behaviour from brain functional connectivity. 'cpmr' provides a simple yet efficient implementation of this method.
+\code{cpmr} provides a tidymodels-facing implementation of
+connectome-based predictive modeling (CPM). The package includes:
+}
+\details{
+\itemize{
+\item a \code{parsnip} model specification via \code{\link[=cpm_reg]{cpm_reg()}};
+\item integration with \code{workflows}, \code{recipes}, and \code{tune};
+\item CPM-specific metrics such as \code{\link[=cpm_cor]{cpm_cor()}} and \code{\link[=cpm_spearman]{cpm_spearman()}};
+\item helpers to inspect stored CPM edge masks via \code{\link[=collect_edges]{collect_edges()}}.
+}
+
+The modeling engine keeps edge selection and model fitting inside each
+resampling split so that training and assessment data remain separated.
 }
 \seealso{
 Useful links:

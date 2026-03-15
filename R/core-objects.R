@@ -1,36 +1,54 @@
-core_new_cpm <- function(call, folds, behav, pred, edges, model, spec, params) {
+new_cpm_fit <- function(model, edges, network, predictors, outcome, params) {
   structure(
     list(
-      folds = folds,
-      real = behav,
-      pred = pred,
-      edges = edges,
       model = model,
-      spec = spec,
-      call = call,
+      edges = edges,
+      network = network,
+      predictors = predictors,
+      outcome = outcome,
       params = params
     ),
-    class = "cpm"
+    class = "cpm_fit"
   )
 }
 
-core_new_cpm_resamples <- function(
-  spec,
-  folds,
-  edges,
-  metrics,
-  predictions,
-  params
+#' CPM engine fit object
+#'
+#' Internal engine fit object returned by the `cpmr` parsnip engine.
+#'
+#' @param x A `cpm_fit` object.
+#' @param ... Unused.
+#'
+#' @return `x`, invisibly.
+#' @name cpm_fit
+NULL
+
+#' @export
+print.cpm_fit <- function(x, ...) {
+  cat("CPM engine fit\n")
+  cat(sprintf("  Predictors: %d\n", length(x$predictors)))
+  cat(sprintf("  Network: %s\n", x$network))
+  cat(sprintf("  Threshold method: %s\n", x$params$thresh_method))
+  cat(sprintf("  Threshold level: %.3f\n", x$params$thresh_level))
+  cat(sprintf("  Bias correction: %s\n", x$params$bias_correct))
+  invisible(x)
+}
+
+#' @export
+predict.cpm_fit <- function(
+  object,
+  new_data,
+  type = c("numeric", "raw"),
+  network = object$network,
+  ...
 ) {
-  structure(
-    list(
-      spec = spec,
-      folds = folds,
-      edges = edges,
-      metrics = metrics,
-      predictions = predictions,
-      params = params
-    ),
-    class = "cpm_resamples"
+  type <- match.arg(type)
+  network <- core_validate_network(network)
+
+  pred <- core_predict_networks(object, new_data)
+  switch(
+    type,
+    numeric = unname(pred[, network]),
+    raw = tibble::as_tibble(pred)
   )
 }
