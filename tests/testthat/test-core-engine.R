@@ -129,7 +129,6 @@ test_that("core_prepare_* keeps covariate handling train-only", {
     expected_cov_train,
     covariates[rows_test, , drop = FALSE]
   )$test
-<<<<<<< HEAD
   expected_assess_behav <- drop(
     core_regress_covariates_by_train(
       behav[rows_train],
