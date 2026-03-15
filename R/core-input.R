@@ -71,6 +71,26 @@ core_validate_network <- function(network) {
   match.arg(network, prediction_networks)
 }
 
+core_warn_extreme_thresh_level <- function(method, level) {
+  if (!level %in% c(0, 1)) {
+    return(invisible())
+  }
+
+  warning(
+    sprintf(
+      paste0(
+        "`thresh_level = %s` is a boundary setting for ",
+        "`thresh_method = \"%s\"` and is usually not meaningful in practice."
+      ),
+      format(level, trim = TRUE),
+      method
+    ),
+    call. = FALSE
+  )
+
+  invisible()
+}
+
 core_normalize_inputs <- function(conmat, behav, covariates = NULL) {
   conmat <- as.matrix(conmat)
   if (!is.numeric(conmat)) {

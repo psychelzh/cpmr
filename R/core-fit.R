@@ -10,6 +10,7 @@ core_fit_xy <- function(
   thresh_level <- core_validate_thresh_level(thresh_level)
   bias_correct <- core_validate_bias_correct(bias_correct)
   network <- core_validate_network(network)
+  core_warn_extreme_thresh_level(thresh_method, thresh_level)
 
   normalized <- core_normalize_inputs(conmat, behav)
   conmat <- normalized$conmat

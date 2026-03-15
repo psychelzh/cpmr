@@ -147,3 +147,19 @@ test_that("core_fit_resamples covers edge-case failures and evaluation helpers",
   expect_equal(core_safe_cor(c(1), c(1)), NA_real_)
   expect_equal(core_safe_cor(c(1, 1, 1), c(1, 2, 3)), NA_real_)
 })
+
+test_that("core_fit_resamples warns on threshold boundary settings", {
+  problem <- simulate_cpm_problem(n = 18, p = 9, seed = 53)
+
+  expect_warning(
+    core_fit_resamples(
+      conmat = problem$x,
+      behav = problem$y,
+      kfolds = 3,
+      thresh_method = "sparsity",
+      thresh_level = 0
+    ),
+    "boundary setting",
+    fixed = FALSE
+  )
+})

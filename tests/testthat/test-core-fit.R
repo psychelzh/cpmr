@@ -27,19 +27,27 @@ test_that("core_fit_xy requires at least three complete observations", {
 test_that("core_fit_xy handles alpha threshold boundary values", {
   problem <- simulate_cpm_problem(n = 30, p = 10, seed = 13)
 
-  fit_zero <- core_fit_xy(
-    conmat = problem$x[1:20, , drop = FALSE],
-    behav = problem$y[1:20],
-    thresh_method = "alpha",
-    thresh_level = 0,
-    network = "both"
+  expect_warning(
+    fit_zero <- core_fit_xy(
+      conmat = problem$x[1:20, , drop = FALSE],
+      behav = problem$y[1:20],
+      thresh_method = "alpha",
+      thresh_level = 0,
+      network = "both"
+    ),
+    "boundary setting",
+    fixed = FALSE
   )
-  fit_one <- core_fit_xy(
-    conmat = problem$x[1:20, , drop = FALSE],
-    behav = problem$y[1:20],
-    thresh_method = "alpha",
-    thresh_level = 1,
-    network = "both"
+  expect_warning(
+    fit_one <- core_fit_xy(
+      conmat = problem$x[1:20, , drop = FALSE],
+      behav = problem$y[1:20],
+      thresh_method = "alpha",
+      thresh_level = 1,
+      network = "both"
+    ),
+    "boundary setting",
+    fixed = FALSE
   )
 
   expect_false(any(fit_zero$edges))

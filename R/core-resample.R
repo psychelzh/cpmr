@@ -139,6 +139,7 @@ core_fit_resamples <- function(
   network <- core_validate_network(network)
   return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
+  core_warn_extreme_thresh_level(thresh_method, thresh_level)
 
   normalized <- core_normalize_inputs(conmat, behav, covariates)
   conmat <- normalized$conmat
