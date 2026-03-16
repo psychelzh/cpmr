@@ -113,7 +113,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
+          Return edges:     sum
           Bias correction:  TRUE
 
 # `fit()` is single-fit
@@ -231,7 +231,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
+          Return edges:     sum
           Bias correction:  TRUE
 
 # Alternative threshold method works
@@ -350,7 +350,7 @@
           Covariates:       FALSE
           Threshold method: sparsity
           Threshold level:  0.01
-          Stored splits:    1
+          Return edges:     sum
           Bias correction:  TRUE
 
 # Different threshold levels works
@@ -468,7 +468,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.10
-          Stored splits:    1
+          Return edges:     sum
           Bias correction:  TRUE
 
 # `return_edges` argument works
@@ -485,7 +485,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
+          Return edges:     none
           Bias correction:  TRUE
 
 ---
@@ -533,7 +533,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
+          Return edges:     all
           Bias correction:  TRUE
 
 # `na_action` argument works
@@ -550,7 +550,7 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
+          Return edges:     sum
           Bias correction:  TRUE
 
 ---
@@ -568,7 +568,7 @@
           Covariates:       TRUE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
+          Return edges:     sum
           Bias correction:  TRUE
 
 ---
@@ -586,6 +586,6 @@
           Covariates:       TRUE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
+          Return edges:     sum
           Bias correction:  TRUE
 

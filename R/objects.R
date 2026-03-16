@@ -13,8 +13,6 @@
 #'   \item{`pred`}{Matrix of in-sample predictions (`both`, `pos`, `neg`).}
 #'   \item{`edges`}{Stored edge selection output according to
 #'     `return_edges`.}
-#'   \item{`folds`}{List of row indices used for fitting. For single-fit,
-#'     this contains one element with all included cases.}
 #'   \item{`params`}{Parameter list used at fit time.}
 #' }
 #'

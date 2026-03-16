@@ -16,7 +16,7 @@ test_that("`fit()` is single-fit", {
   behav <- rnorm(10)
   result <- fit(cpm_spec(), conmat, behav)
   expect_s3_class(result, "cpm")
-  expect_identical(length(result$folds), 1L)
+  expect_false("folds" %in% names(result))
   expect_snapshot_value(result$pred, style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
   expect_snapshot_value(result$params, style = "json2")
@@ -182,7 +182,7 @@ test_that("`na_action` argument works", {
   expect_snapshot(result)
 })
 
-test_that("Folds cover complete cases exactly when excluding missing data", {
+test_that("fit excludes incomplete rows consistently when excluding missing data", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
@@ -204,8 +204,10 @@ test_that("Folds cover complete cases exactly when excluding missing data", {
     which(complete.cases(covariates))
   )
 
-  expect_setequal(unlist(result$folds), include_cases)
+  expect_false("folds" %in% names(result))
   expect_equal(sum(complete.cases(result$pred)), length(include_cases))
+  expect_true(isTRUE(all(stats::complete.cases(result$pred[include_cases, ]))))
+  expect_true(isTRUE(all(is.na(result$pred[-include_cases, ]))))
 })
 
 test_that("resolve_kfolds uses complete-case count when NULL", {

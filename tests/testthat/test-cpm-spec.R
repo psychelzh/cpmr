@@ -313,3 +313,108 @@ test_that("fit_resamples handles covariates in assessment pipeline", {
   expect_true(isTRUE(res$params$covariates))
   expect_equal(length(res$folds), 6L)
 })
+
+test_that("fit_resamples fold path matches fit() on the same training subset", {
+  withr::local_seed(7)
+  n <- 15
+  p <- 12
+  conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
+  behav <- rnorm(n)
+  covariates <- matrix(rnorm(n * 2), ncol = 2)
+  spec <- cpm_spec(thresh_method = "alpha", thresh_level = 0.1)
+  resamples <- list(1:5, 6:10, 11:15)
+  rows_test <- resamples[[1]]
+  rows_train <- setdiff(seq_len(n), rows_test)
+
+  single_fit <- fit(
+    spec,
+    conmat = conmat[rows_train, , drop = FALSE],
+    behav = behav[rows_train],
+    covariates = covariates[rows_train, , drop = FALSE],
+    return_edges = "sum",
+    na_action = "fail"
+  )
+  training <- core_prepare_training_data(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    rows_train = rows_train
+  )
+  assessment <- core_prepare_assessment_data(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    rows_train = rows_train,
+    rows_test = rows_test,
+    covariates_train = training$covariates
+  )
+  fold_edges <- core_select_edges(
+    conmat = training$conmat,
+    behav = training$behav,
+    method = spec$params$thresh_method,
+    level = spec$params$thresh_level
+  )
+  fold_model <- core_train_model(
+    conmat = training$conmat,
+    behav = training$behav,
+    edges = fold_edges,
+    bias_correct = spec$params$bias_correct
+  )
+  resampled <- fit_resamples(
+    spec,
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    resamples = resamples,
+    return_edges = "sum",
+    na_action = "fail"
+  )
+  fold_pred <- core_predict_model(fold_model, assessment$conmat)
+  collected <- collect_predictions(resampled)
+
+  expect_equal(single_fit$edges, fold_edges)
+  expect_equal(single_fit$model$edges, fold_model$edges)
+  expect_equal(single_fit$model$models, fold_model$models)
+  expect_equal(single_fit$model$center, fold_model$center)
+  expect_equal(single_fit$model$scale, fold_model$scale)
+  expect_equal(core_predict_model(single_fit$model, assessment$conmat), fold_pred)
+  expect_equal(
+    as.matrix(collected[rows_test, c("both", "pos", "neg")]),
+    fold_pred,
+    ignore_attr = TRUE
+  )
+  expect_equal(collected$real[rows_test], assessment$behav)
+})
+
+test_that("fit_resamples excludes incomplete rows consistently with covariates", {
+  withr::local_seed(11)
+  n <- 15
+  p <- 8
+  conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
+  behav <- rnorm(n)
+  covariates <- matrix(rnorm(n * 2), ncol = 2)
+  spec <- cpm_spec()
+
+  behav[2] <- NA_real_
+  conmat[5, 3] <- NA_real_
+  covariates[8, 1] <- NA_real_
+
+  include_cases <- setdiff(seq_len(n), c(2L, 5L, 8L))
+  resamples <- list(include_cases[1:4], include_cases[5:8], include_cases[9:12])
+  resampled <- fit_resamples(
+    spec,
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    resamples = resamples,
+    return_edges = "sum",
+    na_action = "exclude"
+  )
+  collected <- collect_predictions(resampled)
+
+  expect_identical(resampled$folds, resamples)
+  expect_equal(sort(collected$row[!is.na(collected$fold)]), include_cases)
+  expect_true(isTRUE(all(stats::complete.cases(collected$both[include_cases]))))
+  expect_true(isTRUE(all(is.na(collected$both[-include_cases]))))
+  expect_true(isTRUE(all(is.na(collected$fold[-include_cases]))))
+})

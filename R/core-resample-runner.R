@@ -192,7 +192,6 @@ core_fit_single <- function(
 
   core_new_cpm(
     call = call,
-    folds = list(include_cases),
     behav = real,
     pred = pred,
     edges = edges,

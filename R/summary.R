@@ -8,64 +8,49 @@
 #' @param ... Other parameters passed to the function.
 #' @param method A character vector indicating the method used to calculate the
 #'   correlation between the real and predicted values.
-#' @param edge_level A numeric value between 0 and 1 indicating the proportional
-#'   threshold for edge selection.
 #' @return A list of class \code{cpm_summary} containing two elements:
 #'   \item{performance}{A matrix of prediction performance, including the
 #'     correlation between the real and predicted values for both edges,
 #'     positive edges only, and negative edges only.}
 #'
-#'   \item{edges}{A logical vector indicating whether each edge is selected
-#'     based on the edge_level.}
+#'   \item{edges}{A logical matrix indicating which edges are selected by the
+#'     fitted CPM model. If single-fit edges were stored as a singleton 3D
+#'     array (`return_edges = "all"`), they are collapsed back to a `p x 2`
+#'     matrix for summary output.}
 #'
 #'   \item{params}{A list of parameters used in the summary.}
 #' @export
 summary.cpm <- function(
   object,
   ...,
-  method = c("pearson", "spearman"),
-  edge_level = 0.5
+  method = c("pearson", "spearman")
 ) {
   method <- match.arg(method)
-  # summary prediction performance
   performance <- matrix(
     vapply(
       colnames(object$pred),
       function(edge_type) {
-        x <- object$real
-        y <- object$pred[, edge_type]
-        valid <- stats::complete.cases(x, y)
-        if (sum(valid) < 2) {
-          return(NA_real_)
-        }
-        x <- x[valid]
-        y <- y[valid]
-        if (stats::sd(x) == 0 || stats::sd(y) == 0) {
-          return(NA_real_)
-        }
-        stats::cor(x, y, method = method)
+        safe_cor(object$real, object$pred[, edge_type], method = method)
       },
       numeric(1)
     ),
     nrow = 1,
     dimnames = list(NULL, colnames(object$pred))
   )
-  # summary edge selection
-  edges <- if (!is.null(object$edges)) {
-    folds_count <- length(object$folds)
-    edges_count <- object$edges
-    if (length(dim(object$edges)) == 3) {
-      edges_count <- apply(object$edges, 1:2, sum)
-    }
-    edges_count > edge_level * folds_count
+
+  edges <- object$edges
+  if (!is.null(edges) && length(dim(edges)) == 3L) {
+    edges <- edges[, , 1, drop = FALSE]
+    dim(edges) <- dim(edges)[1:2]
+    dimnames(edges) <- dimnames(object$edges)[1:2]
   }
+
   structure(
     list(
       performance = performance,
       edges = edges,
       params = list(
-        method = method,
-        edge_level = edge_level
+        method = method
       )
     ),
     class = "cpm_summary"
@@ -84,13 +69,29 @@ print.cpm_summary <- function(x, ...) {
       sub("^(.)", "\\U\\1", x$params$method, perl = TRUE)
     )
   )
-  cat(sprintf("    Positive: %.3f\n", x$performance[, "pos"]))
-  cat(sprintf("    Negative: %.3f\n", x$performance[, "neg"]))
-  cat(sprintf("    Combined: %.3f\n", x$performance[, "both"]))
+  cat(sprintf("    Positive: %s\n", format_cor(x$performance[, "pos"])))
+  cat(sprintf("    Negative: %s\n", format_cor(x$performance[, "neg"])))
+  cat(sprintf("    Combined: %s\n", format_cor(x$performance[, "both"])))
   if (!is.null(x$edges)) {
-    cat(sprintf("  Prop. edges (%.0f%% folds):\n", x$params$edge_level * 100))
-    cat(sprintf("    Positive: %.2f%%\n", mean(x$edges[, "pos"]) * 100))
-    cat(sprintf("    Negative: %.2f%%\n", mean(x$edges[, "neg"]) * 100))
+    cat("  Selected edges:\n")
+    cat(sprintf("    Positive: %s\n", format_rate(safe_mean(x$edges[, "pos"]))))
+    cat(sprintf("    Negative: %s\n", format_rate(safe_mean(x$edges[, "neg"]))))
   }
   invisible(x)
+}
+
+safe_mean <- function(x) {
+  if (length(x) == 0L || all(is.na(x))) {
+    return(NA_real_)
+  }
+
+  mean(x, na.rm = TRUE)
+}
+
+format_cor <- function(x) {
+  ifelse(is.na(x), "NA", sprintf("%.3f", x))
+}
+
+format_rate <- function(x) {
+  ifelse(is.na(x), "NA", sprintf("%.2f%%", x * 100))
 }

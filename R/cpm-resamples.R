@@ -111,7 +111,8 @@ compute_fold_predictions <- function(real, pred, folds) {
   )
 }
 
-safe_cor <- function(x, y) {
+safe_cor <- function(x, y, method = c("pearson", "spearman")) {
+  method <- match.arg(method)
   valid <- stats::complete.cases(x, y)
   if (sum(valid) < 2) {
     return(NA_real_)
@@ -123,5 +124,5 @@ safe_cor <- function(x, y) {
     return(NA_real_)
   }
 
-  stats::cor(x, y)
+  stats::cor(x, y, method = method)
 }

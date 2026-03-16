@@ -18,8 +18,6 @@ A \code{cpm} object is a list with the following elements:
 \item{\code{pred}}{Matrix of in-sample predictions (\code{both}, \code{pos}, \code{neg}).}
 \item{\code{edges}}{Stored edge selection output according to
 \code{return_edges}.}
-\item{\code{folds}}{List of row indices used for fitting. For single-fit,
-this contains one element with all included cases.}
 \item{\code{params}}{Parameter list used at fit time.}
 }
 }

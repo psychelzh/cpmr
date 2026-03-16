@@ -1,7 +1,6 @@
-core_new_cpm <- function(call, folds, behav, pred, edges, model, spec, params) {
+core_new_cpm <- function(call, behav, pred, edges, model, spec, params) {
   structure(
     list(
-      folds = folds,
       real = behav,
       pred = pred,
       edges = edges,

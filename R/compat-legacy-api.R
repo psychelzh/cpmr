@@ -120,7 +120,7 @@ predict_cpm_model <- function(model, conmat_new) {
 }
 
 new_cpm <- function(call, folds, behav, pred, edges, model, spec, params) {
-  core_new_cpm(call, folds, behav, pred, edges, model, spec, params)
+  core_new_cpm(call, behav, pred, edges, model, spec, params)
 }
 
 new_cpm_resamples <- function(

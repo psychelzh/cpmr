@@ -141,6 +141,7 @@ test_that("legacy fit and object constructors still delegate to core helpers", {
   )
   expect_s3_class(cpm_object, "cpm")
   expect_identical(cpm_object$call, call)
+  expect_false("folds" %in% names(cpm_object))
 
   metrics <- data.frame(
     fold = 1L,
