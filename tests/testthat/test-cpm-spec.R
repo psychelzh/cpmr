@@ -11,6 +11,19 @@ test_that("cpm_spec stores model parameters", {
   expect_false(spec$params$bias_correct)
 })
 
+test_that("new_cpm_spec builds cpm_spec objects", {
+  params <- list(
+    thresh_method = "alpha",
+    thresh_level = 0.05,
+    bias_correct = TRUE
+  )
+
+  spec <- new_cpm_spec(params = params)
+
+  expect_s3_class(spec, "cpm_spec")
+  expect_identical(spec$params, params)
+})
+
 test_that("fit.cpm_spec returns a cpm object with correct call", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)

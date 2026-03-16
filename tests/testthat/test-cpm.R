@@ -10,6 +10,37 @@ test_that("Default threshold method works", {
   expect_snapshot(result)
 })
 
+test_that("new_cpm builds single-fit CPM objects", {
+  withr::local_seed(99)
+  conmat <- matrix(rnorm(120), nrow = 10, ncol = 12)
+  behav <- rnorm(10)
+  spec <- cpm_spec(thresh_method = "alpha", thresh_level = 0.05)
+  call <- quote(fit(object = spec, conmat = conmat, behav = behav))
+
+  fit_result <- run_single_fit(
+    object = spec,
+    conmat = conmat,
+    behav = behav,
+    covariates = NULL,
+    na_action = "fail",
+    call = call
+  )
+
+  cpm_object <- new_cpm(
+    call = call,
+    behav = behav,
+    pred = fit_result$pred,
+    edges = fit_result$edges,
+    model = fit_result$model,
+    spec = spec,
+    params = fit_result$params
+  )
+
+  expect_s3_class(cpm_object, "cpm")
+  expect_identical(cpm_object$call, call)
+  expect_false("folds" %in% names(cpm_object))
+})
+
 test_that("`fit()` is single-fit", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)

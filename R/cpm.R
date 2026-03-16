@@ -20,6 +20,21 @@
 #' @name cpm
 NULL
 
+new_cpm <- function(call, behav, pred, edges, model, spec, params) {
+  structure(
+    list(
+      real = behav,
+      pred = pred,
+      edges = edges,
+      model = model,
+      spec = spec,
+      call = call,
+      params = params
+    ),
+    class = "cpm"
+  )
+}
+
 #' @export
 print.cpm <- function(x, ...) {
   cat("CPM results:\n")

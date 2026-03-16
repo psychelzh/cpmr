@@ -163,6 +163,13 @@ fit_resamples.cpm_spec <- function(
   )
 }
 
+new_cpm_spec <- function(params) {
+  structure(
+    list(params = params),
+    class = "cpm_spec"
+  )
+}
+
 validate_cpm_spec_params <- function(thresh_level, bias_correct) {
   if (
     !is.numeric(thresh_level) ||

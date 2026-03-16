@@ -11,6 +11,43 @@ test_that("print.cpm_resamples reports summary fields", {
   expect_output(print(res), "Edge storage")
 })
 
+test_that("new_cpm_resamples builds resampling objects", {
+  spec <- cpm_spec()
+  edges <- matrix(
+    c(TRUE, FALSE, FALSE, TRUE),
+    ncol = 2,
+    dimnames = list(NULL, c("pos", "neg"))
+  )
+  metrics <- data.frame(
+    fold = 1L,
+    n_assess = 2L,
+    both = 0.5,
+    pos = 0.4,
+    neg = 0.3
+  )
+  predictions <- data.frame(
+    row = 1:2,
+    fold = 1L,
+    real = c(1, 2),
+    both = c(1.1, 1.9),
+    pos = c(1.0, 2.0),
+    neg = c(0.9, 2.1)
+  )
+
+  resamples_object <- new_cpm_resamples(
+    spec = spec,
+    folds = list(1:2),
+    edges = edges,
+    metrics = metrics,
+    predictions = predictions,
+    params = list(return_edges = "sum")
+  )
+
+  expect_s3_class(resamples_object, "cpm_resamples")
+  expect_identical(resamples_object$metrics, metrics)
+  expect_identical(resamples_object$predictions, predictions)
+})
+
 test_that("compute_fold_metrics summarizes each assessment fold", {
   real <- c(1, 2, 3, 4)
   pred <- cbind(
