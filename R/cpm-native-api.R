@@ -61,12 +61,10 @@ cpm_fit <- function(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    return_edges = "sum",
     na_action = na_action,
     call = call
   )
 
-  fit$params$return_edges <- NULL
   fit
 }
 

@@ -16,8 +16,8 @@ A \code{cpm} object is a list with the following elements:
 \item{\code{model}}{Trained CPM model components used by prediction.}
 \item{\code{real}}{Observed behavior values after preprocessing decisions.}
 \item{\code{pred}}{Matrix of in-sample predictions (\code{both}, \code{pos}, \code{neg}).}
-\item{\code{edges}}{Stored edge selection output according to
-\code{return_edges}.}
+\item{\code{edges}}{Stored single-fit edge mask as a \verb{p x 2} logical matrix
+with \code{pos} and \code{neg} columns.}
 \item{\code{params}}{Parameter list used at fit time.}
 }
 }

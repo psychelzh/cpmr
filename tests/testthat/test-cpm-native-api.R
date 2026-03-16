@@ -19,13 +19,13 @@ test_that("cpm_fit matches fit(cpm_spec()) on the same inputs", {
     ),
     conmat = conmat,
     behav = behav,
-    return_edges = "sum",
     na_action = "fail"
   )
 
   expect_s3_class(direct, "cpm")
   expect_identical(as.character(direct$call[[1]]), "cpm_fit")
   expect_false("return_edges" %in% names(direct$params))
+  expect_false("return_edges" %in% names(via_spec$params))
   expect_equal(direct$pred, via_spec$pred)
   expect_equal(direct$edges, via_spec$edges)
   expect_equal(direct$model$models, via_spec$model$models)

@@ -76,7 +76,6 @@ test_that("run_single_fit matches fit() outputs on single data", {
     conmat = conmat,
     behav = behav,
     covariates = NULL,
-    return_edges = "sum",
     na_action = "fail",
     call = call
   )
@@ -84,7 +83,6 @@ test_that("run_single_fit matches fit() outputs on single data", {
     spec,
     conmat = conmat,
     behav = behav,
-    return_edges = "sum",
     na_action = "fail"
   )
 
@@ -141,7 +139,6 @@ test_that("run_single_fit errors clearly on insufficient complete cases", {
       conmat = conmat,
       behav = behav,
       covariates = NULL,
-      return_edges = "sum",
       na_action = "exclude",
       call = call
     ),
@@ -156,7 +153,6 @@ test_that("run_single_fit errors clearly on insufficient complete cases", {
       conmat = conmat,
       behav = behav,
       covariates = NULL,
-      return_edges = "sum",
       na_action = "exclude",
       call = call
     ),

@@ -126,12 +126,10 @@ run_single_fit <- function(
   conmat,
   behav,
   covariates = NULL,
-  return_edges = c("none", "sum", "all"),
   na_action = c("fail", "exclude"),
   call = NULL
 ) {
   params <- object$params
-  return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
 
   normalized <- normalize_inputs(conmat, behav, covariates)
@@ -173,20 +171,6 @@ run_single_fit <- function(
   )
   pred[include_cases, ] <- predict_model(model, training$conmat)
 
-  edges <- switch(
-    return_edges,
-    none = NULL,
-    sum = cur_edges,
-    all = {
-      edge_array <- array(
-        dim = c(dim(cur_edges), 1L),
-        dimnames = list(NULL, corr_types, NULL)
-      )
-      edge_array[,, 1] <- cur_edges
-      edge_array
-    }
-  )
-
   real <- behav
   real[include_cases] <- training$behav
 
@@ -194,14 +178,13 @@ run_single_fit <- function(
     call = call,
     behav = real,
     pred = pred,
-    edges = edges,
+    edges = cur_edges,
     model = model,
     spec = object,
     params = list(
       covariates = !is.null(covariates),
       thresh_method = params$thresh_method,
       thresh_level = params$thresh_level,
-      return_edges = return_edges,
       na_action = na_action,
       bias_correct = params$bias_correct
     )

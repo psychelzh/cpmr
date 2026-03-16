@@ -14,9 +14,7 @@
 #'     positive edges only, and negative edges only.}
 #'
 #'   \item{edges}{A logical matrix indicating which edges are selected by the
-#'     fitted CPM model. If single-fit edges were stored as a singleton 3D
-#'     array (`return_edges = "all"`), they are collapsed back to a `p x 2`
-#'     matrix for summary output.}
+#'     fitted CPM model.}
 #'
 #'   \item{params}{A list of parameters used in the summary.}
 #' @export
@@ -38,17 +36,10 @@ summary.cpm <- function(
     dimnames = list(NULL, colnames(object$pred))
   )
 
-  edges <- object$edges
-  if (!is.null(edges) && length(dim(edges)) == 3L) {
-    edges <- edges[,, 1, drop = FALSE]
-    dim(edges) <- dim(edges)[1:2]
-    dimnames(edges) <- dimnames(object$edges)[1:2]
-  }
-
   structure(
     list(
       performance = performance,
-      edges = edges,
+      edges = object$edges,
       params = list(
         method = method
       )

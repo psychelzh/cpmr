@@ -11,8 +11,8 @@
 #'   \item{`model`}{Trained CPM model components used by prediction.}
 #'   \item{`real`}{Observed behavior values after preprocessing decisions.}
 #'   \item{`pred`}{Matrix of in-sample predictions (`both`, `pos`, `neg`).}
-#'   \item{`edges`}{Stored edge selection output according to
-#'     `return_edges`.}
+#'   \item{`edges`}{Stored single-fit edge mask as a `p x 2` logical matrix
+#'     with `pos` and `neg` columns.}
 #'   \item{`params`}{Parameter list used at fit time.}
 #' }
 #'

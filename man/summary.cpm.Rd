@@ -26,9 +26,7 @@ correlation between the real and predicted values for both edges,
 positive edges only, and negative edges only.}
 
 \item{edges}{A logical matrix indicating which edges are selected by the
-fitted CPM model. If single-fit edges were stored as a singleton 3D
-array (\code{return_edges = "all"}), they are collapsed back to a \verb{p x 2}
-matrix for summary output.}
+fitted CPM model.}
 
 \item{params}{A list of parameters used in the summary.}
 }

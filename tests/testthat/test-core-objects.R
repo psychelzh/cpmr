@@ -10,7 +10,6 @@ test_that("new_cpm and new_cpm_resamples build expected objects", {
     conmat = conmat,
     behav = behav,
     covariates = NULL,
-    return_edges = "sum",
     na_action = "fail",
     call = call
   )

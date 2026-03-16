@@ -16,7 +16,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct", "method", "both", "pos", "neg"]
+          "value": ["covariates", "thresh_method", "thresh_level", "na_action", "bias_correct", "method", "both", "pos", "neg"]
         }
       },
       "value": [
@@ -34,11 +34,6 @@
           "type": "double",
           "attributes": {},
           "value": [0.01]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["sum"]
         },
         {
           "type": "character",
@@ -91,7 +86,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct", "pos", "neg"]
+          "value": ["covariates", "thresh_method", "thresh_level", "na_action", "bias_correct", "pos", "neg"]
         }
       },
       "value": [
@@ -109,11 +104,6 @@
           "type": "double",
           "attributes": {},
           "value": [0.01]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["sum"]
         },
         {
           "type": "character",

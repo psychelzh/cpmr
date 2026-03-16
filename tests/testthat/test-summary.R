@@ -5,28 +5,6 @@ test_that("Works for basic summary", {
   summary_result <- summary(fit(cpm_spec(), conmat, behav))
   expect_s3_class(summary_result, "cpm_summary")
   expect_snapshot(summary_result)
-  summary_result <- summary(
-    fit(cpm_spec(), conmat, behav, return_edges = "none")
-  )
-  expect_s3_class(summary_result, "cpm_summary")
-  expect_snapshot(summary_result)
-  summary_result <- summary(
-    fit(cpm_spec(), conmat, behav, return_edges = "all")
-  )
-  expect_s3_class(summary_result, "cpm_summary")
-  expect_snapshot(summary_result)
-})
-
-test_that("summary.cpm collapses singleton edge arrays to a 2D matrix", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(10000), nrow = 10)
-  behav <- rnorm(10)
-  summary_result <- summary(
-    fit(cpm_spec(), conmat, behav, return_edges = "all")
-  )
-
-  expect_equal(dim(summary_result$edges), c(1000, 2))
-  expect_type(summary_result$edges, "logical")
 })
 
 test_that("summary.cpm returns NA when fewer than two valid pairs", {

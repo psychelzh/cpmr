@@ -86,18 +86,41 @@ test_that("Keep names of behavior", {
   expect_identical(rownames(result$pred), LETTERS[1:10])
 })
 
-test_that("`return_edges` argument works", {
+test_that("single-fit CPM always stores selected edges", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- fit(cpm_spec(), conmat, behav, return_edges = "none")
-  expect_null(result$edges)
-  expect_null(collect_edges(result))
-  expect_snapshot(result)
-  result <- fit(cpm_spec(), conmat, behav, return_edges = "all")
-  expect_snapshot_value(result$edges, style = "json2")
+  result <- fit(cpm_spec(), conmat, behav)
+  expect_equal(dim(result$edges), c(10, 2))
   expect_equal(collect_edges(result), result$edges)
-  expect_snapshot(result)
+  expect_false("return_edges" %in% names(result$params))
+})
+
+test_that("print.cpm handles objects without stored edges", {
+  result <- structure(
+    list(
+      real = c(1, 2, 3),
+      pred = matrix(
+        c(1, 2, 3, 1, 2, 3, 1, 2, 3),
+        ncol = 3,
+        dimnames = list(NULL, c("both", "pos", "neg"))
+      ),
+      edges = NULL,
+      call = quote(fit(object = cpm_spec(), conmat = conmat, behav = behav)),
+      params = list(
+        covariates = FALSE,
+        thresh_method = "alpha",
+        thresh_level = 0.01,
+        na_action = "fail",
+        bias_correct = TRUE
+      )
+    ),
+    class = "cpm"
+  )
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Number of edges: not stored", output, fixed = TRUE)))
 })
 
 test_that("Support row/column matrix input of `behav` and `covariates`", {

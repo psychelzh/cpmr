@@ -331,7 +331,6 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     conmat = conmat[rows_train, , drop = FALSE],
     behav = behav[rows_train],
     covariates = covariates[rows_train, , drop = FALSE],
-    return_edges = "sum",
     na_action = "fail"
   )
   training <- prepare_training_data(

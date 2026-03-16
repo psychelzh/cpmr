@@ -12,8 +12,7 @@
 \item{...}{For future extension. Currently ignored.}
 }
 \value{
-A matrix when single-fit edges are stored, a 3D array for
-\code{return_edges = "all"}, or \code{NULL} for \code{return_edges = "none"}.
+A logical matrix storing the selected positive and negative edges.
 }
 \description{
 Collect selected edges from a CPM fit

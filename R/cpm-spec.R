@@ -67,16 +67,11 @@ print.cpm_spec <- function(x, ...) {
 #' @param covariates A matrix of covariates. Observations in row, variables in
 #'   column. If `NULL`, no covariates are used. Note if a vector is provided, it
 #'   will be converted to a column matrix.
-#' @param return_edges A character string indicating the return value of the
-#'   selected edges. If `"none"`, no edges are returned/stored. If `"sum"`, edge
-#'   masks are returned for single-fit and summed across folds for resampling.
-#'   If `"all"`, single-fit stores a 3D array with a singleton third dimension
-#'   while resampling stores fold-wise edge arrays.
 #' @param na_action A character string indicating the action when missing values
 #'   are found in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
 #'   missing values will be excluded from the analysis but kept in the output.
-#'
-#' @return A fitted `cpm` object from a single in-sample fit.
+#' @return A fitted `cpm` object from a single in-sample fit. Single-fit CPM
+#'   objects always store the selected edge mask.
 #' @export
 fit.cpm_spec <- function(
   object,
@@ -84,13 +79,11 @@ fit.cpm_spec <- function(
   behav,
   ...,
   covariates = NULL,
-  return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 ) {
   call <- match.call()
   call[[1]] <- quote(fit)
 
-  return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
 
   run_single_fit(
@@ -98,7 +91,6 @@ fit.cpm_spec <- function(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    return_edges = return_edges,
     na_action = na_action,
     call = call
   )
