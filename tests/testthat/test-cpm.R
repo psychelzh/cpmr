@@ -70,7 +70,7 @@ test_that("fit with covariates uses in-sample residualized target scale", {
 
   result <- fit(cpm_spec(), conmat, behav, covariates = covariates)
 
-  behav_resid <- drop(regress_covariates(behav, covariates))
+  behav_resid <- stats::.lm.fit(cbind(1, covariates), behav)$residuals
 
   expect_equal(result$real, behav_resid)
   expect_true(isTRUE(all(stats::complete.cases(result$pred))))
@@ -208,9 +208,4 @@ test_that("fit excludes incomplete rows consistently when excluding missing data
   expect_equal(sum(complete.cases(result$pred)), length(include_cases))
   expect_true(isTRUE(all(stats::complete.cases(result$pred[include_cases, ]))))
   expect_true(isTRUE(all(is.na(result$pred[-include_cases, ]))))
-})
-
-test_that("resolve_kfolds uses complete-case count when NULL", {
-  expect_identical(resolve_kfolds(NULL, include_cases = c(2L, 4L, 7L)), 3L)
-  expect_identical(resolve_kfolds(5L, include_cases = c(2L, 4L, 7L)), 5L)
 })

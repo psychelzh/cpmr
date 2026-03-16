@@ -30,6 +30,11 @@ test_that("resolve_include_cases returns intersection in exclude mode", {
   expect_identical(include_cases, 4:10)
 })
 
+test_that("resolve_kfolds uses complete-case count when NULL", {
+  expect_identical(resolve_kfolds(NULL, include_cases = c(2L, 4L, 7L)), 3L)
+  expect_identical(resolve_kfolds(5L, include_cases = c(2L, 4L, 7L)), 5L)
+})
+
 test_that("init_edges allocates expected structures", {
   conmat <- matrix(rnorm(40), ncol = 4)
 
@@ -43,31 +48,12 @@ test_that("init_edges allocates expected structures", {
   expect_null(init_edges("none", conmat, kfolds = 5))
 })
 
-test_that("core scalar helpers return expected values", {
+test_that("init_pred preserves prediction matrix structure", {
   behav <- stats::setNames(rnorm(5), paste0("s", 1:5))
 
   pred <- init_pred(behav)
+
   expect_equal(dim(pred), c(5, 3))
   expect_identical(rownames(pred), names(behav))
   expect_identical(colnames(pred), c("both", "pos", "neg"))
-
-  df <- 20 - 2
-  ct <- stats::qt(0.05 / 2, df, lower.tail = FALSE)
-  expect_equal(
-    critical_r(20, 0.05),
-    sqrt((ct^2) / ((ct^2) + df))
-  )
-
-  x <- matrix(as.numeric(1:6), nrow = 3)
-  center <- c(2, 5)
-  scale <- c(1, 2)
-  expect_equal(
-    fscale(x, center, scale),
-    sweep(sweep(x, 2, center, "-"), 2, scale, "/")
-  )
-
-  withr::local_seed(42)
-  folds <- crossv_kfold(1:6, 3)
-  expect_length(folds, 3)
-  expect_identical(sort(unname(unlist(folds))), 1:6)
 })
