@@ -19,7 +19,6 @@ reference:
   - title: Native Fit API
     desc: Primary entry points for fitting CPM models natively.
     contents:
-      - cpm_fit
       - cpm_spec
       - fit_resamples
 

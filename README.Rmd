@@ -45,7 +45,7 @@ install.packages("cpmr", repos = c("https://psychelzh.r-universe.dev", getOption
 
 Shape your connectivity matrix as a subjects-by-edges matrix, where each row
 contains the edge vector for one subject, and pair it with a behavioral vector.
-The most direct entry point is `cpm_fit()`.
+The native workflow uses `cpm_spec()` together with `fit()`.
 
 ```{r example}
 library(cpmr)
@@ -53,24 +53,17 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-fit_obj <- cpm_fit(
-  conmat = conmat,
-  behav = behav
-)
+fit_obj <- fit(cpm_spec(), conmat = conmat, behav = behav)
 
 fit_obj
 summary(fit_obj)
 ```
 
-Cross-validated resampling uses the matching native helper
-`cpm_fit_resamples()`:
+Cross-validated resampling uses `fit_resamples()` with the same specification
+object:
 
 ```{r resample}
-resample_obj <- cpm_fit_resamples(
-  conmat = conmat,
-  behav = behav,
-  kfolds = 5
-)
+resample_obj <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
 
 summary(resample_obj)
 head(resample_obj$predictions)
@@ -81,9 +74,10 @@ dim(resample_obj$edges)
 
 `cpmr` now treats the native workflow as the primary package story:
 
-- use `cpm_fit()` and `cpm_fit_resamples()` for most real CPM analyses;
-- use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` when you want
-  the lower-level specification object directly.
+- use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` for native
+  CPM analyses;
+- keep the `cpm_spec()` object around when you want an explicit, reusable
+  parameter object.
 
 Why this matters: CPM often needs leakage-safe fold-local preprocessing and can
 benefit from future fold-level caching or threshold-specific optimization.

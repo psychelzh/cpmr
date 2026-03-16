@@ -60,13 +60,17 @@ summary(fit)
 ## Native API
 
 ```{r}
-single_fit <- cpm_fit(
+spec <- cpm_spec()
+
+single_fit <- fit(
+  spec,
   conmat = conmat,
   behav = behav,
   covariates = covariates
 )
 
-resamples_fit <- cpm_fit_resamples(
+resamples_fit <- fit_resamples(
+  spec,
   conmat = conmat,
   behav = behav,
   covariates = covariates,
@@ -79,8 +83,8 @@ dim(resamples_fit$edges)
 ```
 
 If you prefer explicit parameter objects, the lower-level
-`cpm_spec()` + `fit()` / `fit_resamples()` path remains available and routes
-through the same CPM core.
+`cpm_spec()` + `fit()` / `fit_resamples()` path is the native interface and
+routes through the same CPM core.
 
 ## Edge Storage Tips
 
