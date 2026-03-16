@@ -62,7 +62,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -80,11 +80,6 @@
           "type": "double",
           "attributes": {},
           "value": [0.01]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["sum"]
         },
         {
           "type": "character",
@@ -113,125 +108,6 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
-          Bias correction:  TRUE
-
-# `fit()` is single-fit
-
-    {
-      "type": "double",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [10, 3]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["both", "pos", "neg"]
-            }
-          ]
-        }
-      },
-      "value": [-0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799]
-    }
-
----
-
-    {
-      "type": "logical",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [10, 2]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pos", "neg"]
-            }
-          ]
-        }
-      },
-      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
-    }
-
----
-
-    {
-      "type": "list",
-      "attributes": {
-        "names": {
-          "type": "character",
-          "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
-        }
-      },
-      "value": [
-        {
-          "type": "logical",
-          "attributes": {},
-          "value": [false]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["alpha"]
-        },
-        {
-          "type": "double",
-          "attributes": {},
-          "value": [0.01]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["sum"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["fail"]
-        },
-        {
-          "type": "logical",
-          "attributes": {},
-          "value": [true]
-        }
-      ]
-    }
-
----
-
-    Code
-      result
-    Output
-      CPM results:
-        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav)
-        Number of observations: 10
-          Complete cases: 10
-        Number of edges: 10
-        Parameters:
-          Covariates:       FALSE
-          Threshold method: alpha
-          Threshold level:  0.01
-          Stored splits:    1
           Bias correction:  TRUE
 
 # Alternative threshold method works
@@ -298,7 +174,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -316,11 +192,6 @@
           "type": "double",
           "attributes": {},
           "value": [0.01]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["sum"]
         },
         {
           "type": "character",
@@ -350,7 +221,6 @@
           Covariates:       FALSE
           Threshold method: sparsity
           Threshold level:  0.01
-          Stored splits:    1
           Bias correction:  TRUE
 
 # Different threshold levels works
@@ -417,7 +287,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "return_edges", "na_action", "bias_correct"]
+          "value": ["covariates", "thresh_method", "thresh_level", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -435,11 +305,6 @@
           "type": "double",
           "attributes": {},
           "value": [0.1]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["sum"]
         },
         {
           "type": "character",
@@ -468,72 +333,6 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.10
-          Stored splits:    1
-          Bias correction:  TRUE
-
-# `return_edges` argument works
-
-    Code
-      result
-    Output
-      CPM results:
-        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, return_edges = "none")
-        Number of observations: 10
-          Complete cases: 10
-        Number of edges: not stored
-        Parameters:
-          Covariates:       FALSE
-          Threshold method: alpha
-          Threshold level:  0.01
-          Stored splits:    1
-          Bias correction:  TRUE
-
----
-
-    {
-      "type": "logical",
-      "attributes": {
-        "dim": {
-          "type": "integer",
-          "attributes": {},
-          "value": [10, 2, 1]
-        },
-        "dimnames": {
-          "type": "list",
-          "attributes": {},
-          "value": [
-            {
-              "type": "NULL"
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pos", "neg"]
-            },
-            {
-              "type": "NULL"
-            }
-          ]
-        }
-      },
-      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
-    }
-
----
-
-    Code
-      result
-    Output
-      CPM results:
-        Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, return_edges = "all")
-        Number of observations: 10
-          Complete cases: 10
-        Number of edges: 10
-        Parameters:
-          Covariates:       FALSE
-          Threshold method: alpha
-          Threshold level:  0.01
-          Stored splits:    1
           Bias correction:  TRUE
 
 # `na_action` argument works
@@ -550,7 +349,6 @@
           Covariates:       FALSE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
           Bias correction:  TRUE
 
 ---
@@ -568,7 +366,6 @@
           Covariates:       TRUE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
           Bias correction:  TRUE
 
 ---
@@ -586,6 +383,5 @@
           Covariates:       TRUE
           Threshold method: alpha
           Threshold level:  0.01
-          Stored splits:    1
           Bias correction:  TRUE
 

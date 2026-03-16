@@ -12,3 +12,5 @@
 ^[.]?air[.]toml$
 ^\.vscode$
 ^touchstone$
+^doc$
+^Meta$
