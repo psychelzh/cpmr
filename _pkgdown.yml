@@ -11,5 +11,6 @@ articles:
   - title: Get Started
     navbar: ~
     contents:
+      - native-getting-started
       - workflow-selection
       - anti-leakage-covariates
