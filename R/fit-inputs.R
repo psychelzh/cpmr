@@ -1,15 +1,41 @@
-check_names <- function(data, behav) {
-  if (!is.null(rownames(data)) && !is.null(names(behav))) {
-    if (!identical(rownames(data), names(behav))) {
-      stop(
-        sprintf(
-          "Case names of `%s` must match those of behavior data.",
-          deparse1(substitute(data))
-        )
-      )
-    }
+resolve_fit_context <- function(
+  conmat,
+  behav,
+  covariates,
+  na_action,
+  action,
+  min_cases
+) {
+  na_action <- match.arg(na_action, c("fail", "exclude"))
+
+  normalized <- normalize_inputs(conmat, behav, covariates)
+  behav <- normalized$behav
+  covariates <- normalized$covariates
+
+  include_cases <- resolve_include_cases(
+    conmat,
+    behav,
+    covariates,
+    na_action
+  )
+
+  if (length(include_cases) == 0L) {
+    stop(sprintf("No complete-case observations available for %s.", action))
   }
-  invisible()
+  if (length(include_cases) < min_cases) {
+    stop(sprintf(
+      "At least %d complete-case observations are required for %s.",
+      min_cases,
+      action
+    ))
+  }
+
+  list(
+    behav = behav,
+    covariates = covariates,
+    include_cases = include_cases,
+    na_action = na_action
+  )
 }
 
 normalize_inputs <- function(conmat, behav, covariates = NULL) {
@@ -65,42 +91,16 @@ resolve_include_cases <- function(conmat, behav, covariates, na_action) {
   )
 }
 
-resolve_fit_context <- function(
-  conmat,
-  behav,
-  covariates,
-  na_action,
-  action,
-  min_cases
-) {
-  na_action <- match.arg(na_action, c("fail", "exclude"))
-
-  normalized <- normalize_inputs(conmat, behav, covariates)
-  behav <- normalized$behav
-  covariates <- normalized$covariates
-
-  include_cases <- resolve_include_cases(
-    conmat,
-    behav,
-    covariates,
-    na_action
-  )
-
-  if (length(include_cases) == 0L) {
-    stop(sprintf("No complete-case observations available for %s.", action))
+check_names <- function(data, behav) {
+  if (!is.null(rownames(data)) && !is.null(names(behav))) {
+    if (!identical(rownames(data), names(behav))) {
+      stop(
+        sprintf(
+          "Case names of `%s` must match those of behavior data.",
+          deparse1(substitute(data))
+        )
+      )
+    }
   }
-  if (length(include_cases) < min_cases) {
-    stop(sprintf(
-      "At least %d complete-case observations are required for %s.",
-      min_cases,
-      action
-    ))
-  }
-
-  list(
-    behav = behav,
-    covariates = covariates,
-    include_cases = include_cases,
-    na_action = na_action
-  )
+  invisible()
 }

@@ -1,45 +1,3 @@
-new_fit_params <- function(
-  spec_params,
-  covariates,
-  na_action,
-  extras = list()
-) {
-  c(
-    list(
-      covariates = !is.null(covariates),
-      thresh_method = spec_params$thresh_method,
-      thresh_level = spec_params$thresh_level,
-      na_action = na_action,
-      bias_correct = spec_params$bias_correct
-    ),
-    extras
-  )
-}
-
-init_pred <- function(behav) {
-  matrix(
-    nrow = length(behav),
-    ncol = length(prediction_types),
-    dimnames = list(names(behav), prediction_types)
-  )
-}
-
-init_edges <- function(return_edges, conmat, kfolds) {
-  switch(
-    return_edges,
-    all = array(
-      dim = c(dim(conmat)[2], length(edge_types), kfolds),
-      dimnames = list(NULL, edge_types, NULL)
-    ),
-    sum = array(
-      0,
-      dim = c(dim(conmat)[2], length(edge_types)),
-      dimnames = list(NULL, edge_types)
-    ),
-    none = NULL
-  )
-}
-
 run_single_fit <- function(
   object,
   conmat,
@@ -197,5 +155,47 @@ run_resample_fit <- function(
     predictions = predictions,
     edges = edges,
     folds = folds
+  )
+}
+
+new_fit_params <- function(
+  spec_params,
+  covariates,
+  na_action,
+  extras = list()
+) {
+  c(
+    list(
+      covariates = !is.null(covariates),
+      thresh_method = spec_params$thresh_method,
+      thresh_level = spec_params$thresh_level,
+      na_action = na_action,
+      bias_correct = spec_params$bias_correct
+    ),
+    extras
+  )
+}
+
+init_pred <- function(behav) {
+  matrix(
+    nrow = length(behav),
+    ncol = length(prediction_types),
+    dimnames = list(names(behav), prediction_types)
+  )
+}
+
+init_edges <- function(return_edges, conmat, kfolds) {
+  switch(
+    return_edges,
+    all = array(
+      dim = c(dim(conmat)[2], length(edge_types), kfolds),
+      dimnames = list(NULL, edge_types, NULL)
+    ),
+    sum = array(
+      0,
+      dim = c(dim(conmat)[2], length(edge_types)),
+      dimnames = list(NULL, edge_types)
+    ),
+    none = NULL
   )
 }

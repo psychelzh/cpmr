@@ -1,76 +1,3 @@
-validate_kfolds <- function(kfolds) {
-  if (
-    !is.null(kfolds) &&
-      (!is.numeric(kfolds) ||
-        length(kfolds) != 1L ||
-        is.na(kfolds) ||
-        !is.finite(kfolds) ||
-        kfolds < 2 ||
-        kfolds %% 1 != 0)
-  ) {
-    stop(
-      "`kfolds` must be NULL or a single integer greater than or equal to 2."
-    )
-  }
-
-  if (is.null(kfolds)) {
-    return(NULL)
-  }
-
-  as.integer(kfolds)
-}
-
-resolve_kfolds <- function(kfolds, include_cases) {
-  if (is.null(kfolds)) {
-    return(length(include_cases))
-  }
-
-  kfolds
-}
-
-validate_resamples <- function(resamples, include_cases) {
-  if (!is.list(resamples) || length(resamples) == 0L) {
-    stop("`resamples` must be a non-empty list of assessment indices.")
-  }
-  if (length(resamples) < 2L) {
-    stop("`resamples` must contain at least 2 assessment sets.")
-  }
-
-  normalized <- lapply(resamples, function(idx) {
-    if (!is.numeric(idx) || anyNA(idx) || any(!is.finite(idx))) {
-      stop("Each element in `resamples` must contain finite numeric indices.")
-    }
-    if (any(idx %% 1 != 0)) {
-      stop("Each element in `resamples` must contain integer-valued indices.")
-    }
-
-    idx <- as.integer(idx)
-    if (any(idx <= 0L)) {
-      stop("Each element in `resamples` must contain positive indices.")
-    }
-    if (anyDuplicated(idx)) {
-      stop("Each element in `resamples` must not contain duplicates.")
-    }
-
-    idx
-  })
-
-  all_assessment <- unlist(normalized, use.names = FALSE)
-  include_cases <- sort(unique(include_cases))
-
-  if (!all(all_assessment %in% include_cases)) {
-    stop("All `resamples` indices must be contained in complete-case rows.")
-  }
-  if (length(all_assessment) != length(unique(all_assessment))) {
-    stop("`resamples` indices must not overlap across folds.")
-  }
-  if (!identical(sort(all_assessment), include_cases)) {
-    stop("`resamples` indices must cover all complete-case rows exactly once.")
-  }
-
-  normalized
-}
-
 resolve_resample_folds <- function(resamples, kfolds, include_cases) {
   if (is.null(resamples)) {
     kfolds <- resolve_kfolds(
@@ -127,4 +54,77 @@ warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
   }
 
   invisible()
+}
+
+validate_resamples <- function(resamples, include_cases) {
+  if (!is.list(resamples) || length(resamples) == 0L) {
+    stop("`resamples` must be a non-empty list of assessment indices.")
+  }
+  if (length(resamples) < 2L) {
+    stop("`resamples` must contain at least 2 assessment sets.")
+  }
+
+  normalized <- lapply(resamples, function(idx) {
+    if (!is.numeric(idx) || anyNA(idx) || any(!is.finite(idx))) {
+      stop("Each element in `resamples` must contain finite numeric indices.")
+    }
+    if (any(idx %% 1 != 0)) {
+      stop("Each element in `resamples` must contain integer-valued indices.")
+    }
+
+    idx <- as.integer(idx)
+    if (any(idx <= 0L)) {
+      stop("Each element in `resamples` must contain positive indices.")
+    }
+    if (anyDuplicated(idx)) {
+      stop("Each element in `resamples` must not contain duplicates.")
+    }
+
+    idx
+  })
+
+  all_assessment <- unlist(normalized, use.names = FALSE)
+  include_cases <- sort(unique(include_cases))
+
+  if (!all(all_assessment %in% include_cases)) {
+    stop("All `resamples` indices must be contained in complete-case rows.")
+  }
+  if (length(all_assessment) != length(unique(all_assessment))) {
+    stop("`resamples` indices must not overlap across folds.")
+  }
+  if (!identical(sort(all_assessment), include_cases)) {
+    stop("`resamples` indices must cover all complete-case rows exactly once.")
+  }
+
+  normalized
+}
+
+validate_kfolds <- function(kfolds) {
+  if (
+    !is.null(kfolds) &&
+      (!is.numeric(kfolds) ||
+        length(kfolds) != 1L ||
+        is.na(kfolds) ||
+        !is.finite(kfolds) ||
+        kfolds < 2 ||
+        kfolds %% 1 != 0)
+  ) {
+    stop(
+      "`kfolds` must be NULL or a single integer greater than or equal to 2."
+    )
+  }
+
+  if (is.null(kfolds)) {
+    return(NULL)
+  }
+
+  as.integer(kfolds)
+}
+
+resolve_kfolds <- function(kfolds, include_cases) {
+  if (is.null(kfolds)) {
+    return(length(include_cases))
+  }
+
+  kfolds
 }
