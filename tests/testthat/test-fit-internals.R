@@ -21,7 +21,7 @@ test_that("internal helpers validate nullable kfolds and finite resamples", {
 
 test_that("large fold-wise edge storage warning is emitted", {
   expect_warning(
-    maybe_warn_large_edge_storage(
+    warn_large_edge_storage(
       n_edges = 140000,
       kfolds = 10,
       return_edges = "all"
@@ -31,7 +31,7 @@ test_that("large fold-wise edge storage warning is emitted", {
   )
 })
 
-test_that("compatibility wrappers delegate to core helpers", {
+test_that("core preprocess and model helpers compose correctly", {
   withr::local_seed(1)
   n <- 12
   p <- 6
@@ -41,14 +41,15 @@ test_that("compatibility wrappers delegate to core helpers", {
   rows_train <- 1:8
   rows_test <- 9:12
 
-  training <- prepare_training_data(conmat, behav, covariates, rows_train)
-  core_training <- core_prepare_training_data(
+  training <- prepare_training_data(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
     rows_train = rows_train
   )
-  expect_equal(training, core_training)
+  expect_equal(dim(training$conmat), c(length(rows_train), p))
+  expect_equal(length(training$behav), length(rows_train))
+  expect_equal(training$covariates, covariates[rows_train, , drop = FALSE])
 
   regressed <- regress_covariates_by_train(
     resp_train = conmat[rows_train, , drop = FALSE],
@@ -56,13 +57,7 @@ test_that("compatibility wrappers delegate to core helpers", {
     cov_train = covariates[rows_train, , drop = FALSE],
     cov_test = covariates[rows_test, , drop = FALSE]
   )
-  core_regressed <- core_regress_covariates_by_train(
-    resp_train = conmat[rows_train, , drop = FALSE],
-    resp_test = conmat[rows_test, , drop = FALSE],
-    cov_train = covariates[rows_train, , drop = FALSE],
-    cov_test = covariates[rows_test, , drop = FALSE]
-  )
-  expect_equal(regressed, core_regressed)
+  expect_equal(dim(regressed$test), c(length(rows_test), p))
 
   assessment <- prepare_assessment_data(
     conmat = conmat,
@@ -72,53 +67,32 @@ test_that("compatibility wrappers delegate to core helpers", {
     rows_test = rows_test,
     covariates_train = training$covariates
   )
-  core_assessment <- core_prepare_assessment_data(
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    rows_train = rows_train,
-    rows_test = rows_test,
-    covariates_train = training$covariates
-  )
-  expect_equal(assessment, core_assessment)
+  expect_equal(dim(assessment$conmat), c(length(rows_test), p))
+  expect_equal(length(assessment$behav), length(rows_test))
 
   edges <- select_edges(training$conmat, training$behav, "alpha", 0.1)
-  model <- train_cpm_model(
+  model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
     edges = edges,
     bias_correct = TRUE
   )
-  core_model <- core_train_model(
-    conmat = training$conmat,
-    behav = training$behav,
-    edges = edges,
-    bias_correct = TRUE
-  )
-  expect_equal(model, core_model)
+  expect_equal(dim(edges), c(p, 2))
+  expect_named(model$models, c("both", "pos", "neg"))
   expect_equal(
-    predict_cpm_model(model, assessment$conmat),
-    core_predict_model(core_model, assessment$conmat)
+    dim(predict_model(model, assessment$conmat)),
+    c(length(rows_test), 3)
   )
 })
 
-test_that("legacy fit and object constructors still delegate to core helpers", {
+test_that("core fit and object constructors build expected objects", {
   withr::local_seed(99)
   conmat <- matrix(rnorm(120), nrow = 10, ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(thresh_method = "alpha", thresh_level = 0.05)
   call <- quote(fit(object = spec, conmat = conmat, behav = behav))
 
-  fit_result <- fit_cpm_single(
-    call = call,
-    object = spec,
-    conmat = conmat,
-    behav = behav,
-    covariates = NULL,
-    return_edges = "sum",
-    na_action = "fail"
-  )
-  core_fit_result <- core_fit_single(
+  fit_result <- run_single_fit(
     object = spec,
     conmat = conmat,
     behav = behav,
@@ -127,11 +101,12 @@ test_that("legacy fit and object constructors still delegate to core helpers", {
     na_action = "fail",
     call = call
   )
-  expect_equal(fit_result, core_fit_result)
+  expect_s3_class(fit_result, "cpm")
+  expect_identical(fit_result$call, call)
+  expect_false("folds" %in% names(fit_result))
 
   cpm_object <- new_cpm(
     call = call,
-    folds = list(1:10),
     behav = behav,
     pred = fit_result$pred,
     edges = fit_result$edges,

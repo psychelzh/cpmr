@@ -1,4 +1,4 @@
-core_new_cpm <- function(call, behav, pred, edges, model, spec, params) {
+new_cpm <- function(call, behav, pred, edges, model, spec, params) {
   structure(
     list(
       real = behav,
@@ -13,7 +13,7 @@ core_new_cpm <- function(call, behav, pred, edges, model, spec, params) {
   )
 }
 
-core_new_cpm_resamples <- function(
+new_cpm_resamples <- function(
   spec,
   folds,
   edges,

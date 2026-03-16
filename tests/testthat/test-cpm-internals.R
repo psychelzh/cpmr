@@ -43,7 +43,7 @@ test_that("init_edges allocates expected structures", {
   expect_null(init_edges("none", conmat, kfolds = 5))
 })
 
-test_that("legacy scalar helpers still delegate to core implementations", {
+test_that("core scalar helpers return expected values", {
   behav <- stats::setNames(rnorm(5), paste0("s", 1:5))
 
   pred <- init_pred(behav)
@@ -51,12 +51,20 @@ test_that("legacy scalar helpers still delegate to core implementations", {
   expect_identical(rownames(pred), names(behav))
   expect_identical(colnames(pred), c("both", "pos", "neg"))
 
-  expect_equal(critical_r(20, 0.05), core_critical_r(20, 0.05))
+  df <- 20 - 2
+  ct <- stats::qt(0.05 / 2, df, lower.tail = FALSE)
+  expect_equal(
+    critical_r(20, 0.05),
+    sqrt((ct^2) / ((ct^2) + df))
+  )
 
   x <- matrix(as.numeric(1:6), nrow = 3)
   center <- c(2, 5)
   scale <- c(1, 2)
-  expect_equal(fscale(x, center, scale), core_fscale(x, center, scale))
+  expect_equal(
+    fscale(x, center, scale),
+    sweep(sweep(x, 2, center, "-"), 2, scale, "/")
+  )
 
   withr::local_seed(42)
   folds <- crossv_kfold(1:6, 3)

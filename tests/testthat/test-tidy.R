@@ -18,16 +18,19 @@ test_that("Support pass arguments of `summary()`", {
     tidy(result, component = "performance", method = "spearman")$method,
     "spearman"
   )
-  expect_named(tidy(result, component = "edges"), c(
-    "covariates",
-    "thresh_method",
-    "thresh_level",
-    "return_edges",
-    "na_action",
-    "bias_correct",
-    "pos",
-    "neg"
-  ))
+  expect_named(
+    tidy(result, component = "edges"),
+    c(
+      "covariates",
+      "thresh_method",
+      "thresh_level",
+      "return_edges",
+      "na_action",
+      "bias_correct",
+      "pos",
+      "neg"
+    )
+  )
 })
 
 test_that("Warning when edges are not stored", {

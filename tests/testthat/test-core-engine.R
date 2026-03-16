@@ -1,11 +1,11 @@
-test_that("core_fit_single matches fit() outputs on single data", {
+test_that("run_single_fit matches fit() outputs on single data", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(thresh_method = "alpha", thresh_level = 0.05)
   call <- quote(fit(object = spec, conmat = conmat, behav = behav))
 
-  core_result <- core_fit_single(
+  core_result <- run_single_fit(
     object = spec,
     conmat = conmat,
     behav = behav,
@@ -29,17 +29,17 @@ test_that("core_fit_single matches fit() outputs on single data", {
   expect_equal(core_result$model$models, api_result$model$models)
 })
 
-test_that("core_fit_resamples matches fit_resamples() outputs", {
+test_that("run_resample_fit matches fit_resamples() outputs", {
   withr::local_seed(321)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(thresh_method = "sparsity", thresh_level = 0.2)
 
   withr::local_seed(999)
-  folds <- core_crossv_kfold(seq_along(behav), 5)
+  folds <- crossv_kfold(seq_along(behav), 5)
 
   withr::local_seed(999)
-  core_result <- core_fit_resamples(
+  core_result <- run_resample_fit(
     object = spec,
     conmat = conmat,
     behav = behav,
@@ -63,11 +63,11 @@ test_that("core_fit_resamples matches fit_resamples() outputs", {
   expect_equal(core_result$predictions, api_result$predictions)
 })
 
-test_that("core_resolve_resample_folds generates and validates public folds", {
+test_that("resolve_resample_folds generates and validates public folds", {
   include_cases <- 1:10
 
   withr::local_seed(222)
-  resolved <- core_resolve_resample_folds(
+  resolved <- resolve_resample_folds(
     resamples = NULL,
     kfolds = 5,
     include_cases = include_cases
@@ -77,7 +77,7 @@ test_that("core_resolve_resample_folds generates and validates public folds", {
   expect_identical(sort(unname(unlist(resolved$folds))), include_cases)
   expect_identical(resolved$kfolds, 5L)
 
-  explicit <- core_resolve_resample_folds(
+  explicit <- resolve_resample_folds(
     resamples = list(1:2, 3:4, 5:6, 7:8, 9:10),
     kfolds = NULL,
     include_cases = include_cases
@@ -86,7 +86,7 @@ test_that("core_resolve_resample_folds generates and validates public folds", {
   expect_identical(explicit$kfolds, 5L)
 })
 
-test_that("core_prepare_* keeps covariate handling train-only", {
+test_that("prepare_* keeps covariate handling train-only", {
   withr::local_seed(456)
   n <- 20
   p <- 8
@@ -96,18 +96,18 @@ test_that("core_prepare_* keeps covariate handling train-only", {
   rows_train <- 1:15
   rows_test <- 16:20
 
-  training <- core_prepare_training_data(
+  training <- prepare_training_data(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
     rows_train = rows_train
   )
   expected_cov_train <- covariates[rows_train, , drop = FALSE]
-  expected_train_conmat <- core_regress_covariates(
+  expected_train_conmat <- regress_covariates(
     conmat[rows_train, , drop = FALSE],
     expected_cov_train
   )
-  expected_train_behav <- drop(core_regress_covariates(
+  expected_train_behav <- drop(regress_covariates(
     behav[rows_train],
     expected_cov_train
   ))
@@ -116,7 +116,7 @@ test_that("core_prepare_* keeps covariate handling train-only", {
   expect_equal(training$behav, expected_train_behav)
   expect_equal(training$covariates, expected_cov_train)
 
-  assessment <- core_prepare_assessment_data(
+  assessment <- prepare_assessment_data(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
@@ -124,14 +124,14 @@ test_that("core_prepare_* keeps covariate handling train-only", {
     rows_test = rows_test,
     covariates_train = training$covariates
   )
-  expected_assess_conmat <- core_regress_covariates_by_train(
+  expected_assess_conmat <- regress_covariates_by_train(
     conmat[rows_train, , drop = FALSE],
     conmat[rows_test, , drop = FALSE],
     expected_cov_train,
     covariates[rows_test, , drop = FALSE]
   )$test
   expected_assess_behav <- drop(
-    core_regress_covariates_by_train(
+    regress_covariates_by_train(
       behav[rows_train],
       behav[rows_test],
       expected_cov_train,
@@ -143,7 +143,7 @@ test_that("core_prepare_* keeps covariate handling train-only", {
   expect_equal(assessment$behav, expected_assess_behav)
 })
 
-test_that("core_prepare_assessment_data infers training covariates when omitted", {
+test_that("prepare_assessment_data infers training covariates when omitted", {
   withr::local_seed(654)
   conmat <- matrix(rnorm(60), nrow = 10, ncol = 6)
   behav <- rnorm(10)
@@ -151,7 +151,7 @@ test_that("core_prepare_assessment_data infers training covariates when omitted"
   rows_train <- 1:7
   rows_test <- 8:10
 
-  assessment <- core_prepare_assessment_data(
+  assessment <- prepare_assessment_data(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
@@ -159,7 +159,7 @@ test_that("core_prepare_assessment_data infers training covariates when omitted"
     rows_test = rows_test
   )
 
-  assessment_explicit <- core_prepare_assessment_data(
+  assessment_explicit <- prepare_assessment_data(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
@@ -171,14 +171,14 @@ test_that("core_prepare_assessment_data infers training covariates when omitted"
   expect_equal(assessment, assessment_explicit)
 })
 
-test_that("core_fit_single errors clearly on insufficient complete cases", {
+test_that("run_single_fit errors clearly on insufficient complete cases", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rep(NA_real_, 10)
   spec <- cpm_spec()
   call <- quote(fit(object = spec, conmat = conmat, behav = behav))
 
   expect_error(
-    core_fit_single(
+    run_single_fit(
       object = spec,
       conmat = conmat,
       behav = behav,
@@ -193,7 +193,7 @@ test_that("core_fit_single errors clearly on insufficient complete cases", {
 
   behav[1:2] <- rnorm(2)
   expect_error(
-    core_fit_single(
+    run_single_fit(
       object = spec,
       conmat = conmat,
       behav = behav,
@@ -207,14 +207,14 @@ test_that("core_fit_single errors clearly on insufficient complete cases", {
   )
 })
 
-test_that("core_fit_resamples errors clearly on insufficient complete cases", {
+test_that("run_resample_fit errors clearly on insufficient complete cases", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rep(NA_real_, 10)
   spec <- cpm_spec()
   folds <- list(1:5, 6:10)
 
   expect_error(
-    core_fit_resamples(
+    run_resample_fit(
       object = spec,
       conmat = conmat,
       behav = behav,
@@ -230,7 +230,7 @@ test_that("core_fit_resamples errors clearly on insufficient complete cases", {
   behav[] <- NA_real_
   behav[1] <- 1
   expect_error(
-    core_fit_resamples(
+    run_resample_fit(
       object = spec,
       conmat = conmat,
       behav = behav,

@@ -1,8 +1,8 @@
-core_regress_covariates <- function(resp, covariates) {
+regress_covariates <- function(resp, covariates) {
   stats::.lm.fit(cbind(1, covariates), resp)$residuals
 }
 
-core_regress_covariates_by_train <- function(
+regress_covariates_by_train <- function(
   resp_train,
   resp_test,
   cov_train,
@@ -17,7 +17,7 @@ core_regress_covariates_by_train <- function(
   )
 }
 
-core_prepare_training_data <- function(conmat, behav, covariates, rows_train) {
+prepare_training_data <- function(conmat, behav, covariates, rows_train) {
   if (is.null(covariates)) {
     return(list(
       conmat = conmat[rows_train, , drop = FALSE],
@@ -28,11 +28,11 @@ core_prepare_training_data <- function(conmat, behav, covariates, rows_train) {
 
   covariates_train <- covariates[rows_train, , drop = FALSE]
   list(
-    conmat = core_regress_covariates(
+    conmat = regress_covariates(
       conmat[rows_train, , drop = FALSE],
       covariates_train
     ),
-    behav = drop(core_regress_covariates(
+    behav = drop(regress_covariates(
       behav[rows_train],
       covariates_train
     )),
@@ -40,7 +40,7 @@ core_prepare_training_data <- function(conmat, behav, covariates, rows_train) {
   )
 }
 
-core_prepare_assessment_data <- function(
+prepare_assessment_data <- function(
   conmat,
   behav,
   covariates,
@@ -60,13 +60,13 @@ core_prepare_assessment_data <- function(
   }
   covariates_test <- covariates[rows_test, , drop = FALSE]
 
-  conmat_regressed <- core_regress_covariates_by_train(
+  conmat_regressed <- regress_covariates_by_train(
     conmat[rows_train, , drop = FALSE],
     conmat[rows_test, , drop = FALSE],
     covariates_train,
     covariates_test
   )
-  behav_regressed <- core_regress_covariates_by_train(
+  behav_regressed <- regress_covariates_by_train(
     behav[rows_train],
     behav[rows_test],
     covariates_train,

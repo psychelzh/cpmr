@@ -93,7 +93,7 @@ fit.cpm_spec <- function(
   return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
 
-  core_fit_single(
+  run_single_fit(
     object = object,
     conmat = conmat,
     behav = behav,
@@ -133,11 +133,11 @@ fit_resamples.cpm_spec <- function(
   return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
 
-  normalized <- core_normalize_inputs(conmat, behav, covariates)
+  normalized <- normalize_inputs(conmat, behav, covariates)
   behav <- normalized$behav
   covariates <- normalized$covariates
 
-  include_cases <- core_resolve_include_cases(
+  include_cases <- resolve_include_cases(
     conmat,
     behav,
     covariates,
@@ -151,13 +151,13 @@ fit_resamples.cpm_spec <- function(
     stop("At least 2 complete-case observations are required for resampling.")
   }
 
-  resolved <- core_resolve_resample_folds(
+  resolved <- resolve_resample_folds(
     resamples = resamples,
     kfolds = kfolds,
     include_cases = include_cases
   )
 
-  core_fit_resamples(
+  run_resample_fit(
     object = object,
     conmat = conmat,
     behav = behav,

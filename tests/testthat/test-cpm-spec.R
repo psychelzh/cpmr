@@ -334,13 +334,13 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     return_edges = "sum",
     na_action = "fail"
   )
-  training <- core_prepare_training_data(
+  training <- prepare_training_data(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
     rows_train = rows_train
   )
-  assessment <- core_prepare_assessment_data(
+  assessment <- prepare_assessment_data(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
@@ -348,13 +348,13 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     rows_test = rows_test,
     covariates_train = training$covariates
   )
-  fold_edges <- core_select_edges(
+  fold_edges <- select_edges(
     conmat = training$conmat,
     behav = training$behav,
     method = spec$params$thresh_method,
     level = spec$params$thresh_level
   )
-  fold_model <- core_train_model(
+  fold_model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
     edges = fold_edges,
@@ -369,7 +369,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     return_edges = "sum",
     na_action = "fail"
   )
-  fold_pred <- core_predict_model(fold_model, assessment$conmat)
+  fold_pred <- predict_model(fold_model, assessment$conmat)
   collected <- collect_predictions(resampled)
 
   expect_equal(single_fit$edges, fold_edges)
@@ -377,7 +377,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   expect_equal(single_fit$model$models, fold_model$models)
   expect_equal(single_fit$model$center, fold_model$center)
   expect_equal(single_fit$model$scale, fold_model$scale)
-  expect_equal(core_predict_model(single_fit$model, assessment$conmat), fold_pred)
+  expect_equal(predict_model(single_fit$model, assessment$conmat), fold_pred)
   expect_equal(
     as.matrix(collected[rows_test, c("both", "pos", "neg")]),
     fold_pred,

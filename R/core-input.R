@@ -1,4 +1,4 @@
-core_normalize_inputs <- function(conmat, behav, covariates = NULL) {
+normalize_inputs <- function(conmat, behav, covariates = NULL) {
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {
     stop("Behavior data must be a numeric vector.")
@@ -24,7 +24,7 @@ core_normalize_inputs <- function(conmat, behav, covariates = NULL) {
   )
 }
 
-core_resolve_include_cases <- function(conmat, behav, covariates, na_action) {
+resolve_include_cases <- function(conmat, behav, covariates, na_action) {
   switch(
     na_action,
     fail = {
@@ -51,14 +51,14 @@ core_resolve_include_cases <- function(conmat, behav, covariates, na_action) {
   )
 }
 
-core_resolve_kfolds <- function(kfolds, include_cases) {
+resolve_kfolds <- function(kfolds, include_cases) {
   if (is.null(kfolds)) {
     return(length(include_cases))
   }
   kfolds
 }
 
-core_init_edges <- function(return_edges, conmat, kfolds) {
+init_edges <- function(return_edges, conmat, kfolds) {
   switch(
     return_edges,
     all = array(
@@ -74,7 +74,7 @@ core_init_edges <- function(return_edges, conmat, kfolds) {
   )
 }
 
-core_init_pred <- function(behav) {
+init_pred <- function(behav) {
   matrix(
     nrow = length(behav),
     ncol = length(inc_edges),

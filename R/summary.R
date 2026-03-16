@@ -40,7 +40,7 @@ summary.cpm <- function(
 
   edges <- object$edges
   if (!is.null(edges) && length(dim(edges)) == 3L) {
-    edges <- edges[, , 1, drop = FALSE]
+    edges <- edges[,, 1, drop = FALSE]
     dim(edges) <- dim(edges)[1:2]
     dimnames(edges) <- dimnames(object$edges)[1:2]
   }

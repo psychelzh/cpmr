@@ -1,4 +1,4 @@
-core_validate_kfolds <- function(kfolds) {
+validate_kfolds <- function(kfolds) {
   if (
     !is.null(kfolds) &&
       (!is.numeric(kfolds) ||
@@ -20,7 +20,7 @@ core_validate_kfolds <- function(kfolds) {
   as.integer(kfolds)
 }
 
-core_validate_resamples <- function(resamples, include_cases) {
+validate_resamples <- function(resamples, include_cases) {
   if (!is.list(resamples) || length(resamples) == 0L) {
     stop("`resamples` must be a non-empty list of assessment indices.")
   }
@@ -63,21 +63,21 @@ core_validate_resamples <- function(resamples, include_cases) {
   normalized
 }
 
-core_resolve_resample_folds <- function(resamples, kfolds, include_cases) {
+resolve_resample_folds <- function(resamples, kfolds, include_cases) {
   if (is.null(resamples)) {
-    kfolds <- core_resolve_kfolds(
-      core_validate_kfolds(kfolds),
+    kfolds <- resolve_kfolds(
+      validate_kfolds(kfolds),
       include_cases
     )
     if (kfolds > length(include_cases)) {
       stop("`kfolds` must be less than or equal to complete-case observations.")
     }
-    folds <- core_crossv_kfold(include_cases, kfolds)
+    folds <- crossv_kfold(include_cases, kfolds)
   } else {
     if (!is.null(kfolds)) {
       stop("Specify either `resamples` or `kfolds`, not both.")
     }
-    folds <- core_validate_resamples(resamples, include_cases)
+    folds <- validate_resamples(resamples, include_cases)
     kfolds <- length(folds)
   }
 
@@ -94,11 +94,11 @@ core_resolve_resample_folds <- function(resamples, kfolds, include_cases) {
   )
 }
 
-core_crossv_kfold <- function(x, k) {
+crossv_kfold <- function(x, k) {
   split(sample(x), cut(seq_along(x), breaks = k, labels = FALSE))
 }
 
-core_warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
+warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
   if (return_edges != "all") {
     return(invisible())
   }
@@ -121,7 +121,7 @@ core_warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
   invisible()
 }
 
-core_fit_single <- function(
+run_single_fit <- function(
   object,
   conmat,
   behav,
@@ -134,11 +134,11 @@ core_fit_single <- function(
   return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
 
-  normalized <- core_normalize_inputs(conmat, behav, covariates)
+  normalized <- normalize_inputs(conmat, behav, covariates)
   behav <- normalized$behav
   covariates <- normalized$covariates
 
-  include_cases <- core_resolve_include_cases(
+  include_cases <- resolve_include_cases(
     conmat,
     behav,
     covariates,
@@ -151,27 +151,27 @@ core_fit_single <- function(
     stop("At least 3 complete-case observations are required for fitting.")
   }
 
-  pred <- core_init_pred(behav)
-  training <- core_prepare_training_data(
+  pred <- init_pred(behav)
+  training <- prepare_training_data(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
     rows_train = include_cases
   )
 
-  cur_edges <- core_select_edges(
+  cur_edges <- select_edges(
     conmat = training$conmat,
     behav = training$behav,
     method = params$thresh_method,
     level = params$thresh_level
   )
-  model <- core_train_model(
+  model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
     edges = cur_edges,
     bias_correct = params$bias_correct
   )
-  pred[include_cases, ] <- core_predict_model(model, training$conmat)
+  pred[include_cases, ] <- predict_model(model, training$conmat)
 
   edges <- switch(
     return_edges,
@@ -190,7 +190,7 @@ core_fit_single <- function(
   real <- behav
   real[include_cases] <- training$behav
 
-  core_new_cpm(
+  new_cpm(
     call = call,
     behav = real,
     pred = pred,
@@ -208,7 +208,7 @@ core_fit_single <- function(
   )
 }
 
-core_fit_resamples <- function(
+run_resample_fit <- function(
   object,
   conmat,
   behav,
@@ -221,11 +221,11 @@ core_fit_resamples <- function(
   return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
 
-  normalized <- core_normalize_inputs(conmat, behav, covariates)
+  normalized <- normalize_inputs(conmat, behav, covariates)
   behav <- normalized$behav
   covariates <- normalized$covariates
 
-  include_cases <- core_resolve_include_cases(
+  include_cases <- resolve_include_cases(
     conmat,
     behav,
     covariates,
@@ -239,38 +239,38 @@ core_fit_resamples <- function(
     stop("At least 2 complete-case observations are required for resampling.")
   }
 
-  folds <- core_validate_resamples(folds, include_cases)
+  folds <- validate_resamples(folds, include_cases)
   kfolds <- length(folds)
 
-  core_warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
+  warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
 
-  pred <- core_init_pred(behav)
-  edges <- core_init_edges(return_edges, conmat, kfolds)
+  pred <- init_pred(behav)
+  edges <- init_edges(return_edges, conmat, kfolds)
   real <- behav
 
   for (fold in seq_len(kfolds)) {
     rows_test <- folds[[fold]]
     rows_train <- setdiff(include_cases, rows_test)
 
-    training <- core_prepare_training_data(
+    training <- prepare_training_data(
       conmat = conmat,
       behav = behav,
       covariates = covariates,
       rows_train = rows_train
     )
-    fold_edges <- core_select_edges(
+    fold_edges <- select_edges(
       conmat = training$conmat,
       behav = training$behav,
       method = params$thresh_method,
       level = params$thresh_level
     )
-    fold_model <- core_train_model(
+    fold_model <- train_model(
       conmat = training$conmat,
       behav = training$behav,
       edges = fold_edges,
       bias_correct = params$bias_correct
     )
-    assessment <- core_prepare_assessment_data(
+    assessment <- prepare_assessment_data(
       conmat = conmat,
       behav = behav,
       covariates = covariates,
@@ -279,7 +279,7 @@ core_fit_resamples <- function(
       covariates_train = training$covariates
     )
 
-    pred[rows_test, ] <- core_predict_model(fold_model, assessment$conmat)
+    pred[rows_test, ] <- predict_model(fold_model, assessment$conmat)
     real[rows_test] <- assessment$behav
 
     if (return_edges == "all") {
@@ -292,7 +292,7 @@ core_fit_resamples <- function(
   metrics <- compute_fold_metrics(real, pred, folds)
   predictions <- compute_fold_predictions(real, pred, folds)
 
-  core_new_cpm_resamples(
+  new_cpm_resamples(
     spec = object,
     folds = folds,
     edges = edges,

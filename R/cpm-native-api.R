@@ -58,7 +58,7 @@ cpm_fit <- function(
     bias_correct = bias_correct
   )
 
-  core_fit_single(
+  run_single_fit(
     object = spec,
     conmat = conmat,
     behav = behav,

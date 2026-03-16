@@ -1,15 +1,15 @@
-core_critical_r <- function(n, alpha) {
+critical_r <- function(n, alpha) {
   df <- n - 2
   ct <- stats::qt(alpha / 2, df, lower.tail = FALSE)
   sqrt((ct^2) / ((ct^2) + df))
 }
 
-core_select_edges <- function(conmat, behav, method, level) {
+select_edges <- function(conmat, behav, method, level) {
   r_mat <- stats::cor(conmat, behav)
   r_crit <- switch(
     method,
     alpha = {
-      thresh <- core_critical_r(nrow(conmat), level)
+      thresh <- critical_r(nrow(conmat), level)
       c(-thresh, thresh)
     },
     sparsity = {
