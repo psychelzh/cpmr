@@ -124,6 +124,22 @@ test_that("resample_metrics supports metric filtering and spearman correlation",
   expect_equal(nrow(pooled), 3)
 })
 
+test_that("resample_metrics ignores correlation_method when correlation is absent", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+
+  metrics <- resample_metrics(
+    res,
+    metrics = "rmse",
+    correlation_method = "kendall"
+  )
+
+  expect_true(all(metrics$metric == "rmse"))
+  expect_equal(nrow(metrics), 15)
+})
+
 test_that("resample_metrics validates object type", {
   expect_error(
     resample_metrics(summary(fit(

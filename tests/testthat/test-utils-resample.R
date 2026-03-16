@@ -103,6 +103,18 @@ test_that("compute_pooled_metric_table returns a long metric table", {
   expect_true(all(c("both", "pos", "neg") %in% metrics$prediction))
 })
 
+test_that("compute_resample_metric only validates correlation methods when needed", {
+  expect_equal(
+    compute_resample_metric(
+      real = c(1, 2),
+      predicted = c(1, 2),
+      metric = "rmse",
+      correlation_method = "kendall"
+    ),
+    0
+  )
+})
+
 test_that("compute_fold_correlations summarizes each assessment fold", {
   predictions <- data.frame(
     row = 1:4,
