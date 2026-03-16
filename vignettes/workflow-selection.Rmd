@@ -69,11 +69,11 @@ This route remains native `cpmr`; it is just a slightly lower-level interface.
 
 ## Where a Tidymodels Adapter Fits
 
-`cpmr` also has an RFC for a tidymodels-compatible adapter layer:
+`cpmr` also keeps a deferred RFC for a tidymodels-compatible adapter layer:
 
 - `design/rfc/0002-tidymodels-adapter.md`
 
-That adapter is intended to be:
+That adapter is currently intended to be:
 
 - an interoperability layer for users who want `parsnip`, `workflows`, and
   related tooling;

@@ -31,10 +31,10 @@
   core-layer refactor, added dedicated core-engine contract tests, and
   hardened resample validation so each fold must retain at least 3
   complete-case training observations.
-* Moved training/prediction primitives into the core layer and kept
-  `fit-internals.R` helpers as compatibility wrappers during phase A.
-* Split phase-A core internals into RFC-aligned module files and moved legacy
-  helper names into `compat-legacy-api.R`.
+* Moved training/prediction primitives into the core layer and simplified
+  internal helpers around the native-first engine.
+* Split core internals into focused module files and aligned the architecture
+  RFCs with the current native-first direction.
 
 # cpmr 0.1.1
 
