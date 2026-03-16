@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 ## Overview
 
 `cpmr`'s primary workflow is a native, matrix-first API built around
-`cpm_fit()` and `cpm_fit_resamples()`.
+`cpm_spec()` together with `fit()` and `fit_resamples()`.
 
 This vignette walks through:
 
@@ -49,18 +49,17 @@ behav <- rowMeans(conmat[, 1:12, drop = FALSE]) +
   rnorm(n, sd = 0.5)
 ```
 
-## Single Fit with `cpm_fit()`
+## Single Fit with `fit()`
 
-Use `cpm_fit()` when you want a direct native fit without constructing a
-`cpm_spec()` object first.
+Use `fit()` on a `cpm_spec()` object when you want a native single fit with
+explicit CPM parameters.
 
 ```{r}
-fit_obj <- cpm_fit(
+fit_obj <- fit(
+  cpm_spec(thresh_method = "alpha", thresh_level = 0.05),
   conmat = conmat,
   behav = behav,
-  covariates = covariates,
-  thresh_method = "alpha",
-  thresh_level = 0.05
+  covariates = covariates
 )
 
 fit_obj
@@ -68,17 +67,18 @@ summary(fit_obj)
 dim(fit_obj$edges)
 ```
 
-For a single fit, `cpm_fit()` stores a `p x 2` edge-selection mask with `pos`
-and `neg` columns by default. This is useful for inspecting the selected
-network, but the performance reported by `summary()` is still in-sample.
+For a single fit, `fit()` stores a `p x 2` edge-selection mask with `pos` and
+`neg` columns by default. This is useful for inspecting the selected network,
+but the performance reported by `summary()` is still in-sample.
 
-## Cross-Validated Resampling with `cpm_fit_resamples()`
+## Cross-Validated Resampling with `fit_resamples()`
 
-Use `cpm_fit_resamples()` for an out-of-sample estimate of predictive
-performance.
+Use `fit_resamples()` on the same `cpm_spec()` object for an out-of-sample
+estimate of predictive performance.
 
 ```{r}
-resample_obj <- cpm_fit_resamples(
+resample_obj <- fit_resamples(
+  cpm_spec(),
   conmat = conmat,
   behav = behav,
   covariates = covariates,
@@ -125,7 +125,8 @@ custom_resamples <- split(
   cut(seq_len(n), breaks = 4, labels = FALSE)
 )
 
-custom_obj <- cpm_fit_resamples(
+custom_obj <- fit_resamples(
+  cpm_spec(),
   conmat = conmat,
   behav = behav,
   resamples = custom_resamples,
@@ -153,7 +154,8 @@ preserving original row positions in the outputs.
 behav_with_na <- behav
 behav_with_na[c(3, 11)] <- NA_real_
 
-na_obj <- cpm_fit_resamples(
+na_obj <- fit_resamples(
+  cpm_spec(),
   conmat = conmat,
   behav = behav_with_na,
   kfolds = 5,
@@ -171,9 +173,9 @@ metadata after resampling.
 
 After you are comfortable with the native path:
 
-- read the workflow-selection article for guidance on when to use native APIs
-  versus lower-level specification objects;
+- read the workflow-selection article for guidance on how to use the native
+  `cpm_spec()` workflow in different settings;
 - read the leakage-focused article if you need a more detailed covariate
   handling example;
-- use `cpm_spec()` plus `fit()` / `fit_resamples()` when you want an explicit
-  reusable parameter object.
+- keep a `cpm_spec()` object around when you want an explicit reusable
+  parameter object.

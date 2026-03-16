@@ -3,20 +3,17 @@
 ## Breaking changes
 
 * Removed the legacy `cpm()` entry point and the deprecated `confounds` alias.
-  Use `cpm_fit()` / `cpm_fit_resamples()` for the direct native workflow, or
-  `fit(cpm_spec(...), ...)` / `fit_resamples(cpm_spec(...), ...)` for the
-  lower-level native interface.
+  Use `fit(cpm_spec(...), ...)` / `fit_resamples(cpm_spec(...), ...)` for the
+  native workflow.
 * `fit()` now performs a single fit; resampling is handled by
-  `cpm_fit_resamples()` or `fit_resamples()`.
+  `fit_resamples()`.
 * `cpm_resamples` no longer stores redundant resample metrics, and the
   `collect_*()` helpers have been removed. Use `summary()` for aggregated
   resample results and `predictions`, `edges`, and `folds` for raw outputs.
 
 ## Enhancements
 
-* Added native helper entry points `cpm_fit()` and `cpm_fit_resamples()`.
-* Added `cpm_spec()` as the lower-level native interface for `fit()` and
-  `fit_resamples()`.
+* Added `cpm_spec()` as the native interface for `fit()` and `fit_resamples()`.
 * Added `summary.cpm_resamples()` and made single-fit and resample result
   objects more consistent.
 * Added native-first documentation, including a getting-started vignette and
