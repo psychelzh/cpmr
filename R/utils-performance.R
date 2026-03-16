@@ -21,3 +21,12 @@ safe_mean <- function(x) {
 
   mean(x, na.rm = TRUE)
 }
+
+safe_std_error <- function(x) {
+  valid <- x[stats::complete.cases(x)]
+  if (length(valid) < 2L) {
+    return(NA_real_)
+  }
+
+  stats::sd(valid) / sqrt(length(valid))
+}

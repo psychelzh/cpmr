@@ -12,3 +12,9 @@ test_that("safe_mean handles empty and all-NA inputs", {
   expect_true(is.na(safe_mean(c(NA_real_, NA_real_))))
   expect_equal(safe_mean(c(1, NA_real_, 3)), 2)
 })
+
+test_that("safe_std_error handles short and valid inputs", {
+  expect_true(is.na(safe_std_error(c(1))))
+  expect_true(is.na(safe_std_error(c(NA_real_, NA_real_))))
+  expect_equal(safe_std_error(c(1, 3)), 1)
+})
