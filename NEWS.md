@@ -2,37 +2,32 @@
 
 ## Breaking changes
 
-* **`cpm()` removed.** The legacy entry-point function `cpm()` has been
-  deleted. Use `fit(cpm_spec(...), conmat, behav)` instead. The `confounds`
-  parameter (deprecated alias of `covariates`) is also removed.
-* `fit()` now performs a single fit. Cross-validation/resampling workflows are
-  handled by `fit_resamples()`.
+* Removed the legacy `cpm()` entry point and the deprecated `confounds` alias.
+  Use `cpm_fit()` / `cpm_fit_resamples()` for the direct native workflow, or
+  `fit(cpm_spec(...), ...)` / `fit_resamples(cpm_spec(...), ...)` for the
+  lower-level native interface.
+* `fit()` now performs a single fit; resampling is handled by
+  `cpm_fit_resamples()` or `fit_resamples()`.
+* `cpm_resamples` no longer stores redundant resample metrics, and the
+  `collect_*()` helpers have been removed. Use `summary()` for aggregated
+  resample results and `predictions`, `edges`, and `folds` for raw outputs.
 
 ## Enhancements
 
-* Added `cpm_spec()` model specification object and `fit()` dispatch as the
-  primary API for connectome-based predictive modeling.
-* Added direct native helper entry points `cpm_fit()` and
-  `cpm_fit_resamples()` for the common `conmat`/`behav` workflow.
-* `print.cpm_spec()` provides a concise summary of all modeling parameters.
-* Added the `cpm_resamples` result class with dedicated methods:
-  `collect_metrics()`, `collect_predictions()`, and `collect_edges()`.
-* Added edge export support via `collect_edges(format = "index")` for sparse
-  index output when edge storage is large.
+* Added native helper entry points `cpm_fit()` and `cpm_fit_resamples()`.
+* Added `cpm_spec()` as the lower-level native interface for `fit()` and
+  `fit_resamples()`.
+* Added `summary.cpm_resamples()` and made single-fit and resample result
+  objects more consistent.
+* Added native-first documentation, including a getting-started vignette and
+  reorganized pkgdown reference pages.
 
 ## Maintenance
 
-* Refactored fit internals into focused native-first modules and aligned S3
-  builders/methods around their class files.
-* Updated and expanded tests for internal helper branches and edge/summary
-  coverage paths.
-* Stabilized GitHub Actions uploads for Codecov coverage and Test Analytics by generating and uploading JUnit test results from an explicit workspace path.
+* Refactored internals and expanded test coverage around fit, summary, edge,
+  and resampling behavior.
 * Hardened resample validation so each fold must retain at least 3
   complete-case training observations.
-* Moved training/prediction primitives into the core layer and simplified
-  internal helpers around the native-first engine.
-* Removed the temporary RFC directory and now track architecture decisions in
-  the roadmap/issues plus the native-first package docs.
 
 # cpmr 0.1.1
 
