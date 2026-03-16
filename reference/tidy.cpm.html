@@ -18,7 +18,9 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/native-getting-started.html">Native Getting Started with cpmr</a></li>
+    <li><a class="dropdown-item" href="../articles/workflow-selection.html">Choosing a Workflow in cpmr</a></li>
+    <li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -32,7 +34,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Tidy a <code>cpm</code> object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/psychelzh/cpmr/blob/main/R/tidy.R" class="external-link"><code>R/tidy.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/psychelzh/cpmr/blob/main/R/cpm.R" class="external-link"><code>R/cpm.R</code></a></small>
       <div class="d-none name"><code>tidy.cpm.Rd</code></div>
     </div>
 
@@ -83,18 +85,14 @@ negative edges.</p></dd>
 
 
 </dl><p>For <code>component = "edges"</code>:</p>
-<dl><dt>level</dt>
-<dd><p>The proportional threshold for edge selection.</p></dd>
-
-
-<dt>pos</dt>
-<dd><p>A logical vector indicating whether each edge is selected based
-on the edge_level (positive).</p></dd>
+<dl><dt>pos</dt>
+<dd><p>A logical vector indicating whether each edge is selected by the
+fitted CPM model (positive).</p></dd>
 
 
 <dt>neg</dt>
-<dd><p>A logical vector indicating whether each edge is selected based
-on the edge_level (negative).</p></dd>
+<dd><p>A logical vector indicating whether each edge is selected by the
+fitted CPM model (negative).</p></dd>
 
 </dl></div>
 

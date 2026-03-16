@@ -4,43 +4,48 @@
 
 ### Breaking changes
 
-- **[`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md)
-  removed.** The legacy entry-point function
-  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) has been
-  deleted. Use `fit(cpm_spec(...), conmat, behav)` instead. The
-  `confounds` parameter (deprecated alias of `covariates`) is also
-  removed.
+- Removed the legacy
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) entry
+  point and the deprecated `confounds` alias. Use
+  [`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md) /
+  [`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
+  for the direct native workflow, or `fit(cpm_spec(...), ...)` /
+  `fit_resamples(cpm_spec(...), ...)` for the lower-level native
+  interface.
 - [`fit()`](https://generics.r-lib.org/reference/fit.html) now performs
-  a single fit. Cross-validation/resampling workflows are handled by
+  a single fit; resampling is handled by
+  [`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
+  or
   [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md).
+- `cpm_resamples` no longer stores redundant resample metrics, and the
+  `collect_*()` helpers have been removed. Use
+  [`summary()`](https://rdrr.io/r/base/summary.html) for aggregated
+  resample results and `predictions`, `edges`, and `folds` for raw
+  outputs.
 
 ### Enhancements
 
+- Added native helper entry points
+  [`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
+  and
+  [`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md).
 - Added
   [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-  model specification object and
-  [`fit()`](https://generics.r-lib.org/reference/fit.html) dispatch as
-  the primary API for connectome-based predictive modeling.
-- `print.cpm_spec()` provides a concise summary of all modeling
-  parameters.
-- Added the `cpm_resamples` result class with dedicated methods:
-  [`collect_metrics()`](https://psychelzh.github.io/cpmr/reference/collect_metrics.md),
-  [`collect_predictions()`](https://psychelzh.github.io/cpmr/reference/collect_predictions.md),
-  and
-  [`collect_edges()`](https://psychelzh.github.io/cpmr/reference/collect_edges.md).
-- Added edge export support via `collect_edges(format = "index")` for
-  sparse index output when edge storage is large.
+  as the lower-level native interface for
+  [`fit()`](https://generics.r-lib.org/reference/fit.html) and
+  [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md).
+- Added
+  [`summary.cpm_resamples()`](https://psychelzh.github.io/cpmr/reference/summary.cpm_resamples.md)
+  and made single-fit and resample result objects more consistent.
+- Added native-first documentation, including a getting-started vignette
+  and reorganized pkgdown reference pages.
 
 ### Maintenance
 
-- Refactored fit internals into focused modules (`fit-generics`,
-  `cpm-spec`, `cpm-resamples`, and `fit-internals`) to improve
-  maintainability.
-- Updated and expanded tests for internal helper branches and
-  edge/summary coverage paths.
-- Stabilized GitHub Actions uploads for Codecov coverage and Test
-  Analytics by generating and uploading JUnit test results from an
-  explicit workspace path.
+- Refactored internals and expanded test coverage around fit, summary,
+  edge, and resampling behavior.
+- Hardened resample validation so each fold must retain at least 3
+  complete-case training observations.
 
 ## cpmr 0.1.1
 

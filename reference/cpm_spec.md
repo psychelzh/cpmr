@@ -20,7 +20,6 @@ fit(
   behav,
   ...,
   covariates = NULL,
-  return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 )
 
@@ -81,14 +80,6 @@ fit_resamples(
   `NULL`, no covariates are used. Note if a vector is provided, it will
   be converted to a column matrix.
 
-- return_edges:
-
-  A character string indicating the return value of the selected edges.
-  If `"none"`, no edges are returned/stored. If `"sum"`, edge masks are
-  returned for single-fit and summed across folds for resampling. If
-  `"all"`, single-fit stores a 3D array with a singleton third dimension
-  while resampling stores fold-wise edge arrays.
-
 - na_action:
 
   A character string indicating the action when missing values are found
@@ -107,14 +98,21 @@ fit_resamples(
   Number of folds used when `resamples` is `NULL`. If `NULL`, it is set
   to the number of complete-case observations (LOOCV).
 
+- return_edges:
+
+  A character string indicating the return value of the selected edges.
+  If `"none"`, no edges are returned/stored. If `"sum"`, edge masks are
+  summed across folds. If `"all"`, fold-wise edge arrays are stored.
+
 ## Value
 
 A `cpm_spec` object storing parameters for later fitting.
 
-A fitted `cpm` object from a single in-sample fit.
+A fitted `cpm` object from a single in-sample fit. Single-fit CPM
+objects always store the selected edge mask.
 
-A `cpm_resamples` object containing fold-level metrics and
-observation-level predictions.
+A `cpm_resamples` object containing observation-level predictions,
+resampling folds, and optional stored edges.
 
 ## Examples
 
@@ -128,16 +126,4 @@ spec
 
 conmat <- matrix(rnorm(100 * 100), nrow = 100)
 behav <- rnorm(100)
-fit(spec, conmat = conmat, behav = behav)
-#> CPM results:
-#>   Call: fit(object = spec, conmat = conmat, behav = behav)
-#>   Number of observations: 100
-#>     Complete cases: 100
-#>   Number of edges: 100
-#>   Parameters:
-#>     Covariates:       FALSE
-#>     Threshold method: alpha
-#>     Threshold level:  0.01
-#>     Stored splits:    1
-#>     Bias correction:  TRUE
 ```

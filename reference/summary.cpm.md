@@ -7,7 +7,7 @@ prediction performance and the selected edges.
 
 ``` r
 # S3 method for class 'cpm'
-summary(object, ..., method = c("pearson", "spearman"), edge_level = 0.5)
+summary(object, ..., method = c("pearson", "spearman"))
 
 # S3 method for class 'cpm_summary'
 print(x, ...)
@@ -28,11 +28,6 @@ print(x, ...)
   A character vector indicating the method used to calculate the
   correlation between the real and predicted values.
 
-- edge_level:
-
-  A numeric value between 0 and 1 indicating the proportional threshold
-  for edge selection.
-
 - x:
 
   An object of class `cpm_summary`.
@@ -49,8 +44,8 @@ A list of class `cpm_summary` containing two elements:
 
 - edges:
 
-  A logical vector indicating whether each edge is selected based on the
-  edge_level.
+  A logical matrix indicating which edges are selected by the fitted CPM
+  model.
 
 - params:
 

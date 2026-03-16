@@ -17,8 +17,6 @@ In `cpmr`, leakage-safe behavior means:
 ## Minimal Example with Synthetic Data
 
 ``` r
-library(cpmr)
-
 set.seed(123)
 n <- 80
 p <- 120
@@ -42,74 +40,64 @@ fit <- fit_resamples(
   kfolds = 5
 )
 
-collect_metrics(fit)
-#> # A tibble: 5 × 5
-#>    fold n_assess    both     pos    neg
-#>   <int>    <int>   <dbl>   <dbl>  <dbl>
-#> 1     1       16  0.142   0.142  NA    
-#> 2     2       16  0.447   0.447  NA    
-#> 3     3       16  0.163   0.294  -0.270
-#> 4     4       16  0.694   0.694  NA    
-#> 5     5       16 -0.0624 -0.0624 NA
+summary(fit)
+#> CPM resample summary:
+#>   Number of folds: 5
+#>   Performance:
+#>     Combined: 0.277 (SE 0.132)
+#>     Positive: 0.303 (SE 0.129)
+#>     Negative: -0.270 (SE NA)
 ```
 
-## Current API
-
-Use `fit(cpm_spec(...), ...)` for a single fit and
-[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
-for CV.
+## Native API
 
 ``` r
-single_fit <- fit(
-  cpm_spec(),
+single_fit <- cpm_fit(
   conmat = conmat,
   behav = behav,
-  covariates = covariates,
-  return_edges = "sum"
+  covariates = covariates
 )
 
-resamples_fit <- fit_resamples(
-  cpm_spec(),
+resamples_fit <- cpm_fit_resamples(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
   kfolds = 5
 )
 
-collect_metrics(resamples_fit)
-#> # A tibble: 5 × 5
-#>    fold n_assess   both    pos     neg
-#>   <int>    <int>  <dbl>  <dbl>   <dbl>
-#> 1     1       16  0.273  0.361 -0.195 
-#> 2     2       16 -0.219 -0.202 -0.0348
-#> 3     3       16  0.330  0.330 NA     
-#> 4     4       16  0.502  0.502 NA     
-#> 5     5       16  0.182  0.182 NA
-collect_predictions(resamples_fit)
-#> # A tibble: 80 × 6
-#>      row  fold     real    both     pos       neg
-#>    <int> <int>    <dbl>   <dbl>   <dbl>     <dbl>
-#>  1     1     4 -0.586   -0.137  -0.137   1.65e-17
-#>  2     2     4  0.726   -0.0626 -0.0626  1.65e-17
-#>  3     3     2  0.478    0.112   0.0806  6.62e- 2
-#>  4     4     3  0.426    0.147   0.147  -1.73e-17
-#>  5     5     5 -1.53    -0.0774 -0.0774 -1.04e-17
-#>  6     6     3  0.500    0.568   0.568  -1.73e-17
-#>  7     7     5 -0.272   -0.0547 -0.0547 -1.04e-17
-#>  8     8     4 -0.00964 -0.238  -0.238   1.65e-17
-#>  9     9     5  0.201    0.0220  0.0220 -1.04e-17
-#> 10    10     3  0.556    0.150   0.150  -1.73e-17
-#> # ℹ 70 more rows
-collect_edges(resamples_fit, format = "index")
-#> NULL
+summary(resamples_fit)
+#> CPM resample summary:
+#>   Number of folds: 5
+#>   Performance:
+#>     Combined: 0.214 (SE 0.120)
+#>     Positive: 0.235 (SE 0.120)
+#>     Negative: -0.115 (SE 0.080)
+#>   Selected edges:
+#>     Positive: 1.50%
+#>     Negative: 0.33%
+head(resamples_fit$predictions)
+#>   row fold       real        both         pos          neg
+#> 1   1    4 -0.5862850 -0.13713172 -0.13713172 8.673617e-18
+#> 2   2    4  0.7262082 -0.06258281 -0.06258281 8.673617e-18
+#> 3   3    2  0.4776754  0.11181262  0.08055321 6.622293e-02
+#> 4   4    3  0.4263198  0.14677926  0.14677926 0.000000e+00
+#> 5   5    5 -1.5329525 -0.07744804 -0.07744804 1.908196e-17
+#> 6   6    3  0.4996146  0.56813333  0.56813333 0.000000e+00
+dim(resamples_fit$edges)
+#> [1] 120   2
 ```
+
+If you prefer explicit parameter objects, the lower-level
+[`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md) +
+[`fit()`](https://generics.r-lib.org/reference/fit.html) /
+[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
+path remains available and routes through the same CPM core.
 
 ## Edge Storage Tips
 
 For large feature spaces, fold-wise edge storage can grow quickly.
 
 - Use `return_edges = "sum"` to keep only fold-aggregated edge counts.
-- Use `collect_edges(..., format = "index")` to export sparse indices.
 - Use `return_edges = "none"` if you only need predictive performance.
 
 ## Anti-Leakage Checklist

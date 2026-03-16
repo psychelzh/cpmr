@@ -20,7 +20,9 @@ fold-level outputs from resampling."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/native-getting-started.html">Native Getting Started with cpmr</a></li>
+    <li><a class="dropdown-item" href="../articles/workflow-selection.html">Choosing a Workflow in cpmr</a></li>
+    <li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -34,7 +36,7 @@ fold-level outputs from resampling."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>cpm_resamples Resampling Object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/psychelzh/cpmr/blob/main/R/objects.R" class="external-link"><code>R/objects.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/psychelzh/cpmr/blob/main/R/cpm-resamples.R" class="external-link"><code>R/cpm-resamples.R</code></a></small>
       <div class="d-none name"><code>cpm_resamples.Rd</code></div>
     </div>
 
@@ -48,14 +50,14 @@ fold-level outputs from resampling.</p>
     <h2 id="structure">Structure<a class="anchor" aria-label="anchor" href="#structure"></a></h2>
 
 
-<p>A <code>cpm_resamples</code> object is a list with the following elements:</p><dl><dt><code>spec</code></dt>
+<p>A <code>cpm_resamples</code> object is a list with the following elements:</p><dl><dt><code>call</code></dt>
+<dd><p>Matched call used for resampling.</p></dd>
+
+<dt><code>spec</code></dt>
 <dd><p>The originating <code>cpm_spec</code> object.</p></dd>
 
-<dt><code>folds</code></dt>
-<dd><p>List of assessment-row indices for each fold.</p></dd>
-
-<dt><code>metrics</code></dt>
-<dd><p>Data frame of fold-level performance metrics.</p></dd>
+<dt><code>params</code></dt>
+<dd><p>Parameter list used for the resampling run.</p></dd>
 
 <dt><code>predictions</code></dt>
 <dd><p>Data frame of observation-level predictions with
@@ -65,15 +67,14 @@ fold IDs.</p></dd>
 <dd><p>Stored edge output based on <code>return_edges</code>
 (<code>NULL</code>/matrix/array).</p></dd>
 
-<dt><code>params</code></dt>
-<dd><p>Parameter list used for the resampling run.</p></dd>
+<dt><code>folds</code></dt>
+<dd><p>List of assessment-row indices for each fold.</p></dd>
 
 
 </dl></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="fit_resamples.html">fit_resamples()</a></code>, <code><a href="collect_metrics.html">collect_metrics()</a></code>, <code><a href="collect_predictions.html">collect_predictions()</a></code>,
-<code><a href="collect_edges.html">collect_edges()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="fit_resamples.html">fit_resamples()</a></code>, <code><a href="summary.cpm_resamples.html">summary.cpm_resamples()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -1,8 +1,10 @@
 # cpmr
 
-The cpmr package is specifically designed for the analysis of the
-connectome predictive modeling (CPM) method in R. This package relies on
-[Rfast](https://CRAN.R-project.org/package=Rfast) to do row oriented
+The cpmr package is designed for connectome predictive modeling (CPM) in
+R. Its primary workflow is a native, matrix-first API that keeps
+CPM-specific training, resampling, and leakage-safe preprocessing inside
+package-controlled code. This package relies on
+[Rfast](https://CRAN.R-project.org/package=Rfast) for row-oriented
 calculation.
 
 ## Installation
@@ -21,13 +23,12 @@ Or you can install the development version of cpmr from
 install.packages("cpmr", repos = c("https://psychelzh.r-universe.dev", getOption("repos")))
 ```
 
-## Example
+## Native workflow
 
-It is very simple to use this package. Just shape your connectivity
-matrix as a subjects by edges matrix, i.e., each row contains the
-correlation matrix (removed diagonal and duplicated values, e.g., lower
-triangular data) for each subject, and your behavior data a vector and
-feed them to [`fit()`](https://generics.r-lib.org/reference/fit.html).
+Shape your connectivity matrix as a subjects-by-edges matrix, where each
+row contains the edge vector for one subject, and pair it with a
+behavioral vector. The most direct entry point is
+[`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md).
 
 ``` r
 library(cpmr)
@@ -35,11 +36,14 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-spec <- cpm_spec()
-res <- fit(spec, conmat = conmat, behav = behav, return_edges = "sum")
-res
+fit_obj <- cpm_fit(
+  conmat = conmat,
+  behav = behav
+)
+
+fit_obj
 #> CPM results:
-#>   Call: fit(object = spec, conmat = conmat, behav = behav, return_edges = "sum")
+#>   Call: cpm_fit(conmat = conmat, behav = behav)
 #>   Number of observations: 100
 #>     Complete cases: 100
 #>   Number of edges: 1000
@@ -47,18 +51,66 @@ res
 #>     Covariates:       FALSE
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
-#>     Stored splits:    1
 #>     Bias correction:  TRUE
-summary(res)
+summary(fit_obj)
 #> CPM summary:
 #>   Performance (Pearson):
+#>     Combined: 0.676
 #>     Positive: 0.595
 #>     Negative: 0.387
-#>     Combined: 0.676
-#>   Prop. edges (50% folds):
+#>   Selected edges:
 #>     Positive: 0.70%
 #>     Negative: 0.20%
 ```
+
+Cross-validated resampling uses the matching native helper
+[`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md):
+
+``` r
+resample_obj <- cpm_fit_resamples(
+  conmat = conmat,
+  behav = behav,
+  kfolds = 5
+)
+
+summary(resample_obj)
+#> CPM resample summary:
+#>   Number of folds: 5
+#>   Performance:
+#>     Combined: -0.057 (SE 0.062)
+#>     Positive: 0.008 (SE 0.089)
+#>     Negative: -0.036 (SE 0.077)
+#>   Selected edges:
+#>     Positive: 0.56%
+#>     Negative: 0.32%
+head(resample_obj$predictions)
+#>   row fold        real        both        pos         neg
+#> 1   1    1  0.26499342 0.492748241 -0.2058990  0.76974455
+#> 2   2    5  1.83074748 0.323127546  0.2918329  0.05747766
+#> 3   3    5 -0.05937826 0.901452079  1.1152311 -0.34018567
+#> 4   4    3 -0.05320937 0.659647280  0.5558721  0.26308893
+#> 5   5    1  0.43790418 0.002067539  0.2977574 -0.37106308
+#> 6   6    4  1.33744904 0.659172053  0.5130919  0.37428531
+dim(resample_obj$edges)
+#> [1] 1000    2
+```
+
+## Choosing a path
+
+`cpmr` now treats the native workflow as the primary package story:
+
+- use
+  [`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
+  and
+  [`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
+  for most real CPM analyses;
+- use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` when
+  you want the lower-level specification object directly.
+
+Why this matters: CPM often needs leakage-safe fold-local preprocessing
+and can benefit from future fold-level caching or threshold-specific
+optimization. Those workloads fit native `cpmr` runners better than a
+generic orchestration layer.
 
 ## Code of Conduct
 

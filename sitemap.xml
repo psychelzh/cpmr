@@ -5,17 +5,13 @@
 <url><loc>https://psychelzh.github.io/cpmr/LICENSE.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/articles/anti-leakage-covariates.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/articles/index.html</loc></url>
+<url><loc>https://psychelzh.github.io/cpmr/articles/native-getting-started.html</loc></url>
+<url><loc>https://psychelzh.github.io/cpmr/articles/workflow-selection.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/authors.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/index.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/news/index.html</loc></url>
-<url><loc>https://psychelzh.github.io/cpmr/reference/collect_edges.cpm.html</loc></url>
-<url><loc>https://psychelzh.github.io/cpmr/reference/collect_edges.cpm_resamples.html</loc></url>
-<url><loc>https://psychelzh.github.io/cpmr/reference/collect_edges.html</loc></url>
-<url><loc>https://psychelzh.github.io/cpmr/reference/collect_metrics.cpm_resamples.html</loc></url>
-<url><loc>https://psychelzh.github.io/cpmr/reference/collect_metrics.html</loc></url>
-<url><loc>https://psychelzh.github.io/cpmr/reference/collect_predictions.cpm_resamples.html</loc></url>
-<url><loc>https://psychelzh.github.io/cpmr/reference/collect_predictions.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/reference/cpm.html</loc></url>
+<url><loc>https://psychelzh.github.io/cpmr/reference/cpm_fit.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/reference/cpm_resamples.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/reference/cpm_spec.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/reference/cpmr-package.html</loc></url>
@@ -23,6 +19,7 @@
 <url><loc>https://psychelzh.github.io/cpmr/reference/index.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/reference/reexports.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/reference/summary.cpm.html</loc></url>
+<url><loc>https://psychelzh.github.io/cpmr/reference/summary.cpm_resamples.html</loc></url>
 <url><loc>https://psychelzh.github.io/cpmr/reference/tidy.cpm.html</loc></url>
 </urlset>
 

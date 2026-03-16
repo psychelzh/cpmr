@@ -1,47 +1,49 @@
 # Package index
 
-## All functions
+## Native Fit API
 
-- [`collect_edges()`](https://psychelzh.github.io/cpmr/reference/collect_edges.md)
-  : Collect selected edges from fitted objects
+Primary entry points for fitting CPM models natively.
 
-- [`collect_edges(`*`<cpm>`*`)`](https://psychelzh.github.io/cpmr/reference/collect_edges.cpm.md)
-  : Collect selected edges from a CPM fit
-
-- [`collect_edges(`*`<cpm_resamples>`*`)`](https://psychelzh.github.io/cpmr/reference/collect_edges.cpm_resamples.md)
-  : Collect selected edges from CPM resamples
-
-- [`collect_metrics()`](https://psychelzh.github.io/cpmr/reference/collect_metrics.md)
-  : Collect fold-level metrics from resampling results
-
-- [`collect_metrics(`*`<cpm_resamples>`*`)`](https://psychelzh.github.io/cpmr/reference/collect_metrics.cpm_resamples.md)
-  : Collect fold-level metrics from CPM resamples
-
-- [`collect_predictions()`](https://psychelzh.github.io/cpmr/reference/collect_predictions.md)
-  : Collect observation-level predictions from resampling results
-
-- [`collect_predictions(`*`<cpm_resamples>`*`)`](https://psychelzh.github.io/cpmr/reference/collect_predictions.cpm_resamples.md)
-  : Collect observation-level predictions from CPM resamples
-
-- [`cpm`](https://psychelzh.github.io/cpmr/reference/cpm.md) : cpm
-  Fitted Object
-
-- [`cpm_resamples`](https://psychelzh.github.io/cpmr/reference/cpm_resamples.md)
-  : cpm_resamples Resampling Object
-
+- [`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
+  [`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
+  : Direct native CPM fit helpers
 - [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
   [`fit(`*`<cpm_spec>`*`)`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
   [`fit_resamples(`*`<cpm_spec>`*`)`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
   : Define a CPM model specification
-
 - [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
   : Fit a model specification on resamples
+
+## Result Objects
+
+S3 result classes returned by single-fit and resampling workflows.
+
+- [`cpm`](https://psychelzh.github.io/cpmr/reference/cpm.md) : cpm
+  Fitted Object
+- [`cpm_resamples`](https://psychelzh.github.io/cpmr/reference/cpm_resamples.md)
+  : cpm_resamples Resampling Object
+
+## Inspect Results
+
+Summary and tidying helpers for fitted results.
 
 - [`summary(`*`<cpm>`*`)`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)
   [`print(`*`<cpm_summary>`*`)`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)
   : Summary of a cpm object.
 
+- [`summary(`*`<cpm_resamples>`*`)`](https://psychelzh.github.io/cpmr/reference/summary.cpm_resamples.md)
+  [`print(`*`<cpm_resamples_summary>`*`)`](https://psychelzh.github.io/cpmr/reference/summary.cpm_resamples.md)
+  :
+
+  Summary of a `cpm_resamples` object
+
 - [`tidy(`*`<cpm>`*`)`](https://psychelzh.github.io/cpmr/reference/tidy.cpm.md)
   :
 
   Tidy a `cpm` object
+
+## Package
+
+- [`cpmr`](https://psychelzh.github.io/cpmr/reference/cpmr-package.md)
+  [`cpmr-package`](https://psychelzh.github.io/cpmr/reference/cpmr-package.md)
+  : cpmr: Connectome Predictive Modelling in R

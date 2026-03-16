@@ -22,7 +22,9 @@ fit()."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/native-getting-started.html">Native Getting Started with cpmr</a></li>
+    <li><a class="dropdown-item" href="../articles/workflow-selection.html">Choosing a Workflow in cpmr</a></li>
+    <li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -61,7 +63,6 @@ parameters required to fit a connectome-based predictive model later with
 <span>  <span class="va">behav</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  return_edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sum"</span>, <span class="st">"none"</span>, <span class="st">"all"</span><span class="op">)</span>,</span>
 <span>  na_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fail"</span>, <span class="st">"exclude"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -123,14 +124,6 @@ column. If <code>NULL</code>, no covariates are used. Note if a vector is provid
 will be converted to a column matrix.</p></dd>
 
 
-<dt id="arg-return-edges">return_edges<a class="anchor" aria-label="anchor" href="#arg-return-edges"></a></dt>
-<dd><p>A character string indicating the return value of the
-selected edges. If <code>"none"</code>, no edges are returned/stored. If <code>"sum"</code>, edge
-masks are returned for single-fit and summed across folds for resampling.
-If <code>"all"</code>, single-fit stores a 3D array with a singleton third dimension
-while resampling stores fold-wise edge arrays.</p></dd>
-
-
 <dt id="arg-na-action">na_action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
 <dd><p>A character string indicating the action when missing values
 are found in <code>behav</code>. If <code>"fail"</code>, an error will be thrown. If <code>"exclude"</code>,
@@ -147,13 +140,21 @@ Each element must be an integer vector indexing rows in <code>conmat</code>. If
 <dd><p>Number of folds used when <code>resamples</code> is <code>NULL</code>. If <code>NULL</code>,
 it is set to the number of complete-case observations (LOOCV).</p></dd>
 
+
+<dt id="arg-return-edges">return_edges<a class="anchor" aria-label="anchor" href="#arg-return-edges"></a></dt>
+<dd><p>A character string indicating the return value of the
+selected edges. If <code>"none"</code>, no edges are returned/stored. If <code>"sum"</code>, edge
+masks are summed across folds. If <code>"all"</code>, fold-wise edge arrays are
+stored.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>cpm_spec</code> object storing parameters for later fitting.</p>
-<p>A fitted <code>cpm</code> object from a single in-sample fit.</p>
-<p>A <code>cpm_resamples</code> object containing fold-level metrics and
-observation-level predictions.</p>
+<p>A fitted <code>cpm</code> object from a single in-sample fit. Single-fit CPM
+objects always store the selected edge mask.</p>
+<p>A <code>cpm_resamples</code> object containing observation-level predictions,
+resampling folds, and optional stored edges.</p>
     </div>
 
     <div class="section level2">
@@ -167,18 +168,6 @@ observation-level predictions.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">conmat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">behav</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">spec</span>, conmat <span class="op">=</span> <span class="va">conmat</span>, behav <span class="op">=</span> <span class="va">behav</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CPM results:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Call: fit(object = spec, conmat = conmat, behav = behav)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations: 100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Complete cases: 100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of edges: 100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Parameters:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Covariates:       FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold method: alpha</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Threshold level:  0.01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Stored splits:    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Bias correction:  TRUE</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

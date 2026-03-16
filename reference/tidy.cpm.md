@@ -49,16 +49,12 @@ For `component = "performance"`:
 
 For `component = "edges"`:
 
-- level:
-
-  The proportional threshold for edge selection.
-
 - pos:
 
-  A logical vector indicating whether each edge is selected based on the
-  edge_level (positive).
+  A logical vector indicating whether each edge is selected by the
+  fitted CPM model (positive).
 
 - neg:
 
-  A logical vector indicating whether each edge is selected based on the
-  edge_level (negative).
+  A logical vector indicating whether each edge is selected by the
+  fitted CPM model (negative).

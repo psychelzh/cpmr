@@ -8,17 +8,17 @@ and stores fold-level outputs from resampling.
 
 A `cpm_resamples` object is a list with the following elements:
 
+- `call`:
+
+  Matched call used for resampling.
+
 - `spec`:
 
   The originating `cpm_spec` object.
 
-- `folds`:
+- `params`:
 
-  List of assessment-row indices for each fold.
-
-- `metrics`:
-
-  Data frame of fold-level performance metrics.
+  Parameter list used for the resampling run.
 
 - `predictions`:
 
@@ -28,13 +28,11 @@ A `cpm_resamples` object is a list with the following elements:
 
   Stored edge output based on `return_edges` (`NULL`/matrix/array).
 
-- `params`:
+- `folds`:
 
-  Parameter list used for the resampling run.
+  List of assessment-row indices for each fold.
 
 ## See also
 
 [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md),
-[`collect_metrics()`](https://psychelzh.github.io/cpmr/reference/collect_metrics.md),
-[`collect_predictions()`](https://psychelzh.github.io/cpmr/reference/collect_predictions.md),
-[`collect_edges()`](https://psychelzh.github.io/cpmr/reference/collect_edges.md)
+[`summary.cpm_resamples()`](https://psychelzh.github.io/cpmr/reference/summary.cpm_resamples.md)
