@@ -124,3 +124,59 @@ print.cpm_resamples_summary <- function(x, ...) {
   print_edge_rate_block(x$edges)
   invisible(x)
 }
+
+#' Extract resampling metrics from a `cpm_resamples` object
+#'
+#' @param x A `cpm_resamples` object.
+#' @param level Which level of metric output to return. Use `"foldwise"` for
+#'   one row per fold, metric, and prediction stream, or `"pooled"` for one row
+#'   per metric and prediction stream computed across all out-of-fold
+#'   predictions.
+#' @param metrics Which metrics to include. Supported values are `"rmse"`,
+#'   `"mae"`, and `"correlation"`.
+#' @param method Correlation method used when `metrics` includes
+#'   `"correlation"`.
+#'
+#' @return A data frame. For `level = "foldwise"`, the returned columns are
+#'   `fold`, `n_assess`, `metric`, `prediction`, and `estimate`. For
+#'   `level = "pooled"`, the returned columns are `metric`, `prediction`, and
+#'   `estimate`.
+#'
+#' @examples
+#' withr::local_seed(123)
+#' conmat <- matrix(rnorm(100), ncol = 10)
+#' behav <- rnorm(10)
+#' res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+#'
+#' head(resample_metrics(res))
+#' resample_metrics(res, level = "pooled")
+#' @export
+resample_metrics <- function(
+  x,
+  level = c("foldwise", "pooled"),
+  metrics = c("rmse", "mae", "correlation"),
+  method = c("pearson", "spearman")
+) {
+  if (!inherits(x, "cpm_resamples")) {
+    stop("`x` must be a `cpm_resamples` object.")
+  }
+
+  level <- match.arg(level)
+  method <- match.arg(method)
+  metrics <- match.arg(metrics, several.ok = TRUE)
+
+  switch(
+    level,
+    pooled = compute_pooled_metric_table(
+      predictions = x$predictions,
+      metrics = metrics,
+      method = method
+    ),
+    foldwise = compute_fold_metric_table(
+      predictions = x$predictions,
+      folds = x$folds,
+      metrics = metrics,
+      method = method
+    )
+  )
+}
