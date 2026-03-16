@@ -43,6 +43,13 @@ NULL
 #' @name cpm_resamples
 NULL
 
+new_cpm_spec <- function(params) {
+  structure(
+    list(params = params),
+    class = "cpm_spec"
+  )
+}
+
 new_cpm <- function(call, behav, pred, edges, model, spec, params) {
   structure(
     list(

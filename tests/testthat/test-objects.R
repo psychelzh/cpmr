@@ -1,9 +1,13 @@
-test_that("new_cpm and new_cpm_resamples build expected objects", {
+test_that("object builders create expected CPM objects", {
   withr::local_seed(99)
   conmat <- matrix(rnorm(120), nrow = 10, ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(thresh_method = "alpha", thresh_level = 0.05)
   call <- quote(fit(object = spec, conmat = conmat, behav = behav))
+
+  spec_object <- new_cpm_spec(params = spec$params)
+  expect_s3_class(spec_object, "cpm_spec")
+  expect_identical(spec_object$params, spec$params)
 
   fit_result <- run_single_fit(
     object = spec,
