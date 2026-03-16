@@ -62,7 +62,6 @@ fit_obj
 #>     Covariates:       FALSE
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
-#>     Edge storage:     stored
 #>     Bias correction:  TRUE
 summary(fit_obj)
 #> CPM summary:
@@ -109,9 +108,7 @@ collect_edges(resample_obj, format = "index")
 
 - use `cpm_fit()` and `cpm_fit_resamples()` for most real CPM analyses;
 - use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` when
-  you want the lower-level specification object directly;
-- treat external workflow adapters as optional future interoperability
-  layers, not as the default path for heavy resampling or tuning.
+  you want the lower-level specification object directly.
 
 Why this matters: CPM often needs leakage-safe fold-local preprocessing
 and can benefit from future fold-level caching or threshold-specific

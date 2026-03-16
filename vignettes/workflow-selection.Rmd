@@ -24,9 +24,7 @@ The package is organized around a core-first design:
 - the native `cpmr` path is the primary workflow for fitting, resampling, and
   future tuning extensions;
 - specification-driven helpers such as `cpm_spec()` remain useful when you want
-  explicit parameter objects;
-- any future tidymodels adapter should be treated as optional interoperability,
-  not as the main package identity.
+  explicit parameter objects.
 
 ## Recommended Path: Native Helpers
 
@@ -67,23 +65,8 @@ resamples_via_spec <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds
 
 This route remains native `cpmr`; it is just a slightly lower-level interface.
 
-## Where an External Workflow Adapter Fits
-
-`cpmr` does not currently ship a dedicated external workflow adapter surface.
-If future interoperability work is revisited, it should remain:
-
-- optional rather than required;
-- thin relative to the native CPM engine;
-- useful for interoperability, not positioned as the default execution path.
-
-It should not redefine the package around generic workflow orchestration. For
-high-dimensional resampling and tuning-heavy workloads, the native path is
-expected to remain the recommended route.
-
 ## Practical Rule of Thumb
 
 Choose the native path when you need speed, explicit CPM behavior, or
-resampling-heavy experiments.
-
-Choose an external workflow adapter only when interoperability is worth the
-extra abstraction and potential overhead.
+resampling-heavy experiments. Choose the `cpm_spec()` path when you want an
+explicit specification object without leaving the native API surface.
