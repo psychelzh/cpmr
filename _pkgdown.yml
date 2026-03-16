@@ -30,16 +30,10 @@ reference:
       - cpm_resamples
 
   - title: Inspect Results
-    desc: Helpers for collecting, summarizing, and tidying fitted results.
+    desc: Summary and tidying helpers for fitted results.
     contents:
-      - collect_edges
-      - collect_edges.cpm
-      - collect_edges.cpm_resamples
-      - collect_metrics
-      - collect_metrics.cpm_resamples
-      - collect_predictions
-      - collect_predictions.cpm_resamples
       - summary.cpm
+      - summary.cpm_resamples
       - tidy.cpm
 
   - title: Package

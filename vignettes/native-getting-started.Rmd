@@ -24,7 +24,7 @@ This vignette walks through:
 - how to shape CPM inputs;
 - how to fit a single native CPM model;
 - how to run leakage-safe resampling;
-- how to inspect predictions, metrics, and selected edges;
+- how to inspect predictions and selected edges;
 - how custom resamples and missing-data handling work.
 
 ## Prepare Inputs
@@ -92,16 +92,17 @@ summary(resample_obj)
 This keeps CPM-specific steps such as covariate handling, edge selection, and
 model training inside each resample fold.
 
-## Inspect Metrics, Predictions, and Edges
+## Inspect Predictions and Edges
 
-Native resampling results keep raw fold-level outputs directly on the object.
+Native resampling results keep raw observation-level outputs directly on the
+object, while `summary()` derives fold-level performance when you need an
+aggregate view.
 
 ```{r}
-metrics <- resample_obj$metrics
 predictions <- resample_obj$predictions
 edges <- resample_obj$edges
 
-head(metrics)
+summary(resample_obj)
 head(predictions)
 dim(edges)
 ```

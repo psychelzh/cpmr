@@ -73,7 +73,7 @@ resample_obj <- cpm_fit_resamples(
 )
 
 summary(resample_obj)
-head(resample_obj$metrics)
+head(resample_obj$predictions)
 dim(resample_obj$edges)
 ```
 

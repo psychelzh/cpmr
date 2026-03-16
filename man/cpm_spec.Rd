@@ -82,8 +82,8 @@ A \code{cpm_spec} object storing parameters for later fitting.
 A fitted \code{cpm} object from a single in-sample fit. Single-fit CPM
 objects always store the selected edge mask.
 
-A \code{cpm_resamples} object containing fold-level metrics and
-observation-level predictions.
+A \code{cpm_resamples} object containing observation-level predictions,
+resampling folds, and optional stored edges.
 }
 \description{
 Create a lightweight specification object that stores the modeling

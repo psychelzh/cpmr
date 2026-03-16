@@ -19,7 +19,6 @@ fold IDs.}
 \item{\code{edges}}{Stored edge output based on \code{return_edges}
 (\code{NULL}/matrix/array).}
 \item{\code{folds}}{List of assessment-row indices for each fold.}
-\item{\code{metrics}}{Data frame of fold-level performance metrics.}
 }
 }
 
