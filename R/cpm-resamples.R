@@ -43,7 +43,6 @@ new_cpm_resamples <- function(
 
 #' @export
 print.cpm_resamples <- function(x, ...) {
-  summary_x <- summary(x)
   cat("CPM resample results:\n")
   if (!is.null(x$call)) {
     cat("  Call: ")
@@ -52,7 +51,7 @@ print.cpm_resamples <- function(x, ...) {
   cat(sprintf("  Number of folds: %d\n", length(x$folds)))
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
   cat(sprintf("  Edge storage: %s\n", x$params$return_edges))
-  print_error_block(summary_x$errors)
+  print_error_block(compute_pooled_errors(x$predictions))
   invisible(x)
 }
 
@@ -108,11 +107,7 @@ print.cpm_resamples_summary <- function(x, ...) {
     values = x$pooled_correlation[prediction_types],
     header = "  Pooled correlations:\n"
   )
-  if (
-    any(stats::complete.cases(
-      x$foldwise_correlation[, prediction_types, drop = FALSE]
-    ))
-  ) {
+  if (any(!is.na(x$foldwise_correlation["mean", prediction_types]))) {
     print_performance_block(
       values = x$foldwise_correlation["mean", prediction_types],
       std_error = x$foldwise_correlation["std_error", prediction_types],
@@ -121,8 +116,8 @@ print.cpm_resamples_summary <- function(x, ...) {
   } else {
     cat(
       paste0(
-        "  Fold-wise correlations: not defined for assessment folds ",
-        "smaller than 2 observations.\n"
+        "  Fold-wise correlations: unavailable because fold-level ",
+        "correlations were undefined for all prediction streams.\n"
       )
     )
   }
