@@ -8,7 +8,7 @@ resample_metrics(
   x,
   level = c("foldwise", "pooled"),
   metrics = c("rmse", "mae", "correlation"),
-  method = c("pearson", "spearman")
+  correlation_method = c("pearson", "spearman")
 )
 }
 \arguments{
@@ -22,7 +22,7 @@ predictions.}
 \item{metrics}{Which metrics to include. Supported values are \code{"rmse"},
 \code{"mae"}, and \code{"correlation"}.}
 
-\item{method}{Correlation method used when \code{metrics} includes
+\item{correlation_method}{Correlation method used when \code{metrics} includes
 \code{"correlation"}.}
 }
 \value{

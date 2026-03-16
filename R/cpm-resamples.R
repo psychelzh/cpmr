@@ -134,7 +134,7 @@ print.cpm_resamples_summary <- function(x, ...) {
 #'   predictions.
 #' @param metrics Which metrics to include. Supported values are `"rmse"`,
 #'   `"mae"`, and `"correlation"`.
-#' @param method Correlation method used when `metrics` includes
+#' @param correlation_method Correlation method used when `metrics` includes
 #'   `"correlation"`.
 #'
 #' @return A data frame. For `level = "foldwise"`, the returned columns are
@@ -155,14 +155,14 @@ resample_metrics <- function(
   x,
   level = c("foldwise", "pooled"),
   metrics = c("rmse", "mae", "correlation"),
-  method = c("pearson", "spearman")
+  correlation_method = c("pearson", "spearman")
 ) {
   if (!inherits(x, "cpm_resamples")) {
     stop("`x` must be a `cpm_resamples` object.")
   }
 
   level <- match.arg(level)
-  method <- match.arg(method)
+  correlation_method <- match.arg(correlation_method)
   metrics <- match.arg(metrics, several.ok = TRUE)
 
   switch(
@@ -170,13 +170,13 @@ resample_metrics <- function(
     pooled = compute_pooled_metric_table(
       predictions = x$predictions,
       metrics = metrics,
-      method = method
+      correlation_method = correlation_method
     ),
     foldwise = compute_fold_metric_table(
       predictions = x$predictions,
       folds = x$folds,
       metrics = metrics,
-      method = method
+      correlation_method = correlation_method
     )
   )
 }
