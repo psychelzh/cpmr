@@ -68,6 +68,7 @@ resample_obj <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds
 summary(resample_obj)
 head(resample_obj$predictions)
 dim(resample_obj$edges)
+head(resample_metrics(resample_obj))
 ```
 
 ## Choosing a path
