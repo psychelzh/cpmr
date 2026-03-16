@@ -57,21 +57,17 @@ fit <- fit_resamples(
 collect_metrics(fit)
 ```
 
-## Current API
-
-Use `fit(cpm_spec(...), ...)` for a single fit and `fit_resamples()` for CV.
+## Native API
 
 ```{r}
-single_fit <- fit(
-  cpm_spec(),
+single_fit <- cpm_fit(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
   return_edges = "sum"
 )
 
-resamples_fit <- fit_resamples(
-  cpm_spec(),
+resamples_fit <- cpm_fit_resamples(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
@@ -82,6 +78,10 @@ collect_metrics(resamples_fit)
 collect_predictions(resamples_fit)
 collect_edges(resamples_fit, format = "index")
 ```
+
+If you prefer explicit parameter objects, the lower-level
+`cpm_spec()` + `fit()` / `fit_resamples()` path remains available and routes
+through the same CPM core.
 
 ## Edge Storage Tips
 

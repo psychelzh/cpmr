@@ -6,3 +6,10 @@ navbar:
   structure:
     left: [reference, articles]
     right: [search, github]
+
+articles:
+  - title: Get Started
+    navbar: ~
+    contents:
+      - workflow-selection
+      - anti-leakage-covariates

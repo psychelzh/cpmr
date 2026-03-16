@@ -12,9 +12,11 @@ coverage](https://codecov.io/gh/psychelzh/cpmr/graph/badge.svg)](https://app.cod
 status](https://www.r-pkg.org/badges/version/cpmr)](https://CRAN.R-project.org/package=cpmr)
 <!-- badges: end -->
 
-The cpmr package is specifically designed for the analysis of the
-connectome predictive modeling (CPM) method in R. This package relies on
-[Rfast](https://CRAN.R-project.org/package=Rfast) to do row oriented
+The cpmr package is designed for connectome predictive modeling (CPM) in
+R. Its primary workflow is a native, matrix-first API that keeps
+CPM-specific training, resampling, and leakage-safe preprocessing inside
+package-controlled code. This package relies on
+[Rfast](https://CRAN.R-project.org/package=Rfast) for row-oriented
 calculation.
 
 ## Installation
@@ -33,13 +35,11 @@ Or you can install the development version of cpmr from
 install.packages("cpmr", repos = c("https://psychelzh.r-universe.dev", getOption("repos")))
 ```
 
-## Example
+## Native workflow
 
-It is very simple to use this package. Just shape your connectivity
-matrix as a subjects by edges matrix, i.e., each row contains the
-correlation matrix (removed diagonal and duplicated values, e.g., lower
-triangular data) for each subject, and your behavior data a vector and
-feed them to `fit()`.
+Shape your connectivity matrix as a subjects-by-edges matrix, where each
+row contains the edge vector for one subject, and pair it with a
+behavioral vector. The most direct entry point is `cpm_fit()`.
 
 ``` r
 library(cpmr)
@@ -47,11 +47,15 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-spec <- cpm_spec()
-res <- fit(spec, conmat = conmat, behav = behav, return_edges = "sum")
-res
+fit_obj <- cpm_fit(
+  conmat = conmat,
+  behav = behav,
+  return_edges = "sum"
+)
+
+fit_obj
 #> CPM results:
-#>   Call: fit(object = spec, conmat = conmat, behav = behav, return_edges = "sum")
+#>   Call: cpm_fit(conmat = conmat, behav = behav, return_edges = "sum")
 #>   Number of observations: 100
 #>     Complete cases: 100
 #>   Number of edges: 1000
@@ -61,7 +65,7 @@ res
 #>     Threshold level:  0.01
 #>     Stored splits:    1
 #>     Bias correction:  TRUE
-summary(res)
+summary(fit_obj)
 #> CPM summary:
 #>   Performance (Pearson):
 #>     Positive: 0.595
@@ -71,6 +75,50 @@ summary(res)
 #>     Positive: 0.70%
 #>     Negative: 0.20%
 ```
+
+Cross-validated resampling uses the matching native helper
+`cpm_fit_resamples()`:
+
+``` r
+resample_obj <- cpm_fit_resamples(
+  conmat = conmat,
+  behav = behav,
+  kfolds = 5,
+  return_edges = "sum"
+)
+
+collect_metrics(resample_obj)
+#> # A tibble: 5 × 5
+#>    fold n_assess    both     pos     neg
+#>   <int>    <int>   <dbl>   <dbl>   <dbl>
+#> 1     1       20 -0.121  -0.0291 -0.102 
+#> 2     2       20  0.138   0.139   0.0356
+#> 3     3       20 -0.214  -0.286  -0.0210
+#> 4     4       20 -0.119   0.239  -0.279 
+#> 5     5       20  0.0309 -0.0224  0.188
+collect_edges(resample_obj, format = "index")
+#> $pos
+#>  [1]   9  50  54  75 298 385 541 543 561 581 622 639 679 717 723 817 853 940 955
+#> [20] 997
+#> 
+#> $neg
+#>  [1]  57  71 191 270 309 427 435 630 687 757 770 878 909
+```
+
+## Choosing a path
+
+`cpmr` now treats the native workflow as the primary package story:
+
+- use `cpm_fit()` and `cpm_fit_resamples()` for most real CPM analyses;
+- use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` when
+  you want the lower-level specification object directly;
+- treat external workflow adapters as optional future interoperability
+  layers, not as the default path for heavy resampling or tuning.
+
+Why this matters: CPM often needs leakage-safe fold-local preprocessing
+and can benefit from future fold-level caching or threshold-specific
+optimization. Those workloads fit native `cpmr` runners better than a
+generic orchestration layer.
 
 ## Code of Conduct
 
