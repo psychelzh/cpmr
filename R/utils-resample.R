@@ -234,25 +234,29 @@ compute_resample_metric <- function(
   real,
   predicted,
   metric = c("rmse", "mae", "correlation"),
-  method = c("pearson", "spearman")
+  correlation_method = c("pearson", "spearman")
 ) {
   metric <- match.arg(metric)
-  method <- match.arg(method)
+  correlation_method <- match.arg(correlation_method)
 
   switch(
     metric,
     rmse = safe_rmse(real, predicted),
     mae = safe_mae(real, predicted),
-    correlation = safe_cor(real, predicted, method = method)
+    correlation = safe_cor(
+      real,
+      predicted,
+      method = correlation_method
+    )
   )
 }
 
 compute_pooled_metric_table <- function(
   predictions,
   metrics = c("rmse", "mae", "correlation"),
-  method = c("pearson", "spearman")
+  correlation_method = c("pearson", "spearman")
 ) {
-  method <- match.arg(method)
+  correlation_method <- match.arg(correlation_method)
   metric_tables <- lapply(metrics, function(metric) {
     estimates <- vapply(
       prediction_types,
@@ -261,7 +265,7 @@ compute_pooled_metric_table <- function(
           predictions$real,
           predictions[[prediction_type]],
           metric = metric,
-          method = method
+          correlation_method = correlation_method
         )
       },
       numeric(1)
@@ -282,9 +286,9 @@ compute_fold_metric_table <- function(
   predictions,
   folds,
   metrics = c("rmse", "mae", "correlation"),
-  method = c("pearson", "spearman")
+  correlation_method = c("pearson", "spearman")
 ) {
-  method <- match.arg(method)
+  correlation_method <- match.arg(correlation_method)
   metric_tables <- lapply(metrics, function(metric) {
     fold_tables <- lapply(seq_along(folds), function(i) {
       rows <- folds[[i]]
@@ -295,7 +299,7 @@ compute_fold_metric_table <- function(
             predictions$real[rows],
             predictions[[prediction_type]][rows],
             metric = metric,
-            method = method
+            correlation_method = correlation_method
           )
         },
         numeric(1)
