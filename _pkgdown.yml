@@ -14,3 +14,34 @@ articles:
       - native-getting-started
       - workflow-selection
       - anti-leakage-covariates
+
+reference:
+  - title: Native Fit API
+    desc: Primary entry points for fitting CPM models natively.
+    contents:
+      - cpm_fit
+      - cpm_spec
+      - fit_resamples
+
+  - title: Result Objects
+    desc: S3 result classes returned by single-fit and resampling workflows.
+    contents:
+      - cpm
+      - cpm_resamples
+
+  - title: Inspect Results
+    desc: Helpers for collecting, summarizing, and tidying fitted results.
+    contents:
+      - collect_edges
+      - collect_edges.cpm
+      - collect_edges.cpm_resamples
+      - collect_metrics
+      - collect_metrics.cpm_resamples
+      - collect_predictions
+      - collect_predictions.cpm_resamples
+      - summary.cpm
+      - tidy.cpm
+
+  - title: Package
+    contents:
+      - cpmr-package
