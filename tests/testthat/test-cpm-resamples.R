@@ -7,7 +7,8 @@ test_that("print.cpm_resamples reports summary fields", {
   res <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
 
   expect_output(print(res), "CPM resample results")
-  expect_output(print(res), "Mean correlations")
+  expect_output(print(res), "Prediction error")
+  expect_output(print(res), "RMSE")
   expect_output(print(res), "Edge storage")
 })
 
@@ -64,7 +65,7 @@ test_that("print.cpm_resamples prints NA instead of NaN for all-NA metrics", {
   expect_true(any(grepl("Combined: NA", out, fixed = TRUE)))
 })
 
-test_that("print.cpm_resamples computes finite means when available", {
+test_that("print.cpm_resamples reports finite pooled errors when available", {
   x <- structure(
     list(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
@@ -83,7 +84,7 @@ test_that("print.cpm_resamples computes finite means when available", {
   )
 
   out <- capture.output(print(x))
-  expect_true(any(grepl("Combined: 0.000", out, fixed = TRUE)))
-  expect_true(any(grepl("Positive: 1.000", out, fixed = TRUE)))
-  expect_true(any(grepl("Negative: -1.000", out, fixed = TRUE)))
+  expect_true(any(grepl("Combined: 1.155", out, fixed = TRUE)))
+  expect_true(any(grepl("Positive: 0.000", out, fixed = TRUE)))
+  expect_true(any(grepl("Negative: 1.633", out, fixed = TRUE)))
 })

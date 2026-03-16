@@ -17,6 +17,22 @@ print_performance_block <- function(values, header, std_error = NULL) {
   }
 }
 
+print_error_block <- function(errors, header = "  Prediction error:\n") {
+  cat(header)
+  for (error_type in rownames(errors)) {
+    cat(sprintf("    %s:\n", toupper(error_type)))
+    for (prediction_type in prediction_types) {
+      cat(sprintf(
+        "      %s: %s\n",
+        prediction_label(prediction_type),
+        format_value(errors[error_type, prediction_type])
+      ))
+    }
+  }
+
+  invisible(NULL)
+}
+
 print_edge_rate_block <- function(edges, header = "  Selected edges:\n") {
   if (is.null(edges)) {
     return(invisible(NULL))
@@ -34,8 +50,12 @@ print_edge_rate_block <- function(edges, header = "  Selected edges:\n") {
   invisible(NULL)
 }
 
-format_cor <- function(x) {
+format_value <- function(x) {
   ifelse(is.na(x), "NA", sprintf("%.3f", x))
+}
+
+format_cor <- function(x) {
+  format_value(x)
 }
 
 format_rate <- function(x) {

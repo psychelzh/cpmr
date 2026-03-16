@@ -129,8 +129,39 @@ resolve_kfolds <- function(kfolds, include_cases) {
   kfolds
 }
 
-compute_fold_metrics <- function(predictions, folds) {
-  fold_metrics <- lapply(seq_along(folds), function(i) {
+compute_pooled_errors <- function(predictions) {
+  errors <- rbind(
+    rmse = vapply(
+      prediction_types,
+      function(prediction_type) {
+        safe_rmse(predictions$real, predictions[[prediction_type]])
+      },
+      numeric(1)
+    ),
+    mae = vapply(
+      prediction_types,
+      function(prediction_type) {
+        safe_mae(predictions$real, predictions[[prediction_type]])
+      },
+      numeric(1)
+    )
+  )
+  colnames(errors) <- prediction_types
+  errors
+}
+
+compute_pooled_correlations <- function(predictions) {
+  vapply(
+    prediction_types,
+    function(prediction_type) {
+      safe_cor(predictions$real, predictions[[prediction_type]])
+    },
+    numeric(1)
+  )
+}
+
+compute_fold_correlations <- function(predictions, folds) {
+  fold_correlations <- lapply(seq_along(folds), function(i) {
     rows <- folds[[i]]
     data.frame(
       fold = i,
@@ -140,7 +171,29 @@ compute_fold_metrics <- function(predictions, folds) {
       neg = safe_cor(predictions$real[rows], predictions$neg[rows])
     )
   })
-  do.call(rbind, fold_metrics)
+  do.call(rbind, fold_correlations)
+}
+
+summarize_fold_correlations <- function(predictions, folds) {
+  fold_correlations <- compute_fold_correlations(predictions, folds)
+  summary <- rbind(
+    mean = vapply(
+      prediction_types,
+      function(prediction_type) {
+        safe_mean(fold_correlations[[prediction_type]])
+      },
+      numeric(1)
+    ),
+    std_error = vapply(
+      prediction_types,
+      function(prediction_type) {
+        safe_std_error(fold_correlations[[prediction_type]])
+      },
+      numeric(1)
+    )
+  )
+  colnames(summary) <- prediction_types
+  summary
 }
 
 summarize_resample_edges <- function(edges, return_edges, kfolds) {

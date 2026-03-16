@@ -14,6 +14,24 @@ safe_cor <- function(x, y, method = c("pearson", "spearman")) {
   stats::cor(x, y, method = method)
 }
 
+safe_rmse <- function(x, y) {
+  valid <- stats::complete.cases(x, y)
+  if (!any(valid)) {
+    return(NA_real_)
+  }
+
+  sqrt(mean((x[valid] - y[valid])^2))
+}
+
+safe_mae <- function(x, y) {
+  valid <- stats::complete.cases(x, y)
+  if (!any(valid)) {
+    return(NA_real_)
+  }
+
+  mean(abs(x[valid] - y[valid]))
+}
+
 safe_mean <- function(x) {
   if (length(x) == 0L || all(is.na(x))) {
     return(NA_real_)
