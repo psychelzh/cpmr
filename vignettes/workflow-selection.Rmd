@@ -16,19 +16,21 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-`cpmr` supports more than one way to express a CPM analysis, but they do not
-all serve the same purpose.
+`cpmr` is organized around one native workflow: create a `cpm_spec()` object,
+then use `fit()` or `fit_resamples()` depending on the question you want to
+answer.
 
-The package is organized around a core-first design:
+The main choice is not between different API families. It is between:
 
-- the native `cpmr` path is the primary workflow for fitting, resampling, and
-  future tuning extensions;
-- `cpm_spec()` is the native way to make CPM parameters explicit and reusable.
+- `fit()` for a single in-sample CPM fit;
+- `fit_resamples()` for out-of-sample resampling;
+- `fit_resamples(..., resamples = ...)` when you already have a partition
+  scheme you want to enforce.
 
-## Recommended Path: `cpm_spec()`
+## Start with `cpm_spec()`
 
-For most analyses, start with `cpm_spec()` together with `fit()` and
-`fit_resamples()`.
+For most analyses, start with `cpm_spec()` and reuse it across single-fit and
+resampling calls.
 
 ```{r}
 library(cpmr)
@@ -45,7 +47,7 @@ summary(fit_obj)
 summary(resample_obj)
 ```
 
-This path is the best fit when you care about:
+This workflow is the best fit when you care about:
 
 - large edge spaces;
 - repeated resampling;
@@ -54,5 +56,6 @@ This path is the best fit when you care about:
 
 ## Practical Rule of Thumb
 
-Choose the native `cpm_spec()` path when you need speed, explicit CPM
-behavior, or resampling-heavy experiments.
+Use `fit()` when you want to inspect one fitted CPM model on the current data.
+Use `fit_resamples()` when you want an out-of-sample performance estimate or a
+custom resampling design.

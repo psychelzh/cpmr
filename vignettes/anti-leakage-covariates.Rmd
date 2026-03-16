@@ -74,7 +74,8 @@ resamples_fit <- fit_resamples(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
-  kfolds = 5
+  kfolds = 5,
+  return_edges = "sum"
 )
 
 summary(resamples_fit)
@@ -82,9 +83,8 @@ head(resamples_fit$predictions)
 dim(resamples_fit$edges)
 ```
 
-If you prefer explicit parameter objects, the lower-level
-`cpm_spec()` + `fit()` / `fit_resamples()` path is the native interface and
-routes through the same CPM core.
+Using a reusable `cpm_spec()` object is helpful when you want the same CPM
+settings to drive both single-fit and resampling analyses.
 
 ## Edge Storage Tips
 
