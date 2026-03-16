@@ -1,3 +1,25 @@
+#' cpm Fitted Object
+#'
+#' A `cpm` object is returned by [fit()] when fitting a [cpm_spec()] on a
+#' single dataset.
+#'
+#' @section Structure:
+#' A `cpm` object is a list with the following elements:
+#' \describe{
+#'   \item{`call`}{Matched call used for fitting.}
+#'   \item{`spec`}{The originating `cpm_spec` object.}
+#'   \item{`model`}{Trained CPM model components used by prediction.}
+#'   \item{`real`}{Observed behavior values after preprocessing decisions.}
+#'   \item{`pred`}{Matrix of in-sample predictions (`both`, `pos`, `neg`).}
+#'   \item{`edges`}{Stored single-fit edge mask as a `p x 2` logical matrix
+#'     with `pos` and `neg` columns.}
+#'   \item{`params`}{Parameter list used at fit time.}
+#' }
+#'
+#' @seealso [fit()], [summary.cpm()], [tidy.cpm()], [collect_edges()]
+#' @name cpm
+NULL
+
 #' @export
 print.cpm <- function(x, ...) {
   cat("CPM results:\n")
