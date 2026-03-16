@@ -1,21 +1,3 @@
-format_cor <- function(x) {
-  ifelse(is.na(x), "NA", sprintf("%.3f", x))
-}
-
-format_rate <- function(x) {
-  ifelse(is.na(x), "NA", sprintf("%.2f%%", x * 100))
-}
-
-prediction_labels <- c(
-  both = "Combined",
-  pos = "Positive",
-  neg = "Negative"
-)
-
-prediction_label <- function(prediction_type) {
-  unname(prediction_labels[[prediction_type]])
-}
-
 print_performance_block <- function(values, header, std_error = NULL) {
   cat(header)
   for (prediction_type in prediction_types) {
@@ -50,4 +32,22 @@ print_edge_rate_block <- function(edges, header = "  Selected edges:\n") {
   }
 
   invisible(NULL)
+}
+
+format_cor <- function(x) {
+  ifelse(is.na(x), "NA", sprintf("%.3f", x))
+}
+
+format_rate <- function(x) {
+  ifelse(is.na(x), "NA", sprintf("%.2f%%", x * 100))
+}
+
+prediction_labels <- c(
+  both = "Combined",
+  pos = "Positive",
+  neg = "Negative"
+)
+
+prediction_label <- function(prediction_type) {
+  unname(prediction_labels[[prediction_type]])
 }

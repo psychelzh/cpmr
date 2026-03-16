@@ -1,12 +1,3 @@
-edge_types <- c("pos", "neg")
-prediction_types <- c("both", edge_types)
-
-critical_r <- function(n, alpha) {
-  df <- n - 2
-  ct <- stats::qt(alpha / 2, df, lower.tail = FALSE)
-  sqrt((ct^2) / ((ct^2) + df))
-}
-
 select_edges <- function(conmat, behav, method, level) {
   r_mat <- stats::cor(conmat, behav)
   r_crit <- switch(
@@ -33,10 +24,6 @@ select_edges <- function(conmat, behav, method, level) {
     ncol = 2,
     dimnames = list(NULL, edge_types)
   )
-}
-
-fscale <- function(x, center, scale) {
-  Rfast::eachrow(Rfast::eachrow(x, center, "-"), scale, "/")
 }
 
 train_model <- function(conmat, behav, edges, bias_correct) {
@@ -111,4 +98,17 @@ predict_model <- function(model, conmat_new) {
   }
 
   pred
+}
+
+edge_types <- c("pos", "neg")
+prediction_types <- c("both", edge_types)
+
+critical_r <- function(n, alpha) {
+  df <- n - 2
+  ct <- stats::qt(alpha / 2, df, lower.tail = FALSE)
+  sqrt((ct^2) / ((ct^2) + df))
+}
+
+fscale <- function(x, center, scale) {
+  Rfast::eachrow(Rfast::eachrow(x, center, "-"), scale, "/")
 }
