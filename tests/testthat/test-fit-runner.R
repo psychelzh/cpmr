@@ -83,7 +83,6 @@ test_that("run_resample_fit matches fit_resamples() outputs", {
   expect_identical(internal_result$folds, api_result$folds)
   expect_identical(internal_result$call, call)
   expect_equal(internal_result$edges, api_result$edges)
-  expect_equal(internal_result$metrics, api_result$metrics)
   expect_equal(internal_result$predictions, api_result$predictions)
 })
 

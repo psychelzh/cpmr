@@ -109,8 +109,8 @@ fit.cpm_spec <- function(
 #'   are found in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
 #'   missing values will be excluded from the analysis but kept in the output.
 #'
-#' @return A `cpm_resamples` object containing fold-level metrics and
-#'   observation-level predictions.
+#' @return A `cpm_resamples` object containing observation-level predictions,
+#'   resampling folds, and optional stored edges.
 #' @export
 fit_resamples.cpm_spec <- function(
   object,

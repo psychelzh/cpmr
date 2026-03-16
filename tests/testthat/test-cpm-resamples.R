@@ -18,13 +18,6 @@ test_that("new_cpm_resamples builds resampling objects", {
     ncol = 2,
     dimnames = list(NULL, c("pos", "neg"))
   )
-  metrics <- data.frame(
-    fold = 1L,
-    n_assess = 2L,
-    both = 0.5,
-    pos = 0.4,
-    neg = 0.3
-  )
   predictions <- data.frame(
     row = 1:2,
     fold = 1L,
@@ -40,26 +33,26 @@ test_that("new_cpm_resamples builds resampling objects", {
     params = list(return_edges = "sum"),
     predictions = predictions,
     edges = edges,
-    folds = list(1:2),
-    metrics = metrics
+    folds = list(1:2)
   )
 
   expect_s3_class(resamples_object, "cpm_resamples")
   expect_identical(as.character(resamples_object$call[[1]]), "fit_resamples")
-  expect_identical(resamples_object$metrics, metrics)
   expect_identical(resamples_object$predictions, predictions)
 })
 
 test_that("compute_fold_metrics summarizes each assessment fold", {
-  real <- c(1, 2, 3, 4)
-  pred <- cbind(
+  predictions <- data.frame(
+    row = 1:4,
+    fold = c(1L, 1L, 2L, 2L),
+    real = c(1, 2, 3, 4),
     both = c(1, 2, 3, 4),
     pos = c(1, 2, 3, 4),
     neg = c(4, 3, 2, 1)
   )
   folds <- list(1:2, 3:4)
 
-  metrics <- compute_fold_metrics(real, pred, folds)
+  metrics <- compute_fold_metrics(predictions, folds)
 
   expect_named(metrics, c("fold", "n_assess", "both", "pos", "neg"))
   expect_equal(metrics$fold, 1:2)
@@ -90,13 +83,13 @@ test_that("print.cpm_resamples prints NA instead of NaN for all-NA metrics", {
     list(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       folds = list(1:2, 3:4),
-      predictions = data.frame(row = 1:4, fold = c(1, 1, 2, 2)),
-      metrics = data.frame(
-        fold = 1:2,
-        n_assess = c(2, 2),
-        both = c(NA_real_, NA_real_),
-        pos = c(NA_real_, NA_real_),
-        neg = c(NA_real_, NA_real_)
+      predictions = data.frame(
+        row = 1:4,
+        fold = c(1L, 1L, 2L, 2L),
+        real = c(NA_real_, NA_real_, NA_real_, NA_real_),
+        both = c(1, 2, 3, 4),
+        pos = c(1, 2, 3, 4),
+        neg = c(1, 2, 3, 4)
       ),
       params = list(return_edges = "none")
     ),
@@ -112,14 +105,14 @@ test_that("print.cpm_resamples computes finite means when available", {
   x <- structure(
     list(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
-      folds = list(1:2, 3:4),
-      predictions = data.frame(row = 1:4, fold = c(1, 1, 2, 2)),
-      metrics = data.frame(
-        fold = 1:2,
-        n_assess = c(2, 2),
-        both = c(0.5, 0.25),
-        pos = c(0.2, 0.4),
-        neg = c(-0.1, -0.2)
+      folds = list(1:3, 4:6),
+      predictions = data.frame(
+        row = 1:6,
+        fold = c(1L, 1L, 1L, 2L, 2L, 2L),
+        real = c(1, 2, 3, 4, 5, 6),
+        both = c(1, 2, 3, 6, 5, 4),
+        pos = c(1, 2, 3, 4, 5, 6),
+        neg = c(3, 2, 1, 6, 5, 4)
       ),
       params = list(return_edges = "sum")
     ),
@@ -127,7 +120,7 @@ test_that("print.cpm_resamples computes finite means when available", {
   )
 
   out <- capture.output(print(x))
-  expect_true(any(grepl("Combined: 0.375", out, fixed = TRUE)))
-  expect_true(any(grepl("Positive: 0.300", out, fixed = TRUE)))
-  expect_true(any(grepl("Negative: -0.150", out, fixed = TRUE)))
+  expect_true(any(grepl("Combined: 0.000", out, fixed = TRUE)))
+  expect_true(any(grepl("Positive: 1.000", out, fixed = TRUE)))
+  expect_true(any(grepl("Negative: -1.000", out, fixed = TRUE)))
 })

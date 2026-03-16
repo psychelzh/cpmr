@@ -14,7 +14,6 @@
 #'   \item{`edges`}{Stored edge output based on `return_edges`
 #'     (`NULL`/matrix/array).}
 #'   \item{`folds`}{List of assessment-row indices for each fold.}
-#'   \item{`metrics`}{Data frame of fold-level performance metrics.}
 #' }
 #'
 #' @seealso [fit_resamples()], [summary.cpm_resamples()]
@@ -27,8 +26,7 @@ new_cpm_resamples <- function(
   params,
   predictions,
   edges,
-  folds,
-  metrics
+  folds
 ) {
   structure(
     list(
@@ -37,8 +35,7 @@ new_cpm_resamples <- function(
       params = params,
       predictions = predictions,
       edges = edges,
-      folds = folds,
-      metrics = metrics
+      folds = folds
     ),
     class = "cpm_resamples"
   )
@@ -46,6 +43,7 @@ new_cpm_resamples <- function(
 
 #' @export
 print.cpm_resamples <- function(x, ...) {
+  metrics <- compute_fold_metrics(x$predictions, x$folds)
   cat("CPM resample results:\n")
   if (!is.null(x$call)) {
     cat("  Call: ")
@@ -57,7 +55,7 @@ print.cpm_resamples <- function(x, ...) {
   print_performance_block(
     values = vapply(
       prediction_types,
-      function(prediction_type) safe_mean(x$metrics[[prediction_type]]),
+      function(prediction_type) safe_mean(metrics[[prediction_type]]),
       numeric(1)
     ),
     header = "  Mean correlations:\n"
@@ -75,15 +73,16 @@ print.cpm_resamples <- function(x, ...) {
 #'   performance and edge-selection rates.
 #' @export
 summary.cpm_resamples <- function(object, ...) {
+  metrics <- compute_fold_metrics(object$predictions, object$folds)
   performance <- rbind(
     mean = vapply(
       prediction_types,
-      function(edge_type) safe_mean(object$metrics[[edge_type]]),
+      function(edge_type) safe_mean(metrics[[edge_type]]),
       numeric(1)
     ),
     std_error = vapply(
       prediction_types,
-      function(edge_type) safe_std_error(object$metrics[[edge_type]]),
+      function(edge_type) safe_std_error(metrics[[edge_type]]),
       numeric(1)
     )
   )
@@ -121,15 +120,15 @@ print.cpm_resamples_summary <- function(x, ...) {
   invisible(x)
 }
 
-compute_fold_metrics <- function(real, pred, folds) {
+compute_fold_metrics <- function(predictions, folds) {
   fold_metrics <- lapply(seq_along(folds), function(i) {
     rows <- folds[[i]]
     data.frame(
       fold = i,
       n_assess = length(rows),
-      both = safe_cor(real[rows], pred[rows, "both"]),
-      pos = safe_cor(real[rows], pred[rows, "pos"]),
-      neg = safe_cor(real[rows], pred[rows, "neg"])
+      both = safe_cor(predictions$real[rows], predictions$both[rows]),
+      pos = safe_cor(predictions$real[rows], predictions$pos[rows]),
+      neg = safe_cor(predictions$real[rows], predictions$neg[rows])
     )
   })
   do.call(rbind, fold_metrics)

@@ -66,7 +66,6 @@ test_that("cpm_fit_resamples matches fit_resamples(cpm_spec())", {
   expect_identical(as.character(via_spec$call[[1]]), "fit_resamples")
   expect_identical(direct$params$return_edges, "sum")
   expect_identical(direct$folds, via_spec$folds)
-  expect_equal(direct$metrics, via_spec$metrics)
   expect_equal(direct$predictions, via_spec$predictions)
   expect_equal(direct$edges, via_spec$edges)
   expect_identical(direct$spec$params, via_spec$spec$params)

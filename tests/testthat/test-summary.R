@@ -58,34 +58,30 @@ test_that("print.cpm_summary reports NA edge rates when stored edges are all mis
 })
 
 test_that("summary.cpm_resamples aggregates fold metrics and edge rates", {
+  predictions <- data.frame(
+    row = 1:6,
+    fold = c(1L, 1L, 1L, 2L, 2L, 2L),
+    real = c(1, 2, 3, 4, 5, 6),
+    both = c(1, 2, 3, 6, 5, 4),
+    pos = c(1, 2, 3, 4, 5, 6),
+    neg = c(3, 2, 1, 6, 5, 4)
+  )
+  folds <- list(1:3, 4:6)
   summary_result <- summary(
     new_cpm_resamples(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       spec = cpm_spec(),
       params = list(kfolds = 2L, return_edges = "sum"),
-      predictions = data.frame(
-        row = 1:4,
-        fold = c(1L, 1L, 2L, 2L),
-        real = c(1, 2, 3, 4),
-        both = c(1, 2, 3, 4),
-        pos = c(1, 2, 3, 4),
-        neg = c(4, 3, 2, 1)
-      ),
+      predictions = predictions,
       edges = matrix(
         c(2, 0, 1, 2),
         ncol = 2,
         dimnames = list(NULL, c("pos", "neg"))
       ),
-      folds = list(1:2, 3:4),
-      metrics = data.frame(
-        fold = 1:2,
-        n_assess = c(2, 2),
-        both = c(0.5, 0.25),
-        pos = c(0.2, 0.4),
-        neg = c(-0.1, -0.2)
-      )
+      folds = folds
     )
   )
+  fold_metrics <- compute_fold_metrics(predictions, folds)
 
   expect_s3_class(summary_result, "cpm_resamples_summary")
   expect_identical(
@@ -93,7 +89,22 @@ test_that("summary.cpm_resamples aggregates fold metrics and edge rates", {
     c("both", "pos", "neg")
   )
   expect_identical(rownames(summary_result$performance), c("mean", "std_error"))
-  expect_equal(summary_result$performance["mean", "both"], 0.375)
+  expect_equal(
+    summary_result$performance["mean", ],
+    vapply(
+      prediction_types,
+      function(type) safe_mean(fold_metrics[[type]]),
+      numeric(1)
+    )
+  )
+  expect_equal(
+    summary_result$performance["std_error", ],
+    vapply(
+      prediction_types,
+      function(type) safe_std_error(fold_metrics[[type]]),
+      numeric(1)
+    )
+  )
   expect_equal(summary_result$edges[, "pos"], c(1, 0))
   expect_equal(summary_result$edges[, "neg"], c(0.5, 1))
 })
@@ -107,20 +118,13 @@ test_that("summary.cpm_resamples returns NULL edges when resamples did not store
       predictions = data.frame(
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
-        real = c(1, 2, 3, 4),
+        real = c(NA_real_, NA_real_, NA_real_, NA_real_),
         both = c(1, 2, 3, 4),
         pos = c(1, 2, 3, 4),
         neg = c(4, 3, 2, 1)
       ),
       edges = NULL,
-      folds = list(1:2, 3:4),
-      metrics = data.frame(
-        fold = 1:2,
-        n_assess = c(2, 2),
-        both = c(NA_real_, NA_real_),
-        pos = c(NA_real_, NA_real_),
-        neg = c(NA_real_, NA_real_)
-      )
+      folds = list(1:2, 3:4)
     )
   )
 
@@ -158,14 +162,7 @@ test_that("summary.cpm_resamples averages fold-wise edges when all edges are sto
         neg = c(4, 3, 2, 1)
       ),
       edges = stored_edges,
-      folds = list(1:2, 3:4),
-      metrics = data.frame(
-        fold = 1:2,
-        n_assess = c(2, 2),
-        both = c(0.5, 0.25),
-        pos = c(0.2, 0.4),
-        neg = c(-0.1, -0.2)
-      )
+      folds = list(1:2, 3:4)
     )
   )
 

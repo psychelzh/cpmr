@@ -66,7 +66,7 @@ test_that("print.cpm_spec shows model options", {
   expect_output(print(spec), "Bias correction")
 })
 
-test_that("fit_resamples returns fold metrics and predictions", {
+test_that("fit_resamples returns predictions and folds", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
@@ -78,17 +78,13 @@ test_that("fit_resamples returns fold metrics and predictions", {
   expect_identical(as.character(res$call[[1]]), "fit_resamples")
   expect_s3_class(res$spec, "cpm_spec")
   expect_identical(length(res$folds), 5L)
-  expect_equal(nrow(res$metrics), 5)
   expect_equal(nrow(res$predictions), 10)
-  expect_named(
-    res$metrics,
-    c("fold", "n_assess", "both", "pos", "neg")
-  )
   expect_named(
     res$predictions,
     c("row", "fold", "real", "both", "pos", "neg")
   )
   expect_null(res$edges)
+  expect_s3_class(summary(res), "cpm_resamples_summary")
 })
 
 test_that("fit_resamples accepts custom resample indices", {

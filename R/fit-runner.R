@@ -180,7 +180,6 @@ run_resample_fit <- function(
     }
   }
 
-  metrics <- compute_fold_metrics(real, pred, folds)
   predictions <- compute_fold_predictions(real, pred, folds)
 
   new_cpm_resamples(
@@ -197,7 +196,6 @@ run_resample_fit <- function(
     ),
     predictions = predictions,
     edges = edges,
-    folds = folds,
-    metrics = metrics
+    folds = folds
   )
 }
