@@ -30,34 +30,6 @@ test_that("resolve_include_cases returns intersection in exclude mode", {
   expect_identical(include_cases, 4:10)
 })
 
-test_that("resolve_kfolds uses complete-case count when NULL", {
-  expect_identical(resolve_kfolds(NULL, include_cases = c(2L, 4L, 7L)), 3L)
-  expect_identical(resolve_kfolds(5L, include_cases = c(2L, 4L, 7L)), 5L)
-})
-
-test_that("init_edges allocates expected structures", {
-  conmat <- matrix(rnorm(40), ncol = 4)
-
-  edges_sum <- init_edges("sum", conmat, kfolds = 5)
-  expect_equal(dim(edges_sum), c(ncol(conmat), 2))
-  expect_identical(colnames(edges_sum), c("pos", "neg"))
-
-  edges_all <- init_edges("all", conmat, kfolds = 5)
-  expect_equal(dim(edges_all), c(ncol(conmat), 2, 5))
-
-  expect_null(init_edges("none", conmat, kfolds = 5))
-})
-
-test_that("init_pred preserves prediction matrix structure", {
-  behav <- stats::setNames(rnorm(5), paste0("s", 1:5))
-
-  pred <- init_pred(behav)
-
-  expect_equal(dim(pred), c(5, 3))
-  expect_identical(rownames(pred), names(behav))
-  expect_identical(colnames(pred), c("both", "pos", "neg"))
-})
-
 test_that("check_names errors when names do not match", {
   x <- matrix(1:10, nrow = 2, dimnames = list(c("a", "b"), NULL))
   y <- stats::setNames(1:2, c("a", "c"))

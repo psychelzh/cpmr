@@ -20,6 +20,14 @@ validate_kfolds <- function(kfolds) {
   as.integer(kfolds)
 }
 
+resolve_kfolds <- function(kfolds, include_cases) {
+  if (is.null(kfolds)) {
+    return(length(include_cases))
+  }
+
+  kfolds
+}
+
 validate_resamples <- function(resamples, include_cases) {
   if (!is.list(resamples) || length(resamples) == 0L) {
     stop("`resamples` must be a non-empty list of assessment indices.")

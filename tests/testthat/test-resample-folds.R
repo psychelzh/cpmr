@@ -3,6 +3,11 @@ test_that("validate_kfolds accepts NULL and scalar fold counts", {
   expect_identical(validate_kfolds(5), 5L)
 })
 
+test_that("resolve_kfolds uses complete-case count when NULL", {
+  expect_identical(resolve_kfolds(NULL, include_cases = c(2L, 4L, 7L)), 3L)
+  expect_identical(resolve_kfolds(5L, include_cases = c(2L, 4L, 7L)), 5L)
+})
+
 test_that("validate_resamples rejects malformed assessment sets", {
   expect_error(
     validate_resamples(list(), include_cases = 1:4),

@@ -65,33 +65,42 @@ resolve_include_cases <- function(conmat, behav, covariates, na_action) {
   )
 }
 
-resolve_kfolds <- function(kfolds, include_cases) {
-  if (is.null(kfolds)) {
-    return(length(include_cases))
-  }
-  kfolds
-}
+resolve_fit_context <- function(
+  conmat,
+  behav,
+  covariates,
+  na_action,
+  action,
+  min_cases
+) {
+  na_action <- match.arg(na_action, c("fail", "exclude"))
 
-init_edges <- function(return_edges, conmat, kfolds) {
-  switch(
-    return_edges,
-    all = array(
-      dim = c(dim(conmat)[2], length(edge_types), kfolds),
-      dimnames = list(NULL, edge_types, NULL)
-    ),
-    sum = array(
-      0,
-      dim = c(dim(conmat)[2], length(edge_types)),
-      dimnames = list(NULL, edge_types)
-    ),
-    none = NULL
+  normalized <- normalize_inputs(conmat, behav, covariates)
+  behav <- normalized$behav
+  covariates <- normalized$covariates
+
+  include_cases <- resolve_include_cases(
+    conmat,
+    behav,
+    covariates,
+    na_action
   )
-}
 
-init_pred <- function(behav) {
-  matrix(
-    nrow = length(behav),
-    ncol = length(prediction_types),
-    dimnames = list(names(behav), prediction_types)
+  if (length(include_cases) == 0L) {
+    stop(sprintf("No complete-case observations available for %s.", action))
+  }
+  if (length(include_cases) < min_cases) {
+    stop(sprintf(
+      "At least %d complete-case observations are required for %s.",
+      min_cases,
+      action
+    ))
+  }
+
+  list(
+    behav = behav,
+    covariates = covariates,
+    include_cases = include_cases,
+    na_action = na_action
   )
 }
