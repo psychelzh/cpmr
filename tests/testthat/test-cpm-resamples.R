@@ -117,7 +117,7 @@ test_that("resample_metrics supports metric filtering and spearman correlation",
     res,
     level = "pooled",
     metrics = "correlation",
-    method = "spearman"
+    correlation_method = "spearman"
   )
 
   expect_true(all(pooled$metric == "correlation"))
