@@ -119,7 +119,7 @@ warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
         paste0(
           "Storing fold-wise edges (`return_edges = \"all\"`) may consume ",
           "large memory (~%.1f MB). Consider `return_edges = \"sum\"` or ",
-          "`collect_edges(format = \"index\")` for sparse export."
+          "`return_edges = \"none\"` when edge storage is optional."
         ),
         estimated_bytes / 1024^2
       )

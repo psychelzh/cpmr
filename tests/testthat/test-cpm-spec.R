@@ -78,18 +78,17 @@ test_that("fit_resamples returns fold metrics and predictions", {
   expect_identical(as.character(res$call[[1]]), "fit_resamples")
   expect_s3_class(res$spec, "cpm_spec")
   expect_identical(length(res$folds), 5L)
-  expect_equal(nrow(collect_metrics(res)), 5)
-  expect_equal(nrow(collect_predictions(res)), 10)
+  expect_equal(nrow(res$metrics), 5)
+  expect_equal(nrow(res$predictions), 10)
   expect_named(
-    collect_metrics(res),
+    res$metrics,
     c("fold", "n_assess", "both", "pos", "neg")
   )
   expect_named(
-    collect_predictions(res),
+    res$predictions,
     c("row", "fold", "real", "both", "pos", "neg")
   )
-  expect_null(collect_edges(res))
-  expect_null(collect_edges(res, format = "index"))
+  expect_null(res$edges)
 })
 
 test_that("fit_resamples accepts custom resample indices", {
@@ -264,14 +263,9 @@ test_that("fit_resamples can store summed edges", {
     return_edges = "sum"
   )
 
-  edges <- collect_edges(res)
+  edges <- res$edges
   expect_type(edges, "double")
   expect_equal(dim(edges), c(12, 2))
-
-  index_edges <- collect_edges(res, format = "index")
-  expect_named(index_edges, c("pos", "neg"))
-  expect_type(index_edges$pos, "integer")
-  expect_type(index_edges$neg, "integer")
 })
 
 test_that("fit_resamples can store fold-wise edges", {
@@ -288,14 +282,9 @@ test_that("fit_resamples can store fold-wise edges", {
     return_edges = "all"
   )
 
-  edges <- collect_edges(res)
+  edges <- res$edges
   expect_type(edges, "logical")
   expect_equal(dim(edges), c(12, 2, 5))
-
-  index_edges <- collect_edges(res, format = "index")
-  expect_length(index_edges, 5)
-  expect_named(index_edges[[1]], c("fold", "pos", "neg"))
-  expect_identical(index_edges[[1]]$fold, 1L)
 })
 
 test_that("fit_resamples handles covariates in assessment pipeline", {
@@ -317,7 +306,7 @@ test_that("fit_resamples handles covariates in assessment pipeline", {
     return_edges = "sum"
   )
 
-  pred <- collect_predictions(res)
+  pred <- res$predictions
   expect_true(isTRUE(all(stats::complete.cases(pred$both))))
   expect_true(isTRUE(res$params$covariates))
   expect_equal(length(res$folds), 6L)
@@ -378,7 +367,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     na_action = "fail"
   )
   fold_pred <- predict_model(fold_model, assessment$conmat)
-  collected <- collect_predictions(resampled)
+  collected <- resampled$predictions
 
   expect_equal(single_fit$edges, fold_edges)
   expect_equal(single_fit$model$edges, fold_model$edges)
@@ -418,7 +407,7 @@ test_that("fit_resamples excludes incomplete rows consistently with covariates",
     return_edges = "sum",
     na_action = "exclude"
   )
-  collected <- collect_predictions(resampled)
+  collected <- resampled$predictions
 
   expect_identical(resampled$folds, resamples)
   expect_equal(sort(collected$row[!is.na(collected$fold)]), include_cases)

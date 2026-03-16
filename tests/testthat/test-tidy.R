@@ -31,12 +31,3 @@ test_that("Support pass arguments of `summary()`", {
     )
   )
 })
-
-test_that("Warning when edges are not stored", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
-  result <- fit(cpm_spec(), conmat, behav)
-  result$edges <- NULL
-  expect_warning(tidy(result, component = "edges"), "No edges stored")
-})

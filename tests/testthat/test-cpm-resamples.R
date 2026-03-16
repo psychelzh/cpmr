@@ -105,7 +105,7 @@ test_that("print.cpm_resamples prints NA instead of NaN for all-NA metrics", {
 
   out <- capture.output(print(x))
   expect_false(any(grepl("NaN", out, fixed = TRUE)))
-  expect_true(any(grepl("Both: NA", out, fixed = TRUE)))
+  expect_true(any(grepl("Combined: NA", out, fixed = TRUE)))
 })
 
 test_that("print.cpm_resamples computes finite means when available", {
@@ -127,7 +127,7 @@ test_that("print.cpm_resamples computes finite means when available", {
   )
 
   out <- capture.output(print(x))
-  expect_true(any(grepl("Both: 0.375", out, fixed = TRUE)))
-  expect_true(any(grepl("Pos:  0.300", out, fixed = TRUE)))
-  expect_true(any(grepl("Neg:  -0.150", out, fixed = TRUE)))
+  expect_true(any(grepl("Combined: 0.375", out, fixed = TRUE)))
+  expect_true(any(grepl("Positive: 0.300", out, fixed = TRUE)))
+  expect_true(any(grepl("Negative: -0.150", out, fixed = TRUE)))
 })

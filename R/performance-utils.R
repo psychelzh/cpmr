@@ -21,11 +21,3 @@ safe_mean <- function(x) {
 
   mean(x, na.rm = TRUE)
 }
-
-format_cor <- function(x) {
-  ifelse(is.na(x), "NA", sprintf("%.3f", x))
-}
-
-format_rate <- function(x) {
-  ifelse(is.na(x), "NA", sprintf("%.2f%%", x * 100))
-}

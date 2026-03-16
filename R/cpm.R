@@ -16,7 +16,7 @@
 #'   \item{`model`}{Trained CPM model components used by prediction.}
 #' }
 #'
-#' @seealso [fit()], [summary.cpm()], [tidy.cpm()], [collect_edges()]
+#' @seealso [fit()], [summary.cpm()], [tidy.cpm()]
 #' @name cpm
 NULL
 
@@ -44,11 +44,7 @@ print.cpm <- function(x, ...) {
     "    Complete cases: %d\n",
     sum(stats::complete.cases(x$predictions[, prediction_types, drop = FALSE]))
   ))
-  if (!is.null(x$edges)) {
-    cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
-  } else {
-    cat("  Number of edges: not stored\n")
-  }
+  cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
   covariates_param <- if (!is.null(x$params$covariates)) {
     x$params$covariates
   } else {
@@ -60,17 +56,6 @@ print.cpm <- function(x, ...) {
   cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
   cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
   invisible(x)
-}
-
-#' Collect selected edges from a CPM fit
-#'
-#' @param x A `cpm` object.
-#' @param ... For future extension. Currently ignored.
-#'
-#' @return A logical matrix storing the selected positive and negative edges.
-#' @export
-collect_edges.cpm <- function(x, ...) {
-  x$edges
 }
 
 #' Summary of a cpm object.
@@ -132,20 +117,14 @@ summary.cpm <- function(
 #' @export
 print.cpm_summary <- function(x, ...) {
   cat("CPM summary:\n")
-  cat(
-    sprintf(
+  print_performance_block(
+    values = x$performance[1, prediction_types],
+    header = sprintf(
       "  Performance (%s):\n",
       sub("^(.)", "\\U\\1", x$params$method, perl = TRUE)
     )
   )
-  cat(sprintf("    Positive: %s\n", format_cor(x$performance[, "pos"])))
-  cat(sprintf("    Negative: %s\n", format_cor(x$performance[, "neg"])))
-  cat(sprintf("    Combined: %s\n", format_cor(x$performance[, "both"])))
-  if (!is.null(x$edges)) {
-    cat("  Selected edges:\n")
-    cat(sprintf("    Positive: %s\n", format_rate(safe_mean(x$edges[, "pos"]))))
-    cat(sprintf("    Negative: %s\n", format_rate(safe_mean(x$edges[, "neg"]))))
-  }
+  print_edge_rate_block(x$edges)
   invisible(x)
 }
 
@@ -187,17 +166,9 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
       method = sum_x$params$method,
       tibble::as_tibble(sum_x$performance)
     ),
-    edges = {
-      if (is.null(sum_x$edges)) {
-        warning(
-          "No edges stored in the object."
-        )
-        return(tibble::tibble())
-      }
-      tibble::tibble(
-        params,
-        tibble::as_tibble(apply(sum_x$edges, 2, list))
-      )
-    }
+    edges = tibble::tibble(
+      params,
+      tibble::as_tibble(apply(sum_x$edges, 2, list))
+    )
   )
 }

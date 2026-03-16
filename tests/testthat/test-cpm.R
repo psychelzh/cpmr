@@ -118,36 +118,14 @@ test_that("single-fit CPM always stores selected edges", {
   behav <- rnorm(10)
   result <- fit(cpm_spec(), conmat, behav)
   expect_equal(dim(result$edges), c(10, 2))
-  expect_equal(collect_edges(result), result$edges)
   expect_false("return_edges" %in% names(result$params))
 })
 
-test_that("print.cpm handles objects without stored edges", {
-  result <- structure(
-    list(
-      predictions = data.frame(
-        row = 1:3,
-        real = c(1, 2, 3),
-        both = c(1, 2, 3),
-        pos = c(1, 2, 3),
-        neg = c(1, 2, 3)
-      ),
-      edges = NULL,
-      call = quote(fit(object = cpm_spec(), conmat = conmat, behav = behav)),
-      params = list(
-        covariates = FALSE,
-        thresh_method = "alpha",
-        thresh_level = 0.01,
-        na_action = "fail",
-        bias_correct = TRUE
-      )
-    ),
-    class = "cpm"
-  )
-
+test_that("print.cpm reports stored edge count", {
+  result <- fit(cpm_spec(), matrix(rnorm(100), ncol = 10), rnorm(10))
   output <- capture.output(print(result))
 
-  expect_true(any(grepl("Number of edges: not stored", output, fixed = TRUE)))
+  expect_true(any(grepl("Number of edges: 10", output, fixed = TRUE)))
 })
 
 test_that("Support row/column matrix input of `behav` and `covariates`", {
