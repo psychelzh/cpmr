@@ -88,3 +88,50 @@ test_that("print.cpm_resamples reports finite pooled errors when available", {
   expect_true(any(grepl("Positive: 0.000", out, fixed = TRUE)))
   expect_true(any(grepl("Negative: 1.633", out, fixed = TRUE)))
 })
+
+test_that("resample_metrics returns pooled and foldwise metrics", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+
+  foldwise <- resample_metrics(res)
+  pooled <- resample_metrics(res, level = "pooled")
+
+  expect_named(
+    foldwise,
+    c("fold", "n_assess", "metric", "prediction", "estimate")
+  )
+  expect_named(pooled, c("metric", "prediction", "estimate"))
+  expect_true(all(c("rmse", "mae", "correlation") %in% pooled$metric))
+  expect_true(all(c("both", "pos", "neg") %in% pooled$prediction))
+})
+
+test_that("resample_metrics supports metric filtering and spearman correlation", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+
+  pooled <- resample_metrics(
+    res,
+    level = "pooled",
+    metrics = "correlation",
+    method = "spearman"
+  )
+
+  expect_true(all(pooled$metric == "correlation"))
+  expect_equal(nrow(pooled), 3)
+})
+
+test_that("resample_metrics validates object type", {
+  expect_error(
+    resample_metrics(summary(fit(
+      cpm_spec(),
+      matrix(rnorm(100), ncol = 10),
+      rnorm(10)
+    ))),
+    "`x` must be a `cpm_resamples` object.",
+    fixed = TRUE
+  )
+})
