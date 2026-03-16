@@ -49,3 +49,27 @@ test_that("summary.cpm returns NA when fewer than two valid pairs", {
   expect_true(all(is.na(summary_result$performance)))
   expect_null(summary_result$edges)
 })
+
+test_that("print.cpm_summary reports NA edge rates when stored edges are all missing", {
+  summary_result <- structure(
+    list(
+      performance = matrix(
+        c(0.1, 0.2, 0.3),
+        nrow = 1,
+        dimnames = list(NULL, c("both", "pos", "neg"))
+      ),
+      edges = matrix(
+        c(NA, NA),
+        ncol = 2,
+        dimnames = list(NULL, c("pos", "neg"))
+      ),
+      params = list(method = "pearson")
+    ),
+    class = "cpm_summary"
+  )
+
+  output <- capture.output(print(summary_result))
+
+  expect_true(any(grepl("Positive: NA", output, fixed = TRUE)))
+  expect_true(any(grepl("Negative: NA", output, fixed = TRUE)))
+})
