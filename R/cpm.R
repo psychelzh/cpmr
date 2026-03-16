@@ -8,28 +8,27 @@
 #' \describe{
 #'   \item{`call`}{Matched call used for fitting.}
 #'   \item{`spec`}{The originating `cpm_spec` object.}
-#'   \item{`model`}{Trained CPM model components used by prediction.}
-#'   \item{`real`}{Observed behavior values after preprocessing decisions.}
-#'   \item{`pred`}{Matrix of in-sample predictions (`both`, `pos`, `neg`).}
+#'   \item{`params`}{Parameter list used at fit time.}
+#'   \item{`predictions`}{Data frame of observation-level outputs with columns
+#'     `row`, `real`, `both`, `pos`, and `neg`.}
 #'   \item{`edges`}{Stored single-fit edge mask as a `p x 2` logical matrix
 #'     with `pos` and `neg` columns.}
-#'   \item{`params`}{Parameter list used at fit time.}
+#'   \item{`model`}{Trained CPM model components used by prediction.}
 #' }
 #'
 #' @seealso [fit()], [summary.cpm()], [tidy.cpm()], [collect_edges()]
 #' @name cpm
 NULL
 
-new_cpm <- function(call, behav, pred, edges, model, spec, params) {
+new_cpm <- function(call, spec, params, predictions, edges, model) {
   structure(
     list(
-      real = behav,
-      pred = pred,
-      edges = edges,
-      model = model,
-      spec = spec,
       call = call,
-      params = params
+      spec = spec,
+      params = params,
+      predictions = predictions,
+      edges = edges,
+      model = model
     ),
     class = "cpm"
   )
@@ -40,8 +39,11 @@ print.cpm <- function(x, ...) {
   cat("CPM results:\n")
   cat("  Call: ")
   print(x$call)
-  cat(sprintf("  Number of observations: %d\n", length(x$real)))
-  cat(sprintf("    Complete cases: %d\n", sum(stats::complete.cases(x$pred))))
+  cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
+  cat(sprintf(
+    "    Complete cases: %d\n",
+    sum(stats::complete.cases(x$predictions[, prediction_types, drop = FALSE]))
+  ))
   if (!is.null(x$edges)) {
     cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
   } else {
@@ -99,14 +101,18 @@ summary.cpm <- function(
   method <- match.arg(method)
   performance <- matrix(
     vapply(
-      colnames(object$pred),
+      prediction_types,
       function(edge_type) {
-        safe_cor(object$real, object$pred[, edge_type], method = method)
+        safe_cor(
+          object$predictions$real,
+          object$predictions[[edge_type]],
+          method = method
+        )
       },
       numeric(1)
     ),
     nrow = 1,
-    dimnames = list(NULL, colnames(object$pred))
+    dimnames = list(NULL, prediction_types)
   )
 
   structure(

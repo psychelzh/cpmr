@@ -83,8 +83,6 @@ fit.cpm_spec <- function(
   call <- match.call()
   call[[1]] <- quote(fit)
 
-  na_action <- match.arg(na_action)
-
   run_single_fit(
     object = object,
     conmat = conmat,
@@ -125,31 +123,22 @@ fit_resamples.cpm_spec <- function(
   return_edges = c("none", "sum", "all"),
   na_action = c("fail", "exclude")
 ) {
+  call <- match.call()
+  call[[1]] <- quote(fit_resamples)
   return_edges <- match.arg(return_edges)
-  na_action <- match.arg(na_action)
-
-  normalized <- normalize_inputs(conmat, behav, covariates)
-  behav <- normalized$behav
-  covariates <- normalized$covariates
-
-  include_cases <- resolve_include_cases(
-    conmat,
-    behav,
-    covariates,
-    na_action
+  fit_context <- resolve_fit_context(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    na_action = na_action,
+    action = "resampling",
+    min_cases = 2L
   )
-
-  if (length(include_cases) == 0L) {
-    stop("No complete-case observations available for resampling.")
-  }
-  if (length(include_cases) < 2L) {
-    stop("At least 2 complete-case observations are required for resampling.")
-  }
 
   resolved <- resolve_resample_folds(
     resamples = resamples,
     kfolds = kfolds,
-    include_cases = include_cases
+    include_cases = fit_context$include_cases
   )
 
   run_resample_fit(
@@ -159,7 +148,9 @@ fit_resamples.cpm_spec <- function(
     covariates = covariates,
     folds = resolved$folds,
     return_edges = return_edges,
-    na_action = na_action
+    na_action = fit_context$na_action,
+    fit_context = fit_context,
+    call = call
   )
 }
 

@@ -35,15 +35,17 @@ test_that("new_cpm_resamples builds resampling objects", {
   )
 
   resamples_object <- new_cpm_resamples(
+    call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
     spec = spec,
-    folds = list(1:2),
-    edges = edges,
-    metrics = metrics,
+    params = list(return_edges = "sum"),
     predictions = predictions,
-    params = list(return_edges = "sum")
+    edges = edges,
+    folds = list(1:2),
+    metrics = metrics
   )
 
   expect_s3_class(resamples_object, "cpm_resamples")
+  expect_identical(as.character(resamples_object$call[[1]]), "fit_resamples")
   expect_identical(resamples_object$metrics, metrics)
   expect_identical(resamples_object$predictions, predictions)
 })
@@ -86,6 +88,7 @@ test_that("compute_fold_predictions annotates rows with fold ids", {
 test_that("print.cpm_resamples prints NA instead of NaN for all-NA metrics", {
   x <- structure(
     list(
+      call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       folds = list(1:2, 3:4),
       predictions = data.frame(row = 1:4, fold = c(1, 1, 2, 2)),
       metrics = data.frame(
@@ -108,6 +111,7 @@ test_that("print.cpm_resamples prints NA instead of NaN for all-NA metrics", {
 test_that("print.cpm_resamples computes finite means when available", {
   x <- structure(
     list(
+      call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       folds = list(1:2, 3:4),
       predictions = data.frame(row = 1:4, fold = c(1, 1, 2, 2)),
       metrics = data.frame(

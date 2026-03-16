@@ -11,14 +11,15 @@ fold-level outputs from resampling.
 
 A \code{cpm_resamples} object is a list with the following elements:
 \describe{
+\item{\code{call}}{Matched call used for resampling.}
 \item{\code{spec}}{The originating \code{cpm_spec} object.}
-\item{\code{folds}}{List of assessment-row indices for each fold.}
-\item{\code{metrics}}{Data frame of fold-level performance metrics.}
+\item{\code{params}}{Parameter list used for the resampling run.}
 \item{\code{predictions}}{Data frame of observation-level predictions with
 fold IDs.}
 \item{\code{edges}}{Stored edge output based on \code{return_edges}
 (\code{NULL}/matrix/array).}
-\item{\code{params}}{Parameter list used for the resampling run.}
+\item{\code{folds}}{List of assessment-row indices for each fold.}
+\item{\code{metrics}}{Data frame of fold-level performance metrics.}
 }
 }
 

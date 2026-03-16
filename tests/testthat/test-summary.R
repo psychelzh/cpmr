@@ -10,11 +10,12 @@ test_that("Works for basic summary", {
 test_that("summary.cpm returns NA when fewer than two valid pairs", {
   sparse_object <- structure(
     list(
-      real = c(NA_real_, 2, NA_real_),
-      pred = matrix(
-        c(1, 2, 3, 1, 2, 3, 1, 2, 3),
-        ncol = 3,
-        dimnames = list(NULL, c("both", "pos", "neg"))
+      predictions = data.frame(
+        row = 1:3,
+        real = c(NA_real_, 2, NA_real_),
+        both = c(1, 2, 3),
+        pos = c(1, 2, 3),
+        neg = c(1, 2, 3)
       ),
       edges = NULL,
       params = list()

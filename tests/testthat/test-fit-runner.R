@@ -20,11 +20,34 @@ test_that("run_single_fit matches fit() outputs on single data", {
     na_action = "fail"
   )
 
-  expect_equal(internal_result$pred, api_result$pred)
+  expect_equal(internal_result$predictions, api_result$predictions)
   expect_equal(internal_result$edges, api_result$edges)
   expect_false("folds" %in% names(internal_result))
   expect_false("folds" %in% names(api_result))
   expect_equal(internal_result$model$models, api_result$model$models)
+})
+
+test_that("init_pred preserves prediction matrix structure", {
+  behav <- stats::setNames(rnorm(5), paste0("s", 1:5))
+
+  pred <- init_pred(behav)
+
+  expect_equal(dim(pred), c(5, 3))
+  expect_identical(rownames(pred), names(behav))
+  expect_identical(colnames(pred), c("both", "pos", "neg"))
+})
+
+test_that("init_edges allocates expected structures", {
+  conmat <- matrix(rnorm(40), ncol = 4)
+
+  edges_sum <- init_edges("sum", conmat, kfolds = 5)
+  expect_equal(dim(edges_sum), c(ncol(conmat), 2))
+  expect_identical(colnames(edges_sum), c("pos", "neg"))
+
+  edges_all <- init_edges("all", conmat, kfolds = 5)
+  expect_equal(dim(edges_all), c(ncol(conmat), 2, 5))
+
+  expect_null(init_edges("none", conmat, kfolds = 5))
 })
 
 test_that("run_resample_fit matches fit_resamples() outputs", {
@@ -32,6 +55,7 @@ test_that("run_resample_fit matches fit_resamples() outputs", {
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(thresh_method = "sparsity", thresh_level = 0.2)
+  call <- quote(fit_resamples(object = spec, conmat = conmat, behav = behav))
 
   withr::local_seed(999)
   folds <- crossv_kfold(seq_along(behav), 5)
@@ -44,7 +68,8 @@ test_that("run_resample_fit matches fit_resamples() outputs", {
     covariates = NULL,
     folds = folds,
     return_edges = "sum",
-    na_action = "fail"
+    na_action = "fail",
+    call = call
   )
   api_result <- fit_resamples(
     spec,
@@ -56,6 +81,7 @@ test_that("run_resample_fit matches fit_resamples() outputs", {
   )
 
   expect_identical(internal_result$folds, api_result$folds)
+  expect_identical(internal_result$call, call)
   expect_equal(internal_result$edges, api_result$edges)
   expect_equal(internal_result$metrics, api_result$metrics)
   expect_equal(internal_result$predictions, api_result$predictions)

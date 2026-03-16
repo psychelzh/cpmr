@@ -75,6 +75,7 @@ test_that("fit_resamples returns fold metrics and predictions", {
   res <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
 
   expect_s3_class(res, "cpm_resamples")
+  expect_identical(as.character(res$call[[1]]), "fit_resamples")
   expect_s3_class(res$spec, "cpm_spec")
   expect_identical(length(res$folds), 5L)
   expect_equal(nrow(collect_metrics(res)), 5)

@@ -56,16 +56,16 @@ cpm_fit <- function(
     bias_correct = bias_correct
   )
 
-  fit <- run_single_fit(
-    object = spec,
+  result <- fit(
+    spec,
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    na_action = na_action,
-    call = call
+    na_action = na_action
   )
 
-  fit
+  result$call <- call
+  result
 }
 
 #' @rdname cpm_fit
@@ -82,7 +82,9 @@ cpm_fit_resamples <- function(
   return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 ) {
+  call <- match.call()
   return_edges <- match.arg(return_edges)
+  na_action <- match.arg(na_action)
 
   spec <- cpm_spec(
     thresh_method = thresh_method,
@@ -90,7 +92,7 @@ cpm_fit_resamples <- function(
     bias_correct = bias_correct
   )
 
-  fit_resamples(
+  result <- fit_resamples(
     spec,
     conmat = conmat,
     behav = behav,
@@ -100,4 +102,7 @@ cpm_fit_resamples <- function(
     return_edges = return_edges,
     na_action = na_action
   )
+
+  result$call <- call
+  result
 }
