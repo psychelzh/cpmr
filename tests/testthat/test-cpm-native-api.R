@@ -9,7 +9,6 @@ test_that("cpm_fit matches fit(cpm_spec()) on the same inputs", {
     thresh_method = "sparsity",
     thresh_level = 0.2,
     bias_correct = FALSE,
-    return_edges = "sum",
     na_action = "fail"
   )
   via_spec <- fit(
@@ -26,6 +25,7 @@ test_that("cpm_fit matches fit(cpm_spec()) on the same inputs", {
 
   expect_s3_class(direct, "cpm")
   expect_identical(as.character(direct$call[[1]]), "cpm_fit")
+  expect_false("return_edges" %in% names(direct$params))
   expect_equal(direct$pred, via_spec$pred)
   expect_equal(direct$edges, via_spec$edges)
   expect_equal(direct$model$models, via_spec$model$models)
@@ -45,7 +45,6 @@ test_that("cpm_fit_resamples matches fit_resamples(cpm_spec())", {
     thresh_method = "sparsity",
     thresh_level = 0.2,
     bias_correct = FALSE,
-    return_edges = "sum",
     na_action = "fail"
   )
   withr::local_seed(999)
@@ -63,6 +62,7 @@ test_that("cpm_fit_resamples matches fit_resamples(cpm_spec())", {
   )
 
   expect_s3_class(direct, "cpm_resamples")
+  expect_identical(direct$params$return_edges, "sum")
   expect_identical(direct$folds, via_spec$folds)
   expect_equal(direct$metrics, via_spec$metrics)
   expect_equal(direct$predictions, via_spec$predictions)

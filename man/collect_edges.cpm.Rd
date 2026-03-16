@@ -12,7 +12,7 @@
 \item{...}{For future extension. Currently ignored.}
 }
 \value{
-A matrix for \code{return_edges = "sum"}, a 3D array for
+A matrix when single-fit edges are stored, a 3D array for
 \code{return_edges = "all"}, or \code{NULL} for \code{return_edges = "none"}.
 }
 \description{

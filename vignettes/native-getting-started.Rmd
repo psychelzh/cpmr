@@ -60,8 +60,7 @@ fit_obj <- cpm_fit(
   behav = behav,
   covariates = covariates,
   thresh_method = "alpha",
-  thresh_level = 0.05,
-  return_edges = "sum"
+  thresh_level = 0.05
 )
 
 fit_obj
@@ -69,8 +68,8 @@ summary(fit_obj)
 dim(collect_edges(fit_obj))
 ```
 
-For a single fit, `return_edges = "sum"` stores a `p x 2` edge-selection mask
-with `pos` and `neg` columns. This is useful for inspecting the selected
+For a single fit, `cpm_fit()` stores a `p x 2` edge-selection mask with `pos`
+and `neg` columns by default. This is useful for inspecting the selected
 network, but the performance reported by `summary()` is still in-sample.
 
 ## Cross-Validated Resampling with `cpm_fit_resamples()`
@@ -83,8 +82,7 @@ resample_obj <- cpm_fit_resamples(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
-  kfolds = 5,
-  return_edges = "sum"
+  kfolds = 5
 )
 
 resample_obj
@@ -110,8 +108,9 @@ str(edge_index)
 `na_action = "exclude"` removed subjects before fitting, those rows are still
 present and their `fold` value is `NA`.
 
-For resampling, `return_edges = "sum"` stores fold-summed counts for each edge.
-If memory matters, use `return_edges = "none"` to skip edge storage entirely.
+For resampling, the default `return_edges = "sum"` stores fold-summed counts
+for each edge. If memory matters, use `return_edges = "none"` to skip edge
+storage entirely.
 
 ## Custom Resamples
 

@@ -49,13 +49,12 @@ conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
 fit_obj <- cpm_fit(
   conmat = conmat,
-  behav = behav,
-  return_edges = "sum"
+  behav = behav
 )
 
 fit_obj
 #> CPM results:
-#>   Call: cpm_fit(conmat = conmat, behav = behav, return_edges = "sum")
+#>   Call: cpm_fit(conmat = conmat, behav = behav)
 #>   Number of observations: 100
 #>     Complete cases: 100
 #>   Number of edges: 1000
@@ -63,7 +62,7 @@ fit_obj
 #>     Covariates:       FALSE
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
-#>     Stored splits:    1
+#>     Edge storage:     stored
 #>     Bias correction:  TRUE
 summary(fit_obj)
 #> CPM summary:
@@ -71,7 +70,7 @@ summary(fit_obj)
 #>     Positive: 0.595
 #>     Negative: 0.387
 #>     Combined: 0.676
-#>   Prop. edges (50% folds):
+#>   Selected edges:
 #>     Positive: 0.70%
 #>     Negative: 0.20%
 ```
@@ -83,8 +82,7 @@ Cross-validated resampling uses the matching native helper
 resample_obj <- cpm_fit_resamples(
   conmat = conmat,
   behav = behav,
-  kfolds = 5,
-  return_edges = "sum"
+  kfolds = 5
 )
 
 collect_metrics(resample_obj)

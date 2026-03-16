@@ -63,8 +63,7 @@ collect_metrics(fit)
 single_fit <- cpm_fit(
   conmat = conmat,
   behav = behav,
-  covariates = covariates,
-  return_edges = "sum"
+  covariates = covariates
 )
 
 resamples_fit <- cpm_fit_resamples(

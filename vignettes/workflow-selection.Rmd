@@ -39,7 +39,7 @@ set.seed(123)
 conmat <- matrix(rnorm(80 * 200), nrow = 80)
 behav <- rnorm(80)
 
-fit_obj <- cpm_fit(conmat, behav, return_edges = "sum")
+fit_obj <- cpm_fit(conmat, behav)
 resample_obj <- cpm_fit_resamples(conmat, behav, kfolds = 5)
 
 summary(fit_obj)

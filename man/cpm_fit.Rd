@@ -12,7 +12,6 @@ cpm_fit(
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
   bias_correct = TRUE,
-  return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 )
 
@@ -25,7 +24,7 @@ cpm_fit_resamples(
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
   bias_correct = TRUE,
-  return_edges = c("none", "sum", "all"),
+  return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 )
 }
@@ -42,11 +41,6 @@ covariates in columns.}
 \item{thresh_method, thresh_level, bias_correct}{CPM modeling parameters passed
 through to \code{\link[=cpm_spec]{cpm_spec()}}.}
 
-\item{return_edges}{How selected edges should be stored. For \code{cpm_fit()},
-\code{"sum"} stores the selected edge mask, \code{"all"} stores a singleton 3D array,
-and \code{"none"} skips edge storage. For \code{cpm_fit_resamples()}, \code{"sum"} stores
-fold-summed edges and \code{"all"} stores fold-wise edge arrays.}
-
 \item{na_action}{How to handle missing values. \code{"fail"} errors when missing
 values are present; \code{"exclude"} fits on complete cases and preserves row
 positions in outputs.}
@@ -54,6 +48,11 @@ positions in outputs.}
 \item{resamples}{Optional list of assessment indices for custom resampling.}
 
 \item{kfolds}{Number of folds used when \code{resamples} is \code{NULL}.}
+
+\item{return_edges}{How selected edges should be stored for
+\code{cpm_fit_resamples()}. \code{"sum"} stores fold-summed edges, \code{"all"} stores
+fold-wise edge arrays, and \code{"none"} skips edge storage. \code{cpm_fit()}
+always stores the single-fit edge mask by default.}
 }
 \value{
 \code{cpm_fit()} returns a fitted \code{cpm} object.

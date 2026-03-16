@@ -16,10 +16,10 @@
 #'   covariates in columns.
 #' @param thresh_method,thresh_level,bias_correct CPM modeling parameters passed
 #'   through to [cpm_spec()].
-#' @param return_edges How selected edges should be stored. For `cpm_fit()`,
-#'   `"sum"` stores the selected edge mask, `"all"` stores a singleton 3D array,
-#'   and `"none"` skips edge storage. For `cpm_fit_resamples()`, `"sum"` stores
-#'   fold-summed edges and `"all"` stores fold-wise edge arrays.
+#' @param return_edges How selected edges should be stored for
+#'   `cpm_fit_resamples()`. `"sum"` stores fold-summed edges, `"all"` stores
+#'   fold-wise edge arrays, and `"none"` skips edge storage. `cpm_fit()`
+#'   always stores the single-fit edge mask by default.
 #' @param na_action How to handle missing values. `"fail"` errors when missing
 #'   values are present; `"exclude"` fits on complete cases and preserves row
 #'   positions in outputs.
@@ -45,11 +45,9 @@ cpm_fit <- function(
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
   bias_correct = TRUE,
-  return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 ) {
   call <- match.call()
-  return_edges <- match.arg(return_edges)
   na_action <- match.arg(na_action)
 
   spec <- cpm_spec(
@@ -58,15 +56,18 @@ cpm_fit <- function(
     bias_correct = bias_correct
   )
 
-  run_single_fit(
+  fit <- run_single_fit(
     object = spec,
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    return_edges = return_edges,
+    return_edges = "sum",
     na_action = na_action,
     call = call
   )
+
+  fit$params$return_edges <- NULL
+  fit
 }
 
 #' @rdname cpm_fit
@@ -80,9 +81,11 @@ cpm_fit_resamples <- function(
   thresh_method = c("alpha", "sparsity"),
   thresh_level = 0.01,
   bias_correct = TRUE,
-  return_edges = c("none", "sum", "all"),
+  return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 ) {
+  return_edges <- match.arg(return_edges)
+
   spec <- cpm_spec(
     thresh_method = thresh_method,
     thresh_level = thresh_level,

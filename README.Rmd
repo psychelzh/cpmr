@@ -55,8 +55,7 @@ conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
 fit_obj <- cpm_fit(
   conmat = conmat,
-  behav = behav,
-  return_edges = "sum"
+  behav = behav
 )
 
 fit_obj
@@ -70,8 +69,7 @@ Cross-validated resampling uses the matching native helper
 resample_obj <- cpm_fit_resamples(
   conmat = conmat,
   behav = behav,
-  kfolds = 5,
-  return_edges = "sum"
+  kfolds = 5
 )
 
 collect_metrics(resample_obj)
