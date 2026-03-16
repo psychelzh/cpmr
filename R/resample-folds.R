@@ -103,7 +103,7 @@ warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
     return(invisible())
   }
 
-  estimated_bytes <- as.double(n_edges) * length(corr_types) * kfolds * 4
+  estimated_bytes <- as.double(n_edges) * length(edge_types) * kfolds * 4
   threshold_bytes <- 10 * 1024^2
   if (estimated_bytes > threshold_bytes) {
     warning(

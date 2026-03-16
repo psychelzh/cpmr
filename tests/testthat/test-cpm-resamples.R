@@ -11,15 +11,6 @@ test_that("print.cpm_resamples reports summary fields", {
   expect_output(print(res), "Edge storage")
 })
 
-test_that("safe_cor returns NA for degenerate vectors", {
-  expect_true(is.na(safe_cor(c(1, 1, 1), c(1, 2, 3))))
-  expect_true(is.na(safe_cor(c(1), c(1))))
-})
-
-test_that("safe_cor returns correlation for valid vectors", {
-  expect_equal(safe_cor(c(1, 2, 3), c(2, 4, 6)), 1)
-})
-
 test_that("compute_fold_metrics summarizes each assessment fold", {
   real <- c(1, 2, 3, 4)
   pred <- cbind(

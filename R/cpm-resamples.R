@@ -1,12 +1,5 @@
 #' @export
 print.cpm_resamples <- function(x, ...) {
-  safe_mean <- function(x) {
-    if (all(is.na(x))) {
-      return(NA_real_)
-    }
-    mean(x, na.rm = TRUE)
-  }
-
   cat("CPM resample results:\n")
   cat(sprintf("  Number of folds: %d\n", length(x$folds)))
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
@@ -109,20 +102,4 @@ compute_fold_predictions <- function(real, pred, folds) {
     pos = pred[, "pos"],
     neg = pred[, "neg"]
   )
-}
-
-safe_cor <- function(x, y, method = c("pearson", "spearman")) {
-  method <- match.arg(method)
-  valid <- stats::complete.cases(x, y)
-  if (sum(valid) < 2) {
-    return(NA_real_)
-  }
-
-  x <- x[valid]
-  y <- y[valid]
-  if (stats::sd(x) == 0 || stats::sd(y) == 0) {
-    return(NA_real_)
-  }
-
-  stats::cor(x, y, method = method)
 }

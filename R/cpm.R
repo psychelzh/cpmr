@@ -158,19 +158,3 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
     }
   )
 }
-
-safe_mean <- function(x) {
-  if (length(x) == 0L || all(is.na(x))) {
-    return(NA_real_)
-  }
-
-  mean(x, na.rm = TRUE)
-}
-
-format_cor <- function(x) {
-  ifelse(is.na(x), "NA", sprintf("%.3f", x))
-}
-
-format_rate <- function(x) {
-  ifelse(is.na(x), "NA", sprintf("%.2f%%", x * 100))
-}

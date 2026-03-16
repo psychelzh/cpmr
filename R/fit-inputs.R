@@ -1,6 +1,3 @@
-corr_types <- c("pos", "neg")
-inc_edges <- c("both", corr_types)
-
 check_names <- function(data, behav) {
   if (!is.null(rownames(data)) && !is.null(names(behav))) {
     if (!identical(rownames(data), names(behav))) {
@@ -79,13 +76,13 @@ init_edges <- function(return_edges, conmat, kfolds) {
   switch(
     return_edges,
     all = array(
-      dim = c(dim(conmat)[2], length(corr_types), kfolds),
-      dimnames = list(NULL, corr_types, NULL)
+      dim = c(dim(conmat)[2], length(edge_types), kfolds),
+      dimnames = list(NULL, edge_types, NULL)
     ),
     sum = array(
       0,
-      dim = c(dim(conmat)[2], length(corr_types)),
-      dimnames = list(NULL, corr_types)
+      dim = c(dim(conmat)[2], length(edge_types)),
+      dimnames = list(NULL, edge_types)
     ),
     none = NULL
   )
@@ -94,7 +91,7 @@ init_edges <- function(return_edges, conmat, kfolds) {
 init_pred <- function(behav) {
   matrix(
     nrow = length(behav),
-    ncol = length(inc_edges),
-    dimnames = list(names(behav), inc_edges)
+    ncol = length(prediction_types),
+    dimnames = list(names(behav), prediction_types)
   )
 }

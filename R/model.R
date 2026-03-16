@@ -1,3 +1,6 @@
+edge_types <- c("pos", "neg")
+prediction_types <- c("both", edge_types)
+
 critical_r <- function(n, alpha) {
   df <- n - 2
   ct <- stats::qt(alpha / 2, df, lower.tail = FALSE)
@@ -28,7 +31,7 @@ select_edges <- function(conmat, behav, method, level) {
   matrix(
     c(r_mat >= r_crit[2], r_mat <= r_crit[1]),
     ncol = 2,
-    dimnames = list(NULL, corr_types)
+    dimnames = list(NULL, edge_types)
   )
 }
 
@@ -48,24 +51,24 @@ train_model <- function(conmat, behav, edges, bias_correct) {
   x <- matrix(
     1,
     nrow = dim(conmat)[1],
-    ncol = length(corr_types) + 1,
-    dimnames = list(NULL, c("(Intercept)", corr_types))
+    ncol = length(edge_types) + 1,
+    dimnames = list(NULL, c("(Intercept)", edge_types))
   )
-  for (corr_type in corr_types) {
-    x[, corr_type] <- Rfast::rowsums(
-      conmat[, edges[, corr_type], drop = FALSE]
+  for (edge_type in edge_types) {
+    x[, edge_type] <- Rfast::rowsums(
+      conmat[, edges[, edge_type], drop = FALSE]
     )
   }
 
-  models <- lapply(inc_edges, function(inc_edge) {
-    cur_x <- if (inc_edge == "both") {
+  models <- lapply(prediction_types, function(prediction_type) {
+    cur_x <- if (prediction_type == "both") {
       x
     } else {
-      x[, c("(Intercept)", inc_edge)]
+      x[, c("(Intercept)", prediction_type)]
     }
     stats::.lm.fit(cur_x, behav)$coefficients
   })
-  names(models) <- inc_edges
+  names(models) <- prediction_types
 
   list(
     bias_correct = bias_correct,
@@ -84,27 +87,27 @@ predict_model <- function(model, conmat_new) {
   x_new <- matrix(
     1,
     nrow = dim(conmat_new)[1],
-    ncol = length(corr_types) + 1,
-    dimnames = list(NULL, c("(Intercept)", corr_types))
+    ncol = length(edge_types) + 1,
+    dimnames = list(NULL, c("(Intercept)", edge_types))
   )
-  for (corr_type in corr_types) {
-    x_new[, corr_type] <- Rfast::rowsums(
-      conmat_new[, model$edges[, corr_type], drop = FALSE]
+  for (edge_type in edge_types) {
+    x_new[, edge_type] <- Rfast::rowsums(
+      conmat_new[, model$edges[, edge_type], drop = FALSE]
     )
   }
 
   pred <- matrix(
     nrow = dim(conmat_new)[1],
-    ncol = length(inc_edges),
-    dimnames = list(NULL, inc_edges)
+    ncol = length(prediction_types),
+    dimnames = list(NULL, prediction_types)
   )
-  for (inc_edge in inc_edges) {
-    cur_x_new <- if (inc_edge == "both") {
+  for (prediction_type in prediction_types) {
+    cur_x_new <- if (prediction_type == "both") {
       x_new
     } else {
-      x_new[, c("(Intercept)", inc_edge)]
+      x_new[, c("(Intercept)", prediction_type)]
     }
-    pred[, inc_edge] <- cur_x_new %*% model$models[[inc_edge]]
+    pred[, prediction_type] <- cur_x_new %*% model$models[[prediction_type]]
   }
 
   pred
