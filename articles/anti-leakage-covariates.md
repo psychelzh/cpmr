@@ -66,7 +66,8 @@ resamples_fit <- fit_resamples(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
-  kfolds = 5
+  kfolds = 5,
+  return_edges = "sum"
 )
 
 summary(resamples_fit)
@@ -76,6 +77,9 @@ summary(resamples_fit)
 #>     Combined: 0.214 (SE 0.120)
 #>     Positive: 0.235 (SE 0.120)
 #>     Negative: -0.115 (SE 0.080)
+#>   Selected edges:
+#>     Positive: 1.50%
+#>     Negative: 0.33%
 head(resamples_fit$predictions)
 #>   row fold       real        both         pos           neg
 #> 1   1    4 -0.5862850 -0.13713172 -0.13713172  1.647987e-17
@@ -85,14 +89,13 @@ head(resamples_fit$predictions)
 #> 5   5    5 -1.5329525 -0.07744804 -0.07744804 -1.040834e-17
 #> 6   6    3  0.4996146  0.56813333  0.56813333 -1.734723e-17
 dim(resamples_fit$edges)
-#> NULL
+#> [1] 120   2
 ```
 
-If you prefer explicit parameter objects, the lower-level
-[`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md) +
-[`fit()`](https://generics.r-lib.org/reference/fit.html) /
-[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
-path is the native interface and routes through the same CPM core.
+Using a reusable
+[`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
+object is helpful when you want the same CPM settings to drive both
+single-fit and resampling analyses.
 
 ## Edge Storage Tips
 

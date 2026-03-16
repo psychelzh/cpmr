@@ -70,22 +70,27 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p><code>cpmr</code> supports more than one way to express a CPM
-analysis, but they do not all serve the same purpose.</p>
-<p>The package is organized around a core-first design:</p>
+<p><code>cpmr</code> is organized around one native workflow: create a
+<code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> object, then use <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> or
+<code><a href="../reference/fit_resamples.html">fit_resamples()</a></code> depending on the question you want to
+answer.</p>
+<p>The main choice is not between different API families. It is
+between:</p>
 <ul>
-<li>the native <code>cpmr</code> path is the primary workflow for
-fitting, resampling, and future tuning extensions;</li>
 <li>
-<code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> is the native way to make CPM parameters
-explicit and reusable.</li>
+<code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> for a single in-sample CPM fit;</li>
+<li>
+<code><a href="../reference/fit_resamples.html">fit_resamples()</a></code> for out-of-sample resampling;</li>
+<li>
+<code>fit_resamples(..., resamples = ...)</code> when you already
+have a partition scheme you want to enforce.</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="recommended-path-cpm_spec">Recommended Path: <code>cpm_spec()</code><a class="anchor" aria-label="anchor" href="#recommended-path-cpm_spec"></a>
+<h2 id="start-with-cpm_spec">Start with <code>cpm_spec()</code><a class="anchor" aria-label="anchor" href="#start-with-cpm_spec"></a>
 </h2>
-<p>For most analyses, start with <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> together with
-<code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> and <code><a href="../reference/fit_resamples.html">fit_resamples()</a></code>.</p>
+<p>For most analyses, start with <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> and reuse it
+across single-fit and resampling calls.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/psychelzh/cpmr" class="external-link">cpmr</a></span><span class="op">)</span></span>
 <span></span>
@@ -113,7 +118,7 @@ explicit and reusable.</li>
 <span><span class="co">#&gt;     Combined: -0.041 (SE 0.202)</span></span>
 <span><span class="co">#&gt;     Positive: -0.161 (SE 0.160)</span></span>
 <span><span class="co">#&gt;     Negative: 0.025 (SE 0.194)</span></span></code></pre></div>
-<p>This path is the best fit when you care about:</p>
+<p>This workflow is the best fit when you care about:</p>
 <ul>
 <li>large edge spaces;</li>
 <li>repeated resampling;</li>
@@ -125,8 +130,9 @@ reuse.</li>
 <div class="section level2">
 <h2 id="practical-rule-of-thumb">Practical Rule of Thumb<a class="anchor" aria-label="anchor" href="#practical-rule-of-thumb"></a>
 </h2>
-<p>Choose the native <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> path when you need speed,
-explicit CPM behavior, or resampling-heavy experiments.</p>
+<p>Use <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> when you want to inspect one fitted CPM model
+on the current data. Use <code><a href="../reference/fit_resamples.html">fit_resamples()</a></code> when you want an
+out-of-sample performance estimate or a custom resampling design.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

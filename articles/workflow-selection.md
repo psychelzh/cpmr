@@ -2,23 +2,27 @@
 
 ## Overview
 
-`cpmr` supports more than one way to express a CPM analysis, but they do
-not all serve the same purpose.
+`cpmr` is organized around one native workflow: create a
+[`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
+object, then use
+[`fit()`](https://generics.r-lib.org/reference/fit.html) or
+[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
+depending on the question you want to answer.
 
-The package is organized around a core-first design:
+The main choice is not between different API families. It is between:
 
-- the native `cpmr` path is the primary workflow for fitting,
-  resampling, and future tuning extensions;
-- [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-  is the native way to make CPM parameters explicit and reusable.
+- [`fit()`](https://generics.r-lib.org/reference/fit.html) for a single
+  in-sample CPM fit;
+- [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
+  for out-of-sample resampling;
+- `fit_resamples(..., resamples = ...)` when you already have a
+  partition scheme you want to enforce.
 
-## Recommended Path: `cpm_spec()`
+## Start with `cpm_spec()`
 
 For most analyses, start with
 [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-together with [`fit()`](https://generics.r-lib.org/reference/fit.html)
-and
-[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md).
+and reuse it across single-fit and resampling calls.
 
 ``` r
 library(cpmr)
@@ -49,7 +53,7 @@ summary(resample_obj)
 #>     Negative: 0.025 (SE 0.194)
 ```
 
-This path is the best fit when you care about:
+This workflow is the best fit when you care about:
 
 - large edge spaces;
 - repeated resampling;
@@ -58,7 +62,8 @@ This path is the best fit when you care about:
 
 ## Practical Rule of Thumb
 
-Choose the native
-[`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-path when you need speed, explicit CPM behavior, or resampling-heavy
-experiments.
+Use [`fit()`](https://generics.r-lib.org/reference/fit.html) when you
+want to inspect one fitted CPM model on the current data. Use
+[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
+when you want an out-of-sample performance estimate or a custom
+resampling design.

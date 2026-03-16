@@ -126,13 +126,12 @@ selection, and model training inside each resample fold.
 
 ## Inspect Predictions and Edges
 
-Native resampling results keep raw observation-level outputs directly on
-the object, while [`summary()`](https://rdrr.io/r/base/summary.html)
+Native resampling results always keep raw observation-level predictions
+on the object, while [`summary()`](https://rdrr.io/r/base/summary.html)
 derives fold-level performance when you need an aggregate view.
 
 ``` r
 predictions <- resample_obj$predictions
-edges <- resample_obj$edges
 
 summary(resample_obj)
 #> CPM resample summary:
@@ -149,17 +148,38 @@ head(predictions)
 #> 4   4    3  0.7870086 -0.001288122 -0.001288122  2.428613e-17
 #> 5   5    5  0.1169538 -0.023682986 -0.023682986  1.994932e-17
 #> 6   6    3  0.7875511  0.255961736  0.255961736  2.428613e-17
-dim(edges)
-#> NULL
+```
+
+By default,
+[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
+uses `return_edges = "none"` and skips edge storage. This keeps the
+resampling object light when you only need predictive performance.
+
+If you also want fold-aggregated edge selection rates, request them
+explicitly:
+
+``` r
+edge_resample_obj <- fit_resamples(
+  cpm_spec(),
+  conmat = conmat,
+  behav = behav,
+  covariates = covariates,
+  kfolds = 5,
+  return_edges = "sum"
+)
+
+dim(edge_resample_obj$edges)
+#> [1] 200   2
 ```
 
 `predictions` returns one row per original observation. If
 `na_action = "exclude"` removed subjects before fitting, those rows are
 still present and their `fold` value is `NA`.
 
-For resampling, the default `return_edges = "sum"` stores fold-summed
-counts for each edge. If memory matters, use `return_edges = "none"` to
-skip edge storage entirely.
+When `return_edges = "sum"`, `cpmr` stores fold-summed edge counts for
+each edge. If memory matters, keep the default `return_edges = "none"`
+or use `return_edges = "all"` only when fold-wise edge arrays are truly
+needed.
 
 ## Custom Resamples
 
