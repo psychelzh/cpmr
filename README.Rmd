@@ -72,8 +72,9 @@ resample_obj <- cpm_fit_resamples(
   kfolds = 5
 )
 
-collect_metrics(resample_obj)
-collect_edges(resample_obj, format = "index")
+summary(resample_obj)
+head(resample_obj$metrics)
+dim(resample_obj$edges)
 ```
 
 ## Choosing a path

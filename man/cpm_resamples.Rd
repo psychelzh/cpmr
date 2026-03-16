@@ -24,6 +24,5 @@ fold IDs.}
 }
 
 \seealso{
-\code{\link[=fit_resamples]{fit_resamples()}}, \code{\link[=collect_metrics]{collect_metrics()}}, \code{\link[=collect_predictions]{collect_predictions()}},
-\code{\link[=collect_edges]{collect_edges()}}
+\code{\link[=fit_resamples]{fit_resamples()}}, \code{\link[=summary.cpm_resamples]{summary.cpm_resamples()}}
 }

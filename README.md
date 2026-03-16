@@ -66,9 +66,9 @@ fit_obj
 summary(fit_obj)
 #> CPM summary:
 #>   Performance (Pearson):
+#>     Combined: 0.676
 #>     Positive: 0.595
 #>     Negative: 0.387
-#>     Combined: 0.676
 #>   Selected edges:
 #>     Positive: 0.70%
 #>     Negative: 0.20%
@@ -84,22 +84,25 @@ resample_obj <- cpm_fit_resamples(
   kfolds = 5
 )
 
-collect_metrics(resample_obj)
-#> # A tibble: 5 × 5
-#>    fold n_assess    both     pos     neg
-#>   <int>    <int>   <dbl>   <dbl>   <dbl>
-#> 1     1       20 -0.121  -0.0291 -0.102 
-#> 2     2       20  0.138   0.139   0.0356
-#> 3     3       20 -0.214  -0.286  -0.0210
-#> 4     4       20 -0.119   0.239  -0.279 
-#> 5     5       20  0.0309 -0.0224  0.188
-collect_edges(resample_obj, format = "index")
-#> $pos
-#>  [1]   9  50  54  75 298 385 541 543 561 581 622 639 679 717 723 817 853 940 955
-#> [20] 997
-#> 
-#> $neg
-#>  [1]  57  71 191 270 309 427 435 630 687 757 770 878 909
+summary(resample_obj)
+#> CPM resample summary:
+#>   Number of folds: 5
+#>   Performance:
+#>     Combined: -0.057 (SE 0.062)
+#>     Positive: 0.008 (SE 0.089)
+#>     Negative: -0.036 (SE 0.077)
+#>   Selected edges:
+#>     Positive: 0.56%
+#>     Negative: 0.32%
+head(resample_obj$metrics)
+#>   fold n_assess        both         pos         neg
+#> 1    1       20 -0.12117842 -0.02914167 -0.10186599
+#> 2    2       20  0.13754956  0.13929784  0.03564001
+#> 3    3       20 -0.21377733 -0.28600381 -0.02101708
+#> 4    4       20 -0.11890438  0.23862535 -0.27888050
+#> 5    5       20  0.03090406 -0.02240053  0.18779668
+dim(resample_obj$edges)
+#> [1] 1000    2
 ```
 
 ## Choosing a path

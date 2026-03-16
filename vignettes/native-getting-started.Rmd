@@ -65,7 +65,7 @@ fit_obj <- cpm_fit(
 
 fit_obj
 summary(fit_obj)
-dim(collect_edges(fit_obj))
+dim(fit_obj$edges)
 ```
 
 For a single fit, `cpm_fit()` stores a `p x 2` edge-selection mask with `pos`
@@ -86,7 +86,7 @@ resample_obj <- cpm_fit_resamples(
 )
 
 resample_obj
-collect_metrics(resample_obj)
+summary(resample_obj)
 ```
 
 This keeps CPM-specific steps such as covariate handling, edge selection, and
@@ -94,17 +94,19 @@ model training inside each resample fold.
 
 ## Inspect Metrics, Predictions, and Edges
 
-Native resampling results support three main accessors.
+Native resampling results keep raw fold-level outputs directly on the object.
 
 ```{r}
-predictions <- collect_predictions(resample_obj)
-edge_index <- collect_edges(resample_obj, format = "index")
+metrics <- resample_obj$metrics
+predictions <- resample_obj$predictions
+edges <- resample_obj$edges
 
+head(metrics)
 head(predictions)
-str(edge_index)
+dim(edges)
 ```
 
-`collect_predictions()` returns one row per original observation. If
+`predictions` returns one row per original observation. If
 `na_action = "exclude"` removed subjects before fitting, those rows are still
 present and their `fold` value is `NA`.
 
@@ -129,7 +131,7 @@ custom_obj <- cpm_fit_resamples(
   return_edges = "none"
 )
 
-collect_metrics(custom_obj)
+summary(custom_obj)
 ```
 
 Custom resamples must:
@@ -157,7 +159,7 @@ na_obj <- cpm_fit_resamples(
   na_action = "exclude"
 )
 
-na_predictions <- collect_predictions(na_obj)
+na_predictions <- na_obj$predictions
 na_predictions[na_predictions$row %in% c(3, 11), ]
 ```
 

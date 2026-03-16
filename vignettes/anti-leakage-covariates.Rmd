@@ -54,7 +54,7 @@ fit <- fit_resamples(
   kfolds = 5
 )
 
-collect_metrics(fit)
+summary(fit)
 ```
 
 ## Native API
@@ -73,9 +73,9 @@ resamples_fit <- cpm_fit_resamples(
   kfolds = 5
 )
 
-collect_metrics(resamples_fit)
-collect_predictions(resamples_fit)
-collect_edges(resamples_fit, format = "index")
+summary(resamples_fit)
+head(resamples_fit$predictions)
+dim(resamples_fit$edges)
 ```
 
 If you prefer explicit parameter objects, the lower-level
@@ -87,7 +87,6 @@ through the same CPM core.
 For large feature spaces, fold-wise edge storage can grow quickly.
 
 - Use `return_edges = "sum"` to keep only fold-aggregated edge counts.
-- Use `collect_edges(..., format = "index")` to export sparse indices.
 - Use `return_edges = "none"` if you only need predictive performance.
 
 ## Anti-Leakage Checklist

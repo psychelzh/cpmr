@@ -23,5 +23,5 @@ with \code{pos} and \code{neg} columns.}
 }
 
 \seealso{
-\code{\link[=fit]{fit()}}, \code{\link[=summary.cpm]{summary.cpm()}}, \code{\link[=tidy.cpm]{tidy.cpm()}}, \code{\link[=collect_edges]{collect_edges()}}
+\code{\link[=fit]{fit()}}, \code{\link[=summary.cpm]{summary.cpm()}}, \code{\link[=tidy.cpm]{tidy.cpm()}}
 }

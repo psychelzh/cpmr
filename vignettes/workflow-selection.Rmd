@@ -41,7 +41,7 @@ fit_obj <- cpm_fit(conmat, behav)
 resample_obj <- cpm_fit_resamples(conmat, behav, kfolds = 5)
 
 summary(fit_obj)
-collect_metrics(resample_obj)
+summary(resample_obj)
 ```
 
 This path is the best fit when you care about:
