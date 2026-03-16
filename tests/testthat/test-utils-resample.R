@@ -62,7 +62,27 @@ test_that("warn_large_edge_storage signals large fold-wise storage", {
   expect_invisible(warn_large_edge_storage(10, 5, "sum"))
 })
 
-test_that("compute_fold_metrics summarizes each assessment fold", {
+test_that("compute_pooled_errors and correlations summarize predictions", {
+  predictions <- data.frame(
+    row = 1:4,
+    fold = c(1L, 1L, 2L, 2L),
+    real = c(1, 2, 3, 4),
+    both = c(1, 2, 3, 4),
+    pos = c(1, 2, 3, 4),
+    neg = c(4, 3, 2, 1)
+  )
+
+  errors <- compute_pooled_errors(predictions)
+  correlations <- compute_pooled_correlations(predictions)
+
+  expect_identical(rownames(errors), c("rmse", "mae"))
+  expect_named(correlations, c("both", "pos", "neg"))
+  expect_equal(errors["rmse", "both"], 0)
+  expect_equal(errors["mae", "both"], 0)
+  expect_equal(unname(correlations["both"]), 1)
+})
+
+test_that("compute_fold_correlations summarizes each assessment fold", {
   predictions <- data.frame(
     row = 1:4,
     fold = c(1L, 1L, 2L, 2L),
@@ -73,13 +93,30 @@ test_that("compute_fold_metrics summarizes each assessment fold", {
   )
   folds <- list(1:2, 3:4)
 
-  metrics <- compute_fold_metrics(predictions, folds)
+  correlations <- compute_fold_correlations(predictions, folds)
 
-  expect_named(metrics, c("fold", "n_assess", "both", "pos", "neg"))
-  expect_equal(metrics$fold, 1:2)
-  expect_equal(metrics$n_assess, c(2, 2))
-  expect_true(all(is.finite(metrics$both[1:2])))
-  expect_true(all(is.finite(metrics$pos[1:2])))
+  expect_named(correlations, c("fold", "n_assess", "both", "pos", "neg"))
+  expect_equal(correlations$fold, 1:2)
+  expect_equal(correlations$n_assess, c(2, 2))
+  expect_true(all(is.finite(correlations$both[1:2])))
+  expect_true(all(is.finite(correlations$pos[1:2])))
+})
+
+test_that("summarize_fold_correlations returns mean and standard error", {
+  predictions <- data.frame(
+    row = 1:6,
+    fold = c(1L, 1L, 1L, 2L, 2L, 2L),
+    real = c(1, 2, 3, 4, 5, 6),
+    both = c(1, 2, 3, 6, 5, 4),
+    pos = c(1, 2, 3, 4, 5, 6),
+    neg = c(3, 2, 1, 6, 5, 4)
+  )
+  folds <- list(1:3, 4:6)
+
+  summary <- summarize_fold_correlations(predictions, folds)
+
+  expect_identical(rownames(summary), c("mean", "std_error"))
+  expect_identical(colnames(summary), c("both", "pos", "neg"))
 })
 
 test_that("summarize_resample_edges handles sum, all, and none storage", {

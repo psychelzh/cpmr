@@ -57,7 +57,7 @@ test_that("print.cpm_summary reports NA edge rates when stored edges are all mis
   expect_true(any(grepl("Negative: NA", output, fixed = TRUE)))
 })
 
-test_that("summary.cpm_resamples aggregates fold metrics and edge rates", {
+test_that("summary.cpm_resamples reports pooled errors, correlations, and edge rates", {
   predictions <- data.frame(
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
@@ -81,27 +81,51 @@ test_that("summary.cpm_resamples aggregates fold metrics and edge rates", {
       folds = folds
     )
   )
-  fold_metrics <- compute_fold_metrics(predictions, folds)
+  fold_correlations <- compute_fold_correlations(predictions, folds)
 
   expect_s3_class(summary_result, "cpm_resamples_summary")
   expect_identical(
-    colnames(summary_result$performance),
+    colnames(summary_result$errors),
     c("both", "pos", "neg")
   )
-  expect_identical(rownames(summary_result$performance), c("mean", "std_error"))
+  expect_identical(rownames(summary_result$errors), c("rmse", "mae"))
   expect_equal(
-    summary_result$performance["mean", ],
+    summary_result$errors["rmse", ],
     vapply(
       prediction_types,
-      function(type) safe_mean(fold_metrics[[type]]),
+      function(type) safe_rmse(predictions$real, predictions[[type]]),
       numeric(1)
     )
   )
   expect_equal(
-    summary_result$performance["std_error", ],
+    summary_result$errors["mae", ],
     vapply(
       prediction_types,
-      function(type) safe_std_error(fold_metrics[[type]]),
+      function(type) safe_mae(predictions$real, predictions[[type]]),
+      numeric(1)
+    )
+  )
+  expect_equal(
+    summary_result$pooled_correlation,
+    vapply(
+      prediction_types,
+      function(type) safe_cor(predictions$real, predictions[[type]]),
+      numeric(1)
+    )
+  )
+  expect_equal(
+    summary_result$foldwise_correlation["mean", ],
+    vapply(
+      prediction_types,
+      function(type) safe_mean(fold_correlations[[type]]),
+      numeric(1)
+    )
+  )
+  expect_equal(
+    summary_result$foldwise_correlation["std_error", ],
+    vapply(
+      prediction_types,
+      function(type) safe_std_error(fold_correlations[[type]]),
       numeric(1)
     )
   )
@@ -129,7 +153,28 @@ test_that("summary.cpm_resamples returns NULL edges when resamples did not store
   )
 
   expect_null(summary_result$edges)
-  expect_true(all(is.na(summary_result$performance)))
+  expect_true(all(is.na(summary_result$pooled_correlation)))
+  expect_true(all(is.na(summary_result$foldwise_correlation)))
+})
+
+test_that("summary.cpm_resamples keeps default LOO summaries usable", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(50), ncol = 10)
+  behav <- rnorm(5)
+
+  result <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav)
+  summary_result <- summary(result)
+
+  expect_true(all(is.finite(summary_result$errors[, prediction_types])))
+  expect_true(all(is.na(summary_result$foldwise_correlation)))
+
+  output <- capture.output(print(summary_result))
+  expect_true(any(grepl("Pooled correlations", output, fixed = TRUE)))
+  expect_true(any(grepl(
+    "not defined for assessment folds smaller than 2 observations",
+    output,
+    fixed = TRUE
+  )))
 })
 
 test_that("summary.cpm_resamples averages fold-wise edges when all edges are stored", {
@@ -172,8 +217,13 @@ test_that("summary.cpm_resamples averages fold-wise edges when all edges are sto
 test_that("print.cpm_resamples_summary reports fold count and rates", {
   summary_result <- structure(
     list(
-      performance = rbind(
-        mean = c(both = 0.4, pos = 0.2, neg = -0.1),
+      errors = rbind(
+        rmse = c(both = 0.8, pos = 0.9, neg = 1.0),
+        mae = c(both = 0.6, pos = 0.7, neg = 0.8)
+      ),
+      pooled_correlation = c(both = 0.4, pos = 0.2, neg = -0.1),
+      foldwise_correlation = rbind(
+        mean = c(both = 0.35, pos = 0.15, neg = -0.05),
         std_error = c(both = 0.05, pos = 0.02, neg = 0.01)
       ),
       edges = matrix(
@@ -189,7 +239,9 @@ test_that("print.cpm_resamples_summary reports fold count and rates", {
   output <- capture.output(print(summary_result))
 
   expect_true(any(grepl("Number of folds: 5", output, fixed = TRUE)))
-  expect_true(any(grepl("Combined: 0.400 (SE 0.050)", output, fixed = TRUE)))
+  expect_true(any(grepl("RMSE", output, fixed = TRUE)))
+  expect_true(any(grepl("Combined: 0.400", output, fixed = TRUE)))
+  expect_true(any(grepl("Combined: 0.350 (SE 0.050)", output, fixed = TRUE)))
   expect_true(any(grepl("Positive: 50.00%", output, fixed = TRUE)))
   expect_true(any(grepl("Negative: 25.00%", output, fixed = TRUE)))
 })
@@ -197,7 +249,12 @@ test_that("print.cpm_resamples_summary reports fold count and rates", {
 test_that("print.cpm_resamples_summary omits edge block when edges are not stored", {
   summary_result <- structure(
     list(
-      performance = rbind(
+      errors = rbind(
+        rmse = c(both = 0.8, pos = 0.9, neg = 1.0),
+        mae = c(both = 0.6, pos = 0.7, neg = 0.8)
+      ),
+      pooled_correlation = c(both = 0.4, pos = 0.2, neg = -0.1),
+      foldwise_correlation = rbind(
         mean = c(both = 0.4, pos = 0.2, neg = -0.1),
         std_error = c(both = 0.05, pos = 0.02, neg = 0.01)
       ),
@@ -210,4 +267,30 @@ test_that("print.cpm_resamples_summary omits edge block when edges are not store
   output <- capture.output(print(summary_result))
 
   expect_false(any(grepl("Selected edges", output, fixed = TRUE)))
+})
+
+test_that("print.cpm_resamples_summary notes when fold-wise correlations are undefined", {
+  summary_result <- structure(
+    list(
+      errors = rbind(
+        rmse = c(both = 0.8, pos = 0.9, neg = 1.0),
+        mae = c(both = 0.6, pos = 0.7, neg = 0.8)
+      ),
+      pooled_correlation = c(both = 0.4, pos = 0.2, neg = -0.1),
+      foldwise_correlation = rbind(
+        mean = c(both = NA_real_, pos = NA_real_, neg = NA_real_),
+        std_error = c(both = NA_real_, pos = NA_real_, neg = NA_real_)
+      ),
+      edges = NULL,
+      params = list(kfolds = 5L, return_edges = "none")
+    ),
+    class = "cpm_resamples_summary"
+  )
+
+  output <- capture.output(print(summary_result))
+
+  expect_true(any(grepl(
+    "not defined for assessment folds smaller than 2 observations",
+    output
+  )))
 })

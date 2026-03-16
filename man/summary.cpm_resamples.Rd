@@ -17,8 +17,17 @@
 \item{x}{An object of class \code{cpm_resamples_summary}.}
 }
 \value{
-A \code{cpm_resamples_summary} object with aggregated fold-level
-performance and edge-selection rates.
+A \code{cpm_resamples_summary} object with the following elements:
+\describe{
+\item{\code{errors}}{A matrix of pooled out-of-fold error metrics.}
+\item{\code{pooled_correlation}}{A named vector of pooled out-of-fold
+correlations for \code{both}, \code{pos}, and \code{neg} predictions.}
+\item{\code{foldwise_correlation}}{A matrix of fold-wise correlation means and
+standard errors.}
+\item{\code{edges}}{Aggregated edge-selection rates, or \code{NULL} when edges were
+not stored.}
+\item{\code{params}}{A list containing summary-relevant resampling settings.}
+}
 }
 \description{
 Summary of a \code{cpm_resamples} object
