@@ -11,6 +11,5 @@
 ^CODE_OF_CONDUCT\.md$
 ^[.]?air[.]toml$
 ^\.vscode$
-^design$
 ^doc$
 ^Meta$

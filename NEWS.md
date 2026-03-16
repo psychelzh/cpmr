@@ -22,19 +22,17 @@
 
 ## Maintenance
 
-* Refactored fit internals into focused modules (`fit-generics`, `cpm-spec`,
-  `cpm-resamples`, and `fit-internals`) to improve maintainability.
+* Refactored fit internals into focused native-first modules and aligned S3
+  builders/methods around their class files.
 * Updated and expanded tests for internal helper branches and edge/summary
   coverage paths.
 * Stabilized GitHub Actions uploads for Codecov coverage and Test Analytics by generating and uploading JUnit test results from an explicit workspace path.
-* Added architecture RFC documents under `design/rfc/`, started the internal
-  core-layer refactor, added dedicated core-engine contract tests, and
-  hardened resample validation so each fold must retain at least 3
+* Hardened resample validation so each fold must retain at least 3
   complete-case training observations.
 * Moved training/prediction primitives into the core layer and simplified
   internal helpers around the native-first engine.
-* Split core internals into focused module files and aligned the architecture
-  RFCs with the current native-first direction.
+* Removed the temporary RFC directory and now track architecture decisions in
+  the roadmap/issues plus the native-first package docs.
 
 # cpmr 0.1.1
 

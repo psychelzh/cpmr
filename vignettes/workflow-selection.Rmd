@@ -67,21 +67,17 @@ resamples_via_spec <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds
 
 This route remains native `cpmr`; it is just a slightly lower-level interface.
 
-## Where a Tidymodels Adapter Fits
+## Where an External Workflow Adapter Fits
 
-`cpmr` also keeps a deferred RFC for a tidymodels-compatible adapter layer:
+`cpmr` does not currently ship a dedicated external workflow adapter surface.
+If future interoperability work is revisited, it should remain:
 
-- `design/rfc/0002-tidymodels-adapter.md`
-
-That adapter is currently intended to be:
-
-- an interoperability layer for users who want `parsnip`, `workflows`, and
-  related tooling;
 - optional rather than required;
-- thin relative to the CPM core.
+- thin relative to the native CPM engine;
+- useful for interoperability, not positioned as the default execution path.
 
-It is not meant to redefine the package around generic workflow orchestration.
-For high-dimensional resampling and tuning-heavy workloads, the native path is
+It should not redefine the package around generic workflow orchestration. For
+high-dimensional resampling and tuning-heavy workloads, the native path is
 expected to remain the recommended route.
 
 ## Practical Rule of Thumb
