@@ -7,15 +7,10 @@
 - Removed the legacy
   [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) entry
   point and the deprecated `confounds` alias. Use
-  [`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md) /
-  [`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
-  for the direct native workflow, or `fit(cpm_spec(...), ...)` /
-  `fit_resamples(cpm_spec(...), ...)` for the lower-level native
-  interface.
+  `fit(cpm_spec(...), ...)` / `fit_resamples(cpm_spec(...), ...)` for
+  the native workflow.
 - [`fit()`](https://generics.r-lib.org/reference/fit.html) now performs
   a single fit; resampling is handled by
-  [`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
-  or
   [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md).
 - `cpm_resamples` no longer stores redundant resample metrics, and the
   `collect_*()` helpers have been removed. Use
@@ -25,13 +20,9 @@
 
 ### Enhancements
 
-- Added native helper entry points
-  [`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
-  and
-  [`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md).
 - Added
   [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-  as the lower-level native interface for
+  as the native interface for
   [`fit()`](https://generics.r-lib.org/reference/fit.html) and
   [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md).
 - Added

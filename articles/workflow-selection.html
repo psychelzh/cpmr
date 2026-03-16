@@ -76,24 +76,26 @@ analysis, but they do not all serve the same purpose.</p>
 <ul>
 <li>the native <code>cpmr</code> path is the primary workflow for
 fitting, resampling, and future tuning extensions;</li>
-<li>specification-driven helpers such as <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> remain
-useful when you want explicit parameter objects.</li>
+<li>
+<code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> is the native way to make CPM parameters
+explicit and reusable.</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="recommended-path-native-helpers">Recommended Path: Native Helpers<a class="anchor" aria-label="anchor" href="#recommended-path-native-helpers"></a>
+<h2 id="recommended-path-cpm_spec">Recommended Path: <code>cpm_spec()</code><a class="anchor" aria-label="anchor" href="#recommended-path-cpm_spec"></a>
 </h2>
-<p>For most analyses, start with <code><a href="../reference/cpm_fit.html">cpm_fit()</a></code> and
-<code><a href="../reference/cpm_fit.html">cpm_fit_resamples()</a></code>.</p>
+<p>For most analyses, start with <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> together with
+<code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> and <code><a href="../reference/fit_resamples.html">fit_resamples()</a></code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/psychelzh/cpmr" class="external-link">cpmr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">conmat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">80</span> <span class="op">*</span> <span class="fl">200</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">80</span><span class="op">)</span></span>
 <span><span class="va">behav</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">80</span><span class="op">)</span></span>
+<span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm_spec.html">cpm_spec</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm_fit.html">cpm_fit</a></span><span class="op">(</span><span class="va">conmat</span>, <span class="va">behav</span><span class="op">)</span></span>
-<span><span class="va">resample_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm_fit.html">cpm_fit_resamples</a></span><span class="op">(</span><span class="va">conmat</span>, <span class="va">behav</span>, kfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">fit_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">spec</span>, conmat <span class="op">=</span> <span class="va">conmat</span>, behav <span class="op">=</span> <span class="va">behav</span><span class="op">)</span></span>
+<span><span class="va">resample_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_resamples.html">fit_resamples</a></span><span class="op">(</span><span class="va">spec</span>, conmat <span class="op">=</span> <span class="va">conmat</span>, behav <span class="op">=</span> <span class="va">behav</span>, kfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_obj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CPM summary:</span></span>
@@ -110,10 +112,7 @@ useful when you want explicit parameter objects.</li>
 <span><span class="co">#&gt;   Performance:</span></span>
 <span><span class="co">#&gt;     Combined: -0.041 (SE 0.202)</span></span>
 <span><span class="co">#&gt;     Positive: -0.161 (SE 0.160)</span></span>
-<span><span class="co">#&gt;     Negative: 0.025 (SE 0.194)</span></span>
-<span><span class="co">#&gt;   Selected edges:</span></span>
-<span><span class="co">#&gt;     Positive: 0.40%</span></span>
-<span><span class="co">#&gt;     Negative: 0.80%</span></span></code></pre></div>
+<span><span class="co">#&gt;     Negative: 0.025 (SE 0.194)</span></span></code></pre></div>
 <p>This path is the best fit when you care about:</p>
 <ul>
 <li>large edge spaces;</li>
@@ -124,26 +123,10 @@ reuse.</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="lower-level-native-path-cpm_spec">Lower-Level Native Path: <code>cpm_spec()</code><a class="anchor" aria-label="anchor" href="#lower-level-native-path-cpm_spec"></a>
-</h2>
-<p>If you want an explicit specification object, you can still work with
-<code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> plus <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> and
-<code><a href="../reference/fit_resamples.html">fit_resamples()</a></code>.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm_spec.html">cpm_spec</a></span><span class="op">(</span>thresh_method <span class="op">=</span> <span class="st">"sparsity"</span>, thresh_level <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">fit_via_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">spec</span>, conmat <span class="op">=</span> <span class="va">conmat</span>, behav <span class="op">=</span> <span class="va">behav</span><span class="op">)</span></span>
-<span><span class="va">resamples_via_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_resamples.html">fit_resamples</a></span><span class="op">(</span><span class="va">spec</span>, conmat <span class="op">=</span> <span class="va">conmat</span>, behav <span class="op">=</span> <span class="va">behav</span>, kfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<p>This route remains native <code>cpmr</code>; it is just a slightly
-lower-level interface.</p>
-</div>
-<div class="section level2">
 <h2 id="practical-rule-of-thumb">Practical Rule of Thumb<a class="anchor" aria-label="anchor" href="#practical-rule-of-thumb"></a>
 </h2>
-<p>Choose the native path when you need speed, explicit CPM behavior, or
-resampling-heavy experiments. Choose the <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> path
-when you want an explicit specification object without leaving the
-native API surface.</p>
+<p>Choose the native <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> path when you need speed,
+explicit CPM behavior, or resampling-heavy experiments.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

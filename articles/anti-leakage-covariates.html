@@ -121,13 +121,17 @@ selection) inside CV as well.</li>
 <h2 id="native-api">Native API<a class="anchor" aria-label="anchor" href="#native-api"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">single_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm_fit.html">cpm_fit</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm_spec.html">cpm_spec</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">single_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span></span>
+<span>  <span class="va">spec</span>,</span>
 <span>  conmat <span class="op">=</span> <span class="va">conmat</span>,</span>
 <span>  behav <span class="op">=</span> <span class="va">behav</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="va">covariates</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">resamples_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm_fit.html">cpm_fit_resamples</a></span><span class="op">(</span></span>
+<span><span class="va">resamples_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_resamples.html">fit_resamples</a></span><span class="op">(</span></span>
+<span>  <span class="va">spec</span>,</span>
 <span>  conmat <span class="op">=</span> <span class="va">conmat</span>,</span>
 <span>  behav <span class="op">=</span> <span class="va">behav</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="va">covariates</span>,</span>
@@ -141,9 +145,6 @@ selection) inside CV as well.</li>
 <span><span class="co">#&gt;     Combined: 0.214 (SE 0.120)</span></span>
 <span><span class="co">#&gt;     Positive: 0.235 (SE 0.120)</span></span>
 <span><span class="co">#&gt;     Negative: -0.115 (SE 0.080)</span></span>
-<span><span class="co">#&gt;   Selected edges:</span></span>
-<span><span class="co">#&gt;     Positive: 1.50%</span></span>
-<span><span class="co">#&gt;     Negative: 0.33%</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">resamples_fit</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   row fold       real        both         pos           neg</span></span>
 <span><span class="co">#&gt; 1   1    4 -0.5862850 -0.13713172 -0.13713172  1.647987e-17</span></span>
@@ -153,11 +154,11 @@ selection) inside CV as well.</li>
 <span><span class="co">#&gt; 5   5    5 -1.5329525 -0.07744804 -0.07744804 -1.040834e-17</span></span>
 <span><span class="co">#&gt; 6   6    3  0.4996146  0.56813333  0.56813333 -1.734723e-17</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">resamples_fit</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 120   2</span></span></code></pre></div>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
 <p>If you prefer explicit parameter objects, the lower-level
 <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> + <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> /
-<code><a href="../reference/fit_resamples.html">fit_resamples()</a></code> path remains available and routes through
-the same CPM core.</p>
+<code><a href="../reference/fit_resamples.html">fit_resamples()</a></code> path is the native interface and routes
+through the same CPM core.</p>
 </div>
 <div class="section level2">
 <h2 id="edge-storage-tips">Edge Storage Tips<a class="anchor" aria-label="anchor" href="#edge-storage-tips"></a>

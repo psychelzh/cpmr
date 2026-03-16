@@ -27,8 +27,9 @@ install.packages("cpmr", repos = c("https://psychelzh.r-universe.dev", getOption
 
 Shape your connectivity matrix as a subjects-by-edges matrix, where each
 row contains the edge vector for one subject, and pair it with a
-behavioral vector. The most direct entry point is
-[`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md).
+behavioral vector. The native workflow uses
+[`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
+together with [`fit()`](https://generics.r-lib.org/reference/fit.html).
 
 ``` r
 library(cpmr)
@@ -36,14 +37,11 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-fit_obj <- cpm_fit(
-  conmat = conmat,
-  behav = behav
-)
+fit_obj <- fit(cpm_spec(), conmat = conmat, behav = behav)
 
 fit_obj
 #> CPM results:
-#>   Call: cpm_fit(conmat = conmat, behav = behav)
+#>   Call: fit(object = cpm_spec(), conmat = conmat, behav = behav)
 #>   Number of observations: 100
 #>     Complete cases: 100
 #>   Number of edges: 1000
@@ -63,15 +61,12 @@ summary(fit_obj)
 #>     Negative: 0.20%
 ```
 
-Cross-validated resampling uses the matching native helper
-[`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md):
+Cross-validated resampling uses
+[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
+with the same specification object:
 
 ``` r
-resample_obj <- cpm_fit_resamples(
-  conmat = conmat,
-  behav = behav,
-  kfolds = 5
-)
+resample_obj <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
 
 summary(resample_obj)
 #> CPM resample summary:
@@ -80,9 +75,6 @@ summary(resample_obj)
 #>     Combined: -0.057 (SE 0.062)
 #>     Positive: 0.008 (SE 0.089)
 #>     Negative: -0.036 (SE 0.077)
-#>   Selected edges:
-#>     Positive: 0.56%
-#>     Negative: 0.32%
 head(resample_obj$predictions)
 #>   row fold        real        both        pos         neg
 #> 1   1    1  0.26499342 0.492748241 -0.2058990  0.76974455
@@ -92,20 +84,18 @@ head(resample_obj$predictions)
 #> 5   5    1  0.43790418 0.002067539  0.2977574 -0.37106308
 #> 6   6    4  1.33744904 0.659172053  0.5130919  0.37428531
 dim(resample_obj$edges)
-#> [1] 1000    2
+#> NULL
 ```
 
 ## Choosing a path
 
 `cpmr` now treats the native workflow as the primary package story:
 
-- use
-  [`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
-  and
-  [`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
-  for most real CPM analyses;
-- use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` when
-  you want the lower-level specification object directly.
+- use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` for
+  native CPM analyses;
+- keep the
+  [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
+  object around when you want an explicit, reusable parameter object.
 
 Why this matters: CPM often needs leakage-safe fold-local preprocessing
 and can benefit from future fold-level caching or threshold-specific

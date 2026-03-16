@@ -4,9 +4,6 @@
 
 Primary entry points for fitting CPM models natively.
 
-- [`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
-  [`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
-  : Direct native CPM fit helpers
 - [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
   [`fit(`*`<cpm_spec>`*`)`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
   [`fit_resamples(`*`<cpm_spec>`*`)`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)

@@ -3,8 +3,10 @@
 ## Overview
 
 `cpmr`’s primary workflow is a native, matrix-first API built around
-[`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md) and
-[`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md).
+[`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
+together with [`fit()`](https://generics.r-lib.org/reference/fit.html)
+and
+[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md).
 
 This vignette walks through:
 
@@ -36,26 +38,24 @@ behav <- rowMeans(conmat[, 1:12, drop = FALSE]) +
   rnorm(n, sd = 0.5)
 ```
 
-## Single Fit with `cpm_fit()`
+## Single Fit with `fit()`
 
-Use [`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
-when you want a direct native fit without constructing a
+Use [`fit()`](https://generics.r-lib.org/reference/fit.html) on a
 [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-object first.
+object when you want a native single fit with explicit CPM parameters.
 
 ``` r
-fit_obj <- cpm_fit(
+fit_obj <- fit(
+  cpm_spec(thresh_method = "alpha", thresh_level = 0.05),
   conmat = conmat,
   behav = behav,
-  covariates = covariates,
-  thresh_method = "alpha",
-  thresh_level = 0.05
+  covariates = covariates
 )
 
 fit_obj
 #> CPM results:
-#>   Call: cpm_fit(conmat = conmat, behav = behav, covariates = covariates, 
-#>     thresh_method = "alpha", thresh_level = 0.05)
+#>   Call: fit(object = cpm_spec(thresh_method = "alpha", thresh_level = 0.05), 
+#>     conmat = conmat, behav = behav, covariates = covariates)
 #>   Number of observations: 80
 #>     Complete cases: 80
 #>   Number of edges: 200
@@ -78,20 +78,23 @@ dim(fit_obj$edges)
 ```
 
 For a single fit,
-[`cpm_fit()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
-stores a `p x 2` edge-selection mask with `pos` and `neg` columns by
-default. This is useful for inspecting the selected network, but the
-performance reported by
-[`summary()`](https://rdrr.io/r/base/summary.html) is still in-sample.
+[`fit()`](https://generics.r-lib.org/reference/fit.html) stores a
+`p x 2` edge-selection mask with `pos` and `neg` columns by default.
+This is useful for inspecting the selected network, but the performance
+reported by [`summary()`](https://rdrr.io/r/base/summary.html) is still
+in-sample.
 
-## Cross-Validated Resampling with `cpm_fit_resamples()`
+## Cross-Validated Resampling with `fit_resamples()`
 
 Use
-[`cpm_fit_resamples()`](https://psychelzh.github.io/cpmr/reference/cpm_fit.md)
-for an out-of-sample estimate of predictive performance.
+[`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
+on the same
+[`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
+object for an out-of-sample estimate of predictive performance.
 
 ``` r
-resample_obj <- cpm_fit_resamples(
+resample_obj <- fit_resamples(
+  cpm_spec(),
   conmat = conmat,
   behav = behav,
   covariates = covariates,
@@ -100,11 +103,11 @@ resample_obj <- cpm_fit_resamples(
 
 resample_obj
 #> CPM resample results:
-#>   Call: cpm_fit_resamples(conmat = conmat, behav = behav, covariates = covariates, 
-#>     kfolds = 5)
+#>   Call: fit_resamples(object = cpm_spec(), conmat = conmat, behav = behav, 
+#>     covariates = covariates, kfolds = 5)
 #>   Number of folds: 5
 #>   Number of observations: 80
-#>   Edge storage: sum
+#>   Edge storage: none
 #>   Mean correlations:
 #>     Combined: -0.075
 #>     Positive: 0.029
@@ -116,9 +119,6 @@ summary(resample_obj)
 #>     Combined: -0.075 (SE 0.046)
 #>     Positive: 0.029 (SE 0.054)
 #>     Negative: -0.181 (SE 0.099)
-#>   Selected edges:
-#>     Positive: 1.00%
-#>     Negative: 0.50%
 ```
 
 This keeps CPM-specific steps such as covariate handling, edge
@@ -141,9 +141,6 @@ summary(resample_obj)
 #>     Combined: -0.075 (SE 0.046)
 #>     Positive: 0.029 (SE 0.054)
 #>     Negative: -0.181 (SE 0.099)
-#>   Selected edges:
-#>     Positive: 1.00%
-#>     Negative: 0.50%
 head(predictions)
 #>   row fold       real         both          pos           neg
 #> 1   1    5 -0.6339456  0.342534590  0.342534590  1.994932e-17
@@ -153,7 +150,7 @@ head(predictions)
 #> 5   5    5  0.1169538 -0.023682986 -0.023682986  1.994932e-17
 #> 6   6    3  0.7875511  0.255961736  0.255961736  2.428613e-17
 dim(edges)
-#> [1] 200   2
+#> NULL
 ```
 
 `predictions` returns one row per original observation. If
@@ -174,7 +171,8 @@ custom_resamples <- split(
   cut(seq_len(n), breaks = 4, labels = FALSE)
 )
 
-custom_obj <- cpm_fit_resamples(
+custom_obj <- fit_resamples(
+  cpm_spec(),
   conmat = conmat,
   behav = behav,
   resamples = custom_resamples,
@@ -208,7 +206,8 @@ while preserving original row positions in the outputs.
 behav_with_na <- behav
 behav_with_na[c(3, 11)] <- NA_real_
 
-na_obj <- cpm_fit_resamples(
+na_obj <- fit_resamples(
+  cpm_spec(),
   conmat = conmat,
   behav = behav_with_na,
   kfolds = 5,
@@ -229,12 +228,12 @@ subject-level metadata after resampling.
 
 After you are comfortable with the native path:
 
-- read the workflow-selection article for guidance on when to use native
-  APIs versus lower-level specification objects;
+- read the workflow-selection article for guidance on how to use the
+  native
+  [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
+  workflow in different settings;
 - read the leakage-focused article if you need a more detailed covariate
   handling example;
-- use
+- keep a
   [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-  plus [`fit()`](https://generics.r-lib.org/reference/fit.html) /
-  [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
-  when you want an explicit reusable parameter object.
+  object around when you want an explicit reusable parameter object.
