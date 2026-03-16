@@ -4,6 +4,7 @@ test_that("Default threshold method works", {
   behav <- rnorm(10)
   result <- fit(cpm_spec(), conmat, behav)
   expect_s3_class(result, "cpm")
+  expect_false("folds" %in% names(result))
   expect_snapshot_value(result$pred, style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
   expect_snapshot_value(result$params, style = "json2")
@@ -39,19 +40,6 @@ test_that("new_cpm builds single-fit CPM objects", {
   expect_s3_class(cpm_object, "cpm")
   expect_identical(cpm_object$call, call)
   expect_false("folds" %in% names(cpm_object))
-})
-
-test_that("`fit()` is single-fit", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
-  result <- fit(cpm_spec(), conmat, behav)
-  expect_s3_class(result, "cpm")
-  expect_false("folds" %in% names(result))
-  expect_snapshot_value(result$pred, style = "json2")
-  expect_snapshot_value(result$edges, style = "json2")
-  expect_snapshot_value(result$params, style = "json2")
-  expect_snapshot(result)
 })
 
 test_that("Alternative threshold method works", {
