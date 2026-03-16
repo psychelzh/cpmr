@@ -108,6 +108,14 @@ head(resample_obj$predictions)
 #> 6   6    4  1.33744904 0.659172053  0.5130919  0.37428531
 dim(resample_obj$edges)
 #> NULL
+head(resample_metrics(resample_obj))
+#>   fold n_assess metric prediction  estimate
+#> 1    1       20   rmse       both 1.1115539
+#> 2    1       20   rmse        pos 1.1024986
+#> 3    1       20   rmse        neg 1.0753358
+#> 4    2       20   rmse       both 0.9556034
+#> 5    2       20   rmse        pos 0.9872521
+#> 6    2       20   rmse        neg 1.0424502
 ```
 
 ## Choosing a path
