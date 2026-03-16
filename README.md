@@ -81,7 +81,20 @@ resample_obj <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds
 summary(resample_obj)
 #> CPM resample summary:
 #>   Number of folds: 5
-#>   Performance:
+#>   Prediction error:
+#>     RMSE:
+#>       Combined: 1.243
+#>       Positive: 1.205
+#>       Negative: 1.200
+#>     MAE:
+#>       Combined: 0.947
+#>       Positive: 0.962
+#>       Negative: 0.905
+#>   Pooled correlations:
+#>     Combined: -0.104
+#>     Positive: -0.072
+#>     Negative: -0.074
+#>   Fold-wise correlations:
 #>     Combined: -0.057 (SE 0.062)
 #>     Positive: 0.008 (SE 0.089)
 #>     Negative: -0.036 (SE 0.077)
