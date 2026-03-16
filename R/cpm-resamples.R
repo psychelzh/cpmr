@@ -162,7 +162,6 @@ resample_metrics <- function(
   }
 
   level <- match.arg(level)
-  correlation_method <- match.arg(correlation_method)
   metrics <- match.arg(metrics, several.ok = TRUE)
 
   switch(
