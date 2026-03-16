@@ -70,6 +70,11 @@ Each element must be an integer vector indexing rows in \code{conmat}. If
 
 \item{kfolds}{Number of folds used when \code{resamples} is \code{NULL}. If \code{NULL},
 it is set to the number of complete-case observations (LOOCV).}
+
+\item{return_edges}{A character string indicating the return value of the
+selected edges. If \code{"none"}, no edges are returned/stored. If \code{"sum"}, edge
+masks are summed across folds. If \code{"all"}, fold-wise edge arrays are
+stored.}
 }
 \value{
 A \code{cpm_spec} object storing parameters for later fitting.
@@ -91,5 +96,4 @@ spec
 
 conmat <- matrix(rnorm(100 * 100), nrow = 100)
 behav <- rnorm(100)
-fit(spec, conmat = conmat, behav = behav)
 }

@@ -2,6 +2,10 @@
 #' @export
 generics::fit
 
+#' @importFrom generics tidy
+#' @export
+generics::tidy
+
 #' Fit a model specification on resamples
 #'
 #' Generic for fitting model specifications across resamples.

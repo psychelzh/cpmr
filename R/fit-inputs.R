@@ -1,3 +1,20 @@
+corr_types <- c("pos", "neg")
+inc_edges <- c("both", corr_types)
+
+check_names <- function(data, behav) {
+  if (!is.null(rownames(data)) && !is.null(names(behav))) {
+    if (!identical(rownames(data), names(behav))) {
+      stop(
+        sprintf(
+          "Case names of `%s` must match those of behavior data.",
+          deparse1(substitute(data))
+        )
+      )
+    }
+  }
+  invisible()
+}
+
 normalize_inputs <- function(conmat, behav, covariates = NULL) {
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {

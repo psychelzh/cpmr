@@ -22,7 +22,6 @@
 #'
 #' conmat <- matrix(rnorm(100 * 100), nrow = 100)
 #' behav <- rnorm(100)
-#' fit(spec, conmat = conmat, behav = behav)
 #' @export
 cpm_spec <- function(
   thresh_method = c("alpha", "sparsity"),
@@ -104,6 +103,10 @@ fit.cpm_spec <- function(
 #'   `NULL`, folds are generated from `kfolds`.
 #' @param kfolds Number of folds used when `resamples` is `NULL`. If `NULL`,
 #'   it is set to the number of complete-case observations (LOOCV).
+#' @param return_edges A character string indicating the return value of the
+#'   selected edges. If `"none"`, no edges are returned/stored. If `"sum"`, edge
+#'   masks are summed across folds. If `"all"`, fold-wise edge arrays are
+#'   stored.
 #' @param na_action A character string indicating the action when missing values
 #'   are found in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
 #'   missing values will be excluded from the analysis but kept in the output.
