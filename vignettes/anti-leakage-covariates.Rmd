@@ -8,6 +8,8 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
+library(cpmr)
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -29,8 +31,6 @@ In `cpmr`, leakage-safe behavior means:
 ## Minimal Example with Synthetic Data
 
 ```{r}
-library(cpmr)
-
 set.seed(123)
 n <- 80
 p <- 120
@@ -54,41 +54,39 @@ fit <- fit_resamples(
   kfolds = 5
 )
 
-collect_metrics(fit)
+summary(fit)
 ```
 
-## Current API
-
-Use `fit(cpm_spec(...), ...)` for a single fit and `fit_resamples()` for CV.
+## Native API
 
 ```{r}
-single_fit <- fit(
-  cpm_spec(),
+single_fit <- cpm_fit(
   conmat = conmat,
   behav = behav,
-  covariates = covariates,
-  return_edges = "sum"
+  covariates = covariates
 )
 
-resamples_fit <- fit_resamples(
-  cpm_spec(),
+resamples_fit <- cpm_fit_resamples(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
   kfolds = 5
 )
 
-collect_metrics(resamples_fit)
-collect_predictions(resamples_fit)
-collect_edges(resamples_fit, format = "index")
+summary(resamples_fit)
+head(resamples_fit$predictions)
+dim(resamples_fit$edges)
 ```
+
+If you prefer explicit parameter objects, the lower-level
+`cpm_spec()` + `fit()` / `fit_resamples()` path remains available and routes
+through the same CPM core.
 
 ## Edge Storage Tips
 
 For large feature spaces, fold-wise edge storage can grow quickly.
 
 - Use `return_edges = "sum"` to keep only fold-aggregated edge counts.
-- Use `collect_edges(..., format = "index")` to export sparse indices.
 - Use `return_edges = "none"` if you only need predictive performance.
 
 ## Anti-Leakage Checklist

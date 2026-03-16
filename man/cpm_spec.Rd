@@ -18,7 +18,6 @@ cpm_spec(
   behav,
   ...,
   covariates = NULL,
-  return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 )
 
@@ -61,12 +60,6 @@ matrix, which will be converted to a vector using \code{\link[=drop]{drop()}}.}
 column. If \code{NULL}, no covariates are used. Note if a vector is provided, it
 will be converted to a column matrix.}
 
-\item{return_edges}{A character string indicating the return value of the
-selected edges. If \code{"none"}, no edges are returned/stored. If \code{"sum"}, edge
-masks are returned for single-fit and summed across folds for resampling.
-If \code{"all"}, single-fit stores a 3D array with a singleton third dimension
-while resampling stores fold-wise edge arrays.}
-
 \item{na_action}{A character string indicating the action when missing values
 are found in \code{behav}. If \code{"fail"}, an error will be thrown. If \code{"exclude"},
 missing values will be excluded from the analysis but kept in the output.}
@@ -77,14 +70,20 @@ Each element must be an integer vector indexing rows in \code{conmat}. If
 
 \item{kfolds}{Number of folds used when \code{resamples} is \code{NULL}. If \code{NULL},
 it is set to the number of complete-case observations (LOOCV).}
+
+\item{return_edges}{A character string indicating the return value of the
+selected edges. If \code{"none"}, no edges are returned/stored. If \code{"sum"}, edge
+masks are summed across folds. If \code{"all"}, fold-wise edge arrays are
+stored.}
 }
 \value{
 A \code{cpm_spec} object storing parameters for later fitting.
 
-A fitted \code{cpm} object from a single in-sample fit.
+A fitted \code{cpm} object from a single in-sample fit. Single-fit CPM
+objects always store the selected edge mask.
 
-A \code{cpm_resamples} object containing fold-level metrics and
-observation-level predictions.
+A \code{cpm_resamples} object containing observation-level predictions,
+resampling folds, and optional stored edges.
 }
 \description{
 Create a lightweight specification object that stores the modeling
@@ -97,5 +96,4 @@ spec
 
 conmat <- matrix(rnorm(100 * 100), nrow = 100)
 behav <- rnorm(100)
-fit(spec, conmat = conmat, behav = behav)
 }

@@ -6,3 +6,36 @@ navbar:
   structure:
     left: [reference, articles]
     right: [search, github]
+
+articles:
+  - title: Get Started
+    navbar: ~
+    contents:
+      - native-getting-started
+      - workflow-selection
+      - anti-leakage-covariates
+
+reference:
+  - title: Native Fit API
+    desc: Primary entry points for fitting CPM models natively.
+    contents:
+      - cpm_fit
+      - cpm_spec
+      - fit_resamples
+
+  - title: Result Objects
+    desc: S3 result classes returned by single-fit and resampling workflows.
+    contents:
+      - cpm
+      - cpm_resamples
+
+  - title: Inspect Results
+    desc: Summary and tidying helpers for fitted results.
+    contents:
+      - summary.cpm
+      - summary.cpm_resamples
+      - tidy.cpm
+
+  - title: Package
+    contents:
+      - cpmr-package

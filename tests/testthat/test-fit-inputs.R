@@ -30,15 +30,10 @@ test_that("resolve_include_cases returns intersection in exclude mode", {
   expect_identical(include_cases, 4:10)
 })
 
-test_that("init_edges allocates expected structures", {
-  conmat <- matrix(rnorm(40), ncol = 4)
+test_that("check_names errors when names do not match", {
+  x <- matrix(1:10, nrow = 2, dimnames = list(c("a", "b"), NULL))
+  y <- stats::setNames(1:2, c("a", "c"))
 
-  edges_sum <- init_edges("sum", conmat, kfolds = 5)
-  expect_equal(dim(edges_sum), c(ncol(conmat), 2))
-  expect_identical(colnames(edges_sum), c("pos", "neg"))
-
-  edges_all <- init_edges("all", conmat, kfolds = 5)
-  expect_equal(dim(edges_all), c(ncol(conmat), 2, 5))
-
-  expect_null(init_edges("none", conmat, kfolds = 5))
+  expect_error(check_names(x, y), "must match")
+  expect_silent(check_names(x, 1:2))
 })
