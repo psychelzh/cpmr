@@ -103,6 +103,7 @@ predictions <- resample_obj$predictions
 
 summary(resample_obj)
 head(predictions)
+head(resample_metrics(resample_obj))
 ```
 
 By default, `fit_resamples()` uses `return_edges = "none"` and skips edge
