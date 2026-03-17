@@ -1,16 +1,16 @@
 print_performance_block <- function(values, header, std_error = NULL) {
   cat(header)
-  for (prediction_type in names(values)) {
+  for (prediction_stream in names(values)) {
     line <- sprintf(
       "    %s: %s",
-      prediction_label(prediction_type),
-      format_cor(values[[prediction_type]])
+      prediction_label(prediction_stream),
+      format_cor(values[[prediction_stream]])
     )
-    if (!is.null(std_error) && !is.na(std_error[[prediction_type]])) {
+    if (!is.null(std_error) && !is.na(std_error[[prediction_stream]])) {
       line <- sprintf(
         "%s (SE %s)",
         line,
-        format_cor(std_error[[prediction_type]])
+        format_cor(std_error[[prediction_stream]])
       )
     }
     cat(line, "\n", sep = "")
@@ -21,11 +21,11 @@ print_error_block <- function(errors, header = "  Prediction error:\n") {
   cat(header)
   for (error_type in rownames(errors)) {
     cat(sprintf("    %s:\n", toupper(error_type)))
-    for (prediction_type in colnames(errors)) {
+    for (prediction_stream in colnames(errors)) {
       cat(sprintf(
         "      %s: %s\n",
-        prediction_label(prediction_type),
-        format_value(errors[error_type, prediction_type])
+        prediction_label(prediction_stream),
+        format_value(errors[error_type, prediction_stream])
       ))
     }
   }
@@ -95,10 +95,10 @@ prediction_labels <- c(
   negative = "Negative"
 )
 
-prediction_label <- function(prediction_type) {
-  unname(prediction_labels[[prediction_type]])
+prediction_label <- function(prediction_stream) {
+  unname(prediction_labels[[prediction_stream]])
 }
 
-format_prediction_streams <- function(prediction_types) {
-  paste(prediction_types, collapse = ", ")
+format_prediction_streams <- function(prediction_streams) {
+  paste(prediction_streams, collapse = ", ")
 }

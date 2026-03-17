@@ -1,11 +1,11 @@
-prediction_types <- c("joint", "positive", "negative")
+prediction_streams <- c("joint", "positive", "negative")
 
 example_resample_summary <- function(
   metrics = rbind(
     data.frame(
       level = "pooled",
       metric = rep(c("rmse", "mae", "correlation"), each = 3),
-      prediction = rep(prediction_types, times = 3),
+      prediction = rep(prediction_streams, times = 3),
       estimate = c(
         0.8,
         0.9,
@@ -27,7 +27,7 @@ example_resample_summary <- function(
     data.frame(
       level = "foldwise",
       metric = "correlation",
-      prediction = prediction_types,
+      prediction = prediction_streams,
       estimate = c(0.35, 0.15, -0.05),
       std_error = c(0.05, 0.02, 0.01),
       method = "pearson",
@@ -39,7 +39,7 @@ example_resample_summary <- function(
     kfolds = 5L,
     return_edges = "none",
     correlation_method = "pearson",
-    prediction_types = prediction_types
+    prediction_streams = prediction_streams
   )
 ) {
   structure(
@@ -97,7 +97,7 @@ test_that("print.cpm_summary reports NA edge rates when stored edges are all mis
       metrics = data.frame(
         level = "single",
         metric = "correlation",
-        prediction = prediction_types,
+        prediction = prediction_streams,
         estimate = c(0.1, 0.2, 0.3),
         std_error = NA_real_,
         method = "pearson",
@@ -110,7 +110,7 @@ test_that("print.cpm_summary reports NA edge rates when stored edges are all mis
       ),
       params = list(
         method = "pearson",
-        prediction_types = prediction_types
+        prediction_streams = prediction_streams
       )
     ),
     class = "cpm_summary"
@@ -165,12 +165,12 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
     ),
     rbind(
       rmse = vapply(
-        prediction_types,
+        prediction_streams,
         function(type) safe_rmse(predictions$real, predictions[[type]]),
         numeric(1)
       ),
       mae = vapply(
-        prediction_types,
+        prediction_streams,
         function(type) safe_mae(predictions$real, predictions[[type]]),
         numeric(1)
       )
@@ -183,7 +183,7 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
       metric = "correlation"
     ),
     vapply(
-      prediction_types,
+      prediction_streams,
       function(type) safe_cor(predictions$real, predictions[[type]]),
       numeric(1)
     )
@@ -195,7 +195,7 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
       metric = "correlation"
     ),
     vapply(
-      prediction_types,
+      prediction_streams,
       function(type) {
         safe_mean(fold_correlations$estimate[
           fold_correlations$prediction == type
@@ -212,7 +212,7 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
       field = "std_error"
     ),
     vapply(
-      prediction_types,
+      prediction_streams,
       function(type) {
         safe_std_error(
           fold_correlations$estimate[fold_correlations$prediction == type]
@@ -299,13 +299,13 @@ test_that("summary.cpm_resamples supports single-stream net summaries", {
   summary_result <- summary(result)
   output <- capture.output(print(summary_result))
 
-  expect_identical(summary_result$params$prediction_types, "net")
+  expect_identical(summary_result$params$prediction_streams, "net")
   expect_equal(
     dim(summary_metric_matrix(
       summary_result$metrics,
       level = "pooled",
       metric = c("rmse", "mae"),
-      prediction_types = "net"
+      prediction_streams = "net"
     )),
     c(2L, 1L)
   )
@@ -360,7 +360,7 @@ test_that("print.cpm_resamples_summary reports fold count and rates", {
       kfolds = 5L,
       return_edges = "sum",
       correlation_method = "pearson",
-      prediction_types = prediction_types
+      prediction_streams = prediction_streams
     )
   )
 

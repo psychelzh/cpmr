@@ -240,7 +240,7 @@ print.cpm_spec <- function(x, ...) {
   cat(sprintf(
     "    Streams:          %s\n",
     format_prediction_streams(
-      prediction_types_for_feature_space(x$params$feature_space)
+      prediction_streams_for_feature_space(x$params$feature_space)
     )
   ))
   cat(sprintf(

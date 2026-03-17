@@ -154,17 +154,17 @@ compute_pooled_metric_table <- function(
   metrics = c("rmse", "mae", "correlation"),
   correlation_method = c("pearson", "spearman")
 ) {
-  prediction_types <- prediction_columns(predictions)
+  prediction_streams <- prediction_columns(predictions)
   if ("correlation" %in% metrics) {
     correlation_method <- match.arg(correlation_method)
   }
   metric_tables <- lapply(metrics, function(metric) {
     estimates <- vapply(
-      prediction_types,
-      function(prediction_type) {
+      prediction_streams,
+      function(prediction_stream) {
         compute_resample_metric(
           predictions$real,
-          predictions[[prediction_type]],
+          predictions[[prediction_stream]],
           metric = metric,
           correlation_method = correlation_method
         )
@@ -174,7 +174,7 @@ compute_pooled_metric_table <- function(
 
     data.frame(
       metric = metric,
-      prediction = prediction_types,
+      prediction = prediction_streams,
       estimate = unname(estimates),
       stringsAsFactors = FALSE
     )
@@ -189,7 +189,7 @@ compute_fold_metric_table <- function(
   metrics = c("rmse", "mae", "correlation"),
   correlation_method = c("pearson", "spearman")
 ) {
-  prediction_types <- prediction_columns(predictions)
+  prediction_streams <- prediction_columns(predictions)
   if ("correlation" %in% metrics) {
     correlation_method <- match.arg(correlation_method)
   }
@@ -197,11 +197,11 @@ compute_fold_metric_table <- function(
     fold_tables <- lapply(seq_along(folds), function(i) {
       rows <- folds[[i]]
       estimates <- vapply(
-        prediction_types,
-        function(prediction_type) {
+        prediction_streams,
+        function(prediction_stream) {
           compute_resample_metric(
             predictions$real[rows],
-            predictions[[prediction_type]][rows],
+            predictions[[prediction_stream]][rows],
             metric = metric,
             correlation_method = correlation_method
           )
@@ -213,7 +213,7 @@ compute_fold_metric_table <- function(
         fold = i,
         n_assess = length(rows),
         metric = metric,
-        prediction = prediction_types,
+        prediction = prediction_streams,
         estimate = unname(estimates),
         stringsAsFactors = FALSE
       )

@@ -91,18 +91,18 @@ train_model <- function(
   }
 
   network_strengths <- compute_network_strengths(conmat, edge_screen$weights)
-  prediction_types <- prediction_types_for_feature_space(feature_space)
+  prediction_streams <- prediction_streams_for_feature_space(feature_space)
 
-  models <- lapply(prediction_types, function(prediction_type) {
+  outcome_models <- lapply(prediction_streams, function(prediction_stream) {
     fit_prediction_model(
       network_strengths = network_strengths,
       behav = behav,
       feature_space = feature_space,
-      prediction_type = prediction_type,
+      prediction_stream = prediction_stream,
       model_spec = model_spec
     )
   })
-  names(models) <- prediction_types
+  names(outcome_models) <- prediction_streams
 
   list(
     bias_correct = bias_correct,
@@ -115,7 +115,8 @@ train_model <- function(
     edge_thresholds = edge_screen$thresholds,
     feature_space = feature_space,
     model_spec = model_spec,
-    models = models
+    prediction_streams = prediction_streams,
+    outcome_models = outcome_models
   )
 }
 
@@ -125,19 +126,19 @@ predict_model <- function(model, conmat_new) {
   }
 
   network_strengths <- compute_network_strengths(conmat_new, model$edge_weights)
-  prediction_types <- names(model$models)
+  prediction_streams <- model$prediction_streams
 
   pred <- matrix(
     nrow = dim(conmat_new)[1],
-    ncol = length(prediction_types),
-    dimnames = list(NULL, prediction_types)
+    ncol = length(prediction_streams),
+    dimnames = list(NULL, prediction_streams)
   )
-  for (prediction_type in prediction_types) {
-    pred[, prediction_type] <- predict_prediction_model(
-      fitted_model = model$models[[prediction_type]],
+  for (prediction_stream in prediction_streams) {
+    pred[, prediction_stream] <- predict_prediction_model(
+      fitted_model = model$outcome_models[[prediction_stream]],
       network_strengths = network_strengths,
       feature_space = model$feature_space,
-      prediction_type = prediction_type
+      prediction_stream = prediction_stream
     )
   }
 
@@ -264,13 +265,13 @@ fit_prediction_model <- function(
   network_strengths,
   behav,
   feature_space,
-  prediction_type,
+  prediction_stream,
   model_spec
 ) {
   features <- prediction_features(
     network_strengths = network_strengths,
     feature_space = feature_space,
-    prediction_type = prediction_type
+    prediction_stream = prediction_stream
   )
 
   fit_outcome_model(
@@ -284,12 +285,12 @@ predict_prediction_model <- function(
   fitted_model,
   network_strengths,
   feature_space,
-  prediction_type
+  prediction_stream
 ) {
   features <- prediction_features(
     network_strengths = network_strengths,
     feature_space = feature_space,
-    prediction_type = prediction_type
+    prediction_stream = prediction_stream
   )
 
   predict_outcome_model(
@@ -301,13 +302,13 @@ predict_prediction_model <- function(
 prediction_features <- function(
   network_strengths,
   feature_space,
-  prediction_type
+  prediction_stream
 ) {
   switch(
     feature_space,
     separate = separate_prediction_features(
       network_strengths = network_strengths,
-      prediction_type = prediction_type
+      prediction_stream = prediction_stream
     ),
     net = matrix(
       network_strengths[, "positive"] - network_strengths[, "negative"],
@@ -322,18 +323,18 @@ prediction_features <- function(
   )
 }
 
-separate_prediction_features <- function(network_strengths, prediction_type) {
+separate_prediction_features <- function(network_strengths, prediction_stream) {
   feature_sets <- list(
     joint = edge_types,
     positive = "positive",
     negative = "negative"
   )
-  columns <- feature_sets[[prediction_type]]
+  columns <- feature_sets[[prediction_stream]]
 
   if (is.null(columns)) {
     stop(
       paste0(
-        "`prediction_type` must be one of ",
+        "`prediction_stream` must be one of ",
         "\"joint\", \"positive\", or \"negative\" for ",
         "`feature_space = \"separate\"`."
       ),
@@ -381,7 +382,7 @@ predict_lm_outcome_model <- function(fitted_model, features) {
   drop(design %*% fitted_model$coefficients)
 }
 
-prediction_types_for_feature_space <- function(feature_space) {
+prediction_streams_for_feature_space <- function(feature_space) {
   switch(
     feature_space,
     separate = c("joint", edge_types),

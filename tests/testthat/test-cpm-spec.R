@@ -140,7 +140,7 @@ test_that("net feature space yields a single prediction stream", {
   result <- fit(spec, conmat = conmat, behav = behav)
 
   expect_named(result$predictions, c("row", "real", "net"))
-  expect_named(result$model$models, "net")
+  expect_named(result$model$outcome_models, "net")
 })
 
 test_that("sigmoid edge weighting stores smooth edge weights in the model", {

@@ -11,7 +11,7 @@ compute_fold_predictions <- function(real, pred, folds) {
 }
 
 new_predictions <- function(real, pred, fold = NULL) {
-  prediction_types <- colnames(pred)
+  prediction_streams <- colnames(pred)
   predictions <- data.frame(
     row = seq_along(real),
     real = real,
@@ -24,7 +24,7 @@ new_predictions <- function(real, pred, fold = NULL) {
   }
 
   predictions$fold <- fold
-  predictions[, c("row", "fold", "real", prediction_types), drop = FALSE]
+  predictions[, c("row", "fold", "real", prediction_streams), drop = FALSE]
 }
 
 prediction_row_names <- function(real) {

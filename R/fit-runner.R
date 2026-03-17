@@ -7,7 +7,9 @@ run_single_fit <- function(
   call = NULL
 ) {
   params <- object$params
-  prediction_types <- prediction_types_for_feature_space(params$feature_space)
+  prediction_streams <- prediction_streams_for_feature_space(
+    params$feature_space
+  )
   fit_context <- resolve_fit_context(
     conmat = conmat,
     behav = behav,
@@ -21,7 +23,7 @@ run_single_fit <- function(
   include_cases <- fit_context$include_cases
   na_action <- fit_context$na_action
 
-  pred <- init_pred(behav, prediction_types)
+  pred <- init_pred(behav, prediction_streams)
   training <- prepare_training_data(
     conmat = conmat,
     behav = behav,
@@ -78,7 +80,9 @@ run_resample_fit <- function(
   call = NULL
 ) {
   params <- object$params
-  prediction_types <- prediction_types_for_feature_space(params$feature_space)
+  prediction_streams <- prediction_streams_for_feature_space(
+    params$feature_space
+  )
   return_edges <- match.arg(return_edges)
   if (is.null(fit_context)) {
     fit_context <- resolve_fit_context(
@@ -100,7 +104,7 @@ run_resample_fit <- function(
 
   warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
 
-  pred <- init_pred(behav, prediction_types)
+  pred <- init_pred(behav, prediction_streams)
   edges <- init_edges(return_edges, conmat, kfolds)
   real <- behav
 
@@ -193,11 +197,11 @@ new_fit_params <- function(
   )
 }
 
-init_pred <- function(behav, prediction_types) {
+init_pred <- function(behav, prediction_streams) {
   matrix(
     nrow = length(behav),
-    ncol = length(prediction_types),
-    dimnames = list(names(behav), prediction_types)
+    ncol = length(prediction_streams),
+    dimnames = list(names(behav), prediction_streams)
   )
 }
 

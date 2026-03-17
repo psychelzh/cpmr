@@ -139,7 +139,7 @@ summary.cpm <- function(
       edges = object$edges,
       params = list(
         method = method,
-        prediction_types = prediction_columns(object$predictions)
+        prediction_streams = prediction_columns(object$predictions)
       )
     ),
     class = "cpm_summary"
@@ -155,14 +155,14 @@ print.cpm_summary <- function(x, ...) {
     level = "single",
     metric = "correlation"
   )
-  prediction_types <- x$params$prediction_types
+  prediction_streams <- x$params$prediction_streams
   cat("CPM summary:\n")
   print_performance_block(
     values = summary_metric_values(
       x$metrics,
       level = "single",
       metric = "correlation",
-      prediction_types = prediction_types
+      prediction_streams = prediction_streams
     ),
     header = sprintf("  Performance (%s):\n", format_method_name(method))
   )
@@ -213,7 +213,7 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
         sum_x$metrics,
         level = "single",
         metric = "correlation",
-        prediction_types = sum_x$params$prediction_types
+        prediction_streams = sum_x$params$prediction_streams
       )))
     ),
     edges = tibble::tibble(

@@ -1,4 +1,4 @@
-prediction_types <- c("joint", "positive", "negative")
+prediction_streams <- c("joint", "positive", "negative")
 
 test_that("safe_cor returns NA for degenerate vectors", {
   expect_true(is.na(safe_cor(c(1, 1, 1), c(1, 2, 3))))
@@ -74,7 +74,7 @@ test_that("summary metric helpers summarize and extract metric views", {
       metrics,
       level = "foldwise",
       metric = "correlation",
-      prediction_types = prediction_types
+      prediction_streams = prediction_streams
     ),
     c(joint = 0.3, positive = 0.2, negative = NA_real_)
   )
@@ -92,7 +92,7 @@ test_that("summary metric helpers summarize and extract metric views", {
       metrics,
       level = "pooled",
       metric = "rmse",
-      prediction_types = prediction_types
+      prediction_streams = prediction_streams
     ),
     c(joint = NA_real_, positive = NA_real_, negative = NA_real_)
   )
@@ -112,7 +112,7 @@ test_that("summary metric helpers summarize and extract metric views", {
       ),
       level = "pooled",
       metric = c("rmse", "mae"),
-      prediction_types = prediction_types
+      prediction_streams = prediction_streams
     ),
     rbind(
       rmse = c(joint = 1, positive = 2, negative = NA_real_),
@@ -137,7 +137,7 @@ test_that("summary_metric_matrix keeps matrix shape for a single prediction stre
       metrics,
       level = "pooled",
       metric = c("rmse", "mae"),
-      prediction_types = "net"
+      prediction_streams = "net"
     ),
     rbind(
       rmse = c(net = 1),

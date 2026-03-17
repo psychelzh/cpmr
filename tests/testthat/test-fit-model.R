@@ -135,7 +135,7 @@ test_that("train_model and predict_model compose correctly", {
   )
 
   expect_equal(dim(edge_screen$mask), c(p, 2))
-  expect_named(model$models, c("joint", "positive", "negative"))
+  expect_named(model$outcome_models, c("joint", "positive", "negative"))
   expect_equal(
     dim(predict_model(model, assessment$conmat)),
     c(length(rows_test), 3)
@@ -172,7 +172,7 @@ test_that("net feature space with lm model produces a single stream", {
   )
   pred <- predict_model(model, conmat)
 
-  expect_named(model$models, "net")
+  expect_named(model$outcome_models, "net")
   expect_identical(colnames(pred), "net")
   expect_equal(dim(pred), c(nrow(conmat), 1))
 })
@@ -237,10 +237,10 @@ test_that("prediction helpers validate unsupported modes", {
     prediction_features(
       network_strengths = network_strengths,
       feature_space = "separate",
-      prediction_type = "bogus"
+      prediction_stream = "bogus"
     ),
     paste0(
-      "`prediction_type` must be one of ",
+      "`prediction_stream` must be one of ",
       "\"joint\", \"positive\", or \"negative\" for ",
       "`feature_space = \"separate\"`."
     ),
@@ -250,7 +250,7 @@ test_that("prediction helpers validate unsupported modes", {
     prediction_features(
       network_strengths = network_strengths,
       feature_space = "bogus",
-      prediction_type = "joint"
+      prediction_stream = "joint"
     ),
     "`feature_space` must be either \"separate\" or \"net\".",
     fixed = TRUE
@@ -265,7 +265,7 @@ test_that("prediction helpers validate unsupported modes", {
     fixed = TRUE
   )
   expect_error(
-    prediction_types_for_feature_space("bogus"),
+    prediction_streams_for_feature_space("bogus"),
     "`feature_space` must be either \"separate\" or \"net\".",
     fixed = TRUE
   )
