@@ -18,7 +18,7 @@
             {
               "type": "character",
               "attributes": {},
-              "value": ["both", "pos", "neg"]
+              "value": ["combined", "positive", "negative"]
             }
           ]
         }
@@ -46,7 +46,7 @@
             {
               "type": "character",
               "attributes": {},
-              "value": ["pos", "neg"]
+              "value": ["positive", "negative"]
             }
           ]
         }
@@ -62,7 +62,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "prediction_head", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -74,12 +74,37 @@
         {
           "type": "character",
           "attributes": {},
+          "value": ["pearson"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
           "value": ["alpha"]
         },
         {
           "type": "double",
           "attributes": {},
           "value": [0.01]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["separate"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["binary"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.05]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["linear"]
         },
         {
           "type": "character",
@@ -106,8 +131,14 @@
         Candidate edges: 10
         Parameters:
           Covariates:       none
+          Association:      pearson
           Threshold method: alpha
           Threshold level:  0.01
+          Network summary:  separate
+          Edge weighting:   binary
+          Weighting scale:  0.05
+          Prediction head:  linear
+          Streams:          combined, positive, negative
           Bias correction:  yes
 
 # Alternative threshold method works
@@ -130,12 +161,12 @@
             {
               "type": "character",
               "attributes": {},
-              "value": ["both", "pos", "neg"]
+              "value": ["combined", "positive", "negative"]
             }
           ]
         }
       },
-      "value": [-0.47986299, -0.4235422, -0.31121857, -0.76666707, -1.27905638, 0.29190563, -0.53251339, -0.6619815, -0.29101707, 0.4954736, -0.50153461, -0.77729984, -0.33661358, -0.40260447, -0.95285926, 0.3039217, -0.1406691, -0.83778146, -0.53134056, 0.21830125, -0.41713269, -0.08233393, -0.33073634, -0.91491306, -1.13193216, -0.06866617, -0.82542811, -0.36418378, -0.1220451, 0.29889139]
+      "value": [-0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799, -0.39584799]
     }
 
 ---
@@ -158,12 +189,12 @@
             {
               "type": "character",
               "attributes": {},
-              "value": ["pos", "neg"]
+              "value": ["positive", "negative"]
             }
           ]
         }
       },
-      "value": [true, true, true, false, false, true, true, true, true, false, false, false, false, true, true, false, false, false, false, true]
+      "value": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
     }
 
 ---
@@ -174,7 +205,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "prediction_head", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -186,12 +217,37 @@
         {
           "type": "character",
           "attributes": {},
+          "value": ["pearson"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
           "value": ["sparsity"]
         },
         {
           "type": "double",
           "attributes": {},
           "value": [0.01]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["separate"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["binary"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.05]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["linear"]
         },
         {
           "type": "character",
@@ -212,15 +268,21 @@
       result
     Output
       CPM fit:
-        Call: fit(object = cpm_spec(thresh_method = "sparsity"), conmat = conmat, 
+        Call: fit(object = cpm_spec(threshold_method = "sparsity"), conmat = conmat, 
           behav = behav)
         Number of observations: 10
           Complete cases: 10
         Candidate edges: 10
         Parameters:
           Covariates:       none
+          Association:      pearson
           Threshold method: sparsity
           Threshold level:  0.01
+          Network summary:  separate
+          Edge weighting:   binary
+          Weighting scale:  0.05
+          Prediction head:  linear
+          Streams:          combined, positive, negative
           Bias correction:  yes
 
 # Different threshold levels works
@@ -243,7 +305,7 @@
             {
               "type": "character",
               "attributes": {},
-              "value": ["both", "pos", "neg"]
+              "value": ["combined", "positive", "negative"]
             }
           ]
         }
@@ -271,7 +333,7 @@
             {
               "type": "character",
               "attributes": {},
-              "value": ["pos", "neg"]
+              "value": ["positive", "negative"]
             }
           ]
         }
@@ -287,7 +349,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "prediction_head", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -299,12 +361,37 @@
         {
           "type": "character",
           "attributes": {},
+          "value": ["pearson"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
           "value": ["alpha"]
         },
         {
           "type": "double",
           "attributes": {},
           "value": [0.1]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["separate"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["binary"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.05]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["linear"]
         },
         {
           "type": "character",
@@ -325,14 +412,21 @@
       result
     Output
       CPM fit:
-        Call: fit(object = cpm_spec(thresh_level = 0.1), conmat = conmat, behav = behav)
+        Call: fit(object = cpm_spec(threshold_level = 0.1), conmat = conmat, 
+          behav = behav)
         Number of observations: 10
           Complete cases: 10
         Candidate edges: 10
         Parameters:
           Covariates:       none
+          Association:      pearson
           Threshold method: alpha
           Threshold level:  0.1
+          Network summary:  separate
+          Edge weighting:   binary
+          Weighting scale:  0.05
+          Prediction head:  linear
+          Streams:          combined, positive, negative
           Bias correction:  yes
 
 # `na_action` argument works
@@ -347,8 +441,14 @@
         Candidate edges: 10
         Parameters:
           Covariates:       none
+          Association:      pearson
           Threshold method: alpha
           Threshold level:  0.01
+          Network summary:  separate
+          Edge weighting:   binary
+          Weighting scale:  0.05
+          Prediction head:  linear
+          Streams:          combined, positive, negative
           Bias correction:  yes
 
 ---
@@ -364,8 +464,14 @@
         Candidate edges: 10
         Parameters:
           Covariates:       included
+          Association:      pearson
           Threshold method: alpha
           Threshold level:  0.01
+          Network summary:  separate
+          Edge weighting:   binary
+          Weighting scale:  0.05
+          Prediction head:  linear
+          Streams:          combined, positive, negative
           Bias correction:  yes
 
 ---
@@ -381,7 +487,13 @@
         Candidate edges: 10
         Parameters:
           Covariates:       included
+          Association:      pearson
           Threshold method: alpha
           Threshold level:  0.01
+          Network summary:  separate
+          Edge weighting:   binary
+          Weighting scale:  0.05
+          Prediction head:  linear
+          Streams:          combined, positive, negative
           Bias correction:  yes
 

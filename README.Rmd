@@ -60,6 +60,28 @@ fit_obj
 summary(fit_obj)
 ```
 
+`cpm_spec()` can also express richer CPM variants without leaving the native
+API surface:
+
+```{r rich-spec}
+rich_spec <- cpm_spec(
+  association_method = "spearman",
+  threshold_method = "effect_size",
+  threshold_level = 0.1,
+  edge_weighting = "sigmoid",
+  weighting_scale = 0.03,
+  network_summary = "difference",
+  prediction_head = "linear_no_intercept"
+)
+
+fit(rich_spec, conmat = conmat, behav = behav)$predictions |>
+  head()
+```
+
+This lets you control edge screening, thresholding, edge weighting,
+network-strength construction, and the final prediction head from one reusable
+spec object.
+
 Cross-validated resampling uses `fit_resamples()` with the same specification
 object:
 

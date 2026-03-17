@@ -10,9 +10,9 @@
 #'   \item{`spec`}{The originating `cpm_spec` object.}
 #'   \item{`params`}{Parameter list used at fit time.}
 #'   \item{`predictions`}{Data frame of observation-level outputs with columns
-#'     `row`, `real`, `both`, `pos`, and `neg`.}
+#'     `row`, `real`, and one column per configured prediction stream.}
 #'   \item{`edges`}{Stored single-fit edge mask as a `p x 2` logical matrix
-#'     with `pos` and `neg` columns.}
+#'     with `positive` and `negative` columns.}
 #'   \item{`model`}{Trained CPM model components used by prediction.}
 #' }
 #'
@@ -42,7 +42,7 @@ print.cpm <- function(x, ...) {
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
   cat(sprintf(
     "    Complete cases: %d\n",
-    sum(stats::complete.cases(x$predictions[, prediction_types, drop = FALSE]))
+    sum(stats::complete.cases(x$predictions[, prediction_columns(x$predictions), drop = FALSE]))
   ))
   cat(sprintf("  Candidate edges: %d\n", dim(x$edges)[1]))
   covariates_param <- if (!is.null(x$params$covariates)) {
@@ -55,10 +55,37 @@ print.cpm <- function(x, ...) {
     "    Covariates:       %s\n",
     format_covariates(covariates_param)
   ))
-  cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
+  cat(sprintf(
+    "    Association:      %s\n",
+    x$params$association_method
+  ))
+  cat(sprintf(
+    "    Threshold method: %s\n",
+    x$params$threshold_method
+  ))
   cat(sprintf(
     "    Threshold level:  %s\n",
-    format_threshold_level(x$params$thresh_level)
+    format_threshold_level(x$params$threshold_level)
+  ))
+  cat(sprintf(
+    "    Network summary:  %s\n",
+    x$params$network_summary
+  ))
+  cat(sprintf(
+    "    Edge weighting:   %s\n",
+    x$params$edge_weighting
+  ))
+  cat(sprintf(
+    "    Weighting scale:  %s\n",
+    format_threshold_level(x$params$weighting_scale)
+  ))
+  cat(sprintf(
+    "    Prediction head:  %s\n",
+    x$params$prediction_head
+  ))
+  cat(sprintf(
+    "    Streams:          %s\n",
+    format_prediction_streams(prediction_columns(x$predictions))
   ))
   cat(sprintf(
     "    Bias correction:  %s\n",
@@ -108,7 +135,8 @@ summary.cpm <- function(
       metrics = metrics,
       edges = object$edges,
       params = list(
-        method = method
+        method = method,
+        prediction_types = prediction_columns(object$predictions)
       )
     ),
     class = "cpm_summary"
@@ -124,12 +152,14 @@ print.cpm_summary <- function(x, ...) {
     level = "single",
     metric = "correlation"
   )
+  prediction_types <- x$params$prediction_types
   cat("CPM summary:\n")
   print_performance_block(
     values = summary_metric_values(
       x$metrics,
       level = "single",
-      metric = "correlation"
+      metric = "correlation",
+      prediction_types = prediction_types
     ),
     header = sprintf("  Performance (%s):\n", format_method_name(method))
   )
@@ -150,19 +180,18 @@ print.cpm_summary <- function(x, ...) {
 #'   \item{method}{The method used to calculate the correlation between the real
 #'   and predicted values.}
 #'
-#'   \item{pos}{The correlation between the real and predicted values for
-#'   positive edges.}
-#'
-#'   \item{neg}{The correlation between the real and predicted values for
-#'   negative edges.}
+#'   \item{prediction columns}{One numeric column per configured prediction
+#'   stream. For example, `combined`, `positive`, and `negative` when
+#'   `network_summary = "separate"`, or `difference` when
+#'   `network_summary = "difference"`.}
 #'
 #'   For `component = "edges"`:
 #'
-#'   \item{pos}{A logical vector indicating whether each edge is selected by the
-#'   fitted CPM model (positive).}
+#'   \item{positive}{A logical vector indicating whether each edge is selected
+#'   by the fitted CPM model (positive).}
 #'
-#'   \item{neg}{A logical vector indicating whether each edge is selected by the
-#'   fitted CPM model (negative).}
+#'   \item{negative}{A logical vector indicating whether each edge is selected
+#'   by the fitted CPM model (negative).}
 #' @export
 tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
   component <- match.arg(component)
@@ -180,7 +209,8 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
       tibble::as_tibble_row(as.list(summary_metric_values(
         sum_x$metrics,
         level = "single",
-        metric = "correlation"
+        metric = "correlation",
+        prediction_types = sum_x$params$prediction_types
       )))
     ),
     edges = tibble::tibble(

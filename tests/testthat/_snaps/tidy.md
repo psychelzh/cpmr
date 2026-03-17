@@ -16,7 +16,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "na_action", "bias_correct", "method", "both", "pos", "neg"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "prediction_head", "na_action", "bias_correct", "method", "combined", "positive", "negative"]
         }
       },
       "value": [
@@ -28,12 +28,37 @@
         {
           "type": "character",
           "attributes": {},
+          "value": ["pearson"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
           "value": ["alpha"]
         },
         {
           "type": "double",
           "attributes": {},
           "value": [0.01]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["separate"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["binary"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.05]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["linear"]
         },
         {
           "type": "character",
@@ -86,7 +111,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "thresh_method", "thresh_level", "na_action", "bias_correct", "pos", "neg"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "prediction_head", "na_action", "bias_correct", "positive", "negative"]
         }
       },
       "value": [
@@ -98,12 +123,37 @@
         {
           "type": "character",
           "attributes": {},
+          "value": ["pearson"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
           "value": ["alpha"]
         },
         {
           "type": "double",
           "attributes": {},
           "value": [0.01]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["separate"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["binary"]
+        },
+        {
+          "type": "double",
+          "attributes": {},
+          "value": [0.05]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["linear"]
         },
         {
           "type": "character",

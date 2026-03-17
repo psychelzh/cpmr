@@ -11,12 +11,11 @@ compute_fold_predictions <- function(real, pred, folds) {
 }
 
 new_predictions <- function(real, pred, fold = NULL) {
+  prediction_types <- colnames(pred)
   predictions <- data.frame(
     row = seq_along(real),
     real = real,
-    both = pred[, "both"],
-    pos = pred[, "pos"],
-    neg = pred[, "neg"],
+    pred,
     row.names = prediction_row_names(real)
   )
 
@@ -34,4 +33,8 @@ prediction_row_names <- function(real) {
   } else {
     NULL
   }
+}
+
+prediction_columns <- function(predictions) {
+  setdiff(names(predictions), c("row", "fold", "real"))
 }

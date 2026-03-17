@@ -16,7 +16,7 @@ A \code{cpm_resamples} object is a list with the following elements:
 \item{\code{spec}}{The originating \code{cpm_spec} object.}
 \item{\code{params}}{Parameter list used for the resampling run.}
 \item{\code{predictions}}{Data frame of observation-level predictions with
-fold IDs.}
+fold IDs and one column per configured prediction stream.}
 \item{\code{edges}}{Stored edge output based on \code{return_edges}
 (\code{NULL}/matrix/array).}
 \item{\code{folds}}{List of assessment-row indices for each fold.}

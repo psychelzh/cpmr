@@ -1,6 +1,6 @@
 print_performance_block <- function(values, header, std_error = NULL) {
   cat(header)
-  for (prediction_type in prediction_types) {
+  for (prediction_type in names(values)) {
     line <- sprintf(
       "    %s: %s",
       prediction_label(prediction_type),
@@ -21,7 +21,7 @@ print_error_block <- function(errors, header = "  Prediction error:\n") {
   cat(header)
   for (error_type in rownames(errors)) {
     cat(sprintf("    %s:\n", toupper(error_type)))
-    for (prediction_type in prediction_types) {
+    for (prediction_type in colnames(errors)) {
       cat(sprintf(
         "      %s: %s\n",
         prediction_label(prediction_type),
@@ -89,11 +89,16 @@ edge_storage_label <- function(x) {
 }
 
 prediction_labels <- c(
-  both = "Combined",
-  pos = "Positive",
-  neg = "Negative"
+  combined = "Combined",
+  difference = "Difference",
+  positive = "Positive",
+  negative = "Negative"
 )
 
 prediction_label <- function(prediction_type) {
   unname(prediction_labels[[prediction_type]])
+}
+
+format_prediction_streams <- function(prediction_types) {
+  paste(prediction_types, collapse = ", ")
 }

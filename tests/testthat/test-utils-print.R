@@ -16,7 +16,9 @@ test_that("format helpers produce stable display strings", {
 })
 
 test_that("prediction labels use full names", {
-  expect_identical(prediction_label("both"), "Combined")
-  expect_identical(prediction_label("pos"), "Positive")
-  expect_identical(prediction_label("neg"), "Negative")
+  expect_identical(prediction_label("combined"), "Combined")
+  expect_identical(prediction_label("difference"), "Difference")
+  expect_identical(prediction_label("positive"), "Positive")
+  expect_identical(prediction_label("negative"), "Negative")
 })
+

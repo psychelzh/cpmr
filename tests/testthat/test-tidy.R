@@ -22,12 +22,18 @@ test_that("Support pass arguments of `summary()`", {
     tidy(result, component = "edges"),
     c(
       "covariates",
-      "thresh_method",
-      "thresh_level",
+      "association_method",
+      "threshold_method",
+      "threshold_level",
+      "network_summary",
+      "edge_weighting",
+      "weighting_scale",
+      "prediction_head",
       "na_action",
       "bias_correct",
-      "pos",
-      "neg"
+      "positive",
+      "negative"
     )
   )
 })
+

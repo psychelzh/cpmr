@@ -22,19 +22,18 @@ For \code{component = "performance"}:
 \item{method}{The method used to calculate the correlation between the real
 and predicted values.}
 
-\item{pos}{The correlation between the real and predicted values for
-positive edges.}
-
-\item{neg}{The correlation between the real and predicted values for
-negative edges.}
+\item{prediction columns}{One numeric column per configured prediction
+stream. For example, \code{combined}, \code{positive}, and \code{negative} when
+\code{network_summary = "separate"}, or \code{difference} when
+\code{network_summary = "difference"}.}
 
 For \code{component = "edges"}:
 
-\item{pos}{A logical vector indicating whether each edge is selected by the
-fitted CPM model (positive).}
+\item{positive}{A logical vector indicating whether each edge is selected
+by the fitted CPM model (positive).}
 
-\item{neg}{A logical vector indicating whether each edge is selected by the
-fitted CPM model (negative).}
+\item{negative}{A logical vector indicating whether each edge is selected
+by the fitted CPM model (negative).}
 }
 \description{
 Tidy a \code{cpm} object

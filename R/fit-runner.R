@@ -7,6 +7,7 @@ run_single_fit <- function(
   call = NULL
 ) {
   params <- object$params
+  prediction_types <- prediction_types_for_summary(params$network_summary)
   fit_context <- resolve_fit_context(
     conmat = conmat,
     behav = behav,
@@ -20,7 +21,7 @@ run_single_fit <- function(
   include_cases <- fit_context$include_cases
   na_action <- fit_context$na_action
 
-  pred <- init_pred(behav)
+  pred <- init_pred(behav, prediction_types)
   training <- prepare_training_data(
     conmat = conmat,
     behav = behav,
@@ -28,17 +29,22 @@ run_single_fit <- function(
     rows_train = include_cases
   )
 
-  cur_edges <- select_edges(
+  edge_screen <- screen_edges(
     conmat = training$conmat,
     behav = training$behav,
-    method = params$thresh_method,
-    level = params$thresh_level
+    association_method = params$association_method,
+    threshold_method = params$threshold_method,
+    threshold_level = params$threshold_level,
+    edge_weighting = params$edge_weighting,
+    weighting_scale = params$weighting_scale
   )
   model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
-    edges = cur_edges,
-    bias_correct = params$bias_correct
+    edge_screen = edge_screen,
+    bias_correct = params$bias_correct,
+    network_summary = params$network_summary,
+    prediction_head = params$prediction_head
   )
   pred[include_cases, ] <- predict_model(model, training$conmat)
 
@@ -55,7 +61,7 @@ run_single_fit <- function(
       na_action = na_action
     ),
     predictions = predictions,
-    edges = cur_edges,
+    edges = edge_screen$mask,
     model = model
   )
 }
@@ -72,6 +78,7 @@ run_resample_fit <- function(
   call = NULL
 ) {
   params <- object$params
+  prediction_types <- prediction_types_for_summary(params$network_summary)
   return_edges <- match.arg(return_edges)
   if (is.null(fit_context)) {
     fit_context <- resolve_fit_context(
@@ -93,7 +100,7 @@ run_resample_fit <- function(
 
   warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
 
-  pred <- init_pred(behav)
+  pred <- init_pred(behav, prediction_types)
   edges <- init_edges(return_edges, conmat, kfolds)
   real <- behav
 
@@ -107,17 +114,22 @@ run_resample_fit <- function(
       covariates = covariates,
       rows_train = rows_train
     )
-    fold_edges <- select_edges(
+    fold_screen <- screen_edges(
       conmat = training$conmat,
       behav = training$behav,
-      method = params$thresh_method,
-      level = params$thresh_level
+      association_method = params$association_method,
+      threshold_method = params$threshold_method,
+      threshold_level = params$threshold_level,
+      edge_weighting = params$edge_weighting,
+      weighting_scale = params$weighting_scale
     )
     fold_model <- train_model(
       conmat = training$conmat,
       behav = training$behav,
-      edges = fold_edges,
-      bias_correct = params$bias_correct
+      edge_screen = fold_screen,
+      bias_correct = params$bias_correct,
+      network_summary = params$network_summary,
+      prediction_head = params$prediction_head
     )
     assessment <- prepare_assessment_data(
       conmat = conmat,
@@ -132,9 +144,9 @@ run_resample_fit <- function(
     real[rows_test] <- assessment$behav
 
     if (return_edges == "all") {
-      edges[,, fold] <- fold_edges
+      edges[,, fold] <- fold_screen$mask
     } else if (return_edges == "sum") {
-      edges <- edges + fold_edges
+      edges <- edges + fold_screen$mask
     }
   }
 
@@ -167,8 +179,13 @@ new_fit_params <- function(
   c(
     list(
       covariates = !is.null(covariates),
-      thresh_method = spec_params$thresh_method,
-      thresh_level = spec_params$thresh_level,
+      association_method = spec_params$association_method,
+      threshold_method = spec_params$threshold_method,
+      threshold_level = spec_params$threshold_level,
+      network_summary = spec_params$network_summary,
+      edge_weighting = spec_params$edge_weighting,
+      weighting_scale = spec_params$weighting_scale,
+      prediction_head = spec_params$prediction_head,
       na_action = na_action,
       bias_correct = spec_params$bias_correct
     ),
@@ -176,7 +193,7 @@ new_fit_params <- function(
   )
 }
 
-init_pred <- function(behav) {
+init_pred <- function(behav, prediction_types) {
   matrix(
     nrow = length(behav),
     ncol = length(prediction_types),

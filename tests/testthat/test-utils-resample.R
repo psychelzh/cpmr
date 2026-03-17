@@ -67,9 +67,9 @@ test_that("compute_pooled_metric_table summarizes pooled predictions", {
     row = 1:4,
     fold = c(1L, 1L, 2L, 2L),
     real = c(1, 2, 3, 4),
-    both = c(1, 2, 3, 4),
-    pos = c(1, 2, 3, 4),
-    neg = c(4, 3, 2, 1)
+    combined = c(1, 2, 3, 4),
+    positive = c(1, 2, 3, 4),
+    negative = c(4, 3, 2, 1)
   )
 
   metrics <- compute_pooled_metric_table(
@@ -78,16 +78,16 @@ test_that("compute_pooled_metric_table summarizes pooled predictions", {
   )
 
   expect_equal(
-    metrics$estimate[metrics$metric == "rmse" & metrics$prediction == "both"],
+    metrics$estimate[metrics$metric == "rmse" & metrics$prediction == "combined"],
     0
   )
   expect_equal(
-    metrics$estimate[metrics$metric == "mae" & metrics$prediction == "both"],
+    metrics$estimate[metrics$metric == "mae" & metrics$prediction == "combined"],
     0
   )
   expect_equal(
     metrics$estimate[
-      metrics$metric == "correlation" & metrics$prediction == "both"
+      metrics$metric == "correlation" & metrics$prediction == "combined"
     ],
     1
   )
@@ -98,9 +98,9 @@ test_that("compute_pooled_metric_table returns a long metric table", {
     row = 1:4,
     fold = c(1L, 1L, 2L, 2L),
     real = c(1, 2, 3, 4),
-    both = c(1, 2, 3, 4),
-    pos = c(1, 2, 3, 4),
-    neg = c(4, 3, 2, 1)
+    combined = c(1, 2, 3, 4),
+    positive = c(1, 2, 3, 4),
+    negative = c(4, 3, 2, 1)
   )
 
   metrics <- compute_pooled_metric_table(
@@ -111,7 +111,7 @@ test_that("compute_pooled_metric_table returns a long metric table", {
   expect_named(metrics, c("metric", "prediction", "estimate"))
   expect_equal(nrow(metrics), 6)
   expect_true(all(c("rmse", "correlation") %in% metrics$metric))
-  expect_true(all(c("both", "pos", "neg") %in% metrics$prediction))
+  expect_true(all(c("combined", "positive", "negative") %in% metrics$prediction))
 })
 
 test_that("compute_resample_metric only validates correlation methods when needed", {
@@ -131,9 +131,9 @@ test_that("compute_resample_summary_metrics combines pooled and foldwise summari
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
     real = c(1, 2, 3, 4, 5, 6),
-    both = c(1, 2, 3, 6, 5, 4),
-    pos = c(1, 2, 3, 4, 5, 6),
-    neg = c(3, 2, 1, 6, 5, 4)
+    combined = c(1, 2, 3, 6, 5, 4),
+    positive = c(1, 2, 3, 4, 5, 6),
+    negative = c(3, 2, 1, 6, 5, 4)
   )
   folds <- list(1:3, 4:6)
 
@@ -149,7 +149,7 @@ test_that("compute_resample_summary_metrics combines pooled and foldwise summari
     metrics$estimate[
       metrics$level == "pooled" &
         metrics$metric == "correlation" &
-        metrics$prediction == "pos"
+        metrics$prediction == "positive"
     ],
     1
   )
@@ -157,7 +157,7 @@ test_that("compute_resample_summary_metrics combines pooled and foldwise summari
     metrics$std_error[
       metrics$level == "foldwise" &
         metrics$metric == "correlation" &
-        metrics$prediction == "both"
+        metrics$prediction == "combined"
     ],
     safe_std_error(c(1, -1))
   )
@@ -168,9 +168,9 @@ test_that("compute_fold_metric_table returns one row per fold, metric, and strea
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
     real = c(1, 2, 3, 4, 5, 6),
-    both = c(1, 2, 3, 6, 5, 4),
-    pos = c(1, 2, 3, 4, 5, 6),
-    neg = c(3, 2, 1, 6, 5, 4)
+    combined = c(1, 2, 3, 6, 5, 4),
+    positive = c(1, 2, 3, 4, 5, 6),
+    negative = c(3, 2, 1, 6, 5, 4)
   )
   folds <- list(1:3, 4:6)
 
@@ -193,7 +193,7 @@ test_that("summarize_resample_edges handles sum, all, and none storage", {
   stored_sum <- matrix(
     c(2, 0, 1, 2),
     ncol = 2,
-    dimnames = list(NULL, c("pos", "neg"))
+    dimnames = list(NULL, c("positive", "negative"))
   )
   stored_all <- array(
     c(
@@ -207,7 +207,7 @@ test_that("summarize_resample_edges handles sum, all, and none storage", {
       TRUE
     ),
     dim = c(2, 2, 2),
-    dimnames = list(NULL, c("pos", "neg"), NULL)
+    dimnames = list(NULL, c("positive", "negative"), NULL)
   )
 
   expect_equal(summarize_resample_edges(stored_sum, "sum", 2L), stored_sum / 2)
@@ -217,3 +217,4 @@ test_that("summarize_resample_edges handles sum, all, and none storage", {
   )
   expect_null(summarize_resample_edges(NULL, "none", 2L))
 })
+

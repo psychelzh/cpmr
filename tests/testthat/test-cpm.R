@@ -1,9 +1,11 @@
 prediction_matrix <- function(x) {
-  as.matrix(x$predictions[, prediction_types, drop = FALSE])
+  as.matrix(x$predictions[, prediction_columns(x$predictions), drop = FALSE])
 }
 
 prediction_complete_cases <- function(x) {
-  stats::complete.cases(x$predictions[, prediction_types, drop = FALSE])
+  stats::complete.cases(
+    x$predictions[, prediction_columns(x$predictions), drop = FALSE]
+  )
 }
 
 test_that("Default threshold method works", {
@@ -23,7 +25,7 @@ test_that("new_cpm builds single-fit CPM objects", {
   withr::local_seed(99)
   conmat <- matrix(rnorm(120), nrow = 10, ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(thresh_method = "alpha", thresh_level = 0.05)
+  spec <- cpm_spec(threshold_method = "alpha", threshold_level = 0.05)
   call <- quote(fit(object = spec, conmat = conmat, behav = behav))
 
   fit_result <- run_single_fit(
@@ -53,7 +55,7 @@ test_that("Alternative threshold method works", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- fit(cpm_spec(thresh_method = "sparsity"), conmat, behav)
+  result <- fit(cpm_spec(threshold_method = "sparsity"), conmat, behav)
   expect_s3_class(result, "cpm")
   expect_snapshot_value(prediction_matrix(result), style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
@@ -65,7 +67,7 @@ test_that("Different threshold levels works", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- fit(cpm_spec(thresh_level = 0.1), conmat, behav)
+  result <- fit(cpm_spec(threshold_level = 0.1), conmat, behav)
   expect_s3_class(result, "cpm")
   expect_snapshot_value(prediction_matrix(result), style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
@@ -245,3 +247,4 @@ test_that("fit excludes incomplete rows consistently when excluding missing data
   expect_true(isTRUE(all(prediction_complete_cases(result)[include_cases])))
   expect_true(isTRUE(all(is.na(prediction_matrix(result)[-include_cases, ]))))
 })
+

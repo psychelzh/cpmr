@@ -112,6 +112,7 @@ summary_metric_values <- function(
   metrics,
   level,
   metric,
+  prediction_types = unique(metrics$prediction),
   field = c("estimate", "std_error")
 ) {
   field <- match.arg(field)
@@ -129,6 +130,7 @@ summary_metric_matrix <- function(
   metrics,
   level,
   metric,
+  prediction_types = unique(metrics$prediction),
   field = c("estimate", "std_error")
 ) {
   field <- match.arg(field)
@@ -141,6 +143,7 @@ summary_metric_matrix <- function(
         metrics,
         level = level,
         metric = metric_name,
+        prediction_types = prediction_types,
         field = field
       )
     },

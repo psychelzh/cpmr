@@ -1,20 +1,35 @@
 test_that("cpm_spec stores model parameters", {
   spec <- cpm_spec(
-    thresh_method = "sparsity",
-    thresh_level = 0.05,
+    association_method = "spearman",
+    threshold_method = "sparsity",
+    threshold_level = 0.05,
+    network_summary = "difference",
+    edge_weighting = "sigmoid",
+    weighting_scale = 0.02,
+    prediction_head = "linear_no_intercept",
     bias_correct = FALSE
   )
 
   expect_s3_class(spec, "cpm_spec")
-  expect_identical(spec$params$thresh_method, "sparsity")
-  expect_identical(spec$params$thresh_level, 0.05)
+  expect_identical(spec$params$association_method, "spearman")
+  expect_identical(spec$params$threshold_method, "sparsity")
+  expect_identical(spec$params$threshold_level, 0.05)
+  expect_identical(spec$params$network_summary, "difference")
+  expect_identical(spec$params$edge_weighting, "sigmoid")
+  expect_identical(spec$params$weighting_scale, 0.02)
+  expect_identical(spec$params$prediction_head, "linear_no_intercept")
   expect_false(spec$params$bias_correct)
 })
 
 test_that("new_cpm_spec builds cpm_spec objects", {
   params <- list(
-    thresh_method = "alpha",
-    thresh_level = 0.05,
+    association_method = "pearson",
+    threshold_method = "alpha",
+    threshold_level = 0.05,
+    network_summary = "separate",
+    edge_weighting = "binary",
+    weighting_scale = 0.05,
+    prediction_head = "linear",
     bias_correct = TRUE
   )
 
@@ -37,18 +52,23 @@ test_that("fit.cpm_spec returns a cpm object with correct call", {
 
 test_that("cpm_spec validates scalar parameter values", {
   expect_error(
-    cpm_spec(thresh_level = -0.1),
-    "`thresh_level` must be a single number between 0 and 1.",
+    cpm_spec(threshold_level = -0.1),
+    "`threshold_level` must be a single number between 0 and 1.",
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(thresh_level = c(0.1, 0.2)),
-    "`thresh_level` must be a single number between 0 and 1.",
+    cpm_spec(threshold_level = c(0.1, 0.2)),
+    "`threshold_level` must be a single number between 0 and 1.",
     fixed = TRUE
   )
   expect_error(
     cpm_spec(bias_correct = NA),
     "`bias_correct` must be either TRUE or FALSE.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_spec(weighting_scale = 0),
+    "`weighting_scale` must be a single positive number.",
     fixed = TRUE
   )
   expect_error(
@@ -59,11 +79,47 @@ test_that("cpm_spec validates scalar parameter values", {
 })
 
 test_that("print.cpm_spec shows model options", {
-  spec <- cpm_spec(thresh_method = "sparsity")
+  spec <- cpm_spec(threshold_method = "sparsity")
 
   expect_output(print(spec), "CPM specification")
-  expect_output(print(spec), "Threshold method: sparsity")
+  expect_output(print(spec), "Association method")
+  expect_output(print(spec), "Threshold method:\\s+sparsity")
+  expect_output(print(spec), "Edge weighting")
+  expect_output(print(spec), "Prediction streams")
   expect_output(print(spec), "Bias correction")
+})
+
+test_that("difference summary yields a single prediction stream", {
+  withr::local_seed(101)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  spec <- cpm_spec(
+    network_summary = "difference",
+    prediction_head = "linear_no_intercept"
+  )
+
+  result <- fit(spec, conmat = conmat, behav = behav)
+
+  expect_named(result$predictions, c("row", "real", "difference"))
+  expect_named(result$model$models, "difference")
+})
+
+test_that("sigmoid edge weighting stores smooth edge weights in the model", {
+  withr::local_seed(202)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  spec <- cpm_spec(
+    threshold_method = "effect_size",
+    threshold_level = 0.1,
+    edge_weighting = "sigmoid",
+    weighting_scale = 0.03
+  )
+
+  result <- fit(spec, conmat = conmat, behav = behav)
+
+  expect_true(is.double(result$model$edge_weights))
+  expect_equal(dim(result$model$edge_weights), c(ncol(conmat), 2))
+  expect_true(any(result$model$edge_weights > 0 & result$model$edge_weights < 1))
 })
 
 test_that("fit_resamples returns predictions and folds", {
@@ -81,7 +137,7 @@ test_that("fit_resamples returns predictions and folds", {
   expect_equal(nrow(res$predictions), 10)
   expect_named(
     res$predictions,
-    c("row", "fold", "real", "both", "pos", "neg")
+    c("row", "fold", "real", "combined", "positive", "negative")
   )
   expect_null(res$edges)
   expect_s3_class(summary(res), "cpm_resamples_summary")
@@ -303,7 +359,7 @@ test_that("fit_resamples handles covariates in assessment pipeline", {
   )
 
   pred <- res$predictions
-  expect_true(isTRUE(all(stats::complete.cases(pred$both))))
+  expect_true(isTRUE(all(stats::complete.cases(pred$combined))))
   expect_true(isTRUE(res$params$covariates))
   expect_equal(length(res$folds), 6L)
 })
@@ -315,7 +371,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
   behav <- rnorm(n)
   covariates <- matrix(rnorm(n * 2), ncol = 2)
-  spec <- cpm_spec(thresh_method = "alpha", thresh_level = 0.1)
+  spec <- cpm_spec(threshold_method = "alpha", threshold_level = 0.1)
   resamples <- list(1:5, 6:10, 11:15)
   rows_test <- resamples[[1]]
   rows_train <- setdiff(seq_len(n), rows_test)
@@ -344,14 +400,25 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   fold_edges <- select_edges(
     conmat = training$conmat,
     behav = training$behav,
-    method = spec$params$thresh_method,
-    level = spec$params$thresh_level
+    association_method = spec$params$association_method,
+    threshold_method = spec$params$threshold_method,
+    threshold_level = spec$params$threshold_level
   )
   fold_model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
-    edges = fold_edges,
-    bias_correct = spec$params$bias_correct
+    edge_screen = screen_edges(
+      conmat = training$conmat,
+      behav = training$behav,
+      association_method = spec$params$association_method,
+      threshold_method = spec$params$threshold_method,
+      threshold_level = spec$params$threshold_level,
+      edge_weighting = spec$params$edge_weighting,
+      weighting_scale = spec$params$weighting_scale
+    ),
+    bias_correct = spec$params$bias_correct,
+    network_summary = spec$params$network_summary,
+    prediction_head = spec$params$prediction_head
   )
   resampled <- fit_resamples(
     spec,
@@ -372,7 +439,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   expect_equal(single_fit$model$scale, fold_model$scale)
   expect_equal(predict_model(single_fit$model, assessment$conmat), fold_pred)
   expect_equal(
-    as.matrix(collected[rows_test, c("both", "pos", "neg")]),
+    as.matrix(collected[rows_test, c("combined", "positive", "negative")]),
     fold_pred,
     ignore_attr = TRUE
   )
@@ -407,7 +474,8 @@ test_that("fit_resamples excludes incomplete rows consistently with covariates",
 
   expect_identical(resampled$folds, resamples)
   expect_equal(sort(collected$row[!is.na(collected$fold)]), include_cases)
-  expect_true(isTRUE(all(stats::complete.cases(collected$both[include_cases]))))
-  expect_true(isTRUE(all(is.na(collected$both[-include_cases]))))
+  expect_true(isTRUE(all(stats::complete.cases(collected$combined[include_cases]))))
+  expect_true(isTRUE(all(is.na(collected$combined[-include_cases]))))
   expect_true(isTRUE(all(is.na(collected$fold[-include_cases]))))
 })
+

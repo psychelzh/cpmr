@@ -2,7 +2,7 @@ test_that("run_single_fit matches fit() outputs on single data", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(thresh_method = "alpha", thresh_level = 0.05)
+  spec <- cpm_spec(threshold_method = "alpha", threshold_level = 0.05)
   call <- quote(fit(object = spec, conmat = conmat, behav = behav))
 
   internal_result <- run_single_fit(
@@ -30,11 +30,11 @@ test_that("run_single_fit matches fit() outputs on single data", {
 test_that("init_pred preserves prediction matrix structure", {
   behav <- stats::setNames(rnorm(5), paste0("s", 1:5))
 
-  pred <- init_pred(behav)
+  pred <- init_pred(behav, c("combined", "positive", "negative"))
 
   expect_equal(dim(pred), c(5, 3))
   expect_identical(rownames(pred), names(behav))
-  expect_identical(colnames(pred), c("both", "pos", "neg"))
+  expect_identical(colnames(pred), c("combined", "positive", "negative"))
 })
 
 test_that("init_edges allocates expected structures", {
@@ -42,7 +42,7 @@ test_that("init_edges allocates expected structures", {
 
   edges_sum <- init_edges("sum", conmat, kfolds = 5)
   expect_equal(dim(edges_sum), c(ncol(conmat), 2))
-  expect_identical(colnames(edges_sum), c("pos", "neg"))
+  expect_identical(colnames(edges_sum), c("positive", "negative"))
 
   edges_all <- init_edges("all", conmat, kfolds = 5)
   expect_equal(dim(edges_all), c(ncol(conmat), 2, 5))
@@ -54,7 +54,7 @@ test_that("run_resample_fit matches fit_resamples() outputs", {
   withr::local_seed(321)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(thresh_method = "sparsity", thresh_level = 0.2)
+  spec <- cpm_spec(threshold_method = "sparsity", threshold_level = 0.2)
   call <- quote(fit_resamples(object = spec, conmat = conmat, behav = behav))
 
   withr::local_seed(999)
@@ -156,3 +156,4 @@ test_that("run_resample_fit errors clearly on insufficient complete cases", {
     fixed = TRUE
   )
 })
+

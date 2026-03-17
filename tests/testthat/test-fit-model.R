@@ -8,16 +8,22 @@ test_that("critical_r matches the t-statistic conversion", {
   )
 })
 
-test_that("select_edges returns a logical pos/neg mask", {
+test_that("select_edges returns a logical positive/negative mask", {
   withr::local_seed(1)
   conmat <- matrix(rnorm(60), nrow = 10, ncol = 6)
   behav <- rnorm(10)
 
-  edges <- select_edges(conmat, behav, "alpha", 0.1)
+  edges <- select_edges(
+    conmat = conmat,
+    behav = behav,
+    association_method = "pearson",
+    threshold_method = "alpha",
+    threshold_level = 0.1
+  )
 
   expect_equal(dim(edges), c(ncol(conmat), 2))
   expect_type(edges, "logical")
-  expect_identical(colnames(edges), c("pos", "neg"))
+  expect_identical(colnames(edges), c("positive", "negative"))
 })
 
 test_that("select_edges warns when sparsity selection drops one edge sign", {
@@ -25,7 +31,13 @@ test_that("select_edges warns when sparsity selection drops one edge sign", {
   conmat <- cbind(behav, behav * 2, behav * 3, behav * 4)
 
   expect_warning(
-    select_edges(conmat, behav, "sparsity", 0.25),
+    select_edges(
+      conmat = conmat,
+      behav = behav,
+      association_method = "pearson",
+      threshold_method = "sparsity",
+      threshold_level = 0.25
+    ),
     "The requested sparsity level did not retain both positive and negative edges.",
     fixed = TRUE
   )
@@ -37,10 +49,37 @@ test_that("select_edges validates threshold method", {
   behav <- rnorm(10)
 
   expect_error(
-    select_edges(conmat, behav, "bogus", 0.1),
-    "`method` must be either \"alpha\" or \"sparsity\".",
+    select_edges(
+      conmat = conmat,
+      behav = behav,
+      association_method = "pearson",
+      threshold_method = "bogus",
+      threshold_level = 0.1
+    ),
+    "`threshold_method` must be one of \"alpha\", \"sparsity\", or \"effect_size\".",
     fixed = TRUE
   )
+})
+
+test_that("select_edges supports spearman and effect_size screening", {
+  behav <- c(1, 2, 3, 4, 5, 6)
+  conmat <- cbind(
+    behav^3,
+    c(1, 4, 9, 16, 25, 36),
+    c(6, 5, 4, 3, 2, 1),
+    c(3, 1, 4, 1, 5, 9)
+  )
+
+  spearman_edges <- select_edges(
+    conmat = conmat,
+    behav = behav,
+    association_method = "spearman",
+    threshold_method = "effect_size",
+    threshold_level = 0.8
+  )
+
+  expect_true(all(spearman_edges[1:2, "positive"]))
+  expect_true(isTRUE(spearman_edges[3, "negative"]))
 })
 
 test_that("fscale centers and scales columns", {
@@ -79,18 +118,87 @@ test_that("train_model and predict_model compose correctly", {
     covariates_train = training$covariates
   )
 
-  edges <- select_edges(training$conmat, training$behav, "alpha", 0.1)
+  edge_screen <- screen_edges(
+    conmat = training$conmat,
+    behav = training$behav,
+    association_method = "pearson",
+    threshold_method = "alpha",
+    threshold_level = 0.1
+  )
   model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
-    edges = edges,
-    bias_correct = TRUE
+    edge_screen = edge_screen,
+    bias_correct = TRUE,
+    network_summary = "separate",
+    prediction_head = "linear"
   )
 
-  expect_equal(dim(edges), c(p, 2))
-  expect_named(model$models, c("both", "pos", "neg"))
+  expect_equal(dim(edge_screen$mask), c(p, 2))
+  expect_named(model$models, c("combined", "positive", "negative"))
   expect_equal(
     dim(predict_model(model, assessment$conmat)),
     c(length(rows_test), 3)
   )
 })
+
+test_that("difference summary with no-intercept head produces a single stream", {
+  withr::local_seed(2)
+  conmat <- matrix(rnorm(40), nrow = 8, ncol = 5)
+  behav <- rnorm(8)
+  edge_screen <- list(
+    mask = matrix(
+      c(TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE),
+      ncol = 2,
+      dimnames = list(NULL, c("positive", "negative"))
+    ),
+    weights = matrix(
+      c(1, 0, 0, 1, 1, 0, 0, 1, 0, 1),
+      ncol = 2,
+      dimnames = list(NULL, c("positive", "negative"))
+    ),
+    edge_weighting = "binary",
+    weighting_scale = 0.05,
+    thresholds = c(positive = 0.1, negative = 0.1)
+  )
+
+  model <- train_model(
+    conmat = conmat,
+    behav = behav,
+    edge_screen = edge_screen,
+    bias_correct = FALSE,
+    network_summary = "difference",
+    prediction_head = "linear_no_intercept"
+  )
+  pred <- predict_model(model, conmat)
+
+  expect_named(model$models, "difference")
+  expect_identical(colnames(pred), "difference")
+  expect_equal(dim(pred), c(nrow(conmat), 1))
+})
+
+test_that("sigmoid edge weighting yields smooth edge weights", {
+  behav <- c(1, 2, 3, 4, 5, 6, 7, 8)
+  conmat <- cbind(
+    behav,
+    behav + c(0, 0, 0, 1, 1, 1, 2, 2),
+    rev(behav),
+    c(1, 2, 1, 2, 1, 2, 1, 2)
+  )
+
+  edge_screen <- screen_edges(
+    conmat = conmat,
+    behav = behav,
+    association_method = "pearson",
+    threshold_method = "effect_size",
+    threshold_level = 0.4,
+    edge_weighting = "sigmoid",
+    weighting_scale = 0.05
+  )
+
+  expect_true(is.double(edge_screen$weights))
+  expect_true(any(edge_screen$weights > 0 & edge_screen$weights < 1))
+  expect_true(all(edge_screen$weights[edge_screen$mask] >= 0.5))
+  expect_true(all(edge_screen$weights[!edge_screen$mask] <= 0.5))
+})
+

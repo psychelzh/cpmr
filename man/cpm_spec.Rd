@@ -7,8 +7,13 @@
 \title{Define a CPM model specification}
 \usage{
 cpm_spec(
-  thresh_method = c("alpha", "sparsity"),
-  thresh_level = 0.01,
+  association_method = c("pearson", "spearman"),
+  threshold_method = c("alpha", "sparsity", "effect_size"),
+  threshold_level = 0.01,
+  network_summary = c("separate", "difference"),
+  edge_weighting = c("binary", "sigmoid"),
+  weighting_scale = 0.05,
+  prediction_head = c("linear", "linear_no_intercept"),
   bias_correct = TRUE
 )
 
@@ -34,11 +39,35 @@ cpm_spec(
 )
 }
 \arguments{
-\item{thresh_method, thresh_level}{The threshold method and level used in edge
-selection. With \code{"alpha"}, edges are selected by thresholding the absolute
-correlation against a critical value implied by \code{thresh_level}. With
-\code{"sparsity"}, \code{thresh_level} is treated as a proportion and edges are
-selected from the lower and upper tails of the correlation distribution.}
+\item{association_method}{Association measure used during edge screening.
+\code{"pearson"} uses linear correlation and \code{"spearman"} uses rank-based
+correlation.}
+
+\item{threshold_method, threshold_level}{The threshold method and level used
+in edge selection. With \code{"alpha"}, edges are selected by thresholding the
+absolute association against a critical value implied by
+\code{threshold_level}. With \code{"sparsity"}, \code{threshold_level} is treated as a
+per-sign proportion and edges are retained from the positive and negative
+tails separately. With \code{"effect_size"}, \code{threshold_level} is treated as a
+direct absolute association cutoff.}
+
+\item{network_summary}{How selected positive and negative edges are turned
+into subject-level predictors. \code{"separate"} keeps the classic CPM positive
+and negative sums and fits a combined stream from both. \code{"difference"}
+uses a single \code{positive - negative} strength.}
+
+\item{edge_weighting}{How edge-level statistics are converted into weights
+before network summarization. \code{"binary"} uses the hard thresholded edge
+mask. \code{"sigmoid"} uses a smooth sigmoid weight centered on the threshold,
+so edges closer to or beyond the cutoff contribute more strongly.}
+
+\item{weighting_scale}{Positive scale parameter used when
+\code{edge_weighting = "sigmoid"}. Smaller values make the weighting curve
+sharper around the threshold.}
+
+\item{prediction_head}{Final prediction head fit on the summarized network
+features. \code{"linear"} fits the usual intercept-inclusive linear model.
+\code{"linear_no_intercept"} fits a no-intercept linear model.}
 
 \item{bias_correct}{Logical value indicating if the connectome data should be
 bias-corrected. If \code{TRUE}, the connectome data will be centered and scaled
@@ -94,7 +123,12 @@ parameters required to fit a connectome-based predictive model later with
 \code{\link[=fit]{fit()}} or \code{\link[=fit_resamples]{fit_resamples()}}.
 }
 \examples{
-spec <- cpm_spec(thresh_level = 0.01)
+spec <- cpm_spec(
+  association_method = "spearman",
+  threshold_method = "effect_size",
+  threshold_level = 0.1,
+  edge_weighting = "sigmoid"
+)
 spec
 
 conmat <- matrix(rnorm(100 * 100), nrow = 100)

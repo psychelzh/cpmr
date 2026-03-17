@@ -56,7 +56,7 @@ explicit CPM parameters.
 
 ```{r}
 fit_obj <- fit(
-  cpm_spec(thresh_method = "alpha", thresh_level = 0.05),
+  cpm_spec(threshold_method = "alpha", threshold_level = 0.05),
   conmat = conmat,
   behav = behav,
   covariates = covariates
@@ -67,9 +67,43 @@ summary(fit_obj)
 dim(fit_obj$edges)
 ```
 
-For a single fit, `fit()` stores a `p x 2` edge-selection mask with `pos` and
-`neg` columns by default. This is useful for inspecting the selected network,
-but the performance reported by `summary()` is still in-sample.
+For a single fit, `fit()` stores a `p x 2` edge-selection mask with `positive`
+and `negative` columns by default. This is useful for inspecting the selected
+network, but the performance reported by `summary()` is still in-sample.
+
+## Customize the CPM Strategy
+
+`cpm_spec()` is no longer limited to one screening-and-head combination. You
+can vary the edge association measure, the threshold rule, how edges are
+weighted, how selected edges are summarized, and the final prediction head
+independently.
+
+```{r}
+rich_spec <- cpm_spec(
+  association_method = "spearman",
+  threshold_method = "effect_size",
+  threshold_level = 0.1,
+  edge_weighting = "sigmoid",
+  weighting_scale = 0.03,
+  network_summary = "difference",
+  prediction_head = "linear_no_intercept"
+)
+
+rich_fit <- fit(
+  rich_spec,
+  conmat = conmat,
+  behav = behav,
+  covariates = covariates
+)
+
+head(rich_fit$predictions)
+```
+
+Prediction columns depend on `network_summary`:
+
+- `network_summary = "separate"` yields `combined`, `positive`, and `negative`
+  streams;
+- `network_summary = "difference"` yields a single `difference` stream.
 
 ## Cross-Validated Resampling with `fit_resamples()`
 

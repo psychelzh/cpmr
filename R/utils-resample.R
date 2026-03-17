@@ -154,6 +154,7 @@ compute_pooled_metric_table <- function(
   metrics = c("rmse", "mae", "correlation"),
   correlation_method = c("pearson", "spearman")
 ) {
+  prediction_types <- prediction_columns(predictions)
   if ("correlation" %in% metrics) {
     correlation_method <- match.arg(correlation_method)
   }
@@ -188,6 +189,7 @@ compute_fold_metric_table <- function(
   metrics = c("rmse", "mae", "correlation"),
   correlation_method = c("pearson", "spearman")
 ) {
+  prediction_types <- prediction_columns(predictions)
   if ("correlation" %in% metrics) {
     correlation_method <- match.arg(correlation_method)
   }

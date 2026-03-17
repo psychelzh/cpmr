@@ -1,3 +1,5 @@
+prediction_types <- c("combined", "positive", "negative")
+
 example_resample_summary <- function(
   metrics = rbind(
     data.frame(
@@ -36,7 +38,8 @@ example_resample_summary <- function(
   params = list(
     kfolds = 5L,
     return_edges = "none",
-    correlation_method = "pearson"
+    correlation_method = "pearson",
+    prediction_types = prediction_types
   )
 ) {
   structure(
@@ -64,14 +67,14 @@ test_that("summary.cpm returns NA when fewer than two valid pairs", {
       predictions = data.frame(
         row = 1:3,
         real = c(NA_real_, 2, NA_real_),
-        both = c(1, 2, 3),
-        pos = c(1, 2, 3),
-        neg = c(1, 2, 3)
+        combined = c(1, 2, 3),
+        positive = c(1, 2, 3),
+        negative = c(1, 2, 3)
       ),
       edges = matrix(
         c(TRUE, FALSE, FALSE, TRUE),
         ncol = 2,
-        dimnames = list(NULL, c("pos", "neg"))
+        dimnames = list(NULL, c("positive", "negative"))
       ),
       params = list()
     ),
@@ -103,9 +106,12 @@ test_that("print.cpm_summary reports NA edge rates when stored edges are all mis
       edges = matrix(
         c(NA, NA),
         ncol = 2,
-        dimnames = list(NULL, c("pos", "neg"))
+        dimnames = list(NULL, c("positive", "negative"))
       ),
-      params = list(method = "pearson")
+      params = list(
+        method = "pearson",
+        prediction_types = prediction_types
+      )
     ),
     class = "cpm_summary"
   )
@@ -121,9 +127,9 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
     real = c(1, 2, 3, 4, 5, 6),
-    both = c(1, 2, 3, 6, 5, 4),
-    pos = c(1, 2, 3, 4, 5, 6),
-    neg = c(3, 2, 1, 6, 5, 4)
+    combined = c(1, 2, 3, 6, 5, 4),
+    positive = c(1, 2, 3, 4, 5, 6),
+    negative = c(3, 2, 1, 6, 5, 4)
   )
   folds <- list(1:3, 4:6)
   summary_result <- summary(
@@ -135,7 +141,7 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
       edges = matrix(
         c(2, 0, 1, 2),
         ncol = 2,
-        dimnames = list(NULL, c("pos", "neg"))
+        dimnames = list(NULL, c("positive", "negative"))
       ),
       folds = folds
     )
@@ -215,8 +221,8 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
       numeric(1)
     )
   )
-  expect_equal(summary_result$edges[, "pos"], c(1, 0))
-  expect_equal(summary_result$edges[, "neg"], c(0.5, 1))
+  expect_equal(summary_result$edges[, "positive"], c(1, 0))
+  expect_equal(summary_result$edges[, "negative"], c(0.5, 1))
 })
 
 test_that("summary.cpm_resamples returns NULL edges when resamples did not store them", {
@@ -229,9 +235,9 @@ test_that("summary.cpm_resamples returns NULL edges when resamples did not store
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
         real = c(NA_real_, NA_real_, NA_real_, NA_real_),
-        both = c(1, 2, 3, 4),
-        pos = c(1, 2, 3, 4),
-        neg = c(4, 3, 2, 1)
+        combined = c(1, 2, 3, 4),
+        positive = c(1, 2, 3, 4),
+        negative = c(4, 3, 2, 1)
       ),
       edges = NULL,
       folds = list(1:2, 3:4)
@@ -292,7 +298,7 @@ test_that("summary.cpm_resamples averages fold-wise edges when all edges are sto
       TRUE
     ),
     dim = c(2, 2, 2),
-    dimnames = list(NULL, c("pos", "neg"), NULL)
+    dimnames = list(NULL, c("positive", "negative"), NULL)
   )
 
   summary_result <- summary(
@@ -304,9 +310,9 @@ test_that("summary.cpm_resamples averages fold-wise edges when all edges are sto
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
         real = c(1, 2, 3, 4),
-        both = c(1, 2, 3, 4),
-        pos = c(1, 2, 3, 4),
-        neg = c(4, 3, 2, 1)
+        combined = c(1, 2, 3, 4),
+        positive = c(1, 2, 3, 4),
+        negative = c(4, 3, 2, 1)
       ),
       edges = stored_edges,
       folds = list(1:2, 3:4)
@@ -321,12 +327,13 @@ test_that("print.cpm_resamples_summary reports fold count and rates", {
     edges = matrix(
       c(0.5, 0.25),
       ncol = 2,
-      dimnames = list(NULL, c("pos", "neg"))
+      dimnames = list(NULL, c("positive", "negative"))
     ),
     params = list(
       kfolds = 5L,
       return_edges = "sum",
-      correlation_method = "pearson"
+      correlation_method = "pearson",
+      prediction_types = prediction_types
     )
   )
 
@@ -380,10 +387,10 @@ test_that("print.cpm_resamples_summary prints fold-wise block when some streams 
   summary_result <- example_resample_summary(
     metrics = within(example_resample_summary()$metrics, {
       estimate[
-        level == "foldwise" & metric == "correlation" & prediction == "pos"
+        level == "foldwise" & metric == "correlation" & prediction == "positive"
       ] <- NA_real_
       std_error[
-        level == "foldwise" & metric == "correlation" & prediction == "pos"
+        level == "foldwise" & metric == "correlation" & prediction == "positive"
       ] <- NA_real_
     })
   )
@@ -405,3 +412,4 @@ test_that("print.cpm_resamples_summary prints fold-wise block when some streams 
     fixed = TRUE
   )))
 })
+
