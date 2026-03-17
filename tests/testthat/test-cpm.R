@@ -125,7 +125,9 @@ test_that("print.cpm reports stored edge count", {
   result <- fit(cpm_spec(), matrix(rnorm(100), ncol = 10), rnorm(10))
   output <- capture.output(print(result))
 
-  expect_true(any(grepl("Number of edges: 10", output, fixed = TRUE)))
+  expect_true(any(grepl("Candidate edges: 10", output, fixed = TRUE)))
+  expect_true(any(grepl("Covariates:       none", output, fixed = TRUE)))
+  expect_true(any(grepl("Bias correction:  yes", output, fixed = TRUE)))
 })
 
 test_that("Support row/column matrix input of `behav` and `covariates`", {

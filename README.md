@@ -52,16 +52,16 @@ behav <- rnorm(100)
 fit_obj <- fit(cpm_spec(), conmat = conmat, behav = behav)
 
 fit_obj
-#> CPM results:
+#> CPM fit:
 #>   Call: fit(object = cpm_spec(), conmat = conmat, behav = behav)
 #>   Number of observations: 100
 #>     Complete cases: 100
-#>   Number of edges: 1000
+#>   Candidate edges: 1000
 #>   Parameters:
-#>     Covariates:       FALSE
+#>     Covariates:       none
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
-#>     Bias correction:  TRUE
+#>     Bias correction:  yes
 summary(fit_obj)
 #> CPM summary:
 #>   Performance (Pearson):
