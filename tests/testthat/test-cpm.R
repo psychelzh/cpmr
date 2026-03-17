@@ -125,7 +125,9 @@ test_that("print.cpm reports stored edge count", {
   result <- fit(cpm_spec(), matrix(rnorm(100), ncol = 10), rnorm(10))
   output <- capture.output(print(result))
 
-  expect_true(any(grepl("Number of edges: 10", output, fixed = TRUE)))
+  expect_true(any(grepl("Candidate edges: 10", output, fixed = TRUE)))
+  expect_true(any(grepl("Covariates:       none", output, fixed = TRUE)))
+  expect_true(any(grepl("Bias correction:  yes", output, fixed = TRUE)))
 })
 
 test_that("Support row/column matrix input of `behav` and `covariates`", {
@@ -159,7 +161,7 @@ test_that("Throw informative error if data checking not pass", {
   )
   expect_error(
     fit(cpm_spec(), conmat, rnorm(20)),
-    "Case numbers of `conmat` and `behav` must match."
+    "The number of observations in `conmat` and `behav` must match."
   )
   expect_error(
     fit(
@@ -168,7 +170,7 @@ test_that("Throw informative error if data checking not pass", {
       rnorm(10),
       covariates = matrix(rnorm(20), ncol = 1)
     ),
-    "Case numbers of `covariates` and `behav` must match."
+    "The number of observations in `covariates` and `behav` must match."
   )
 })
 

@@ -44,7 +44,7 @@ normalize_inputs <- function(conmat, behav, covariates = NULL) {
     stop("Behavior data must be a numeric vector.")
   }
   if (nrow(conmat) != length(behav)) {
-    stop("Case numbers of `conmat` and `behav` must match.")
+    stop("The number of observations in `conmat` and `behav` must match.")
   }
   check_names(conmat, behav)
 
@@ -53,7 +53,7 @@ normalize_inputs <- function(conmat, behav, covariates = NULL) {
       covariates <- as.matrix(covariates)
     }
     if (nrow(covariates) != length(behav)) {
-      stop("Case numbers of `covariates` and `behav` must match.")
+      stop("The number of observations in `covariates` and `behav` must match.")
     }
     check_names(covariates, behav)
   }

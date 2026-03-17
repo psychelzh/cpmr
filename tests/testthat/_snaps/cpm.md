@@ -99,16 +99,16 @@
     Code
       result
     Output
-      CPM results:
+      CPM fit:
         Call: fit(object = cpm_spec(), conmat = conmat, behav = behav)
         Number of observations: 10
           Complete cases: 10
-        Number of edges: 10
+        Candidate edges: 10
         Parameters:
-          Covariates:       FALSE
+          Covariates:       none
           Threshold method: alpha
           Threshold level:  0.01
-          Bias correction:  TRUE
+          Bias correction:  yes
 
 # Alternative threshold method works
 
@@ -211,17 +211,17 @@
     Code
       result
     Output
-      CPM results:
+      CPM fit:
         Call: fit(object = cpm_spec(thresh_method = "sparsity"), conmat = conmat, 
           behav = behav)
         Number of observations: 10
           Complete cases: 10
-        Number of edges: 10
+        Candidate edges: 10
         Parameters:
-          Covariates:       FALSE
+          Covariates:       none
           Threshold method: sparsity
           Threshold level:  0.01
-          Bias correction:  TRUE
+          Bias correction:  yes
 
 # Different threshold levels works
 
@@ -324,64 +324,64 @@
     Code
       result
     Output
-      CPM results:
+      CPM fit:
         Call: fit(object = cpm_spec(thresh_level = 0.1), conmat = conmat, behav = behav)
         Number of observations: 10
           Complete cases: 10
-        Number of edges: 10
+        Candidate edges: 10
         Parameters:
-          Covariates:       FALSE
+          Covariates:       none
           Threshold method: alpha
-          Threshold level:  0.10
-          Bias correction:  TRUE
+          Threshold level:  0.1
+          Bias correction:  yes
 
 # `na_action` argument works
 
     Code
       result
     Output
-      CPM results:
+      CPM fit:
         Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, na_action = "exclude")
         Number of observations: 10
           Complete cases: 9
-        Number of edges: 10
+        Candidate edges: 10
         Parameters:
-          Covariates:       FALSE
+          Covariates:       none
           Threshold method: alpha
           Threshold level:  0.01
-          Bias correction:  TRUE
+          Bias correction:  yes
 
 ---
 
     Code
       result
     Output
-      CPM results:
+      CPM fit:
         Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, covariates = covariates, 
           na_action = "exclude")
         Number of observations: 10
           Complete cases: 8
-        Number of edges: 10
+        Candidate edges: 10
         Parameters:
-          Covariates:       TRUE
+          Covariates:       included
           Threshold method: alpha
           Threshold level:  0.01
-          Bias correction:  TRUE
+          Bias correction:  yes
 
 ---
 
     Code
       result
     Output
-      CPM results:
+      CPM fit:
         Call: fit(object = cpm_spec(), conmat = conmat, behav = behav, covariates = covariates, 
           na_action = "exclude")
         Number of observations: 10
           Complete cases: 8
-        Number of edges: 10
+        Candidate edges: 10
         Parameters:
-          Covariates:       TRUE
+          Covariates:       included
           Threshold method: alpha
           Threshold level:  0.01
-          Bias correction:  TRUE
+          Bias correction:  yes
 

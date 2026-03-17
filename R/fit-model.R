@@ -13,11 +13,16 @@ select_edges <- function(conmat, behav, method, level) {
         Rfast::nth(r_mat, k, descending = TRUE)
       )
       if (thresh[[1]] > 0 || thresh[[2]] < 0) {
-        warning("Not enough positive or negative correlation values.") # nocov
+        warning(
+          paste(
+            "The requested sparsity level did not retain both positive and",
+            "negative edges."
+          )
+        ) # nocov
       }
       thresh
     },
-    stop("Invalid threshold method.")
+    stop("`method` must be either \"alpha\" or \"sparsity\".")
   )
   matrix(
     c(r_mat >= r_crit[2], r_mat <= r_crit[1]),

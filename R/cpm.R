@@ -36,7 +36,7 @@ new_cpm <- function(call, spec, params, predictions, edges, model) {
 
 #' @export
 print.cpm <- function(x, ...) {
-  cat("CPM results:\n")
+  cat("CPM fit:\n")
   cat("  Call: ")
   print(x$call)
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
@@ -44,17 +44,26 @@ print.cpm <- function(x, ...) {
     "    Complete cases: %d\n",
     sum(stats::complete.cases(x$predictions[, prediction_types, drop = FALSE]))
   ))
-  cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
+  cat(sprintf("  Candidate edges: %d\n", dim(x$edges)[1]))
   covariates_param <- if (!is.null(x$params$covariates)) {
     x$params$covariates
   } else {
     NA
   }
   cat("  Parameters:\n")
-  cat(sprintf("    Covariates:       %s\n", covariates_param))
+  cat(sprintf(
+    "    Covariates:       %s\n",
+    format_covariates(covariates_param)
+  ))
   cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
-  cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
-  cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
+  cat(sprintf(
+    "    Threshold level:  %s\n",
+    format_threshold_level(x$params$thresh_level)
+  ))
+  cat(sprintf(
+    "    Bias correction:  %s\n",
+    format_yes_no(x$params$bias_correct)
+  ))
   invisible(x)
 }
 
@@ -68,10 +77,10 @@ print.cpm <- function(x, ...) {
 #' @param ... Other parameters passed to the function.
 #' @param method A character vector indicating the method used to calculate the
 #'   correlation between the real and predicted values.
-#' @return A list of class \code{cpm_summary} containing two elements:
-#'   \item{performance}{A matrix of prediction performance, including the
-#'     correlation between the real and predicted values for both edges,
-#'     positive edges only, and negative edges only.}
+#' @return A list of class \code{cpm_summary} containing:
+#'   \item{metrics}{A data frame with columns `level`, `metric`, `prediction`,
+#'     `estimate`, `std_error`, and `method`. Single-fit CPM summaries store
+#'     correlation metrics at `level = "single"`.}
 #'
 #'   \item{edges}{A logical matrix indicating which edges are selected by the
 #'     fitted CPM model.}
@@ -84,25 +93,19 @@ summary.cpm <- function(
   method = c("pearson", "spearman")
 ) {
   method <- match.arg(method)
-  performance <- matrix(
-    vapply(
-      prediction_types,
-      function(edge_type) {
-        safe_cor(
-          object$predictions$real,
-          object$predictions[[edge_type]],
-          method = method
-        )
-      },
-      numeric(1)
+  metrics <- as_summary_metrics(
+    compute_pooled_metric_table(
+      object$predictions,
+      metrics = "correlation",
+      correlation_method = method
     ),
-    nrow = 1,
-    dimnames = list(NULL, prediction_types)
+    level = "single",
+    method = method
   )
 
   structure(
     list(
-      performance = performance,
+      metrics = metrics,
       edges = object$edges,
       params = list(
         method = method
@@ -116,13 +119,19 @@ summary.cpm <- function(
 #' @param x An object of class \code{cpm_summary}.
 #' @export
 print.cpm_summary <- function(x, ...) {
+  method <- summary_metric_method(
+    x$metrics,
+    level = "single",
+    metric = "correlation"
+  )
   cat("CPM summary:\n")
   print_performance_block(
-    values = x$performance[1, prediction_types],
-    header = sprintf(
-      "  Performance (%s):\n",
-      sub("^(.)", "\\U\\1", x$params$method, perl = TRUE)
-    )
+    values = summary_metric_values(
+      x$metrics,
+      level = "single",
+      metric = "correlation"
+    ),
+    header = sprintf("  Performance (%s):\n", format_method_name(method))
   )
   print_edge_rate_block(x$edges)
   invisible(x)
@@ -163,8 +172,16 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
     component,
     performance = tibble::tibble(
       params,
-      method = sum_x$params$method,
-      tibble::as_tibble(sum_x$performance)
+      method = summary_metric_method(
+        sum_x$metrics,
+        level = "single",
+        metric = "correlation"
+      ),
+      tibble::as_tibble_row(as.list(summary_metric_values(
+        sum_x$metrics,
+        level = "single",
+        metric = "correlation"
+      )))
     ),
     edges = tibble::tibble(
       params,

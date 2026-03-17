@@ -3,7 +3,7 @@
 \name{summary.cpm_resamples}
 \alias{summary.cpm_resamples}
 \alias{print.cpm_resamples_summary}
-\title{Summary of a \code{cpm_resamples} object}
+\title{Summarize a \code{cpm_resamples} object}
 \usage{
 \method{summary}{cpm_resamples}(object, ...)
 
@@ -17,9 +17,32 @@
 \item{x}{An object of class \code{cpm_resamples_summary}.}
 }
 \value{
-A \code{cpm_resamples_summary} object with aggregated fold-level
-performance and edge-selection rates.
+A \code{cpm_resamples_summary} object with the following elements:
+\describe{
+\item{\code{metrics}}{A data frame with columns \code{level}, \code{metric},
+\code{prediction}, \code{estimate}, \code{std_error}, and \code{method}. Resample summaries
+store pooled errors and pooled correlations at \code{level = "pooled"}, and
+fold-wise correlation summaries at \code{level = "foldwise"}.}
+\item{\code{edges}}{Aggregated edge-selection rates, or \code{NULL} when edges were
+not stored.}
+\item{\code{params}}{A list containing summary-relevant resampling settings.}
+}
 }
 \description{
-Summary of a \code{cpm_resamples} object
+Summarize a \code{cpm_resamples} object
+}
+\details{
+\code{summary.cpm_resamples()} is designed to give a compact default report.
+It leads with pooled out-of-fold error metrics (\code{RMSE} and \code{MAE}), then
+reports pooled and fold-wise correlations as supplementary statistics.
+This keeps the default summary usable even when fold-wise correlations are
+undefined for some resampling schemes, such as leave-one-out resampling.
+}
+\examples{
+withr::local_seed(123)
+conmat <- matrix(rnorm(200), nrow = 20)
+behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
+res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 4)
+
+summary(res)
 }

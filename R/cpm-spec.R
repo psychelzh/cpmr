@@ -2,19 +2,17 @@
 #'
 #' Create a lightweight specification object that stores the modeling
 #' parameters required to fit a connectome-based predictive model later with
-#' [fit()].
+#' [fit()] or [fit_resamples()].
 #'
 #' @param thresh_method,thresh_level The threshold method and level used in edge
-#'   selection. If method is set to be `"alpha"`, the edge selection is based on
-#'   the critical value of correlation coefficient. If method is set to be
-#'   `"sparsity"`, the edge selection is based on the quantile of correlation
-#'   coefficient, thus network sparsity is controlled.
+#'   selection. With `"alpha"`, edges are selected by thresholding the absolute
+#'   correlation against a critical value implied by `thresh_level`. With
+#'   `"sparsity"`, `thresh_level` is treated as a proportion and edges are
+#'   selected from the lower and upper tails of the correlation distribution.
 #' @param bias_correct Logical value indicating if the connectome data should be
 #'   bias-corrected. If `TRUE`, the connectome data will be centered and scaled
 #'   to have unit variance based on the training data before model fitting and
 #'   prediction. See Rapuano et al. (2020) for more details.
-#'
-#' @return A `cpm_spec` object storing parameters for later fitting.
 #'
 #' @examples
 #' spec <- cpm_spec(thresh_level = 0.01)
@@ -22,6 +20,11 @@
 #'
 #' conmat <- matrix(rnorm(100 * 100), nrow = 100)
 #' behav <- rnorm(100)
+#' fit_obj <- fit(spec, conmat = conmat, behav = behav)
+#' summary(fit_obj)
+#'
+#' resample_obj <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
+#' summary(resample_obj)
 #' @export
 cpm_spec <- function(
   thresh_method = c("alpha", "sparsity"),
@@ -46,10 +49,16 @@ cpm_spec <- function(
 
 #' @export
 print.cpm_spec <- function(x, ...) {
-  cat("CPM model specification:\n")
+  cat("CPM specification:\n")
   cat(sprintf("  Threshold method: %s\n", x$params$thresh_method))
-  cat(sprintf("  Threshold level:  %.2f\n", x$params$thresh_level))
-  cat(sprintf("  Bias correction:  %s\n", x$params$bias_correct))
+  cat(sprintf(
+    "  Threshold level:  %s\n",
+    format_threshold_level(x$params$thresh_level)
+  ))
+  cat(sprintf(
+    "  Bias correction:  %s\n",
+    format_yes_no(x$params$bias_correct)
+  ))
   invisible(x)
 }
 
@@ -58,19 +67,17 @@ print.cpm_spec <- function(x, ...) {
 #' @rdname cpm_spec
 #' @param object A `cpm_spec` object.
 #' @param conmat A matrix of connectome data. Observations in row, edges in
-#'   column (assumed that duplicated edges are removed).
-#' @param behav A numeric vector contains behavior data. Length must equal to
-#'   number of observations in `conmat`. Note `behav` could also be a row/column
-#'   matrix, which will be converted to a vector using [drop()].
+#'   column.
+#' @param behav A numeric outcome vector with one value per observation in
+#'   `conmat`. Row or column matrices are accepted and converted with [drop()].
 #' @param ... For future extension. Currently ignored.
 #' @param covariates A matrix of covariates. Observations in row, variables in
-#'   column. If `NULL`, no covariates are used. Note if a vector is provided, it
-#'   will be converted to a column matrix.
+#'   column. If `NULL`, no covariates are used. Vectors are converted to
+#'   single-column matrices.
 #' @param na_action A character string indicating the action when missing values
-#'   are found in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
-#'   missing values will be excluded from the analysis but kept in the output.
-#' @return A fitted `cpm` object from a single in-sample fit. Single-fit CPM
-#'   objects always store the selected edge mask.
+#'   are found in the inputs. `"fail"` stops immediately when any required value
+#'   is missing. `"exclude"` fits on complete cases and keeps the original row
+#'   layout in the returned predictions.
 #' @export
 fit.cpm_spec <- function(
   object,
@@ -102,15 +109,25 @@ fit.cpm_spec <- function(
 #' @param kfolds Number of folds used when `resamples` is `NULL`. If `NULL`,
 #'   it is set to the number of complete-case observations (LOOCV).
 #' @param return_edges A character string indicating the return value of the
-#'   selected edges. If `"none"`, no edges are returned/stored. If `"sum"`, edge
-#'   masks are summed across folds. If `"all"`, fold-wise edge arrays are
-#'   stored.
+#'   selected edges. `"none"` skips edge storage, `"sum"` stores fold counts for
+#'   each selected edge, and `"all"` stores the fold-wise edge masks.
 #' @param na_action A character string indicating the action when missing values
-#'   are found in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
-#'   missing values will be excluded from the analysis but kept in the output.
+#'   are found in the inputs. `"fail"` stops immediately when any required value
+#'   is missing. `"exclude"` fits on complete cases and keeps the original row
+#'   layout in the returned predictions.
 #'
-#' @return A `cpm_resamples` object containing observation-level predictions,
-#'   resampling folds, and optional stored edges.
+#' @return
+#' `cpm_spec()` returns a `cpm_spec` object that can be reused across calls to
+#' [fit()] and [fit_resamples()].
+#'
+#' `fit()` returns a `cpm` object from a single in-sample fit. Single-fit CPM
+#' objects always store the selected edge mask.
+#'
+#' `fit_resamples()` returns a `cpm_resamples` object containing
+#' observation-level predictions, resampling folds, and optional stored edges.
+#' Call [summary.cpm_resamples()] for the default aggregate report, or
+#' [resample_metrics()] when you want pooled or fold-wise metrics in tabular
+#' form.
 #' @export
 fit_resamples.cpm_spec <- function(
   object,

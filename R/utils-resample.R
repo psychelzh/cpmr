@@ -129,18 +129,129 @@ resolve_kfolds <- function(kfolds, include_cases) {
   kfolds
 }
 
-compute_fold_metrics <- function(predictions, folds) {
-  fold_metrics <- lapply(seq_along(folds), function(i) {
-    rows <- folds[[i]]
+compute_resample_metric <- function(
+  real,
+  predicted,
+  metric = c("rmse", "mae", "correlation"),
+  correlation_method = c("pearson", "spearman")
+) {
+  metric <- match.arg(metric)
+
+  switch(
+    metric,
+    rmse = safe_rmse(real, predicted),
+    mae = safe_mae(real, predicted),
+    correlation = safe_cor(
+      real,
+      predicted,
+      method = match.arg(correlation_method)
+    )
+  )
+}
+
+compute_pooled_metric_table <- function(
+  predictions,
+  metrics = c("rmse", "mae", "correlation"),
+  correlation_method = c("pearson", "spearman")
+) {
+  if ("correlation" %in% metrics) {
+    correlation_method <- match.arg(correlation_method)
+  }
+  metric_tables <- lapply(metrics, function(metric) {
+    estimates <- vapply(
+      prediction_types,
+      function(prediction_type) {
+        compute_resample_metric(
+          predictions$real,
+          predictions[[prediction_type]],
+          metric = metric,
+          correlation_method = correlation_method
+        )
+      },
+      numeric(1)
+    )
+
     data.frame(
-      fold = i,
-      n_assess = length(rows),
-      both = safe_cor(predictions$real[rows], predictions$both[rows]),
-      pos = safe_cor(predictions$real[rows], predictions$pos[rows]),
-      neg = safe_cor(predictions$real[rows], predictions$neg[rows])
+      metric = metric,
+      prediction = prediction_types,
+      estimate = unname(estimates),
+      stringsAsFactors = FALSE
     )
   })
-  do.call(rbind, fold_metrics)
+
+  do.call(rbind, metric_tables)
+}
+
+compute_fold_metric_table <- function(
+  predictions,
+  folds,
+  metrics = c("rmse", "mae", "correlation"),
+  correlation_method = c("pearson", "spearman")
+) {
+  if ("correlation" %in% metrics) {
+    correlation_method <- match.arg(correlation_method)
+  }
+  metric_tables <- lapply(metrics, function(metric) {
+    fold_tables <- lapply(seq_along(folds), function(i) {
+      rows <- folds[[i]]
+      estimates <- vapply(
+        prediction_types,
+        function(prediction_type) {
+          compute_resample_metric(
+            predictions$real[rows],
+            predictions[[prediction_type]][rows],
+            metric = metric,
+            correlation_method = correlation_method
+          )
+        },
+        numeric(1)
+      )
+
+      data.frame(
+        fold = i,
+        n_assess = length(rows),
+        metric = metric,
+        prediction = prediction_types,
+        estimate = unname(estimates),
+        stringsAsFactors = FALSE
+      )
+    })
+
+    do.call(rbind, fold_tables)
+  })
+
+  do.call(rbind, metric_tables)
+}
+
+compute_resample_summary_metrics <- function(
+  predictions,
+  folds,
+  correlation_method = c("pearson", "spearman")
+) {
+  correlation_method <- match.arg(correlation_method)
+
+  pooled_metrics <- as_summary_metrics(
+    compute_pooled_metric_table(
+      predictions,
+      metrics = c("rmse", "mae", "correlation"),
+      correlation_method = correlation_method
+    ),
+    level = "pooled",
+    method = correlation_method
+  )
+
+  foldwise_correlations <- summarize_metric_estimates(
+    compute_fold_metric_table(
+      predictions,
+      folds,
+      metrics = "correlation",
+      correlation_method = correlation_method
+    ),
+    level = "foldwise",
+    method = correlation_method
+  )
+
+  rbind(pooled_metrics, foldwise_correlations)
 }
 
 summarize_resample_edges <- function(edges, return_edges, kfolds) {

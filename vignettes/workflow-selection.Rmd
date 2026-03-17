@@ -45,6 +45,7 @@ resample_obj <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
 
 summary(fit_obj)
 summary(resample_obj)
+head(summary(resample_obj)[["metrics"]])
 ```
 
 This workflow is the best fit when you care about:
@@ -59,3 +60,10 @@ This workflow is the best fit when you care about:
 Use `fit()` when you want to inspect one fitted CPM model on the current data.
 Use `fit_resamples()` when you want an out-of-sample performance estimate or a
 custom resampling design.
+
+As a rule of thumb:
+
+- use `summary(fit_obj)` or `tidy(fit_obj)` for single-fit summaries;
+- use `summary(resample_obj)` for the default aggregate resampling report;
+- use `summary(resample_obj)[["metrics"]]` or `resample_metrics(resample_obj)`
+  when you need structured metric tables instead of printed output.
