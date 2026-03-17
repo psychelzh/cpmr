@@ -17,11 +17,11 @@ screen_edges <- function(
 
   thresholds <- switch(
     threshold_method,
-    alpha = setNames(
+    alpha = stats::setNames(
       rep(critical_r(nrow(conmat), threshold_level), length(edge_types)),
       edge_types
     ),
-    effect_size = setNames(
+    effect_size = stats::setNames(
       rep(threshold_level, length(edge_types)),
       edge_types
     ),
@@ -167,7 +167,10 @@ select_sparsity_thresholds <- function(associations, proportion) {
 
     if (length(pos_idx)) {
       pos_order <- order(associations[pos_idx], decreasing = TRUE)
-      positive_cutoff <- associations[pos_idx[pos_order][[min(k, length(pos_idx))]]]
+      positive_cutoff <- associations[pos_idx[pos_order][[min(
+        k,
+        length(pos_idx)
+      )]]]
     }
     if (length(neg_idx)) {
       neg_strength <- -associations[neg_idx]
@@ -176,7 +179,9 @@ select_sparsity_thresholds <- function(associations, proportion) {
     }
   }
 
-  if (k > 0L && (is.infinite(positive_cutoff) || is.infinite(negative_cutoff))) {
+  if (
+    k > 0L && (is.infinite(positive_cutoff) || is.infinite(negative_cutoff))
+  ) {
     warning(
       paste(
         "The requested sparsity level did not retain both positive and",
@@ -185,7 +190,7 @@ select_sparsity_thresholds <- function(associations, proportion) {
     ) # nocov
   }
 
-  setNames(c(positive_cutoff, negative_cutoff), edge_types)
+  stats::setNames(c(positive_cutoff, negative_cutoff), edge_types)
 }
 
 compute_edge_weights <- function(

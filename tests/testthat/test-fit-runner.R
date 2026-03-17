@@ -164,4 +164,3 @@ test_that("run_resample_fit errors clearly on insufficient complete cases", {
     fixed = TRUE
   )
 })
-

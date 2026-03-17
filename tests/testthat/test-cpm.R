@@ -259,4 +259,3 @@ test_that("fit excludes incomplete rows consistently when excluding missing data
   expect_true(isTRUE(all(prediction_complete_cases(result)[include_cases])))
   expect_true(isTRUE(all(is.na(prediction_matrix(result)[-include_cases, ]))))
 })
-

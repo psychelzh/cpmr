@@ -136,19 +136,18 @@ summary_metric_matrix <- function(
   field <- match.arg(field)
   metric <- as.character(metric)
 
-  values <- t(vapply(
-    metric,
-    function(metric_name) {
-      summary_metric_values(
+  values <- do.call(
+    rbind,
+    lapply(metric, function(metric_name) {
+      unname(summary_metric_values(
         metrics,
         level = level,
         metric = metric_name,
         prediction_types = prediction_types,
         field = field
-      )
-    },
-    numeric(length(prediction_types))
-  ))
+      ))
+    })
+  )
 
   rownames(values) <- metric
   colnames(values) <- prediction_types

@@ -285,6 +285,33 @@ test_that("summary.cpm_resamples keeps default LOO summaries usable", {
   )))
 })
 
+test_that("summary.cpm_resamples supports single-stream difference summaries", {
+  withr::local_seed(321)
+  conmat <- matrix(rnorm(120), nrow = 20)
+  behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
+
+  result <- fit_resamples(
+    cpm_spec(network_summary = "difference"),
+    conmat = conmat,
+    behav = behav,
+    kfolds = 4
+  )
+  summary_result <- summary(result)
+  output <- capture.output(print(summary_result))
+
+  expect_identical(summary_result$params$prediction_types, "difference")
+  expect_equal(
+    dim(summary_metric_matrix(
+      summary_result$metrics,
+      level = "pooled",
+      metric = c("rmse", "mae"),
+      prediction_types = "difference"
+    )),
+    c(2L, 1L)
+  )
+  expect_true(any(grepl("Difference:", output, fixed = TRUE)))
+})
+
 test_that("summary.cpm_resamples averages fold-wise edges when all edges are stored", {
   stored_edges <- array(
     c(
@@ -412,4 +439,3 @@ test_that("print.cpm_resamples_summary prints fold-wise block when some streams 
     fixed = TRUE
   )))
 })
-

@@ -121,3 +121,27 @@ test_that("summary metric helpers summarize and extract metric views", {
   )
 })
 
+test_that("summary_metric_matrix keeps matrix shape for a single prediction stream", {
+  metrics <- as_summary_metrics(
+    data.frame(
+      metric = c("rmse", "mae"),
+      prediction = c("difference", "difference"),
+      estimate = c(1, 2),
+      stringsAsFactors = FALSE
+    ),
+    level = "pooled"
+  )
+
+  expect_equal(
+    summary_metric_matrix(
+      metrics,
+      level = "pooled",
+      metric = c("rmse", "mae"),
+      prediction_types = "difference"
+    ),
+    rbind(
+      rmse = c(difference = 1),
+      mae = c(difference = 2)
+    )
+  )
+})

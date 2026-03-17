@@ -80,6 +80,21 @@ test_that("helper constructors validate scalar parameter values", {
     "`bias_correct` must be either TRUE or FALSE.",
     fixed = TRUE
   )
+  expect_error(
+    cpm_spec(screen = list()),
+    "`screen` must be created by `cpm_screen()`.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_spec(weighting = list()),
+    "`weighting` must be created by `cpm_weighting()`.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_screen(threshold = list()),
+    "`threshold` must be created by `cpm_threshold()`.",
+    fixed = TRUE
+  )
 })
 
 test_that("print.cpm_spec shows model options", {
@@ -127,7 +142,9 @@ test_that("sigmoid edge weighting stores smooth edge weights in the model", {
 
   expect_true(is.double(result$model$edge_weights))
   expect_equal(dim(result$model$edge_weights), c(ncol(conmat), 2))
-  expect_true(any(result$model$edge_weights > 0 & result$model$edge_weights < 1))
+  expect_true(any(
+    result$model$edge_weights > 0 & result$model$edge_weights < 1
+  ))
 })
 
 test_that("fit_resamples returns predictions and folds", {
@@ -486,8 +503,9 @@ test_that("fit_resamples excludes incomplete rows consistently with covariates",
 
   expect_identical(resampled$folds, resamples)
   expect_equal(sort(collected$row[!is.na(collected$fold)]), include_cases)
-  expect_true(isTRUE(all(stats::complete.cases(collected$combined[include_cases]))))
+  expect_true(isTRUE(all(stats::complete.cases(collected$combined[
+    include_cases
+  ]))))
   expect_true(isTRUE(all(is.na(collected$combined[-include_cases]))))
   expect_true(isTRUE(all(is.na(collected$fold[-include_cases]))))
 })
-

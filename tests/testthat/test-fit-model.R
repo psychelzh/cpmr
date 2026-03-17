@@ -202,3 +202,70 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
   expect_true(all(edge_screen$weights[!edge_screen$mask] <= 0.5))
 })
 
+test_that("compute_edge_weights validates weighting mode", {
+  expect_error(
+    compute_edge_weights(
+      associations = c(0.2, -0.3),
+      cutoffs = c(positive = 0.1, negative = 0.1),
+      mask = matrix(
+        c(TRUE, FALSE, FALSE, TRUE),
+        ncol = 2,
+        dimnames = list(NULL, c("positive", "negative"))
+      ),
+      edge_weighting = "bogus",
+      weighting_scale = 0.05
+    ),
+    "`edge_weighting` must be either \"binary\" or \"sigmoid\".",
+    fixed = TRUE
+  )
+})
+
+test_that("smooth_threshold_weights returns zeros for infinite cutoffs", {
+  expect_equal(
+    smooth_threshold_weights(c(0.1, 0.2, NA_real_), cutoff = Inf, scale = 0.05),
+    c(0, 0, 0)
+  )
+})
+
+test_that("prediction helpers validate unsupported modes", {
+  network_strengths <- cbind(
+    positive = c(1, 2),
+    negative = c(3, 4)
+  )
+
+  expect_error(
+    prediction_features(
+      network_strengths = network_strengths,
+      network_summary = "separate",
+      prediction_type = "bogus"
+    ),
+    paste0(
+      "`prediction_type` must be one of ",
+      "\"combined\", \"positive\", or \"negative\" for ",
+      "`network_summary = \"separate\"`."
+    ),
+    fixed = TRUE
+  )
+  expect_error(
+    prediction_features(
+      network_strengths = network_strengths,
+      network_summary = "bogus",
+      prediction_type = "combined"
+    ),
+    "`network_summary` must be either \"separate\" or \"difference\".",
+    fixed = TRUE
+  )
+  expect_error(
+    prediction_design_matrix(
+      features = matrix(1:2, ncol = 1),
+      prediction_head = "bogus"
+    ),
+    "`prediction_head` must be either \"linear\" or \"linear_no_intercept\".",
+    fixed = TRUE
+  )
+  expect_error(
+    prediction_types_for_summary("bogus"),
+    "`network_summary` must be either \"separate\" or \"difference\".",
+    fixed = TRUE
+  )
+})
