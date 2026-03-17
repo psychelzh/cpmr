@@ -7,12 +7,9 @@
 \title{Define a CPM model specification}
 \usage{
 cpm_spec(
-  association_method = c("pearson", "spearman"),
-  threshold_method = c("alpha", "sparsity", "effect_size"),
-  threshold_level = 0.01,
+  screen = cpm_screen(),
   network_summary = c("separate", "difference"),
-  edge_weighting = c("binary", "sigmoid"),
-  weighting_scale = 0.05,
+  weighting = cpm_weighting(),
   prediction_head = c("linear", "linear_no_intercept"),
   bias_correct = TRUE
 )
@@ -39,31 +36,14 @@ cpm_spec(
 )
 }
 \arguments{
-\item{association_method}{Association measure used during edge screening.
-\code{"pearson"} uses linear correlation and \code{"spearman"} uses rank-based
-correlation.}
-
-\item{threshold_method, threshold_level}{The threshold method and level used
-in edge selection. With \code{"alpha"}, edges are selected by thresholding the
-absolute association against a critical value implied by
-\code{threshold_level}. With \code{"sparsity"}, \code{threshold_level} is treated as a
-per-sign proportion and edges are retained from the positive and negative
-tails separately. With \code{"effect_size"}, \code{threshold_level} is treated as a
-direct absolute association cutoff.}
+\item{screen}{Edge-screening helper created by \code{\link[=cpm_screen]{cpm_screen()}}.}
 
 \item{network_summary}{How selected positive and negative edges are turned
 into subject-level predictors. \code{"separate"} keeps the classic CPM positive
 and negative sums and fits a combined stream from both. \code{"difference"}
 uses a single \code{positive - negative} strength.}
 
-\item{edge_weighting}{How edge-level statistics are converted into weights
-before network summarization. \code{"binary"} uses the hard thresholded edge
-mask. \code{"sigmoid"} uses a smooth sigmoid weight centered on the threshold,
-so edges closer to or beyond the cutoff contribute more strongly.}
-
-\item{weighting_scale}{Positive scale parameter used when
-\code{edge_weighting = "sigmoid"}. Smaller values make the weighting curve
-sharper around the threshold.}
+\item{weighting}{Edge-weighting helper created by \code{\link[=cpm_weighting]{cpm_weighting()}}.}
 
 \item{prediction_head}{Final prediction head fit on the summarized network
 features. \code{"linear"} fits the usual intercept-inclusive linear model.
@@ -122,12 +102,23 @@ Create a lightweight specification object that stores the modeling
 parameters required to fit a connectome-based predictive model later with
 \code{\link[=fit]{fit()}} or \code{\link[=fit_resamples]{fit_resamples()}}.
 }
+\details{
+\code{cpm_spec()} keeps the main CPM decisions visible at the top level while
+grouping naturally paired settings into helpers:
+\itemize{
+\item \code{\link[=cpm_screen]{cpm_screen()}} bundles the edge association measure with its threshold rule.
+\item \code{\link[=cpm_weighting]{cpm_weighting()}} bundles the edge-weighting method with its scale.
+}
+}
 \examples{
 spec <- cpm_spec(
-  association_method = "spearman",
-  threshold_method = "effect_size",
-  threshold_level = 0.1,
-  edge_weighting = "sigmoid"
+  screen = cpm_screen(
+    association = "spearman",
+    threshold = cpm_threshold("effect_size", level = 0.1)
+  ),
+  network_summary = "difference",
+  weighting = cpm_weighting("sigmoid", scale = 0.03),
+  prediction_head = "linear_no_intercept"
 )
 spec
 

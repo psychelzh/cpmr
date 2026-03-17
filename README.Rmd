@@ -65,12 +65,12 @@ API surface:
 
 ```{r rich-spec}
 rich_spec <- cpm_spec(
-  association_method = "spearman",
-  threshold_method = "effect_size",
-  threshold_level = 0.1,
-  edge_weighting = "sigmoid",
-  weighting_scale = 0.03,
+  screen = cpm_screen(
+    association = "spearman",
+    threshold = cpm_threshold("effect_size", level = 0.1)
+  ),
   network_summary = "difference",
+  weighting = cpm_weighting("sigmoid", scale = 0.03),
   prediction_head = "linear_no_intercept"
 )
 
@@ -78,9 +78,8 @@ fit(rich_spec, conmat = conmat, behav = behav)$predictions |>
   head()
 ```
 
-This lets you control edge screening, thresholding, edge weighting,
-network-strength construction, and the final prediction head from one reusable
-spec object.
+This keeps the main CPM choices visible while grouping naturally paired options
+like screening and edge weighting into small helper objects.
 
 Cross-validated resampling uses `fit_resamples()` with the same specification
 object:

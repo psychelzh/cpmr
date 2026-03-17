@@ -4,27 +4,18 @@
 #' parameters required to fit a connectome-based predictive model later with
 #' [fit()] or [fit_resamples()].
 #'
-#' @param association_method Association measure used during edge screening.
-#'   `"pearson"` uses linear correlation and `"spearman"` uses rank-based
-#'   correlation.
-#' @param threshold_method,threshold_level The threshold method and level used
-#'   in edge selection. With `"alpha"`, edges are selected by thresholding the
-#'   absolute association against a critical value implied by
-#'   `threshold_level`. With `"sparsity"`, `threshold_level` is treated as a
-#'   per-sign proportion and edges are retained from the positive and negative
-#'   tails separately. With `"effect_size"`, `threshold_level` is treated as a
-#'   direct absolute association cutoff.
+#' `cpm_spec()` keeps the main CPM decisions visible at the top level while
+#' grouping naturally paired settings into helpers:
+#'
+#' - [cpm_screen()] bundles the edge association measure with its threshold rule.
+#' - [cpm_weighting()] bundles the edge-weighting method with its scale.
+#'
+#' @param screen Edge-screening helper created by [cpm_screen()].
 #' @param network_summary How selected positive and negative edges are turned
 #'   into subject-level predictors. `"separate"` keeps the classic CPM positive
 #'   and negative sums and fits a combined stream from both. `"difference"`
 #'   uses a single `positive - negative` strength.
-#' @param edge_weighting How edge-level statistics are converted into weights
-#'   before network summarization. `"binary"` uses the hard thresholded edge
-#'   mask. `"sigmoid"` uses a smooth sigmoid weight centered on the threshold,
-#'   so edges closer to or beyond the cutoff contribute more strongly.
-#' @param weighting_scale Positive scale parameter used when
-#'   `edge_weighting = "sigmoid"`. Smaller values make the weighting curve
-#'   sharper around the threshold.
+#' @param weighting Edge-weighting helper created by [cpm_weighting()].
 #' @param prediction_head Final prediction head fit on the summarized network
 #'   features. `"linear"` fits the usual intercept-inclusive linear model.
 #'   `"linear_no_intercept"` fits a no-intercept linear model.
@@ -35,10 +26,13 @@
 #'
 #' @examples
 #' spec <- cpm_spec(
-#'   association_method = "spearman",
-#'   threshold_method = "effect_size",
-#'   threshold_level = 0.1,
-#'   edge_weighting = "sigmoid"
+#'   screen = cpm_screen(
+#'     association = "spearman",
+#'     threshold = cpm_threshold("effect_size", level = 0.1)
+#'   ),
+#'   network_summary = "difference",
+#'   weighting = cpm_weighting("sigmoid", scale = 0.03),
+#'   prediction_head = "linear_no_intercept"
 #' )
 #' spec
 #'
@@ -51,77 +45,185 @@
 #' summary(resample_obj)
 #' @export
 cpm_spec <- function(
-  association_method = c("pearson", "spearman"),
-  threshold_method = c("alpha", "sparsity", "effect_size"),
-  threshold_level = 0.01,
+  screen = cpm_screen(),
   network_summary = c("separate", "difference"),
-  edge_weighting = c("binary", "sigmoid"),
-  weighting_scale = 0.05,
+  weighting = cpm_weighting(),
   prediction_head = c("linear", "linear_no_intercept"),
   bias_correct = TRUE
 ) {
-  association_method <- match.arg(association_method)
-  threshold_method <- match.arg(threshold_method)
   network_summary <- match.arg(network_summary)
-  edge_weighting <- match.arg(edge_weighting)
   prediction_head <- match.arg(prediction_head)
-
-  validate_cpm_spec_params(
-    threshold_level = threshold_level,
-    weighting_scale = weighting_scale,
-    bias_correct = bias_correct
+  validate_cpm_component(
+    screen,
+    class = "cpm_screen_spec",
+    message = "`screen` must be created by `cpm_screen()`."
   )
+  validate_cpm_component(
+    weighting,
+    class = "cpm_weighting_spec",
+    message = "`weighting` must be created by `cpm_weighting()`."
+  )
+  validate_bias_correct(bias_correct)
 
   new_cpm_spec(
     params = list(
-      association_method = association_method,
-      threshold_method = threshold_method,
-      threshold_level = threshold_level,
+      association_method = screen$association,
+      threshold_method = screen$threshold$method,
+      threshold_level = screen$threshold$level,
       network_summary = network_summary,
-      edge_weighting = edge_weighting,
-      weighting_scale = weighting_scale,
+      edge_weighting = weighting$method,
+      weighting_scale = weighting$scale,
       prediction_head = prediction_head,
       bias_correct = bias_correct
+    ),
+    helpers = list(
+      screen = screen,
+      weighting = weighting
     )
+  )
+}
+
+#' Define CPM edge-screening settings
+#'
+#' Build the screening portion of a `cpm_spec()`. This stage chooses the
+#' association measure used during edge screening and the threshold rule used to
+#' keep positive and negative edges.
+#'
+#' @param association Association measure used during edge screening.
+#'   `"pearson"` uses linear correlation and `"spearman"` uses rank-based
+#'   correlation.
+#' @param threshold Threshold helper created by [cpm_threshold()].
+#'
+#' @examples
+#' cpm_screen(
+#'   association = "spearman",
+#'   threshold = cpm_threshold("effect_size", level = 0.1)
+#' )
+#' @export
+cpm_screen <- function(
+  association = c("pearson", "spearman"),
+  threshold = cpm_threshold()
+) {
+  association <- match.arg(association)
+  validate_cpm_component(
+    threshold,
+    class = "cpm_threshold_spec",
+    message = "`threshold` must be created by `cpm_threshold()`."
+  )
+
+  structure(
+    list(
+      association = association,
+      threshold = threshold
+    ),
+    class = "cpm_screen_spec"
+  )
+}
+
+#' Define CPM edge-threshold settings
+#'
+#' Build the thresholding rule used during the screening stage.
+#'
+#' @param method Threshold method used in edge selection. With `"alpha"`, edges
+#'   are selected by thresholding the absolute association against a critical
+#'   value implied by `level`. With `"sparsity"`, `level` is treated as a
+#'   per-sign proportion and edges are retained from the positive and negative
+#'   tails separately. With `"effect_size"`, `level` is treated as a direct
+#'   absolute association cutoff.
+#' @param level Numeric threshold level associated with `method`.
+#'
+#' @examples
+#' cpm_threshold("alpha", level = 0.05)
+#' cpm_threshold("sparsity", level = 0.1)
+#' @export
+cpm_threshold <- function(
+  method = c("alpha", "sparsity", "effect_size"),
+  level = 0.01
+) {
+  method <- match.arg(method)
+  validate_threshold_level(level)
+
+  structure(
+    list(
+      method = method,
+      level = level
+    ),
+    class = "cpm_threshold_spec"
+  )
+}
+
+#' Define CPM edge-weight settings
+#'
+#' Build the edge-weighting rule used during network summarization.
+#'
+#' @param method How edge-level statistics are converted into weights before
+#'   network summarization. `"binary"` uses the hard thresholded edge mask.
+#'   `"sigmoid"` uses a smooth sigmoid weight centered on the threshold, so
+#'   edges closer to or beyond the cutoff contribute more strongly.
+#' @param scale Positive scale parameter used when `method = "sigmoid"`.
+#'   Smaller values make the weighting curve sharper around the threshold.
+#'
+#' @examples
+#' cpm_weighting("binary")
+#' cpm_weighting("sigmoid", scale = 0.03)
+#' @export
+cpm_weighting <- function(
+  method = c("binary", "sigmoid"),
+  scale = 0.05
+) {
+  method <- match.arg(method)
+  validate_weighting_scale(scale)
+
+  structure(
+    list(
+      method = method,
+      scale = scale
+    ),
+    class = "cpm_weighting_spec"
   )
 }
 
 #' @export
 print.cpm_spec <- function(x, ...) {
   cat("CPM specification:\n")
+  cat("  Screening:\n")
   cat(sprintf(
-    "  Association method: %s\n",
+    "    Association:      %s\n",
     x$params$association_method
   ))
-  cat(sprintf("  Threshold method:   %s\n", x$params$threshold_method))
   cat(sprintf(
-    "  Threshold level:    %s\n",
-    format_threshold_level(x$params$threshold_level)
+    "    Threshold method: %s\n",
+    x$params$threshold_method
   ))
   cat(sprintf(
-    "  Network summary:    %s\n",
+    "    Threshold level:  %s\n",
+    format_threshold_level(x$params$threshold_level)
+  ))
+  cat("  Model:\n")
+  cat(sprintf(
+    "    Network summary:  %s\n",
     x$params$network_summary
   ))
   cat(sprintf(
-    "  Edge weighting:     %s\n",
+    "    Edge weighting:   %s\n",
     x$params$edge_weighting
   ))
   cat(sprintf(
-    "  Weighting scale:    %s\n",
+    "    Weighting scale:  %s\n",
     format_threshold_level(x$params$weighting_scale)
   ))
   cat(sprintf(
-    "  Prediction head:    %s\n",
+    "    Prediction head:  %s\n",
     x$params$prediction_head
   ))
   cat(sprintf(
-    "  Prediction streams: %s\n",
+    "    Streams:          %s\n",
     format_prediction_streams(
       prediction_types_for_summary(x$params$network_summary)
     )
   ))
   cat(sprintf(
-    "  Bias correction:    %s\n",
+    "    Bias correction:  %s\n",
     format_yes_no(x$params$bias_correct)
   ))
   invisible(x)
@@ -236,46 +338,77 @@ fit_resamples.cpm_spec <- function(
   )
 }
 
-new_cpm_spec <- function(params) {
+new_cpm_spec <- function(params, helpers = cpm_helpers_from_params(params)) {
   structure(
-    list(params = params),
+    list(
+      params = params,
+      helpers = helpers
+    ),
     class = "cpm_spec"
   )
 }
 
-validate_cpm_spec_params <- function(
-  threshold_level,
-  weighting_scale,
-  bias_correct
-) {
-  if (
-    !is.numeric(threshold_level) ||
-      length(threshold_level) != 1L ||
-      is.na(threshold_level) ||
-      !is.finite(threshold_level) ||
-      threshold_level < 0 ||
-      threshold_level > 1
-  ) {
-    stop("`threshold_level` must be a single number between 0 and 1.")
+cpm_helpers_from_params <- function(params) {
+  list(
+    screen = cpm_screen(
+      association = params$association_method,
+      threshold = cpm_threshold(
+        method = params$threshold_method,
+        level = params$threshold_level
+      )
+    ),
+    weighting = cpm_weighting(
+      method = params$edge_weighting,
+      scale = params$weighting_scale
+    )
+  )
+}
+
+validate_cpm_component <- function(x, class, message) {
+  if (!inherits(x, class)) {
+    stop(message, call. = FALSE)
   }
 
+  invisible(x)
+}
+
+validate_threshold_level <- function(level) {
   if (
-    !is.numeric(weighting_scale) ||
-      length(weighting_scale) != 1L ||
-      is.na(weighting_scale) ||
-      !is.finite(weighting_scale) ||
-      weighting_scale <= 0
+    !is.numeric(level) ||
+      length(level) != 1L ||
+      is.na(level) ||
+      !is.finite(level) ||
+      level < 0 ||
+      level > 1
   ) {
-    stop("`weighting_scale` must be a single positive number.")
+    stop("`level` must be a single number between 0 and 1.", call. = FALSE)
   }
 
+  invisible(level)
+}
+
+validate_weighting_scale <- function(scale) {
+  if (
+    !is.numeric(scale) ||
+      length(scale) != 1L ||
+      is.na(scale) ||
+      !is.finite(scale) ||
+      scale <= 0
+  ) {
+    stop("`scale` must be a single positive number.", call. = FALSE)
+  }
+
+  invisible(scale)
+}
+
+validate_bias_correct <- function(bias_correct) {
   if (
     !is.logical(bias_correct) ||
       length(bias_correct) != 1L ||
       is.na(bias_correct)
   ) {
-    stop("`bias_correct` must be either TRUE or FALSE.")
+    stop("`bias_correct` must be either TRUE or FALSE.", call. = FALSE)
   }
 
-  invisible()
+  invisible(bias_correct)
 }

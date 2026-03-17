@@ -56,7 +56,11 @@ explicit CPM parameters.
 
 ```{r}
 fit_obj <- fit(
-  cpm_spec(threshold_method = "alpha", threshold_level = 0.05),
+  cpm_spec(
+    screen = cpm_screen(
+      threshold = cpm_threshold("alpha", level = 0.05)
+    )
+  ),
   conmat = conmat,
   behav = behav,
   covariates = covariates
@@ -73,19 +77,17 @@ network, but the performance reported by `summary()` is still in-sample.
 
 ## Customize the CPM Strategy
 
-`cpm_spec()` is no longer limited to one screening-and-head combination. You
-can vary the edge association measure, the threshold rule, how edges are
-weighted, how selected edges are summarized, and the final prediction head
-independently.
+`cpm_spec()` keeps the main CPM choices visible while using helpers for the
+parts that naturally come in pairs, such as screening and edge weighting.
 
 ```{r}
 rich_spec <- cpm_spec(
-  association_method = "spearman",
-  threshold_method = "effect_size",
-  threshold_level = 0.1,
-  edge_weighting = "sigmoid",
-  weighting_scale = 0.03,
+  screen = cpm_screen(
+    association = "spearman",
+    threshold = cpm_threshold("effect_size", level = 0.1)
+  ),
   network_summary = "difference",
+  weighting = cpm_weighting("sigmoid", scale = 0.03),
   prediction_head = "linear_no_intercept"
 )
 

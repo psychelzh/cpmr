@@ -2,7 +2,11 @@ test_that("run_single_fit matches fit() outputs on single data", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(threshold_method = "alpha", threshold_level = 0.05)
+  spec <- cpm_spec(
+    screen = cpm_screen(
+      threshold = cpm_threshold("alpha", level = 0.05)
+    )
+  )
   call <- quote(fit(object = spec, conmat = conmat, behav = behav))
 
   internal_result <- run_single_fit(
@@ -54,7 +58,11 @@ test_that("run_resample_fit matches fit_resamples() outputs", {
   withr::local_seed(321)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(threshold_method = "sparsity", threshold_level = 0.2)
+  spec <- cpm_spec(
+    screen = cpm_screen(
+      threshold = cpm_threshold("sparsity", level = 0.2)
+    )
+  )
   call <- quote(fit_resamples(object = spec, conmat = conmat, behav = behav))
 
   withr::local_seed(999)

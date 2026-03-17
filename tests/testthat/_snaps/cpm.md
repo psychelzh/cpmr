@@ -268,8 +268,8 @@
       result
     Output
       CPM fit:
-        Call: fit(object = cpm_spec(threshold_method = "sparsity"), conmat = conmat, 
-          behav = behav)
+        Call: fit(object = cpm_spec(screen = cpm_screen(threshold = cpm_threshold("sparsity"))), 
+          conmat = conmat, behav = behav)
         Number of observations: 10
           Complete cases: 10
         Candidate edges: 10
@@ -412,8 +412,8 @@
       result
     Output
       CPM fit:
-        Call: fit(object = cpm_spec(threshold_level = 0.1), conmat = conmat, 
-          behav = behav)
+        Call: fit(object = cpm_spec(screen = cpm_screen(threshold = cpm_threshold(level = 0.1))), 
+          conmat = conmat, behav = behav)
         Number of observations: 10
           Complete cases: 10
         Candidate edges: 10

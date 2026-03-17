@@ -1,16 +1,18 @@
 test_that("cpm_spec stores model parameters", {
   spec <- cpm_spec(
-    association_method = "spearman",
-    threshold_method = "sparsity",
-    threshold_level = 0.05,
+    screen = cpm_screen(
+      association = "spearman",
+      threshold = cpm_threshold("sparsity", level = 0.05)
+    ),
     network_summary = "difference",
-    edge_weighting = "sigmoid",
-    weighting_scale = 0.02,
+    weighting = cpm_weighting("sigmoid", scale = 0.02),
     prediction_head = "linear_no_intercept",
     bias_correct = FALSE
   )
 
   expect_s3_class(spec, "cpm_spec")
+  expect_s3_class(spec$helpers$screen, "cpm_screen_spec")
+  expect_s3_class(spec$helpers$weighting, "cpm_weighting_spec")
   expect_identical(spec$params$association_method, "spearman")
   expect_identical(spec$params$threshold_method, "sparsity")
   expect_identical(spec$params$threshold_level, 0.05)
@@ -37,6 +39,8 @@ test_that("new_cpm_spec builds cpm_spec objects", {
 
   expect_s3_class(spec, "cpm_spec")
   expect_identical(spec$params, params)
+  expect_s3_class(spec$helpers$screen, "cpm_screen_spec")
+  expect_s3_class(spec$helpers$weighting, "cpm_weighting_spec")
 })
 
 test_that("fit.cpm_spec returns a cpm object with correct call", {
@@ -50,15 +54,15 @@ test_that("fit.cpm_spec returns a cpm object with correct call", {
   expect_identical(result$spec, spec)
 })
 
-test_that("cpm_spec validates scalar parameter values", {
+test_that("helper constructors validate scalar parameter values", {
   expect_error(
-    cpm_spec(threshold_level = -0.1),
-    "`threshold_level` must be a single number between 0 and 1.",
+    cpm_threshold(level = -0.1),
+    "`level` must be a single number between 0 and 1.",
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(threshold_level = c(0.1, 0.2)),
-    "`threshold_level` must be a single number between 0 and 1.",
+    cpm_threshold(level = c(0.1, 0.2)),
+    "`level` must be a single number between 0 and 1.",
     fixed = TRUE
   )
   expect_error(
@@ -67,8 +71,8 @@ test_that("cpm_spec validates scalar parameter values", {
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(weighting_scale = 0),
-    "`weighting_scale` must be a single positive number.",
+    cpm_weighting(scale = 0),
+    "`scale` must be a single positive number.",
     fixed = TRUE
   )
   expect_error(
@@ -79,13 +83,17 @@ test_that("cpm_spec validates scalar parameter values", {
 })
 
 test_that("print.cpm_spec shows model options", {
-  spec <- cpm_spec(threshold_method = "sparsity")
+  spec <- cpm_spec(
+    screen = cpm_screen(
+      threshold = cpm_threshold("sparsity")
+    )
+  )
 
   expect_output(print(spec), "CPM specification")
-  expect_output(print(spec), "Association method")
+  expect_output(print(spec), "Screening")
   expect_output(print(spec), "Threshold method:\\s+sparsity")
   expect_output(print(spec), "Edge weighting")
-  expect_output(print(spec), "Prediction streams")
+  expect_output(print(spec), "Streams")
   expect_output(print(spec), "Bias correction")
 })
 
@@ -109,10 +117,10 @@ test_that("sigmoid edge weighting stores smooth edge weights in the model", {
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(
-    threshold_method = "effect_size",
-    threshold_level = 0.1,
-    edge_weighting = "sigmoid",
-    weighting_scale = 0.03
+    screen = cpm_screen(
+      threshold = cpm_threshold("effect_size", level = 0.1)
+    ),
+    weighting = cpm_weighting("sigmoid", scale = 0.03)
   )
 
   result <- fit(spec, conmat = conmat, behav = behav)
@@ -371,7 +379,11 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
   behav <- rnorm(n)
   covariates <- matrix(rnorm(n * 2), ncol = 2)
-  spec <- cpm_spec(threshold_method = "alpha", threshold_level = 0.1)
+  spec <- cpm_spec(
+    screen = cpm_screen(
+      threshold = cpm_threshold("alpha", level = 0.1)
+    )
+  )
   resamples <- list(1:5, 6:10, 11:15)
   rows_test <- resamples[[1]]
   rows_train <- setdiff(seq_len(n), rows_test)
