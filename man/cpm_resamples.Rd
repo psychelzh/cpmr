@@ -5,7 +5,8 @@
 \title{cpm_resamples Resampling Object}
 \description{
 A \code{cpm_resamples} object is returned by \code{\link[=fit_resamples]{fit_resamples()}} and stores
-fold-level outputs from resampling.
+observation-level predictions together with the resampling structure that
+produced them.
 }
 \section{Structure}{
 

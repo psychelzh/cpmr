@@ -34,12 +34,19 @@ A data frame. For \code{level = "foldwise"}, the returned columns are
 \description{
 Extract resampling metrics from a \code{cpm_resamples} object
 }
+\details{
+Use \code{resample_metrics()} when you want resampling metrics in a tabular form
+for downstream inspection or plotting. Compared with
+\code{\link[=summary.cpm_resamples]{summary.cpm_resamples()}}, this helper is less opinionated: it can return
+pooled metrics across all out-of-fold predictions or the raw fold-wise
+metrics used to build aggregate summaries.
+}
 \examples{
 withr::local_seed(123)
-conmat <- matrix(rnorm(100), ncol = 10)
-behav <- rnorm(10)
-res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+conmat <- matrix(rnorm(200), nrow = 20)
+behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
+res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 4)
 
 head(resample_metrics(res))
-resample_metrics(res, level = "pooled")
+resample_metrics(res, level = "pooled", metrics = "correlation")
 }
