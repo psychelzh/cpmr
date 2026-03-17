@@ -20,6 +20,29 @@ test_that("select_edges returns a logical pos/neg mask", {
   expect_identical(colnames(edges), c("pos", "neg"))
 })
 
+test_that("select_edges warns when sparsity selection drops one edge sign", {
+  behav <- 1:10
+  conmat <- cbind(behav, behav * 2, behav * 3, behav * 4)
+
+  expect_warning(
+    select_edges(conmat, behav, "sparsity", 0.25),
+    "The requested sparsity level did not retain both positive and negative edges.",
+    fixed = TRUE
+  )
+})
+
+test_that("select_edges validates threshold method", {
+  withr::local_seed(1)
+  conmat <- matrix(rnorm(60), nrow = 10, ncol = 6)
+  behav <- rnorm(10)
+
+  expect_error(
+    select_edges(conmat, behav, "bogus", 0.1),
+    "`method` must be either \"alpha\" or \"sparsity\".",
+    fixed = TRUE
+  )
+})
+
 test_that("fscale centers and scales columns", {
   x <- matrix(as.numeric(1:6), nrow = 3)
   center <- c(2, 5)
