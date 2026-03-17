@@ -9,6 +9,7 @@ test_that("format helpers produce stable display strings", {
   expect_identical(format_yes_no(FALSE), "no")
   expect_identical(format_covariates(TRUE), "included")
   expect_identical(format_covariates(FALSE), "none")
+  expect_identical(format_method_name("pearson"), "Pearson")
   expect_identical(edge_storage_label("none"), "not stored")
   expect_identical(edge_storage_label("sum"), "summed across folds")
   expect_identical(edge_storage_label("all"), "stored for each fold")

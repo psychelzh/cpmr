@@ -1,21 +1,47 @@
 example_resample_summary <- function(
-  errors = rbind(
-    rmse = c(both = 0.8, pos = 0.9, neg = 1.0),
-    mae = c(both = 0.6, pos = 0.7, neg = 0.8)
-  ),
-  pooled_correlation = c(both = 0.4, pos = 0.2, neg = -0.1),
-  foldwise_correlation = rbind(
-    mean = c(both = 0.35, pos = 0.15, neg = -0.05),
-    std_error = c(both = 0.05, pos = 0.02, neg = 0.01)
+  metrics = rbind(
+    data.frame(
+      level = "pooled",
+      metric = rep(c("rmse", "mae", "correlation"), each = 3),
+      prediction = rep(prediction_types, times = 3),
+      estimate = c(
+        0.8,
+        0.9,
+        1.0,
+        0.6,
+        0.7,
+        0.8,
+        0.4,
+        0.2,
+        -0.1
+      ),
+      std_error = NA_real_,
+      method = c(
+        rep(NA_character_, 6),
+        rep("pearson", 3)
+      ),
+      stringsAsFactors = FALSE
+    ),
+    data.frame(
+      level = "foldwise",
+      metric = "correlation",
+      prediction = prediction_types,
+      estimate = c(0.35, 0.15, -0.05),
+      std_error = c(0.05, 0.02, 0.01),
+      method = "pearson",
+      stringsAsFactors = FALSE
+    )
   ),
   edges = NULL,
-  params = list(kfolds = 5L, return_edges = "none")
+  params = list(
+    kfolds = 5L,
+    return_edges = "none",
+    correlation_method = "pearson"
+  )
 ) {
   structure(
     list(
-      errors = errors,
-      pooled_correlation = pooled_correlation,
-      foldwise_correlation = foldwise_correlation,
+      metrics = metrics,
       edges = edges,
       params = params
     ),
@@ -54,17 +80,25 @@ test_that("summary.cpm returns NA when fewer than two valid pairs", {
 
   summary_result <- summary(sparse_object)
 
-  expect_true(all(is.na(summary_result$performance)))
+  expect_true(all(is.na(summary_metric_values(
+    summary_result$metrics,
+    level = "single",
+    metric = "correlation"
+  ))))
   expect_identical(summary_result$edges, sparse_object$edges)
 })
 
 test_that("print.cpm_summary reports NA edge rates when stored edges are all missing", {
   summary_result <- structure(
     list(
-      performance = matrix(
-        c(0.1, 0.2, 0.3),
-        nrow = 1,
-        dimnames = list(NULL, c("both", "pos", "neg"))
+      metrics = data.frame(
+        level = "single",
+        metric = "correlation",
+        prediction = prediction_types,
+        estimate = c(0.1, 0.2, 0.3),
+        std_error = NA_real_,
+        method = "pearson",
+        stringsAsFactors = FALSE
       ),
       edges = matrix(
         c(NA, NA),
@@ -106,32 +140,42 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
       folds = folds
     )
   )
-  fold_correlations <- compute_fold_correlations(predictions, folds)
+  fold_correlations <- compute_fold_metric_table(
+    predictions,
+    folds,
+    metrics = "correlation"
+  )
 
   expect_s3_class(summary_result, "cpm_resamples_summary")
   expect_identical(
-    colnames(summary_result$errors),
-    c("both", "pos", "neg")
+    names(summary_result$metrics),
+    c("level", "metric", "prediction", "estimate", "std_error", "method")
   )
-  expect_identical(rownames(summary_result$errors), c("rmse", "mae"))
   expect_equal(
-    summary_result$errors["rmse", ],
-    vapply(
-      prediction_types,
-      function(type) safe_rmse(predictions$real, predictions[[type]]),
-      numeric(1)
+    summary_metric_matrix(
+      summary_result$metrics,
+      level = "pooled",
+      metric = c("rmse", "mae")
+    ),
+    rbind(
+      rmse = vapply(
+        prediction_types,
+        function(type) safe_rmse(predictions$real, predictions[[type]]),
+        numeric(1)
+      ),
+      mae = vapply(
+        prediction_types,
+        function(type) safe_mae(predictions$real, predictions[[type]]),
+        numeric(1)
+      )
     )
   )
   expect_equal(
-    summary_result$errors["mae", ],
-    vapply(
-      prediction_types,
-      function(type) safe_mae(predictions$real, predictions[[type]]),
-      numeric(1)
-    )
-  )
-  expect_equal(
-    summary_result$pooled_correlation,
+    summary_metric_values(
+      summary_result$metrics,
+      level = "pooled",
+      metric = "correlation"
+    ),
     vapply(
       prediction_types,
       function(type) safe_cor(predictions$real, predictions[[type]]),
@@ -139,18 +183,35 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
     )
   )
   expect_equal(
-    summary_result$foldwise_correlation["mean", ],
+    summary_metric_values(
+      summary_result$metrics,
+      level = "foldwise",
+      metric = "correlation"
+    ),
     vapply(
       prediction_types,
-      function(type) safe_mean(fold_correlations[[type]]),
+      function(type) {
+        safe_mean(fold_correlations$estimate[
+          fold_correlations$prediction == type
+        ])
+      },
       numeric(1)
     )
   )
   expect_equal(
-    summary_result$foldwise_correlation["std_error", ],
+    summary_metric_values(
+      summary_result$metrics,
+      level = "foldwise",
+      metric = "correlation",
+      field = "std_error"
+    ),
     vapply(
       prediction_types,
-      function(type) safe_std_error(fold_correlations[[type]]),
+      function(type) {
+        safe_std_error(
+          fold_correlations$estimate[fold_correlations$prediction == type]
+        )
+      },
       numeric(1)
     )
   )
@@ -178,8 +239,16 @@ test_that("summary.cpm_resamples returns NULL edges when resamples did not store
   )
 
   expect_null(summary_result$edges)
-  expect_true(all(is.na(summary_result$pooled_correlation)))
-  expect_true(all(is.na(summary_result$foldwise_correlation)))
+  expect_true(all(is.na(summary_metric_values(
+    summary_result$metrics,
+    level = "pooled",
+    metric = "correlation"
+  ))))
+  expect_true(all(is.na(summary_metric_values(
+    summary_result$metrics,
+    level = "foldwise",
+    metric = "correlation"
+  ))))
 })
 
 test_that("summary.cpm_resamples keeps default LOO summaries usable", {
@@ -190,11 +259,19 @@ test_that("summary.cpm_resamples keeps default LOO summaries usable", {
   result <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav)
   summary_result <- summary(result)
 
-  expect_true(all(is.finite(summary_result$errors[, prediction_types])))
-  expect_true(all(is.na(summary_result$foldwise_correlation)))
+  expect_true(all(is.finite(summary_metric_matrix(
+    summary_result$metrics,
+    level = "pooled",
+    metric = c("rmse", "mae")
+  ))))
+  expect_true(all(is.na(summary_metric_values(
+    summary_result$metrics,
+    level = "foldwise",
+    metric = "correlation"
+  ))))
 
   output <- capture.output(print(summary_result))
-  expect_true(any(grepl("Pooled correlations", output, fixed = TRUE)))
+  expect_true(any(grepl("Pooled correlations (Pearson)", output, fixed = TRUE)))
   expect_true(any(grepl(
     "unavailable because they were undefined for all prediction streams",
     output,
@@ -246,7 +323,11 @@ test_that("print.cpm_resamples_summary reports fold count and rates", {
       ncol = 2,
       dimnames = list(NULL, c("pos", "neg"))
     ),
-    params = list(kfolds = 5L, return_edges = "sum")
+    params = list(
+      kfolds = 5L,
+      return_edges = "sum",
+      correlation_method = "pearson"
+    )
   )
 
   output <- capture.output(print(summary_result))
@@ -254,17 +335,24 @@ test_that("print.cpm_resamples_summary reports fold count and rates", {
   expect_true(any(grepl("Number of folds: 5", output, fixed = TRUE)))
   expect_true(any(grepl("RMSE", output, fixed = TRUE)))
   expect_true(any(grepl("Combined: 0.400", output, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Pooled correlations (Pearson):",
+    output,
+    fixed = TRUE
+  )))
   expect_true(any(grepl("Combined: 0.350 (SE 0.050)", output, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Fold-wise correlations (Pearson):",
+    output,
+    fixed = TRUE
+  )))
   expect_true(any(grepl("Positive: 50.00%", output, fixed = TRUE)))
   expect_true(any(grepl("Negative: 25.00%", output, fixed = TRUE)))
 })
 
 test_that("print.cpm_resamples_summary omits edge block when edges are not stored", {
   summary_result <- example_resample_summary(
-    foldwise_correlation = rbind(
-      mean = c(both = 0.4, pos = 0.2, neg = -0.1),
-      std_error = c(both = 0.05, pos = 0.02, neg = 0.01)
-    )
+    metrics = example_resample_summary()$metrics
   )
 
   output <- capture.output(print(summary_result))
@@ -274,10 +362,10 @@ test_that("print.cpm_resamples_summary omits edge block when edges are not store
 
 test_that("print.cpm_resamples_summary notes when fold-wise correlations are undefined", {
   summary_result <- example_resample_summary(
-    foldwise_correlation = rbind(
-      mean = c(both = NA_real_, pos = NA_real_, neg = NA_real_),
-      std_error = c(both = NA_real_, pos = NA_real_, neg = NA_real_)
-    )
+    metrics = within(example_resample_summary()$metrics, {
+      estimate[level == "foldwise" & metric == "correlation"] <- NA_real_
+      std_error[level == "foldwise" & metric == "correlation"] <- NA_real_
+    })
   )
 
   output <- capture.output(print(summary_result))
@@ -290,15 +378,23 @@ test_that("print.cpm_resamples_summary notes when fold-wise correlations are und
 
 test_that("print.cpm_resamples_summary prints fold-wise block when some streams remain estimable", {
   summary_result <- example_resample_summary(
-    foldwise_correlation = rbind(
-      mean = c(both = 0.35, pos = NA_real_, neg = -0.05),
-      std_error = c(both = 0.05, pos = NA_real_, neg = 0.01)
-    )
+    metrics = within(example_resample_summary()$metrics, {
+      estimate[
+        level == "foldwise" & metric == "correlation" & prediction == "pos"
+      ] <- NA_real_
+      std_error[
+        level == "foldwise" & metric == "correlation" & prediction == "pos"
+      ] <- NA_real_
+    })
   )
 
   output <- capture.output(print(summary_result))
 
-  expect_true(any(grepl("Fold-wise correlations:", output, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Fold-wise correlations (Pearson):",
+    output,
+    fixed = TRUE
+  )))
   expect_true(any(grepl("Combined: 0.350 (SE 0.050)", output, fixed = TRUE)))
   expect_true(any(grepl("Positive: NA", output, fixed = TRUE)))
   expect_true(any(grepl("Negative: -0.050", output, fixed = TRUE)))
