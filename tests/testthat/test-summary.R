@@ -171,7 +171,7 @@ test_that("summary.cpm_resamples keeps default LOO summaries usable", {
   output <- capture.output(print(summary_result))
   expect_true(any(grepl("Pooled correlations", output, fixed = TRUE)))
   expect_true(any(grepl(
-    "unavailable because fold-level correlations were undefined for all prediction streams",
+    "unavailable because they were undefined for all prediction streams",
     output,
     fixed = TRUE
   )))
@@ -290,7 +290,7 @@ test_that("print.cpm_resamples_summary notes when fold-wise correlations are und
   output <- capture.output(print(summary_result))
 
   expect_true(any(grepl(
-    "unavailable because fold-level correlations were undefined for all prediction streams",
+    "unavailable because they were undefined for all prediction streams",
     output
   )))
 })
@@ -319,7 +319,7 @@ test_that("print.cpm_resamples_summary prints fold-wise block when some streams 
   expect_true(any(grepl("Combined: 0.350 (SE 0.050)", output, fixed = TRUE)))
   expect_true(any(grepl("Positive: NA", output, fixed = TRUE)))
   expect_false(any(grepl(
-    "unavailable because fold-level correlations were undefined for all prediction streams",
+    "unavailable because they were undefined for all prediction streams",
     output,
     fixed = TRUE
   )))
