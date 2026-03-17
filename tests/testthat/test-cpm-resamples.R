@@ -9,10 +9,10 @@ example_resample_result <- function(kfolds = 5L) {
 test_that("print.cpm_resamples reports summary fields", {
   res <- example_resample_result()
 
-  expect_output(print(res), "CPM resample results")
-  expect_output(print(res), "Prediction error")
-  expect_output(print(res), "RMSE")
-  expect_output(print(res), "Edge storage")
+  expect_output(print(res), "CPM resamples")
+  expect_output(print(res), "Complete cases")
+  expect_output(print(res), "Edge storage: not stored")
+  expect_output(print(res), "Use summary\\(\\) for aggregate metrics")
 })
 
 test_that("new_cpm_resamples builds resampling objects", {
@@ -45,30 +45,7 @@ test_that("new_cpm_resamples builds resampling objects", {
   expect_identical(resamples_object$predictions, predictions)
 })
 
-test_that("print.cpm_resamples prints NA instead of NaN for all-NA metrics", {
-  x <- structure(
-    list(
-      call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
-      folds = list(1:2, 3:4),
-      predictions = data.frame(
-        row = 1:4,
-        fold = c(1L, 1L, 2L, 2L),
-        real = c(NA_real_, NA_real_, NA_real_, NA_real_),
-        both = c(1, 2, 3, 4),
-        pos = c(1, 2, 3, 4),
-        neg = c(1, 2, 3, 4)
-      ),
-      params = list(return_edges = "none")
-    ),
-    class = "cpm_resamples"
-  )
-
-  out <- capture.output(print(x))
-  expect_false(any(grepl("NaN", out, fixed = TRUE)))
-  expect_true(any(grepl("Combined: NA", out, fixed = TRUE)))
-})
-
-test_that("print.cpm_resamples reports finite pooled errors when available", {
+test_that("print.cpm_resamples uses human-readable edge storage labels", {
   x <- structure(
     list(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
@@ -87,9 +64,11 @@ test_that("print.cpm_resamples reports finite pooled errors when available", {
   )
 
   out <- capture.output(print(x))
-  expect_true(any(grepl("Combined: 1.155", out, fixed = TRUE)))
-  expect_true(any(grepl("Positive: 0.000", out, fixed = TRUE)))
-  expect_true(any(grepl("Negative: 1.633", out, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Edge storage: summed across folds",
+    out,
+    fixed = TRUE
+  )))
 })
 
 test_that("resample_metrics returns pooled and foldwise metrics", {

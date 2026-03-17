@@ -6,7 +6,7 @@ print_performance_block <- function(values, header, std_error = NULL) {
       prediction_label(prediction_type),
       format_cor(values[[prediction_type]])
     )
-    if (!is.null(std_error)) {
+    if (!is.null(std_error) && !is.na(std_error[[prediction_type]])) {
       line <- sprintf(
         "%s (SE %s)",
         line,
@@ -60,6 +60,28 @@ format_cor <- function(x) {
 
 format_rate <- function(x) {
   ifelse(is.na(x), "NA", sprintf("%.2f%%", x * 100))
+}
+
+format_threshold_level <- function(x) {
+  ifelse(is.na(x), "NA", trimws(formatC(x, format = "fg", digits = 3)))
+}
+
+format_yes_no <- function(x) {
+  ifelse(is.na(x), "NA", ifelse(isTRUE(x), "yes", "no"))
+}
+
+format_covariates <- function(x) {
+  ifelse(is.na(x), "NA", ifelse(isTRUE(x), "included", "none"))
+}
+
+edge_storage_labels <- c(
+  none = "not stored",
+  sum = "summed across folds",
+  all = "stored for each fold"
+)
+
+edge_storage_label <- function(x) {
+  unname(edge_storage_labels[[x]])
 }
 
 prediction_labels <- c(

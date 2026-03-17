@@ -44,15 +44,22 @@ new_cpm_resamples <- function(
 
 #' @export
 print.cpm_resamples <- function(x, ...) {
-  cat("CPM resample results:\n")
+  cat("CPM resamples:\n")
   if (!is.null(x$call)) {
     cat("  Call: ")
     print(x$call)
   }
   cat(sprintf("  Number of folds: %d\n", length(x$folds)))
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
-  cat(sprintf("  Edge storage: %s\n", x$params$return_edges))
-  print_error_block(compute_pooled_errors(x$predictions))
+  cat(sprintf(
+    "    Complete cases: %d\n",
+    sum(stats::complete.cases(x$predictions[, prediction_types, drop = FALSE]))
+  ))
+  cat(sprintf(
+    "  Edge storage: %s\n",
+    edge_storage_label(x$params$return_edges)
+  ))
+  cat("  Use summary() for aggregate metrics.\n")
   invisible(x)
 }
 

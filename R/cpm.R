@@ -36,7 +36,7 @@ new_cpm <- function(call, spec, params, predictions, edges, model) {
 
 #' @export
 print.cpm <- function(x, ...) {
-  cat("CPM results:\n")
+  cat("CPM fit:\n")
   cat("  Call: ")
   print(x$call)
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
@@ -44,17 +44,26 @@ print.cpm <- function(x, ...) {
     "    Complete cases: %d\n",
     sum(stats::complete.cases(x$predictions[, prediction_types, drop = FALSE]))
   ))
-  cat(sprintf("  Number of edges: %d\n", dim(x$edges)[1]))
+  cat(sprintf("  Candidate edges: %d\n", dim(x$edges)[1]))
   covariates_param <- if (!is.null(x$params$covariates)) {
     x$params$covariates
   } else {
     NA
   }
   cat("  Parameters:\n")
-  cat(sprintf("    Covariates:       %s\n", covariates_param))
+  cat(sprintf(
+    "    Covariates:       %s\n",
+    format_covariates(covariates_param)
+  ))
   cat(sprintf("    Threshold method: %s\n", x$params$thresh_method))
-  cat(sprintf("    Threshold level:  %.2f\n", x$params$thresh_level))
-  cat(sprintf("    Bias correction:  %s\n", x$params$bias_correct))
+  cat(sprintf(
+    "    Threshold level:  %s\n",
+    format_threshold_level(x$params$thresh_level)
+  ))
+  cat(sprintf(
+    "    Bias correction:  %s\n",
+    format_yes_no(x$params$bias_correct)
+  ))
   invisible(x)
 }
 
