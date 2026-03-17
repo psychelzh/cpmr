@@ -91,11 +91,11 @@ summary(resample_obj)
 #>       Combined: 0.947
 #>       Positive: 0.962
 #>       Negative: 0.905
-#>   Pooled correlations:
+#>   Pooled correlations (Pearson):
 #>     Combined: -0.104
 #>     Positive: -0.072
 #>     Negative: -0.074
-#>   Fold-wise correlations:
+#>   Fold-wise correlations (Pearson):
 #>     Combined: -0.057 (SE 0.062)
 #>     Positive: 0.008 (SE 0.089)
 #>     Negative: -0.036 (SE 0.077)

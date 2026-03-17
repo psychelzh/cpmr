@@ -129,107 +129,6 @@ resolve_kfolds <- function(kfolds, include_cases) {
   kfolds
 }
 
-compute_pooled_errors <- function(predictions) {
-  errors <- rbind(
-    rmse = vapply(
-      prediction_types,
-      function(prediction_type) {
-        safe_rmse(predictions$real, predictions[[prediction_type]])
-      },
-      numeric(1)
-    ),
-    mae = vapply(
-      prediction_types,
-      function(prediction_type) {
-        safe_mae(predictions$real, predictions[[prediction_type]])
-      },
-      numeric(1)
-    )
-  )
-  colnames(errors) <- prediction_types
-  errors
-}
-
-compute_pooled_correlations <- function(
-  predictions,
-  method = c("pearson", "spearman")
-) {
-  method <- match.arg(method)
-  vapply(
-    prediction_types,
-    function(prediction_type) {
-      safe_cor(
-        predictions$real,
-        predictions[[prediction_type]],
-        method = method
-      )
-    },
-    numeric(1)
-  )
-}
-
-compute_fold_correlations <- function(
-  predictions,
-  folds,
-  method = c("pearson", "spearman")
-) {
-  method <- match.arg(method)
-  fold_correlations <- lapply(seq_along(folds), function(i) {
-    rows <- folds[[i]]
-    data.frame(
-      fold = i,
-      n_assess = length(rows),
-      both = safe_cor(
-        predictions$real[rows],
-        predictions$both[rows],
-        method = method
-      ),
-      pos = safe_cor(
-        predictions$real[rows],
-        predictions$pos[rows],
-        method = method
-      ),
-      neg = safe_cor(
-        predictions$real[rows],
-        predictions$neg[rows],
-        method = method
-      )
-    )
-  })
-  do.call(rbind, fold_correlations)
-}
-
-summarize_fold_correlations <- function(
-  predictions,
-  folds,
-  method = c("pearson", "spearman")
-) {
-  method <- match.arg(method)
-  fold_correlations <- compute_fold_correlations(
-    predictions,
-    folds,
-    method = method
-  )
-  summary <- rbind(
-    mean = vapply(
-      prediction_types,
-      function(prediction_type) {
-        safe_mean(fold_correlations[[prediction_type]])
-      },
-      numeric(1)
-    ),
-    std_error = vapply(
-      prediction_types,
-      function(prediction_type) {
-        safe_std_error(fold_correlations[[prediction_type]])
-      },
-      numeric(1)
-    )
-  )
-  colnames(summary) <- prediction_types
-  summary
-}
-
 compute_resample_metric <- function(
   real,
   predicted,
@@ -322,6 +221,37 @@ compute_fold_metric_table <- function(
   })
 
   do.call(rbind, metric_tables)
+}
+
+compute_resample_summary_metrics <- function(
+  predictions,
+  folds,
+  correlation_method = c("pearson", "spearman")
+) {
+  correlation_method <- match.arg(correlation_method)
+
+  pooled_metrics <- as_summary_metrics(
+    compute_pooled_metric_table(
+      predictions,
+      metrics = c("rmse", "mae", "correlation"),
+      correlation_method = correlation_method
+    ),
+    level = "pooled",
+    method = correlation_method
+  )
+
+  foldwise_correlations <- summarize_metric_estimates(
+    compute_fold_metric_table(
+      predictions,
+      folds,
+      metrics = "correlation",
+      correlation_method = correlation_method
+    ),
+    level = "foldwise",
+    method = correlation_method
+  )
+
+  rbind(pooled_metrics, foldwise_correlations)
 }
 
 summarize_resample_edges <- function(edges, return_edges, kfolds) {

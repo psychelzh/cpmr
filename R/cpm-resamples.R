@@ -78,11 +78,10 @@ print.cpm_resamples <- function(x, ...) {
 #'
 #' @return A `cpm_resamples_summary` object with the following elements:
 #' \describe{
-#'   \item{`errors`}{A matrix of pooled out-of-fold error metrics.}
-#'   \item{`pooled_correlation`}{A named vector of pooled out-of-fold
-#'     correlations for `both`, `pos`, and `neg` predictions.}
-#'   \item{`foldwise_correlation`}{A matrix of fold-wise correlation means and
-#'     standard errors.}
+#'   \item{`metrics`}{A data frame with columns `level`, `metric`,
+#'     `prediction`, `estimate`, `std_error`, and `method`. Resample summaries
+#'     store pooled errors and pooled correlations at `level = "pooled"`, and
+#'     fold-wise correlation summaries at `level = "foldwise"`.}
 #'   \item{`edges`}{Aggregated edge-selection rates, or `NULL` when edges were
 #'     not stored.}
 #'   \item{`params`}{A list containing summary-relevant resampling settings.}
@@ -97,13 +96,14 @@ print.cpm_resamples <- function(x, ...) {
 #' summary(res)
 #' @export
 summary.cpm_resamples <- function(object, ...) {
+  correlation_method <- "pearson"
+
   structure(
     list(
-      errors = compute_pooled_errors(object$predictions),
-      pooled_correlation = compute_pooled_correlations(object$predictions),
-      foldwise_correlation = summarize_fold_correlations(
+      metrics = compute_resample_summary_metrics(
         object$predictions,
-        object$folds
+        object$folds,
+        correlation_method = correlation_method
       ),
       edges = summarize_resample_edges(
         object$edges,
@@ -112,7 +112,8 @@ summary.cpm_resamples <- function(object, ...) {
       ),
       params = list(
         kfolds = object$params$kfolds,
-        return_edges = object$params$return_edges
+        return_edges = object$params$return_edges,
+        correlation_method = correlation_method
       )
     ),
     class = "cpm_resamples_summary"
@@ -123,18 +124,48 @@ summary.cpm_resamples <- function(object, ...) {
 #' @param x An object of class `cpm_resamples_summary`.
 #' @export
 print.cpm_resamples_summary <- function(x, ...) {
+  correlation_method <- summary_metric_method(
+    x$metrics,
+    level = c("pooled", "foldwise"),
+    metric = "correlation"
+  )
+
   cat("CPM resample summary:\n")
   cat(sprintf("  Number of folds: %d\n", x$params$kfolds))
-  print_error_block(x$errors)
+  print_error_block(summary_metric_matrix(
+    x$metrics,
+    level = "pooled",
+    metric = c("rmse", "mae")
+  ))
   print_performance_block(
-    values = x$pooled_correlation[prediction_types],
-    header = "  Pooled correlations:\n"
+    values = summary_metric_values(
+      x$metrics,
+      level = "pooled",
+      metric = "correlation"
+    ),
+    header = sprintf(
+      "  Pooled correlations (%s):\n",
+      format_method_name(correlation_method)
+    )
   )
-  if (any(!is.na(x$foldwise_correlation["mean", prediction_types]))) {
+  foldwise_values <- summary_metric_values(
+    x$metrics,
+    level = "foldwise",
+    metric = "correlation"
+  )
+  if (any(!is.na(foldwise_values))) {
     print_performance_block(
-      values = x$foldwise_correlation["mean", prediction_types],
-      std_error = x$foldwise_correlation["std_error", prediction_types],
-      header = "  Fold-wise correlations:\n"
+      values = foldwise_values,
+      std_error = summary_metric_values(
+        x$metrics,
+        level = "foldwise",
+        metric = "correlation",
+        field = "std_error"
+      ),
+      header = sprintf(
+        "  Fold-wise correlations (%s):\n",
+        format_method_name(correlation_method)
+      )
     )
   } else {
     cat(

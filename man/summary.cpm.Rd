@@ -20,10 +20,10 @@ correlation between the real and predicted values.}
 \item{x}{An object of class \code{cpm_summary}.}
 }
 \value{
-A list of class \code{cpm_summary} containing two elements:
-\item{performance}{A matrix of prediction performance, including the
-correlation between the real and predicted values for both edges,
-positive edges only, and negative edges only.}
+A list of class \code{cpm_summary} containing:
+\item{metrics}{A data frame with columns \code{level}, \code{metric}, \code{prediction},
+\code{estimate}, \code{std_error}, and \code{method}. Single-fit CPM summaries store
+correlation metrics at \code{level = "single"}.}
 
 \item{edges}{A logical matrix indicating which edges are selected by the
 fitted CPM model.}

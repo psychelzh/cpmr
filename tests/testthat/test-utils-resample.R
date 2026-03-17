@@ -62,7 +62,7 @@ test_that("warn_large_edge_storage signals large fold-wise storage", {
   expect_invisible(warn_large_edge_storage(10, 5, "sum"))
 })
 
-test_that("compute_pooled_errors and correlations summarize predictions", {
+test_that("compute_pooled_metric_table summarizes pooled predictions", {
   predictions <- data.frame(
     row = 1:4,
     fold = c(1L, 1L, 2L, 2L),
@@ -72,14 +72,25 @@ test_that("compute_pooled_errors and correlations summarize predictions", {
     neg = c(4, 3, 2, 1)
   )
 
-  errors <- compute_pooled_errors(predictions)
-  correlations <- compute_pooled_correlations(predictions)
+  metrics <- compute_pooled_metric_table(
+    predictions,
+    metrics = c("rmse", "mae", "correlation")
+  )
 
-  expect_identical(rownames(errors), c("rmse", "mae"))
-  expect_named(correlations, c("both", "pos", "neg"))
-  expect_equal(errors["rmse", "both"], 0)
-  expect_equal(errors["mae", "both"], 0)
-  expect_equal(unname(correlations["both"]), 1)
+  expect_equal(
+    metrics$estimate[metrics$metric == "rmse" & metrics$prediction == "both"],
+    0
+  )
+  expect_equal(
+    metrics$estimate[metrics$metric == "mae" & metrics$prediction == "both"],
+    0
+  )
+  expect_equal(
+    metrics$estimate[
+      metrics$metric == "correlation" & metrics$prediction == "both"
+    ],
+    1
+  )
 })
 
 test_that("compute_pooled_metric_table returns a long metric table", {
@@ -115,27 +126,7 @@ test_that("compute_resample_metric only validates correlation methods when neede
   )
 })
 
-test_that("compute_fold_correlations summarizes each assessment fold", {
-  predictions <- data.frame(
-    row = 1:4,
-    fold = c(1L, 1L, 2L, 2L),
-    real = c(1, 2, 3, 4),
-    both = c(1, 2, 3, 4),
-    pos = c(1, 2, 3, 4),
-    neg = c(4, 3, 2, 1)
-  )
-  folds <- list(1:2, 3:4)
-
-  correlations <- compute_fold_correlations(predictions, folds)
-
-  expect_named(correlations, c("fold", "n_assess", "both", "pos", "neg"))
-  expect_equal(correlations$fold, 1:2)
-  expect_equal(correlations$n_assess, c(2, 2))
-  expect_true(all(is.finite(correlations$both[1:2])))
-  expect_true(all(is.finite(correlations$pos[1:2])))
-})
-
-test_that("summarize_fold_correlations returns mean and standard error", {
+test_that("compute_resample_summary_metrics combines pooled and foldwise summaries", {
   predictions <- data.frame(
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
@@ -146,10 +137,30 @@ test_that("summarize_fold_correlations returns mean and standard error", {
   )
   folds <- list(1:3, 4:6)
 
-  summary <- summarize_fold_correlations(predictions, folds)
+  metrics <- compute_resample_summary_metrics(predictions, folds)
 
-  expect_identical(rownames(summary), c("mean", "std_error"))
-  expect_identical(colnames(summary), c("both", "pos", "neg"))
+  expect_named(
+    metrics,
+    c("level", "metric", "prediction", "estimate", "std_error", "method")
+  )
+  expect_true(all(c("pooled", "foldwise") %in% metrics$level))
+  expect_true(all(c("rmse", "mae", "correlation") %in% metrics$metric))
+  expect_equal(
+    metrics$estimate[
+      metrics$level == "pooled" &
+        metrics$metric == "correlation" &
+        metrics$prediction == "pos"
+    ],
+    1
+  )
+  expect_equal(
+    metrics$std_error[
+      metrics$level == "foldwise" &
+        metrics$metric == "correlation" &
+        metrics$prediction == "both"
+    ],
+    safe_std_error(c(1, -1))
+  )
 })
 
 test_that("compute_fold_metric_table returns one row per fold, metric, and stream", {

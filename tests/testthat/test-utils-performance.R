@@ -25,3 +25,85 @@ test_that("safe_std_error handles short and valid inputs", {
   expect_true(is.na(safe_std_error(c(NA_real_, NA_real_))))
   expect_equal(safe_std_error(c(1, 3)), 1)
 })
+
+test_that("summary metric helpers produce stable long-format summaries", {
+  metric_table <- data.frame(
+    metric = c("rmse", "rmse", "correlation", "correlation"),
+    prediction = c("both", "pos", "both", "pos"),
+    estimate = c(0.1, 0.2, 0.3, 0.4),
+    stringsAsFactors = FALSE
+  )
+
+  metrics <- as_summary_metrics(
+    metric_table,
+    level = "pooled",
+    method = "pearson"
+  )
+
+  expect_named(
+    metrics,
+    c("level", "metric", "prediction", "estimate", "std_error", "method")
+  )
+  expect_true(all(is.na(metrics$std_error)))
+  expect_identical(
+    metrics$method,
+    c(NA_character_, NA_character_, "pearson", "pearson")
+  )
+})
+
+test_that("summary metric helpers summarize and extract metric views", {
+  metric_table <- data.frame(
+    fold = c(1L, 1L, 2L, 2L),
+    n_assess = c(3L, 3L, 3L, 3L),
+    metric = c("correlation", "correlation", "correlation", "correlation"),
+    prediction = c("both", "pos", "both", "pos"),
+    estimate = c(0.2, 0.1, 0.4, 0.3),
+    stringsAsFactors = FALSE
+  )
+
+  metrics <- summarize_metric_estimates(
+    metric_table,
+    level = "foldwise",
+    method = "spearman"
+  )
+
+  expect_equal(
+    summary_metric_values(metrics, level = "foldwise", metric = "correlation"),
+    c(both = 0.3, pos = 0.2, neg = NA_real_)
+  )
+  expect_equal(
+    summary_metric_method(metrics, level = "foldwise", metric = "correlation"),
+    "spearman"
+  )
+  expect_true(is.na(summary_metric_method(
+    metrics,
+    level = "pooled",
+    metric = "rmse"
+  )))
+  expect_equal(
+    summary_metric_values(metrics, level = "pooled", metric = "rmse"),
+    c(both = NA_real_, pos = NA_real_, neg = NA_real_)
+  )
+  expect_equal(
+    summary_metric_matrix(
+      rbind(
+        as_summary_metrics(
+          data.frame(
+            metric = c("rmse", "rmse", "mae", "mae"),
+            prediction = c("both", "pos", "both", "pos"),
+            estimate = c(1, 2, 3, 4),
+            stringsAsFactors = FALSE
+          ),
+          level = "pooled"
+        ),
+        metrics
+      ),
+      level = "pooled",
+      metric = c("rmse", "mae")
+    ),
+    rbind(
+      rmse = c(both = 1, pos = 2, neg = NA_real_),
+      mae = c(both = 3, pos = 4, neg = NA_real_)
+    )
+  )
+})
