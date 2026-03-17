@@ -49,10 +49,16 @@ cpm_spec <- function(
 
 #' @export
 print.cpm_spec <- function(x, ...) {
-  cat("CPM model specification:\n")
+  cat("CPM specification:\n")
   cat(sprintf("  Threshold method: %s\n", x$params$thresh_method))
-  cat(sprintf("  Threshold level:  %.2f\n", x$params$thresh_level))
-  cat(sprintf("  Bias correction:  %s\n", x$params$bias_correct))
+  cat(sprintf(
+    "  Threshold level:  %s\n",
+    format_threshold_level(x$params$thresh_level)
+  ))
+  cat(sprintf(
+    "  Bias correction:  %s\n",
+    format_yes_no(x$params$bias_correct)
+  ))
   invisible(x)
 }
 

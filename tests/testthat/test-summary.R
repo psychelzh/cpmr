@@ -301,6 +301,8 @@ test_that("print.cpm_resamples_summary prints fold-wise block when some streams 
   expect_true(any(grepl("Fold-wise correlations:", output, fixed = TRUE)))
   expect_true(any(grepl("Combined: 0.350 (SE 0.050)", output, fixed = TRUE)))
   expect_true(any(grepl("Positive: NA", output, fixed = TRUE)))
+  expect_true(any(grepl("Negative: -0.050", output, fixed = TRUE)))
+  expect_false(any(grepl("SE NA", output, fixed = TRUE)))
   expect_false(any(grepl(
     "unavailable because they were undefined for all prediction streams",
     output,

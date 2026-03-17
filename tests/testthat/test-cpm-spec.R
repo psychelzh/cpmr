@@ -61,7 +61,7 @@ test_that("cpm_spec validates scalar parameter values", {
 test_that("print.cpm_spec shows model options", {
   spec <- cpm_spec(thresh_method = "sparsity")
 
-  expect_output(print(spec), "CPM model specification")
+  expect_output(print(spec), "CPM specification")
   expect_output(print(spec), "Threshold method: sparsity")
   expect_output(print(spec), "Bias correction")
 })
