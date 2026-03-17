@@ -101,10 +101,21 @@ metrics as the default summary and correlations as supplementary output.
 ```{r}
 predictions <- resample_obj$predictions
 
-summary(resample_obj)
+resample_summary <- summary(resample_obj)
+
+resample_summary
+head(resample_summary[["metrics"]])
 head(predictions)
 head(resample_metrics(resample_obj))
 ```
+
+These three outputs have slightly different jobs:
+
+- `summary(resample_obj)` prints the default aggregate report;
+- `summary(resample_obj)[["metrics"]]` exposes the compact summary-level metric
+  table stored on the summary object;
+- `resample_metrics(resample_obj)` returns the raw pooled or fold-wise metric
+  tables for further filtering, plotting, or export.
 
 By default, `fit_resamples()` uses `return_edges = "none"` and skips edge
 storage. This keeps the resampling object light when you only need predictive
