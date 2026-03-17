@@ -71,7 +71,7 @@ rich_spec <- cpm_spec(
   ),
   network_summary = "difference",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
-  prediction_head = "linear_no_intercept"
+  model = cpm_model_lm()
 )
 
 fit(rich_spec, conmat = conmat, behav = behav)$predictions |>
@@ -79,7 +79,8 @@ fit(rich_spec, conmat = conmat, behav = behav)$predictions |>
 ```
 
 This keeps the main CPM choices visible while grouping naturally paired options
-like screening and edge weighting into small helper objects.
+like screening, edge weighting, and the outcome model into small helper
+objects.
 
 Cross-validated resampling uses `fit_resamples()` with the same specification
 object:

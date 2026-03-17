@@ -88,8 +88,8 @@ A practical way to read a spec is:
 - `network_summary`: how positive and negative network strengths are combined;
 - `weighting = cpm_weighting(...)`: whether edges contribute as a hard mask or
   with smooth weights;
-- `prediction_head`: how the summarized network features map to the final
-  prediction;
+- `model = cpm_model_lm()`: how the summarized network features map to the
+  final prediction;
 - `bias_correct`: whether fold-local centering and scaling are applied.
 
 For example, this spec reads almost like a short sentence:
@@ -102,7 +102,7 @@ readable_spec <- cpm_spec(
   ),
   network_summary = "difference",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
-  prediction_head = "linear_no_intercept"
+  model = cpm_model_lm()
 )
 
 readable_spec
@@ -113,7 +113,7 @@ That means:
 - rank-based screening with a direct effect-size threshold;
 - one `positive - negative` network feature;
 - smooth edge weights around the fold-local threshold;
-- a no-intercept linear head on the final network feature.
+- an explicit linear outcome model on the final network feature.
 
 ## Customize the CPM Strategy
 
@@ -132,7 +132,7 @@ rich_spec <- cpm_spec(
   ),
   network_summary = "difference",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
-  prediction_head = "linear_no_intercept"
+  model = cpm_model_lm()
 )
 
 rich_fit <- fit(
@@ -152,7 +152,8 @@ Compared with the default spec, the example above changes four things:
   screening;
 - the network is summarized as one `difference` stream instead of the classic
   `combined` / `positive` / `negative` trio;
-- the final head is fit without an intercept.
+- the second-stage model is made explicit, even though it still uses the
+  default linear regression helper.
 
 Prediction columns depend on `network_summary`:
 

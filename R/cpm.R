@@ -83,8 +83,8 @@ print.cpm <- function(x, ...) {
     format_threshold_level(x$params$weighting_scale)
   ))
   cat(sprintf(
-    "    Prediction head:  %s\n",
-    x$params$prediction_head
+    "    Outcome model:    %s\n",
+    format_model_type(x$params$model)
   ))
   cat(sprintf(
     "    Streams:          %s\n",

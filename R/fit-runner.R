@@ -44,7 +44,7 @@ run_single_fit <- function(
     edge_screen = edge_screen,
     bias_correct = params$bias_correct,
     network_summary = params$network_summary,
-    prediction_head = params$prediction_head
+    model_spec = object$helpers$model
   )
   pred[include_cases, ] <- predict_model(model, training$conmat)
 
@@ -129,7 +129,7 @@ run_resample_fit <- function(
       edge_screen = fold_screen,
       bias_correct = params$bias_correct,
       network_summary = params$network_summary,
-      prediction_head = params$prediction_head
+      model_spec = object$helpers$model
     )
     assessment <- prepare_assessment_data(
       conmat = conmat,
@@ -185,7 +185,7 @@ new_fit_params <- function(
       network_summary = spec_params$network_summary,
       edge_weighting = spec_params$edge_weighting,
       weighting_scale = spec_params$weighting_scale,
-      prediction_head = spec_params$prediction_head,
+      model = spec_params$model,
       na_action = na_action,
       bias_correct = spec_params$bias_correct
     ),

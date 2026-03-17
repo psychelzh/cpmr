@@ -80,7 +80,7 @@ train_model <- function(
   edge_screen,
   bias_correct,
   network_summary,
-  prediction_head
+  model_spec
 ) {
   center <- NULL
   scale <- NULL
@@ -94,12 +94,12 @@ train_model <- function(
   prediction_types <- prediction_types_for_summary(network_summary)
 
   models <- lapply(prediction_types, function(prediction_type) {
-    fit_prediction_head(
+    fit_prediction_model(
       network_strengths = network_strengths,
       behav = behav,
       network_summary = network_summary,
       prediction_type = prediction_type,
-      prediction_head = prediction_head
+      model_spec = model_spec
     )
   })
   names(models) <- prediction_types
@@ -114,7 +114,7 @@ train_model <- function(
     weighting_scale = edge_screen$weighting_scale,
     edge_thresholds = edge_screen$thresholds,
     network_summary = network_summary,
-    prediction_head = prediction_head,
+    model_spec = model_spec,
     models = models
   )
 }
@@ -133,12 +133,11 @@ predict_model <- function(model, conmat_new) {
     dimnames = list(NULL, prediction_types)
   )
   for (prediction_type in prediction_types) {
-    pred[, prediction_type] <- predict_prediction_head(
-      fitted_head = model$models[[prediction_type]],
+    pred[, prediction_type] <- predict_prediction_model(
+      fitted_model = model$models[[prediction_type]],
       network_strengths = network_strengths,
       network_summary = model$network_summary,
-      prediction_type = prediction_type,
-      prediction_head = model$prediction_head
+      prediction_type = prediction_type
     )
   }
 
@@ -261,57 +260,42 @@ weighted_row_sums_or_zero <- function(conmat, weights) {
   drop(conmat[, idx, drop = FALSE] %*% weights[idx])
 }
 
-fit_prediction_head <- function(
+fit_prediction_model <- function(
   network_strengths,
   behav,
   network_summary,
   prediction_type,
-  prediction_head
+  model_spec
 ) {
   features <- prediction_features(
     network_strengths = network_strengths,
     network_summary = network_summary,
     prediction_type = prediction_type
   )
-  design <- prediction_design_matrix(
+
+  fit_outcome_model(
     features = features,
-    prediction_head = prediction_head
+    behav = behav,
+    model_spec = model_spec
   )
-
-  if (
-    identical(prediction_head, "linear_no_intercept") &&
-      all(design == 0)
-  ) {
-    coefficients <- stats::setNames(
-      rep(0, ncol(design)),
-      colnames(design)
-    )
-  } else {
-    coefficients <- stats::.lm.fit(design, behav)$coefficients
-    coefficients <- stats::setNames(coefficients, colnames(design))
-  }
-
-  list(coefficients = coefficients)
 }
 
-predict_prediction_head <- function(
-  fitted_head,
+predict_prediction_model <- function(
+  fitted_model,
   network_strengths,
   network_summary,
-  prediction_type,
-  prediction_head
+  prediction_type
 ) {
   features <- prediction_features(
     network_strengths = network_strengths,
     network_summary = network_summary,
     prediction_type = prediction_type
   )
-  design <- prediction_design_matrix(
-    features = features,
-    prediction_head = prediction_head
-  )
 
-  drop(design %*% fitted_head$coefficients)
+  predict_outcome_model(
+    fitted_model = fitted_model,
+    features = features
+  )
 }
 
 prediction_features <- function(
@@ -321,18 +305,9 @@ prediction_features <- function(
 ) {
   switch(
     network_summary,
-    separate = switch(
-      prediction_type,
-      combined = network_strengths[, edge_types, drop = FALSE],
-      positive = network_strengths[, "positive", drop = FALSE],
-      negative = network_strengths[, "negative", drop = FALSE],
-      stop(
-        paste0(
-          "`prediction_type` must be one of ",
-          "\"combined\", \"positive\", or \"negative\" for ",
-          "`network_summary = \"separate\"`."
-        )
-      )
+    separate = separate_prediction_features(
+      network_strengths = network_strengths,
+      prediction_type = prediction_type
     ),
     difference = matrix(
       network_strengths[, "positive"] - network_strengths[, "negative"],
@@ -347,20 +322,63 @@ prediction_features <- function(
   )
 }
 
-prediction_design_matrix <- function(features, prediction_head) {
-  features <- as.matrix(features)
-
-  switch(
-    prediction_head,
-    linear = cbind("(Intercept)" = 1, features),
-    linear_no_intercept = features,
-    stop(
-      paste(
-        "`prediction_head` must be either \"linear\" or",
-        "\"linear_no_intercept\"."
-      )
-    )
+separate_prediction_features <- function(network_strengths, prediction_type) {
+  feature_sets <- list(
+    combined = edge_types,
+    positive = "positive",
+    negative = "negative"
   )
+  columns <- feature_sets[[prediction_type]]
+
+  if (is.null(columns)) {
+    stop(
+      paste0(
+        "`prediction_type` must be one of ",
+        "\"combined\", \"positive\", or \"negative\" for ",
+        "`network_summary = \"separate\"`."
+      ),
+      call. = FALSE
+    )
+  }
+
+  network_strengths[, columns, drop = FALSE]
+}
+
+fit_outcome_model <- function(features, behav, model_spec) {
+  switch(
+    model_spec$type,
+    lm = fit_lm_outcome_model(features, behav),
+    stop("`model` must be a supported CPM outcome model.", call. = FALSE)
+  )
+}
+
+predict_outcome_model <- function(fitted_model, features) {
+  switch(
+    fitted_model$type,
+    lm = predict_lm_outcome_model(fitted_model, features),
+    stop("`model` must be a supported CPM outcome model.", call. = FALSE)
+  )
+}
+
+lm_design_matrix <- function(features) {
+  features <- as.matrix(features)
+  cbind("(Intercept)" = 1, features)
+}
+
+fit_lm_outcome_model <- function(features, behav) {
+  design <- lm_design_matrix(features)
+  coefficients <- stats::.lm.fit(design, behav)$coefficients
+
+  list(
+    type = "lm",
+    feature_names = colnames(features),
+    coefficients = stats::setNames(coefficients, colnames(design))
+  )
+}
+
+predict_lm_outcome_model <- function(fitted_model, features) {
+  design <- lm_design_matrix(features)
+  drop(design %*% fitted_model$coefficients)
 }
 
 prediction_types_for_summary <- function(network_summary) {

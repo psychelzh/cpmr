@@ -28,6 +28,7 @@ reference:
       - cpm_screen
       - cpm_threshold
       - cpm_weighting
+      - cpm_model_lm
 
   - title: Result Objects
     desc: S3 result classes returned by single-fit and resampling workflows.

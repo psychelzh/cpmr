@@ -9,6 +9,7 @@
 #'
 #' - [cpm_screen()] bundles the edge association measure with its threshold rule.
 #' - [cpm_weighting()] bundles the edge-weighting method with its scale.
+#' - [cpm_model_lm()] defines the outcome model fitted on CPM-derived features.
 #'
 #' @param screen Edge-screening helper created by [cpm_screen()].
 #' @param network_summary How selected positive and negative edges are turned
@@ -16,9 +17,8 @@
 #'   and negative sums and fits a combined stream from both. `"difference"`
 #'   uses a single `positive - negative` strength.
 #' @param weighting Edge-weighting helper created by [cpm_weighting()].
-#' @param prediction_head Final prediction head fit on the summarized network
-#'   features. `"linear"` fits the usual intercept-inclusive linear model.
-#'   `"linear_no_intercept"` fits a no-intercept linear model.
+#' @param model Outcome-model helper created by [cpm_model_lm()]. This stage
+#'   maps CPM-derived subject-level features to the behavioral outcome.
 #' @param bias_correct Logical value indicating if the connectome data should be
 #'   bias-corrected. If `TRUE`, the connectome data will be centered and scaled
 #'   to have unit variance based on the training data before model fitting and
@@ -32,7 +32,7 @@
 #'   ),
 #'   network_summary = "difference",
 #'   weighting = cpm_weighting("sigmoid", scale = 0.03),
-#'   prediction_head = "linear_no_intercept"
+#'   model = cpm_model_lm()
 #' )
 #' spec
 #'
@@ -48,11 +48,10 @@ cpm_spec <- function(
   screen = cpm_screen(),
   network_summary = c("separate", "difference"),
   weighting = cpm_weighting(),
-  prediction_head = c("linear", "linear_no_intercept"),
+  model = cpm_model_lm(),
   bias_correct = TRUE
 ) {
   network_summary <- match.arg(network_summary)
-  prediction_head <- match.arg(prediction_head)
   validate_cpm_component(
     screen,
     class = "cpm_screen_spec",
@@ -62,6 +61,11 @@ cpm_spec <- function(
     weighting,
     class = "cpm_weighting_spec",
     message = "`weighting` must be created by `cpm_weighting()`."
+  )
+  validate_cpm_component(
+    model,
+    class = "cpm_model_spec",
+    message = "`model` must be created by `cpm_model_lm()`."
   )
   validate_bias_correct(bias_correct)
 
@@ -73,12 +77,13 @@ cpm_spec <- function(
       network_summary = network_summary,
       edge_weighting = weighting$method,
       weighting_scale = weighting$scale,
-      prediction_head = prediction_head,
+      model = model$type,
       bias_correct = bias_correct
     ),
     helpers = list(
       screen = screen,
-      weighting = weighting
+      weighting = weighting,
+      model = model
     )
   )
 }
@@ -183,6 +188,22 @@ cpm_weighting <- function(
   )
 }
 
+#' Define the outcome model used after CPM feature construction
+#'
+#' Build the second-stage model used after CPM has converted selected edges
+#' into subject-level predictors. `cpm_model_lm()` fits an intercept-inclusive
+#' linear regression with the CPM-derived features for each prediction stream.
+#'
+#' @examples
+#' cpm_model_lm()
+#' @export
+cpm_model_lm <- function() {
+  structure(
+    list(type = "lm"),
+    class = "cpm_model_spec"
+  )
+}
+
 #' @export
 print.cpm_spec <- function(x, ...) {
   cat("CPM specification:\n")
@@ -213,8 +234,8 @@ print.cpm_spec <- function(x, ...) {
     format_threshold_level(x$params$weighting_scale)
   ))
   cat(sprintf(
-    "    Prediction head:  %s\n",
-    x$params$prediction_head
+    "    Outcome model:    %s\n",
+    format_model_type(x$params$model)
   ))
   cat(sprintf(
     "    Streams:          %s\n",
@@ -360,7 +381,16 @@ cpm_helpers_from_params <- function(params) {
     weighting = cpm_weighting(
       method = params$edge_weighting,
       scale = params$weighting_scale
-    )
+    ),
+    model = cpm_model_from_params(params$model)
+  )
+}
+
+cpm_model_from_params <- function(model_type) {
+  switch(
+    model_type,
+    lm = cpm_model_lm(),
+    stop("`model` must be a supported CPM outcome model.", call. = FALSE)
   )
 }
 
@@ -411,4 +441,12 @@ validate_bias_correct <- function(bias_correct) {
   }
 
   invisible(bias_correct)
+}
+
+format_model_type <- function(model_type) {
+  switch(
+    model_type,
+    lm = "linear regression",
+    model_type
+  )
 }

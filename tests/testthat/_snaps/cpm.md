@@ -62,7 +62,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "prediction_head", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -104,7 +104,7 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["linear"]
+          "value": ["lm"]
         },
         {
           "type": "character",
@@ -137,7 +137,7 @@
           Network summary:  separate
           Edge weighting:   binary
           Weighting scale:  0.05
-          Prediction head:  linear
+          Outcome model:    linear regression
           Streams:          combined, positive, negative
           Bias correction:  yes
 
@@ -205,7 +205,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "prediction_head", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -247,7 +247,7 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["linear"]
+          "value": ["lm"]
         },
         {
           "type": "character",
@@ -281,7 +281,7 @@
           Network summary:  separate
           Edge weighting:   binary
           Weighting scale:  0.05
-          Prediction head:  linear
+          Outcome model:    linear regression
           Streams:          combined, positive, negative
           Bias correction:  yes
 
@@ -349,7 +349,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "prediction_head", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -391,7 +391,7 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["linear"]
+          "value": ["lm"]
         },
         {
           "type": "character",
@@ -425,7 +425,7 @@
           Network summary:  separate
           Edge weighting:   binary
           Weighting scale:  0.05
-          Prediction head:  linear
+          Outcome model:    linear regression
           Streams:          combined, positive, negative
           Bias correction:  yes
 
@@ -447,7 +447,7 @@
           Network summary:  separate
           Edge weighting:   binary
           Weighting scale:  0.05
-          Prediction head:  linear
+          Outcome model:    linear regression
           Streams:          combined, positive, negative
           Bias correction:  yes
 
@@ -470,7 +470,7 @@
           Network summary:  separate
           Edge weighting:   binary
           Weighting scale:  0.05
-          Prediction head:  linear
+          Outcome model:    linear regression
           Streams:          combined, positive, negative
           Bias correction:  yes
 
@@ -493,7 +493,7 @@
           Network summary:  separate
           Edge weighting:   binary
           Weighting scale:  0.05
-          Prediction head:  linear
+          Outcome model:    linear regression
           Streams:          combined, positive, negative
           Bias correction:  yes
 

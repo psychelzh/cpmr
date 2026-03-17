@@ -28,7 +28,7 @@ test_that("Support pass arguments of `summary()`", {
       "network_summary",
       "edge_weighting",
       "weighting_scale",
-      "prediction_head",
+      "model",
       "na_action",
       "bias_correct",
       "positive",

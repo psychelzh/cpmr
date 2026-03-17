@@ -131,7 +131,7 @@ test_that("train_model and predict_model compose correctly", {
     edge_screen = edge_screen,
     bias_correct = TRUE,
     network_summary = "separate",
-    prediction_head = "linear"
+    model_spec = cpm_model_lm()
   )
 
   expect_equal(dim(edge_screen$mask), c(p, 2))
@@ -142,7 +142,7 @@ test_that("train_model and predict_model compose correctly", {
   )
 })
 
-test_that("difference summary with no-intercept head produces a single stream", {
+test_that("difference summary with lm model produces a single stream", {
   withr::local_seed(2)
   conmat <- matrix(rnorm(40), nrow = 8, ncol = 5)
   behav <- rnorm(8)
@@ -168,7 +168,7 @@ test_that("difference summary with no-intercept head produces a single stream", 
     edge_screen = edge_screen,
     bias_correct = FALSE,
     network_summary = "difference",
-    prediction_head = "linear_no_intercept"
+    model_spec = cpm_model_lm()
   )
   pred <- predict_model(model, conmat)
 
@@ -256,16 +256,28 @@ test_that("prediction helpers validate unsupported modes", {
     fixed = TRUE
   )
   expect_error(
-    prediction_design_matrix(
+    fit_outcome_model(
       features = matrix(1:2, ncol = 1),
-      prediction_head = "bogus"
+      behav = 1:2,
+      model_spec = structure(list(type = "bogus"), class = "cpm_model_spec")
     ),
-    "`prediction_head` must be either \"linear\" or \"linear_no_intercept\".",
+    "`model` must be a supported CPM outcome model.",
     fixed = TRUE
   )
   expect_error(
     prediction_types_for_summary("bogus"),
     "`network_summary` must be either \"separate\" or \"difference\".",
+    fixed = TRUE
+  )
+})
+
+test_that("predict_outcome_model validates unsupported model types", {
+  expect_error(
+    predict_outcome_model(
+      fitted_model = list(type = "bogus"),
+      features = matrix(1:2, ncol = 1)
+    ),
+    "`model` must be a supported CPM outcome model.",
     fixed = TRUE
   )
 })

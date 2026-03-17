@@ -10,7 +10,7 @@ cpm_spec(
   screen = cpm_screen(),
   network_summary = c("separate", "difference"),
   weighting = cpm_weighting(),
-  prediction_head = c("linear", "linear_no_intercept"),
+  model = cpm_model_lm(),
   bias_correct = TRUE
 )
 
@@ -45,9 +45,8 @@ uses a single \code{positive - negative} strength.}
 
 \item{weighting}{Edge-weighting helper created by \code{\link[=cpm_weighting]{cpm_weighting()}}.}
 
-\item{prediction_head}{Final prediction head fit on the summarized network
-features. \code{"linear"} fits the usual intercept-inclusive linear model.
-\code{"linear_no_intercept"} fits a no-intercept linear model.}
+\item{model}{Outcome-model helper created by \code{\link[=cpm_model_lm]{cpm_model_lm()}}. This stage
+maps CPM-derived subject-level features to the behavioral outcome.}
 
 \item{bias_correct}{Logical value indicating if the connectome data should be
 bias-corrected. If \code{TRUE}, the connectome data will be centered and scaled
@@ -108,6 +107,7 @@ grouping naturally paired settings into helpers:
 \itemize{
 \item \code{\link[=cpm_screen]{cpm_screen()}} bundles the edge association measure with its threshold rule.
 \item \code{\link[=cpm_weighting]{cpm_weighting()}} bundles the edge-weighting method with its scale.
+\item \code{\link[=cpm_model_lm]{cpm_model_lm()}} defines the outcome model fitted on CPM-derived features.
 }
 }
 \examples{
@@ -118,7 +118,7 @@ spec <- cpm_spec(
   ),
   network_summary = "difference",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
-  prediction_head = "linear_no_intercept"
+  model = cpm_model_lm()
 )
 spec
 

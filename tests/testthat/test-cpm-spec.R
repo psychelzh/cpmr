@@ -6,20 +6,21 @@ test_that("cpm_spec stores model parameters", {
     ),
     network_summary = "difference",
     weighting = cpm_weighting("sigmoid", scale = 0.02),
-    prediction_head = "linear_no_intercept",
+    model = cpm_model_lm(),
     bias_correct = FALSE
   )
 
   expect_s3_class(spec, "cpm_spec")
   expect_s3_class(spec$helpers$screen, "cpm_screen_spec")
   expect_s3_class(spec$helpers$weighting, "cpm_weighting_spec")
+  expect_s3_class(spec$helpers$model, "cpm_model_spec")
   expect_identical(spec$params$association_method, "spearman")
   expect_identical(spec$params$threshold_method, "sparsity")
   expect_identical(spec$params$threshold_level, 0.05)
   expect_identical(spec$params$network_summary, "difference")
   expect_identical(spec$params$edge_weighting, "sigmoid")
   expect_identical(spec$params$weighting_scale, 0.02)
-  expect_identical(spec$params$prediction_head, "linear_no_intercept")
+  expect_identical(spec$params$model, "lm")
   expect_false(spec$params$bias_correct)
 })
 
@@ -31,7 +32,7 @@ test_that("new_cpm_spec builds cpm_spec objects", {
     network_summary = "separate",
     edge_weighting = "binary",
     weighting_scale = 0.05,
-    prediction_head = "linear",
+    model = "lm",
     bias_correct = TRUE
   )
 
@@ -41,6 +42,7 @@ test_that("new_cpm_spec builds cpm_spec objects", {
   expect_identical(spec$params, params)
   expect_s3_class(spec$helpers$screen, "cpm_screen_spec")
   expect_s3_class(spec$helpers$weighting, "cpm_weighting_spec")
+  expect_s3_class(spec$helpers$model, "cpm_model_spec")
 })
 
 test_that("fit.cpm_spec returns a cpm object with correct call", {
@@ -91,8 +93,24 @@ test_that("helper constructors validate scalar parameter values", {
     fixed = TRUE
   )
   expect_error(
+    cpm_spec(model = list()),
+    "`model` must be created by `cpm_model_lm()`.",
+    fixed = TRUE
+  )
+  expect_error(
     cpm_screen(threshold = list()),
     "`threshold` must be created by `cpm_threshold()`.",
+    fixed = TRUE
+  )
+})
+
+test_that("model helper constructors round-trip through params", {
+  expect_s3_class(cpm_model_lm(), "cpm_model_spec")
+  expect_identical(cpm_model_lm()$type, "lm")
+  expect_identical(format_model_type("custom"), "custom")
+  expect_error(
+    cpm_model_from_params("bogus"),
+    "`model` must be a supported CPM outcome model.",
     fixed = TRUE
   )
 })
@@ -108,6 +126,7 @@ test_that("print.cpm_spec shows model options", {
   expect_output(print(spec), "Screening")
   expect_output(print(spec), "Threshold method:\\s+sparsity")
   expect_output(print(spec), "Edge weighting")
+  expect_output(print(spec), "Outcome model:\\s+linear regression")
   expect_output(print(spec), "Streams")
   expect_output(print(spec), "Bias correction")
 })
@@ -116,10 +135,7 @@ test_that("difference summary yields a single prediction stream", {
   withr::local_seed(101)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(
-    network_summary = "difference",
-    prediction_head = "linear_no_intercept"
-  )
+  spec <- cpm_spec(network_summary = "difference")
 
   result <- fit(spec, conmat = conmat, behav = behav)
 
@@ -447,7 +463,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     ),
     bias_correct = spec$params$bias_correct,
     network_summary = spec$params$network_summary,
-    prediction_head = spec$params$prediction_head
+    model_spec = spec$helpers$model
   )
   resampled <- fit_resamples(
     spec,
