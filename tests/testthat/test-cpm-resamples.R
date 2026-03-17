@@ -26,7 +26,7 @@ test_that("new_cpm_resamples builds resampling objects", {
     row = 1:2,
     fold = 1L,
     real = c(1, 2),
-    combined = c(1.1, 1.9),
+    joint = c(1.1, 1.9),
     positive = c(1.0, 2.0),
     negative = c(0.9, 2.1)
   )
@@ -54,7 +54,7 @@ test_that("print.cpm_resamples uses human-readable edge storage labels", {
         row = 1:6,
         fold = c(1L, 1L, 1L, 2L, 2L, 2L),
         real = c(1, 2, 3, 4, 5, 6),
-        combined = c(1, 2, 3, 6, 5, 4),
+        joint = c(1, 2, 3, 6, 5, 4),
         positive = c(1, 2, 3, 4, 5, 6),
         negative = c(3, 2, 1, 6, 5, 4)
       ),
@@ -83,7 +83,7 @@ test_that("resample_metrics returns pooled and foldwise metrics", {
   )
   expect_named(pooled, c("metric", "prediction", "estimate"))
   expect_true(all(c("rmse", "mae", "correlation") %in% pooled$metric))
-  expect_true(all(c("combined", "positive", "negative") %in% pooled$prediction))
+  expect_true(all(c("joint", "positive", "negative") %in% pooled$prediction))
 })
 
 test_that("resample_metrics supports metric filtering and spearman correlation", {

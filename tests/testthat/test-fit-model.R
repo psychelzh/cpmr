@@ -130,19 +130,19 @@ test_that("train_model and predict_model compose correctly", {
     behav = training$behav,
     edge_screen = edge_screen,
     bias_correct = TRUE,
-    network_summary = "separate",
+    feature_space = "separate",
     model_spec = cpm_model_lm()
   )
 
   expect_equal(dim(edge_screen$mask), c(p, 2))
-  expect_named(model$models, c("combined", "positive", "negative"))
+  expect_named(model$models, c("joint", "positive", "negative"))
   expect_equal(
     dim(predict_model(model, assessment$conmat)),
     c(length(rows_test), 3)
   )
 })
 
-test_that("difference summary with lm model produces a single stream", {
+test_that("net feature space with lm model produces a single stream", {
   withr::local_seed(2)
   conmat <- matrix(rnorm(40), nrow = 8, ncol = 5)
   behav <- rnorm(8)
@@ -167,13 +167,13 @@ test_that("difference summary with lm model produces a single stream", {
     behav = behav,
     edge_screen = edge_screen,
     bias_correct = FALSE,
-    network_summary = "difference",
+    feature_space = "net",
     model_spec = cpm_model_lm()
   )
   pred <- predict_model(model, conmat)
 
-  expect_named(model$models, "difference")
-  expect_identical(colnames(pred), "difference")
+  expect_named(model$models, "net")
+  expect_identical(colnames(pred), "net")
   expect_equal(dim(pred), c(nrow(conmat), 1))
 })
 
@@ -236,23 +236,23 @@ test_that("prediction helpers validate unsupported modes", {
   expect_error(
     prediction_features(
       network_strengths = network_strengths,
-      network_summary = "separate",
+      feature_space = "separate",
       prediction_type = "bogus"
     ),
     paste0(
       "`prediction_type` must be one of ",
-      "\"combined\", \"positive\", or \"negative\" for ",
-      "`network_summary = \"separate\"`."
+      "\"joint\", \"positive\", or \"negative\" for ",
+      "`feature_space = \"separate\"`."
     ),
     fixed = TRUE
   )
   expect_error(
     prediction_features(
       network_strengths = network_strengths,
-      network_summary = "bogus",
-      prediction_type = "combined"
+      feature_space = "bogus",
+      prediction_type = "joint"
     ),
-    "`network_summary` must be either \"separate\" or \"difference\".",
+    "`feature_space` must be either \"separate\" or \"net\".",
     fixed = TRUE
   )
   expect_error(
@@ -265,8 +265,8 @@ test_that("prediction helpers validate unsupported modes", {
     fixed = TRUE
   )
   expect_error(
-    prediction_types_for_summary("bogus"),
-    "`network_summary` must be either \"separate\" or \"difference\".",
+    prediction_types_for_feature_space("bogus"),
+    "`feature_space` must be either \"separate\" or \"net\".",
     fixed = TRUE
   )
 })

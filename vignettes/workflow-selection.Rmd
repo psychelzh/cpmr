@@ -51,8 +51,8 @@ head(summary(resample_obj)[["metrics"]])
 If you are new to the helper-based spec, the easiest mental model is:
 
 - `screen = cpm_screen(...)` decides how edges get into the model;
-- `network_summary` decides whether you keep classic positive/negative streams
-  or collapse them into one difference score;
+- `feature_space` decides whether you keep classic positive/negative streams
+  or collapse them into one net score;
 - `weighting = cpm_weighting(...)` decides whether edge contribution is binary
   or smooth;
 - `model = cpm_model_lm()` and `bias_correct` finish the modeling pipeline.

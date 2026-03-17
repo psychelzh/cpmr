@@ -23,9 +23,9 @@ For \code{component = "performance"}:
 and predicted values.}
 
 \item{prediction columns}{One numeric column per configured prediction
-stream. For example, \code{combined}, \code{positive}, and \code{negative} when
-\code{network_summary = "separate"}, or \code{difference} when
-\code{network_summary = "difference"}.}
+stream. For example, \code{joint}, \code{positive}, and \code{negative} when
+\code{feature_space = "separate"}, or \code{net} when
+\code{feature_space = "net"}.}
 
 For \code{component = "edges"}:
 

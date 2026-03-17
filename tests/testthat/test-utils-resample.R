@@ -67,7 +67,7 @@ test_that("compute_pooled_metric_table summarizes pooled predictions", {
     row = 1:4,
     fold = c(1L, 1L, 2L, 2L),
     real = c(1, 2, 3, 4),
-    combined = c(1, 2, 3, 4),
+    joint = c(1, 2, 3, 4),
     positive = c(1, 2, 3, 4),
     negative = c(4, 3, 2, 1)
   )
@@ -79,19 +79,19 @@ test_that("compute_pooled_metric_table summarizes pooled predictions", {
 
   expect_equal(
     metrics$estimate[
-      metrics$metric == "rmse" & metrics$prediction == "combined"
+      metrics$metric == "rmse" & metrics$prediction == "joint"
     ],
     0
   )
   expect_equal(
     metrics$estimate[
-      metrics$metric == "mae" & metrics$prediction == "combined"
+      metrics$metric == "mae" & metrics$prediction == "joint"
     ],
     0
   )
   expect_equal(
     metrics$estimate[
-      metrics$metric == "correlation" & metrics$prediction == "combined"
+      metrics$metric == "correlation" & metrics$prediction == "joint"
     ],
     1
   )
@@ -102,7 +102,7 @@ test_that("compute_pooled_metric_table returns a long metric table", {
     row = 1:4,
     fold = c(1L, 1L, 2L, 2L),
     real = c(1, 2, 3, 4),
-    combined = c(1, 2, 3, 4),
+    joint = c(1, 2, 3, 4),
     positive = c(1, 2, 3, 4),
     negative = c(4, 3, 2, 1)
   )
@@ -116,7 +116,7 @@ test_that("compute_pooled_metric_table returns a long metric table", {
   expect_equal(nrow(metrics), 6)
   expect_true(all(c("rmse", "correlation") %in% metrics$metric))
   expect_true(all(
-    c("combined", "positive", "negative") %in% metrics$prediction
+    c("joint", "positive", "negative") %in% metrics$prediction
   ))
 })
 
@@ -137,7 +137,7 @@ test_that("compute_resample_summary_metrics combines pooled and foldwise summari
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
     real = c(1, 2, 3, 4, 5, 6),
-    combined = c(1, 2, 3, 6, 5, 4),
+    joint = c(1, 2, 3, 6, 5, 4),
     positive = c(1, 2, 3, 4, 5, 6),
     negative = c(3, 2, 1, 6, 5, 4)
   )
@@ -163,7 +163,7 @@ test_that("compute_resample_summary_metrics combines pooled and foldwise summari
     metrics$std_error[
       metrics$level == "foldwise" &
         metrics$metric == "correlation" &
-        metrics$prediction == "combined"
+        metrics$prediction == "joint"
     ],
     safe_std_error(c(1, -1))
   )
@@ -174,7 +174,7 @@ test_that("compute_fold_metric_table returns one row per fold, metric, and strea
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
     real = c(1, 2, 3, 4, 5, 6),
-    combined = c(1, 2, 3, 6, 5, 4),
+    joint = c(1, 2, 3, 6, 5, 4),
     positive = c(1, 2, 3, 4, 5, 6),
     negative = c(3, 2, 1, 6, 5, 4)
   )

@@ -18,7 +18,7 @@
             {
               "type": "character",
               "attributes": {},
-              "value": ["combined", "positive", "negative"]
+              "value": ["joint", "positive", "negative"]
             }
           ]
         }
@@ -62,7 +62,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -134,11 +134,11 @@
           Association:      pearson
           Threshold method: alpha
           Threshold level:  0.01
-          Network summary:  separate
+          Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
-          Streams:          combined, positive, negative
+          Streams:          joint, positive, negative
           Bias correction:  yes
 
 # Alternative threshold method works
@@ -161,7 +161,7 @@
             {
               "type": "character",
               "attributes": {},
-              "value": ["combined", "positive", "negative"]
+              "value": ["joint", "positive", "negative"]
             }
           ]
         }
@@ -205,7 +205,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -278,11 +278,11 @@
           Association:      pearson
           Threshold method: sparsity
           Threshold level:  0.01
-          Network summary:  separate
+          Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
-          Streams:          combined, positive, negative
+          Streams:          joint, positive, negative
           Bias correction:  yes
 
 # Different threshold levels works
@@ -305,7 +305,7 @@
             {
               "type": "character",
               "attributes": {},
-              "value": ["combined", "positive", "negative"]
+              "value": ["joint", "positive", "negative"]
             }
           ]
         }
@@ -349,7 +349,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "network_summary", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
         }
       },
       "value": [
@@ -422,11 +422,11 @@
           Association:      pearson
           Threshold method: alpha
           Threshold level:  0.1
-          Network summary:  separate
+          Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
-          Streams:          combined, positive, negative
+          Streams:          joint, positive, negative
           Bias correction:  yes
 
 # `na_action` argument works
@@ -444,11 +444,11 @@
           Association:      pearson
           Threshold method: alpha
           Threshold level:  0.01
-          Network summary:  separate
+          Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
-          Streams:          combined, positive, negative
+          Streams:          joint, positive, negative
           Bias correction:  yes
 
 ---
@@ -467,11 +467,11 @@
           Association:      pearson
           Threshold method: alpha
           Threshold level:  0.01
-          Network summary:  separate
+          Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
-          Streams:          combined, positive, negative
+          Streams:          joint, positive, negative
           Bias correction:  yes
 
 ---
@@ -490,10 +490,10 @@
           Association:      pearson
           Threshold method: alpha
           Threshold level:  0.01
-          Network summary:  separate
+          Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
-          Streams:          combined, positive, negative
+          Streams:          joint, positive, negative
           Bias correction:  yes
 

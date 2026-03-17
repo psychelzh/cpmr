@@ -5,7 +5,7 @@
     Output
       CPM summary:
         Performance (Pearson):
-          Combined: 0.989
+          Joint: 0.989
           Positive: 0.988
           Negative: 0.934
         Selected edges:

@@ -89,8 +89,8 @@ edge_storage_label <- function(x) {
 }
 
 prediction_labels <- c(
-  combined = "Combined",
-  difference = "Difference",
+  joint = "Joint",
+  net = "Net",
   positive = "Positive",
   negative = "Negative"
 )

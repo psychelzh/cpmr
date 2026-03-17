@@ -79,7 +79,7 @@ train_model <- function(
   behav,
   edge_screen,
   bias_correct,
-  network_summary,
+  feature_space,
   model_spec
 ) {
   center <- NULL
@@ -91,13 +91,13 @@ train_model <- function(
   }
 
   network_strengths <- compute_network_strengths(conmat, edge_screen$weights)
-  prediction_types <- prediction_types_for_summary(network_summary)
+  prediction_types <- prediction_types_for_feature_space(feature_space)
 
   models <- lapply(prediction_types, function(prediction_type) {
     fit_prediction_model(
       network_strengths = network_strengths,
       behav = behav,
-      network_summary = network_summary,
+      feature_space = feature_space,
       prediction_type = prediction_type,
       model_spec = model_spec
     )
@@ -113,7 +113,7 @@ train_model <- function(
     edge_weighting = edge_screen$edge_weighting,
     weighting_scale = edge_screen$weighting_scale,
     edge_thresholds = edge_screen$thresholds,
-    network_summary = network_summary,
+    feature_space = feature_space,
     model_spec = model_spec,
     models = models
   )
@@ -136,7 +136,7 @@ predict_model <- function(model, conmat_new) {
     pred[, prediction_type] <- predict_prediction_model(
       fitted_model = model$models[[prediction_type]],
       network_strengths = network_strengths,
-      network_summary = model$network_summary,
+      feature_space = model$feature_space,
       prediction_type = prediction_type
     )
   }
@@ -263,13 +263,13 @@ weighted_row_sums_or_zero <- function(conmat, weights) {
 fit_prediction_model <- function(
   network_strengths,
   behav,
-  network_summary,
+  feature_space,
   prediction_type,
   model_spec
 ) {
   features <- prediction_features(
     network_strengths = network_strengths,
-    network_summary = network_summary,
+    feature_space = feature_space,
     prediction_type = prediction_type
   )
 
@@ -283,12 +283,12 @@ fit_prediction_model <- function(
 predict_prediction_model <- function(
   fitted_model,
   network_strengths,
-  network_summary,
+  feature_space,
   prediction_type
 ) {
   features <- prediction_features(
     network_strengths = network_strengths,
-    network_summary = network_summary,
+    feature_space = feature_space,
     prediction_type = prediction_type
   )
 
@@ -300,23 +300,23 @@ predict_prediction_model <- function(
 
 prediction_features <- function(
   network_strengths,
-  network_summary,
+  feature_space,
   prediction_type
 ) {
   switch(
-    network_summary,
+    feature_space,
     separate = separate_prediction_features(
       network_strengths = network_strengths,
       prediction_type = prediction_type
     ),
-    difference = matrix(
+    net = matrix(
       network_strengths[, "positive"] - network_strengths[, "negative"],
       ncol = 1,
-      dimnames = list(NULL, "difference")
+      dimnames = list(NULL, "net_strength")
     ),
     stop(
       paste(
-        "`network_summary` must be either \"separate\" or \"difference\"."
+        "`feature_space` must be either \"separate\" or \"net\"."
       )
     )
   )
@@ -324,7 +324,7 @@ prediction_features <- function(
 
 separate_prediction_features <- function(network_strengths, prediction_type) {
   feature_sets <- list(
-    combined = edge_types,
+    joint = edge_types,
     positive = "positive",
     negative = "negative"
   )
@@ -334,8 +334,8 @@ separate_prediction_features <- function(network_strengths, prediction_type) {
     stop(
       paste0(
         "`prediction_type` must be one of ",
-        "\"combined\", \"positive\", or \"negative\" for ",
-        "`network_summary = \"separate\"`."
+        "\"joint\", \"positive\", or \"negative\" for ",
+        "`feature_space = \"separate\"`."
       ),
       call. = FALSE
     )
@@ -381,14 +381,14 @@ predict_lm_outcome_model <- function(fitted_model, features) {
   drop(design %*% fitted_model$coefficients)
 }
 
-prediction_types_for_summary <- function(network_summary) {
+prediction_types_for_feature_space <- function(feature_space) {
   switch(
-    network_summary,
-    separate = c("combined", edge_types),
-    difference = "difference",
+    feature_space,
+    separate = c("joint", edge_types),
+    net = "net",
     stop(
       paste(
-        "`network_summary` must be either \"separate\" or \"difference\"."
+        "`feature_space` must be either \"separate\" or \"net\"."
       )
     )
   )

@@ -25,7 +25,7 @@ test_that("Support pass arguments of `summary()`", {
       "association_method",
       "threshold_method",
       "threshold_level",
-      "network_summary",
+      "feature_space",
       "edge_weighting",
       "weighting_scale",
       "model",

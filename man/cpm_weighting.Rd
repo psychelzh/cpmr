@@ -8,7 +8,7 @@ cpm_weighting(method = c("binary", "sigmoid"), scale = 0.05)
 }
 \arguments{
 \item{method}{How edge-level statistics are converted into weights before
-network summarization. \code{"binary"} uses the hard thresholded edge mask.
+CPM feature construction. \code{"binary"} uses the hard thresholded edge mask.
 \code{"sigmoid"} uses a smooth sigmoid weight centered on the threshold, so
 edges closer to or beyond the cutoff contribute more strongly.}
 
@@ -16,7 +16,7 @@ edges closer to or beyond the cutoff contribute more strongly.}
 Smaller values make the weighting curve sharper around the threshold.}
 }
 \description{
-Build the edge-weighting rule used during network summarization.
+Build the edge-weighting rule used during CPM feature construction.
 }
 \examples{
 cpm_weighting("binary")

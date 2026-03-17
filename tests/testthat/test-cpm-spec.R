@@ -4,7 +4,7 @@ test_that("cpm_spec stores model parameters", {
       association = "spearman",
       threshold = cpm_threshold("sparsity", level = 0.05)
     ),
-    network_summary = "difference",
+    feature_space = "net",
     weighting = cpm_weighting("sigmoid", scale = 0.02),
     model = cpm_model_lm(),
     bias_correct = FALSE
@@ -17,7 +17,7 @@ test_that("cpm_spec stores model parameters", {
   expect_identical(spec$params$association_method, "spearman")
   expect_identical(spec$params$threshold_method, "sparsity")
   expect_identical(spec$params$threshold_level, 0.05)
-  expect_identical(spec$params$network_summary, "difference")
+  expect_identical(spec$params$feature_space, "net")
   expect_identical(spec$params$edge_weighting, "sigmoid")
   expect_identical(spec$params$weighting_scale, 0.02)
   expect_identical(spec$params$model, "lm")
@@ -29,7 +29,7 @@ test_that("new_cpm_spec builds cpm_spec objects", {
     association_method = "pearson",
     threshold_method = "alpha",
     threshold_level = 0.05,
-    network_summary = "separate",
+    feature_space = "separate",
     edge_weighting = "binary",
     weighting_scale = 0.05,
     model = "lm",
@@ -131,16 +131,16 @@ test_that("print.cpm_spec shows model options", {
   expect_output(print(spec), "Bias correction")
 })
 
-test_that("difference summary yields a single prediction stream", {
+test_that("net feature space yields a single prediction stream", {
   withr::local_seed(101)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(network_summary = "difference")
+  spec <- cpm_spec(feature_space = "net")
 
   result <- fit(spec, conmat = conmat, behav = behav)
 
-  expect_named(result$predictions, c("row", "real", "difference"))
-  expect_named(result$model$models, "difference")
+  expect_named(result$predictions, c("row", "real", "net"))
+  expect_named(result$model$models, "net")
 })
 
 test_that("sigmoid edge weighting stores smooth edge weights in the model", {
@@ -178,7 +178,7 @@ test_that("fit_resamples returns predictions and folds", {
   expect_equal(nrow(res$predictions), 10)
   expect_named(
     res$predictions,
-    c("row", "fold", "real", "combined", "positive", "negative")
+    c("row", "fold", "real", "joint", "positive", "negative")
   )
   expect_null(res$edges)
   expect_s3_class(summary(res), "cpm_resamples_summary")
@@ -400,7 +400,7 @@ test_that("fit_resamples handles covariates in assessment pipeline", {
   )
 
   pred <- res$predictions
-  expect_true(isTRUE(all(stats::complete.cases(pred$combined))))
+  expect_true(isTRUE(all(stats::complete.cases(pred$joint))))
   expect_true(isTRUE(res$params$covariates))
   expect_equal(length(res$folds), 6L)
 })
@@ -462,7 +462,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
       weighting_scale = spec$params$weighting_scale
     ),
     bias_correct = spec$params$bias_correct,
-    network_summary = spec$params$network_summary,
+    feature_space = spec$params$feature_space,
     model_spec = spec$helpers$model
   )
   resampled <- fit_resamples(
@@ -484,7 +484,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   expect_equal(single_fit$model$scale, fold_model$scale)
   expect_equal(predict_model(single_fit$model, assessment$conmat), fold_pred)
   expect_equal(
-    as.matrix(collected[rows_test, c("combined", "positive", "negative")]),
+    as.matrix(collected[rows_test, c("joint", "positive", "negative")]),
     fold_pred,
     ignore_attr = TRUE
   )
@@ -519,9 +519,9 @@ test_that("fit_resamples excludes incomplete rows consistently with covariates",
 
   expect_identical(resampled$folds, resamples)
   expect_equal(sort(collected$row[!is.na(collected$fold)]), include_cases)
-  expect_true(isTRUE(all(stats::complete.cases(collected$combined[
+  expect_true(isTRUE(all(stats::complete.cases(collected$joint[
     include_cases
   ]))))
-  expect_true(isTRUE(all(is.na(collected$combined[-include_cases]))))
+  expect_true(isTRUE(all(is.na(collected$joint[-include_cases]))))
   expect_true(isTRUE(all(is.na(collected$fold[-include_cases]))))
 })

@@ -12,10 +12,10 @@
 #' - [cpm_model_lm()] defines the outcome model fitted on CPM-derived features.
 #'
 #' @param screen Edge-screening helper created by [cpm_screen()].
-#' @param network_summary How selected positive and negative edges are turned
+#' @param feature_space How selected positive and negative edges are turned
 #'   into subject-level predictors. `"separate"` keeps the classic CPM positive
-#'   and negative sums and fits a combined stream from both. `"difference"`
-#'   uses a single `positive - negative` strength.
+#'   and negative strengths and fits a joint stream from both. `"net"` uses a
+#'   single `positive - negative` strength.
 #' @param weighting Edge-weighting helper created by [cpm_weighting()].
 #' @param model Outcome-model helper created by [cpm_model_lm()]. This stage
 #'   maps CPM-derived subject-level features to the behavioral outcome.
@@ -30,7 +30,7 @@
 #'     association = "spearman",
 #'     threshold = cpm_threshold("effect_size", level = 0.1)
 #'   ),
-#'   network_summary = "difference",
+#'   feature_space = "net",
 #'   weighting = cpm_weighting("sigmoid", scale = 0.03),
 #'   model = cpm_model_lm()
 #' )
@@ -46,12 +46,12 @@
 #' @export
 cpm_spec <- function(
   screen = cpm_screen(),
-  network_summary = c("separate", "difference"),
+  feature_space = c("separate", "net"),
   weighting = cpm_weighting(),
   model = cpm_model_lm(),
   bias_correct = TRUE
 ) {
-  network_summary <- match.arg(network_summary)
+  feature_space <- match.arg(feature_space)
   validate_cpm_component(
     screen,
     class = "cpm_screen_spec",
@@ -74,7 +74,7 @@ cpm_spec <- function(
       association_method = screen$association,
       threshold_method = screen$threshold$method,
       threshold_level = screen$threshold$level,
-      network_summary = network_summary,
+      feature_space = feature_space,
       edge_weighting = weighting$method,
       weighting_scale = weighting$scale,
       model = model$type,
@@ -159,10 +159,10 @@ cpm_threshold <- function(
 
 #' Define CPM edge-weight settings
 #'
-#' Build the edge-weighting rule used during network summarization.
+#' Build the edge-weighting rule used during CPM feature construction.
 #'
 #' @param method How edge-level statistics are converted into weights before
-#'   network summarization. `"binary"` uses the hard thresholded edge mask.
+#'   CPM feature construction. `"binary"` uses the hard thresholded edge mask.
 #'   `"sigmoid"` uses a smooth sigmoid weight centered on the threshold, so
 #'   edges closer to or beyond the cutoff contribute more strongly.
 #' @param scale Positive scale parameter used when `method = "sigmoid"`.
@@ -222,8 +222,8 @@ print.cpm_spec <- function(x, ...) {
   ))
   cat("  Model:\n")
   cat(sprintf(
-    "    Network summary:  %s\n",
-    x$params$network_summary
+    "    Feature space:    %s\n",
+    x$params$feature_space
   ))
   cat(sprintf(
     "    Edge weighting:   %s\n",
@@ -240,7 +240,7 @@ print.cpm_spec <- function(x, ...) {
   cat(sprintf(
     "    Streams:          %s\n",
     format_prediction_streams(
-      prediction_types_for_summary(x$params$network_summary)
+      prediction_types_for_feature_space(x$params$feature_space)
     )
   ))
   cat(sprintf(

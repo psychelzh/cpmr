@@ -8,7 +8,7 @@
 \usage{
 cpm_spec(
   screen = cpm_screen(),
-  network_summary = c("separate", "difference"),
+  feature_space = c("separate", "net"),
   weighting = cpm_weighting(),
   model = cpm_model_lm(),
   bias_correct = TRUE
@@ -38,10 +38,10 @@ cpm_spec(
 \arguments{
 \item{screen}{Edge-screening helper created by \code{\link[=cpm_screen]{cpm_screen()}}.}
 
-\item{network_summary}{How selected positive and negative edges are turned
+\item{feature_space}{How selected positive and negative edges are turned
 into subject-level predictors. \code{"separate"} keeps the classic CPM positive
-and negative sums and fits a combined stream from both. \code{"difference"}
-uses a single \code{positive - negative} strength.}
+and negative strengths and fits a joint stream from both. \code{"net"} uses a
+single \code{positive - negative} strength.}
 
 \item{weighting}{Edge-weighting helper created by \code{\link[=cpm_weighting]{cpm_weighting()}}.}
 
@@ -116,7 +116,7 @@ spec <- cpm_spec(
     association = "spearman",
     threshold = cpm_threshold("effect_size", level = 0.1)
   ),
-  network_summary = "difference",
+  feature_space = "net",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
   model = cpm_model_lm()
 )

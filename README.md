@@ -62,16 +62,16 @@ fit_obj
 #>     Association:      pearson
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
-#>     Network summary:  separate
+#>     Feature space:    separate
 #>     Edge weighting:   binary
 #>     Weighting scale:  0.05
 #>     Outcome model:    linear regression
-#>     Streams:          combined, positive, negative
+#>     Streams:          joint, positive, negative
 #>     Bias correction:  yes
 summary(fit_obj)
 #> CPM summary:
 #>   Performance (Pearson):
-#>     Combined: 0.676
+#>     Joint: 0.676
 #>     Positive: 0.595
 #>     Negative: 0.387
 #>   Selected edges:
@@ -88,14 +88,14 @@ rich_spec <- cpm_spec(
     association = "spearman",
     threshold = cpm_threshold("effect_size", level = 0.1)
   ),
-  network_summary = "difference",
+  feature_space = "net",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
   model = cpm_model_lm()
 )
 
 fit(rich_spec, conmat = conmat, behav = behav)$predictions |>
   head()
-#>   row        real  difference
+#>   row        real         net
 #> 1   1  0.26499342  0.82985741
 #> 2   2  1.83074748  1.97548933
 #> 3   3 -0.05937826  0.32139217
@@ -119,23 +119,23 @@ summary(resample_obj)
 #>   Number of folds: 5
 #>   Prediction error:
 #>     RMSE:
-#>       Combined: 1.243
+#>       Joint: 1.243
 #>       Positive: 1.205
 #>       Negative: 1.200
 #>     MAE:
-#>       Combined: 0.947
+#>       Joint: 0.947
 #>       Positive: 0.962
 #>       Negative: 0.905
 #>   Pooled correlations (Pearson):
-#>     Combined: -0.104
+#>     Joint: -0.104
 #>     Positive: -0.072
 #>     Negative: -0.074
 #>   Fold-wise correlations (Pearson):
-#>     Combined: -0.057 (SE 0.062)
+#>     Joint: -0.057 (SE 0.062)
 #>     Positive: 0.008 (SE 0.089)
 #>     Negative: -0.036 (SE 0.077)
 head(resample_obj$predictions)
-#>   row fold        real    combined   positive    negative
+#>   row fold        real       joint   positive    negative
 #> 1   1    1  0.26499342 0.492748241 -0.2058990  0.76974455
 #> 2   2    5  1.83074748 0.323127546  0.2918329  0.05747766
 #> 3   3    5 -0.05937826 0.901452079  1.1152311 -0.34018567
@@ -146,10 +146,10 @@ dim(resample_obj$edges)
 #> NULL
 head(resample_metrics(resample_obj))
 #>   fold n_assess metric prediction  estimate
-#> 1    1       20   rmse   combined 1.1115539
+#> 1    1       20   rmse      joint 1.1115539
 #> 2    1       20   rmse   positive 1.1024986
 #> 3    1       20   rmse   negative 1.0753358
-#> 4    2       20   rmse   combined 0.9556034
+#> 4    2       20   rmse      joint 0.9556034
 #> 5    2       20   rmse   positive 0.9872521
 #> 6    2       20   rmse   negative 1.0424502
 ```

@@ -7,7 +7,7 @@ run_single_fit <- function(
   call = NULL
 ) {
   params <- object$params
-  prediction_types <- prediction_types_for_summary(params$network_summary)
+  prediction_types <- prediction_types_for_feature_space(params$feature_space)
   fit_context <- resolve_fit_context(
     conmat = conmat,
     behav = behav,
@@ -43,7 +43,7 @@ run_single_fit <- function(
     behav = training$behav,
     edge_screen = edge_screen,
     bias_correct = params$bias_correct,
-    network_summary = params$network_summary,
+    feature_space = params$feature_space,
     model_spec = object$helpers$model
   )
   pred[include_cases, ] <- predict_model(model, training$conmat)
@@ -78,7 +78,7 @@ run_resample_fit <- function(
   call = NULL
 ) {
   params <- object$params
-  prediction_types <- prediction_types_for_summary(params$network_summary)
+  prediction_types <- prediction_types_for_feature_space(params$feature_space)
   return_edges <- match.arg(return_edges)
   if (is.null(fit_context)) {
     fit_context <- resolve_fit_context(
@@ -128,7 +128,7 @@ run_resample_fit <- function(
       behav = training$behav,
       edge_screen = fold_screen,
       bias_correct = params$bias_correct,
-      network_summary = params$network_summary,
+      feature_space = params$feature_space,
       model_spec = object$helpers$model
     )
     assessment <- prepare_assessment_data(
@@ -182,7 +182,7 @@ new_fit_params <- function(
       association_method = spec_params$association_method,
       threshold_method = spec_params$threshold_method,
       threshold_level = spec_params$threshold_level,
-      network_summary = spec_params$network_summary,
+      feature_space = spec_params$feature_space,
       edge_weighting = spec_params$edge_weighting,
       weighting_scale = spec_params$weighting_scale,
       model = spec_params$model,

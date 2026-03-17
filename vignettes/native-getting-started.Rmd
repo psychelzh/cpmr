@@ -85,7 +85,8 @@ A practical way to read a spec is:
 
 - `screen = cpm_screen(...)`: how candidate edges are associated with the
   outcome and thresholded;
-- `network_summary`: how positive and negative network strengths are combined;
+- `feature_space`: how positive and negative network strengths are exposed to
+  the outcome model;
 - `weighting = cpm_weighting(...)`: whether edges contribute as a hard mask or
   with smooth weights;
 - `model = cpm_model_lm()`: how the summarized network features map to the
@@ -100,7 +101,7 @@ readable_spec <- cpm_spec(
     association = "spearman",
     threshold = cpm_threshold("effect_size", level = 0.1)
   ),
-  network_summary = "difference",
+  feature_space = "net",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
   model = cpm_model_lm()
 )
@@ -111,7 +112,7 @@ readable_spec
 That means:
 
 - rank-based screening with a direct effect-size threshold;
-- one `positive - negative` network feature;
+- one `positive - negative` net feature;
 - smooth edge weights around the fold-local threshold;
 - an explicit linear outcome model on the final network feature.
 
@@ -130,7 +131,7 @@ rich_spec <- cpm_spec(
     association = "spearman",
     threshold = cpm_threshold("effect_size", level = 0.1)
   ),
-  network_summary = "difference",
+  feature_space = "net",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
   model = cpm_model_lm()
 )
@@ -150,16 +151,16 @@ Compared with the default spec, the example above changes four things:
 - screening uses Spearman association instead of Pearson;
 - thresholding uses a direct effect-size cutoff instead of alpha-based
   screening;
-- the network is summarized as one `difference` stream instead of the classic
-  `combined` / `positive` / `negative` trio;
+- the feature space is exposed as one `net` stream instead of the classic
+  `joint` / `positive` / `negative` trio;
 - the second-stage model is made explicit, even though it still uses the
   default linear regression helper.
 
-Prediction columns depend on `network_summary`:
+Prediction columns depend on `feature_space`:
 
-- `network_summary = "separate"` yields `combined`, `positive`, and `negative`
+- `feature_space = "separate"` yields `joint`, `positive`, and `negative`
   streams;
-- `network_summary = "difference"` yields a single `difference` stream.
+- `feature_space = "net"` yields a single `net` stream.
 
 ## Cross-Validated Resampling with `fit_resamples()`
 

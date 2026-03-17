@@ -1,4 +1,4 @@
-prediction_types <- c("combined", "positive", "negative")
+prediction_types <- c("joint", "positive", "negative")
 
 test_that("safe_cor returns NA for degenerate vectors", {
   expect_true(is.na(safe_cor(c(1, 1, 1), c(1, 2, 3))))
@@ -31,7 +31,7 @@ test_that("safe_std_error handles short and valid inputs", {
 test_that("summary metric helpers produce stable long-format summaries", {
   metric_table <- data.frame(
     metric = c("rmse", "rmse", "correlation", "correlation"),
-    prediction = c("combined", "positive", "combined", "positive"),
+    prediction = c("joint", "positive", "joint", "positive"),
     estimate = c(0.1, 0.2, 0.3, 0.4),
     stringsAsFactors = FALSE
   )
@@ -58,7 +58,7 @@ test_that("summary metric helpers summarize and extract metric views", {
     fold = c(1L, 1L, 2L, 2L),
     n_assess = c(3L, 3L, 3L, 3L),
     metric = c("correlation", "correlation", "correlation", "correlation"),
-    prediction = c("combined", "positive", "combined", "positive"),
+    prediction = c("joint", "positive", "joint", "positive"),
     estimate = c(0.2, 0.1, 0.4, 0.3),
     stringsAsFactors = FALSE
   )
@@ -76,7 +76,7 @@ test_that("summary metric helpers summarize and extract metric views", {
       metric = "correlation",
       prediction_types = prediction_types
     ),
-    c(combined = 0.3, positive = 0.2, negative = NA_real_)
+    c(joint = 0.3, positive = 0.2, negative = NA_real_)
   )
   expect_equal(
     summary_metric_method(metrics, level = "foldwise", metric = "correlation"),
@@ -94,7 +94,7 @@ test_that("summary metric helpers summarize and extract metric views", {
       metric = "rmse",
       prediction_types = prediction_types
     ),
-    c(combined = NA_real_, positive = NA_real_, negative = NA_real_)
+    c(joint = NA_real_, positive = NA_real_, negative = NA_real_)
   )
   expect_equal(
     summary_metric_matrix(
@@ -102,7 +102,7 @@ test_that("summary metric helpers summarize and extract metric views", {
         as_summary_metrics(
           data.frame(
             metric = c("rmse", "rmse", "mae", "mae"),
-            prediction = c("combined", "positive", "combined", "positive"),
+            prediction = c("joint", "positive", "joint", "positive"),
             estimate = c(1, 2, 3, 4),
             stringsAsFactors = FALSE
           ),
@@ -115,8 +115,8 @@ test_that("summary metric helpers summarize and extract metric views", {
       prediction_types = prediction_types
     ),
     rbind(
-      rmse = c(combined = 1, positive = 2, negative = NA_real_),
-      mae = c(combined = 3, positive = 4, negative = NA_real_)
+      rmse = c(joint = 1, positive = 2, negative = NA_real_),
+      mae = c(joint = 3, positive = 4, negative = NA_real_)
     )
   )
 })
@@ -125,7 +125,7 @@ test_that("summary_metric_matrix keeps matrix shape for a single prediction stre
   metrics <- as_summary_metrics(
     data.frame(
       metric = c("rmse", "mae"),
-      prediction = c("difference", "difference"),
+      prediction = c("net", "net"),
       estimate = c(1, 2),
       stringsAsFactors = FALSE
     ),
@@ -137,11 +137,11 @@ test_that("summary_metric_matrix keeps matrix shape for a single prediction stre
       metrics,
       level = "pooled",
       metric = c("rmse", "mae"),
-      prediction_types = "difference"
+      prediction_types = "net"
     ),
     rbind(
-      rmse = c(difference = 1),
-      mae = c(difference = 2)
+      rmse = c(net = 1),
+      mae = c(net = 2)
     )
   )
 })

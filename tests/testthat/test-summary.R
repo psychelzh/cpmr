@@ -1,4 +1,4 @@
-prediction_types <- c("combined", "positive", "negative")
+prediction_types <- c("joint", "positive", "negative")
 
 example_resample_summary <- function(
   metrics = rbind(
@@ -67,7 +67,7 @@ test_that("summary.cpm returns NA when fewer than two valid pairs", {
       predictions = data.frame(
         row = 1:3,
         real = c(NA_real_, 2, NA_real_),
-        combined = c(1, 2, 3),
+        joint = c(1, 2, 3),
         positive = c(1, 2, 3),
         negative = c(1, 2, 3)
       ),
@@ -127,7 +127,7 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
     real = c(1, 2, 3, 4, 5, 6),
-    combined = c(1, 2, 3, 6, 5, 4),
+    joint = c(1, 2, 3, 6, 5, 4),
     positive = c(1, 2, 3, 4, 5, 6),
     negative = c(3, 2, 1, 6, 5, 4)
   )
@@ -235,7 +235,7 @@ test_that("summary.cpm_resamples returns NULL edges when resamples did not store
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
         real = c(NA_real_, NA_real_, NA_real_, NA_real_),
-        combined = c(1, 2, 3, 4),
+        joint = c(1, 2, 3, 4),
         positive = c(1, 2, 3, 4),
         negative = c(4, 3, 2, 1)
       ),
@@ -285,13 +285,13 @@ test_that("summary.cpm_resamples keeps default LOO summaries usable", {
   )))
 })
 
-test_that("summary.cpm_resamples supports single-stream difference summaries", {
+test_that("summary.cpm_resamples supports single-stream net summaries", {
   withr::local_seed(321)
   conmat <- matrix(rnorm(120), nrow = 20)
   behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
 
   result <- fit_resamples(
-    cpm_spec(network_summary = "difference"),
+    cpm_spec(feature_space = "net"),
     conmat = conmat,
     behav = behav,
     kfolds = 4
@@ -299,17 +299,17 @@ test_that("summary.cpm_resamples supports single-stream difference summaries", {
   summary_result <- summary(result)
   output <- capture.output(print(summary_result))
 
-  expect_identical(summary_result$params$prediction_types, "difference")
+  expect_identical(summary_result$params$prediction_types, "net")
   expect_equal(
     dim(summary_metric_matrix(
       summary_result$metrics,
       level = "pooled",
       metric = c("rmse", "mae"),
-      prediction_types = "difference"
+      prediction_types = "net"
     )),
     c(2L, 1L)
   )
-  expect_true(any(grepl("Difference:", output, fixed = TRUE)))
+  expect_true(any(grepl("Net:", output, fixed = TRUE)))
 })
 
 test_that("summary.cpm_resamples averages fold-wise edges when all edges are stored", {
@@ -337,7 +337,7 @@ test_that("summary.cpm_resamples averages fold-wise edges when all edges are sto
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
         real = c(1, 2, 3, 4),
-        combined = c(1, 2, 3, 4),
+        joint = c(1, 2, 3, 4),
         positive = c(1, 2, 3, 4),
         negative = c(4, 3, 2, 1)
       ),
@@ -368,13 +368,13 @@ test_that("print.cpm_resamples_summary reports fold count and rates", {
 
   expect_true(any(grepl("Number of folds: 5", output, fixed = TRUE)))
   expect_true(any(grepl("RMSE", output, fixed = TRUE)))
-  expect_true(any(grepl("Combined: 0.400", output, fixed = TRUE)))
+  expect_true(any(grepl("Joint: 0.400", output, fixed = TRUE)))
   expect_true(any(grepl(
     "Pooled correlations (Pearson):",
     output,
     fixed = TRUE
   )))
-  expect_true(any(grepl("Combined: 0.350 (SE 0.050)", output, fixed = TRUE)))
+  expect_true(any(grepl("Joint: 0.350 (SE 0.050)", output, fixed = TRUE)))
   expect_true(any(grepl(
     "Fold-wise correlations (Pearson):",
     output,
@@ -429,7 +429,7 @@ test_that("print.cpm_resamples_summary prints fold-wise block when some streams 
     output,
     fixed = TRUE
   )))
-  expect_true(any(grepl("Combined: 0.350 (SE 0.050)", output, fixed = TRUE)))
+  expect_true(any(grepl("Joint: 0.350 (SE 0.050)", output, fixed = TRUE)))
   expect_true(any(grepl("Positive: NA", output, fixed = TRUE)))
   expect_true(any(grepl("Negative: -0.050", output, fixed = TRUE)))
   expect_false(any(grepl("SE NA", output, fixed = TRUE)))

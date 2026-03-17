@@ -34,11 +34,11 @@ test_that("run_single_fit matches fit() outputs on single data", {
 test_that("init_pred preserves prediction matrix structure", {
   behav <- stats::setNames(rnorm(5), paste0("s", 1:5))
 
-  pred <- init_pred(behav, c("combined", "positive", "negative"))
+  pred <- init_pred(behav, c("joint", "positive", "negative"))
 
   expect_equal(dim(pred), c(5, 3))
   expect_identical(rownames(pred), names(behav))
-  expect_identical(colnames(pred), c("combined", "positive", "negative"))
+  expect_identical(colnames(pred), c("joint", "positive", "negative"))
 })
 
 test_that("init_edges allocates expected structures", {

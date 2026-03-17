@@ -71,8 +71,8 @@ print.cpm <- function(x, ...) {
     format_threshold_level(x$params$threshold_level)
   ))
   cat(sprintf(
-    "    Network summary:  %s\n",
-    x$params$network_summary
+    "    Feature space:    %s\n",
+    x$params$feature_space
   ))
   cat(sprintf(
     "    Edge weighting:   %s\n",
@@ -184,9 +184,9 @@ print.cpm_summary <- function(x, ...) {
 #'   and predicted values.}
 #'
 #'   \item{prediction columns}{One numeric column per configured prediction
-#'   stream. For example, `combined`, `positive`, and `negative` when
-#'   `network_summary = "separate"`, or `difference` when
-#'   `network_summary = "difference"`.}
+#'   stream. For example, `joint`, `positive`, and `negative` when
+#'   `feature_space = "separate"`, or `net` when
+#'   `feature_space = "net"`.}
 #'
 #'   For `component = "edges"`:
 #'
