@@ -12,10 +12,11 @@ coverage](https://codecov.io/gh/psychelzh/cpmr/graph/badge.svg)](https://app.cod
 status](https://www.r-pkg.org/badges/version/cpmr)](https://CRAN.R-project.org/package=cpmr)
 <!-- badges: end -->
 
-The cpmr package is designed for connectome predictive modeling (CPM) in
-R. Its primary workflow is a native, matrix-first API that keeps
-CPM-specific training, resampling, and leakage-safe preprocessing inside
-package-controlled code. This package relies on
+The cpmr package implements connectome predictive modeling (CPM) in R.
+Its primary workflow is native and matrix-first: you pass a
+subject-by-edge matrix together with a behavioral vector, and `cpmr`
+handles CPM-specific training, resampling, and leakage-safe
+preprocessing inside package code. This package relies on
 [Rfast](https://CRAN.R-project.org/package=Rfast) for row-oriented
 calculation.
 
@@ -118,9 +119,14 @@ head(resample_metrics(resample_obj))
 #> 6    2       20   rmse        neg 1.0424502
 ```
 
+`summary(resample_obj)` gives the default aggregate report, with pooled
+out-of-fold error metrics shown first and correlations reported as
+supplementary statistics. Use `resample_metrics(resample_obj)` when you
+want pooled or fold-wise metric tables directly.
+
 ## Choosing a path
 
-`cpmr` now treats the native workflow as the primary package story:
+`cpmr` treats this native workflow as the primary package path:
 
 - use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` for
   native CPM analyses;
@@ -128,7 +134,7 @@ head(resample_metrics(resample_obj))
   reusable parameter object.
 
 Why this matters: CPM often needs leakage-safe fold-local preprocessing
-and can benefit from future fold-level caching or threshold-specific
+and can benefit from future fold-level caching or threshold-aware
 optimization. Those workloads fit native `cpmr` runners better than a
 generic orchestration layer.
 
