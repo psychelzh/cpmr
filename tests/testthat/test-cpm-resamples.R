@@ -1,10 +1,13 @@
-test_that("print.cpm_resamples reports summary fields", {
+example_resample_result <- function(kfolds = 5L) {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec()
 
-  res <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
+  fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = kfolds)
+}
+
+test_that("print.cpm_resamples reports summary fields", {
+  res <- example_resample_result()
 
   expect_output(print(res), "CPM resample results")
   expect_output(print(res), "Prediction error")
@@ -90,10 +93,7 @@ test_that("print.cpm_resamples reports finite pooled errors when available", {
 })
 
 test_that("resample_metrics returns pooled and foldwise metrics", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(120), ncol = 12)
-  behav <- rnorm(10)
-  res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+  res <- example_resample_result()
 
   foldwise <- resample_metrics(res)
   pooled <- resample_metrics(res, level = "pooled")
@@ -108,10 +108,7 @@ test_that("resample_metrics returns pooled and foldwise metrics", {
 })
 
 test_that("resample_metrics supports metric filtering and spearman correlation", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(120), ncol = 12)
-  behav <- rnorm(10)
-  res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+  res <- example_resample_result()
 
   pooled <- resample_metrics(
     res,
@@ -125,10 +122,7 @@ test_that("resample_metrics supports metric filtering and spearman correlation",
 })
 
 test_that("resample_metrics ignores correlation_method when correlation is absent", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(120), ncol = 12)
-  behav <- rnorm(10)
-  res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+  res <- example_resample_result()
 
   metrics <- resample_metrics(
     res,

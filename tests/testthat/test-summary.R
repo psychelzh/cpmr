@@ -1,3 +1,28 @@
+example_resample_summary <- function(
+  errors = rbind(
+    rmse = c(both = 0.8, pos = 0.9, neg = 1.0),
+    mae = c(both = 0.6, pos = 0.7, neg = 0.8)
+  ),
+  pooled_correlation = c(both = 0.4, pos = 0.2, neg = -0.1),
+  foldwise_correlation = rbind(
+    mean = c(both = 0.35, pos = 0.15, neg = -0.05),
+    std_error = c(both = 0.05, pos = 0.02, neg = 0.01)
+  ),
+  edges = NULL,
+  params = list(kfolds = 5L, return_edges = "none")
+) {
+  structure(
+    list(
+      errors = errors,
+      pooled_correlation = pooled_correlation,
+      foldwise_correlation = foldwise_correlation,
+      edges = edges,
+      params = params
+    ),
+    class = "cpm_resamples_summary"
+  )
+}
+
 test_that("Works for basic summary", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(10000), nrow = 10)
@@ -215,25 +240,13 @@ test_that("summary.cpm_resamples averages fold-wise edges when all edges are sto
 })
 
 test_that("print.cpm_resamples_summary reports fold count and rates", {
-  summary_result <- structure(
-    list(
-      errors = rbind(
-        rmse = c(both = 0.8, pos = 0.9, neg = 1.0),
-        mae = c(both = 0.6, pos = 0.7, neg = 0.8)
-      ),
-      pooled_correlation = c(both = 0.4, pos = 0.2, neg = -0.1),
-      foldwise_correlation = rbind(
-        mean = c(both = 0.35, pos = 0.15, neg = -0.05),
-        std_error = c(both = 0.05, pos = 0.02, neg = 0.01)
-      ),
-      edges = matrix(
-        c(0.5, 0.25),
-        ncol = 2,
-        dimnames = list(NULL, c("pos", "neg"))
-      ),
-      params = list(kfolds = 5L, return_edges = "sum")
+  summary_result <- example_resample_summary(
+    edges = matrix(
+      c(0.5, 0.25),
+      ncol = 2,
+      dimnames = list(NULL, c("pos", "neg"))
     ),
-    class = "cpm_resamples_summary"
+    params = list(kfolds = 5L, return_edges = "sum")
   )
 
   output <- capture.output(print(summary_result))
@@ -247,21 +260,11 @@ test_that("print.cpm_resamples_summary reports fold count and rates", {
 })
 
 test_that("print.cpm_resamples_summary omits edge block when edges are not stored", {
-  summary_result <- structure(
-    list(
-      errors = rbind(
-        rmse = c(both = 0.8, pos = 0.9, neg = 1.0),
-        mae = c(both = 0.6, pos = 0.7, neg = 0.8)
-      ),
-      pooled_correlation = c(both = 0.4, pos = 0.2, neg = -0.1),
-      foldwise_correlation = rbind(
-        mean = c(both = 0.4, pos = 0.2, neg = -0.1),
-        std_error = c(both = 0.05, pos = 0.02, neg = 0.01)
-      ),
-      edges = NULL,
-      params = list(kfolds = 5L, return_edges = "none")
-    ),
-    class = "cpm_resamples_summary"
+  summary_result <- example_resample_summary(
+    foldwise_correlation = rbind(
+      mean = c(both = 0.4, pos = 0.2, neg = -0.1),
+      std_error = c(both = 0.05, pos = 0.02, neg = 0.01)
+    )
   )
 
   output <- capture.output(print(summary_result))
@@ -270,21 +273,11 @@ test_that("print.cpm_resamples_summary omits edge block when edges are not store
 })
 
 test_that("print.cpm_resamples_summary notes when fold-wise correlations are undefined", {
-  summary_result <- structure(
-    list(
-      errors = rbind(
-        rmse = c(both = 0.8, pos = 0.9, neg = 1.0),
-        mae = c(both = 0.6, pos = 0.7, neg = 0.8)
-      ),
-      pooled_correlation = c(both = 0.4, pos = 0.2, neg = -0.1),
-      foldwise_correlation = rbind(
-        mean = c(both = NA_real_, pos = NA_real_, neg = NA_real_),
-        std_error = c(both = NA_real_, pos = NA_real_, neg = NA_real_)
-      ),
-      edges = NULL,
-      params = list(kfolds = 5L, return_edges = "none")
-    ),
-    class = "cpm_resamples_summary"
+  summary_result <- example_resample_summary(
+    foldwise_correlation = rbind(
+      mean = c(both = NA_real_, pos = NA_real_, neg = NA_real_),
+      std_error = c(both = NA_real_, pos = NA_real_, neg = NA_real_)
+    )
   )
 
   output <- capture.output(print(summary_result))
@@ -296,21 +289,11 @@ test_that("print.cpm_resamples_summary notes when fold-wise correlations are und
 })
 
 test_that("print.cpm_resamples_summary prints fold-wise block when some streams remain estimable", {
-  summary_result <- structure(
-    list(
-      errors = rbind(
-        rmse = c(both = 0.8, pos = 0.9, neg = 1.0),
-        mae = c(both = 0.6, pos = 0.7, neg = 0.8)
-      ),
-      pooled_correlation = c(both = 0.4, pos = 0.2, neg = -0.1),
-      foldwise_correlation = rbind(
-        mean = c(both = 0.35, pos = NA_real_, neg = -0.05),
-        std_error = c(both = 0.05, pos = NA_real_, neg = 0.01)
-      ),
-      edges = NULL,
-      params = list(kfolds = 5L, return_edges = "none")
-    ),
-    class = "cpm_resamples_summary"
+  summary_result <- example_resample_summary(
+    foldwise_correlation = rbind(
+      mean = c(both = 0.35, pos = NA_real_, neg = -0.05),
+      std_error = c(both = 0.05, pos = NA_real_, neg = 0.01)
+    )
   )
 
   output <- capture.output(print(summary_result))
