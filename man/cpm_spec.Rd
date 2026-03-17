@@ -35,10 +35,10 @@ cpm_spec(
 }
 \arguments{
 \item{thresh_method, thresh_level}{The threshold method and level used in edge
-selection. If method is set to be \code{"alpha"}, the edge selection is based on
-the critical value of correlation coefficient. If method is set to be
-\code{"sparsity"}, the edge selection is based on the quantile of correlation
-coefficient, thus network sparsity is controlled.}
+selection. With \code{"alpha"}, edges are selected by thresholding the absolute
+correlation against a critical value implied by \code{thresh_level}. With
+\code{"sparsity"}, \code{thresh_level} is treated as a proportion and edges are
+selected from the lower and upper tails of the correlation distribution.}
 
 \item{bias_correct}{Logical value indicating if the connectome data should be
 bias-corrected. If \code{TRUE}, the connectome data will be centered and scaled
@@ -48,21 +48,21 @@ prediction. See Rapuano et al. (2020) for more details.}
 \item{object}{A \code{cpm_spec} object.}
 
 \item{conmat}{A matrix of connectome data. Observations in row, edges in
-column (assumed that duplicated edges are removed).}
+column.}
 
-\item{behav}{A numeric vector contains behavior data. Length must equal to
-number of observations in \code{conmat}. Note \code{behav} could also be a row/column
-matrix, which will be converted to a vector using \code{\link[=drop]{drop()}}.}
+\item{behav}{A numeric outcome vector with one value per observation in
+\code{conmat}. Row or column matrices are accepted and converted with \code{\link[=drop]{drop()}}.}
 
 \item{...}{For future extension. Currently ignored.}
 
 \item{covariates}{A matrix of covariates. Observations in row, variables in
-column. If \code{NULL}, no covariates are used. Note if a vector is provided, it
-will be converted to a column matrix.}
+column. If \code{NULL}, no covariates are used. Vectors are converted to
+single-column matrices.}
 
 \item{na_action}{A character string indicating the action when missing values
-are found in \code{behav}. If \code{"fail"}, an error will be thrown. If \code{"exclude"},
-missing values will be excluded from the analysis but kept in the output.}
+are found in the inputs. \code{"fail"} stops immediately when any required value
+is missing. \code{"exclude"} fits on complete cases and keeps the original row
+layout in the returned predictions.}
 
 \item{resamples}{Optional list of assessment indices defining resamples.
 Each element must be an integer vector indexing rows in \code{conmat}. If
@@ -72,23 +72,26 @@ Each element must be an integer vector indexing rows in \code{conmat}. If
 it is set to the number of complete-case observations (LOOCV).}
 
 \item{return_edges}{A character string indicating the return value of the
-selected edges. If \code{"none"}, no edges are returned/stored. If \code{"sum"}, edge
-masks are summed across folds. If \code{"all"}, fold-wise edge arrays are
-stored.}
+selected edges. \code{"none"} skips edge storage, \code{"sum"} stores fold counts for
+each selected edge, and \code{"all"} stores the fold-wise edge masks.}
 }
 \value{
-A \code{cpm_spec} object storing parameters for later fitting.
+\code{cpm_spec()} returns a \code{cpm_spec} object that can be reused across calls to
+\code{\link[=fit]{fit()}} and \code{\link[=fit_resamples]{fit_resamples()}}.
 
-A fitted \code{cpm} object from a single in-sample fit. Single-fit CPM
+\code{fit()} returns a \code{cpm} object from a single in-sample fit. Single-fit CPM
 objects always store the selected edge mask.
 
-A \code{cpm_resamples} object containing observation-level predictions,
-resampling folds, and optional stored edges.
+\code{fit_resamples()} returns a \code{cpm_resamples} object containing
+observation-level predictions, resampling folds, and optional stored edges.
+Call \code{\link[=summary.cpm_resamples]{summary.cpm_resamples()}} for the default aggregate report, or
+\code{\link[=resample_metrics]{resample_metrics()}} when you want pooled or fold-wise metrics in tabular
+form.
 }
 \description{
 Create a lightweight specification object that stores the modeling
 parameters required to fit a connectome-based predictive model later with
-\code{\link[=fit]{fit()}}.
+\code{\link[=fit]{fit()}} or \code{\link[=fit_resamples]{fit_resamples()}}.
 }
 \examples{
 spec <- cpm_spec(thresh_level = 0.01)
@@ -96,4 +99,9 @@ spec
 
 conmat <- matrix(rnorm(100 * 100), nrow = 100)
 behav <- rnorm(100)
+fit_obj <- fit(spec, conmat = conmat, behav = behav)
+summary(fit_obj)
+
+resample_obj <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
+summary(resample_obj)
 }

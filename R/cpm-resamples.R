@@ -1,7 +1,8 @@
 #' cpm_resamples Resampling Object
 #'
 #' A `cpm_resamples` object is returned by [fit_resamples()] and stores
-#' fold-level outputs from resampling.
+#' observation-level predictions together with the resampling structure that
+#' produced them.
 #'
 #' @section Structure:
 #' A `cpm_resamples` object is a list with the following elements:
@@ -55,11 +56,18 @@ print.cpm_resamples <- function(x, ...) {
   invisible(x)
 }
 
-#' Summary of a `cpm_resamples` object
+#' Summarize a `cpm_resamples` object
 #'
 #' @rdname summary.cpm_resamples
 #' @param object An object of class `cpm_resamples`.
 #' @param ... For future extension. Currently ignored.
+#'
+#' @details
+#' `summary.cpm_resamples()` is designed to give a compact default report.
+#' It leads with pooled out-of-fold error metrics (`RMSE` and `MAE`), then
+#' reports pooled and fold-wise correlations as supplementary statistics.
+#' This keeps the default summary usable even when fold-wise correlations are
+#' undefined for some resampling schemes, such as leave-one-out resampling.
 #'
 #' @return A `cpm_resamples_summary` object with the following elements:
 #' \describe{
@@ -72,6 +80,14 @@ print.cpm_resamples <- function(x, ...) {
 #'     not stored.}
 #'   \item{`params`}{A list containing summary-relevant resampling settings.}
 #' }
+#'
+#' @examples
+#' withr::local_seed(123)
+#' conmat <- matrix(rnorm(200), nrow = 20)
+#' behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
+#' res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 4)
+#'
+#' summary(res)
 #' @export
 summary.cpm_resamples <- function(object, ...) {
   structure(
@@ -137,6 +153,13 @@ print.cpm_resamples_summary <- function(x, ...) {
 #' @param correlation_method Correlation method used when `metrics` includes
 #'   `"correlation"`.
 #'
+#' @details
+#' Use `resample_metrics()` when you want resampling metrics in a tabular form
+#' for downstream inspection or plotting. Compared with
+#' [summary.cpm_resamples()], this helper is less opinionated: it can return
+#' pooled metrics across all out-of-fold predictions or the raw fold-wise
+#' metrics used to build aggregate summaries.
+#'
 #' @return A data frame. For `level = "foldwise"`, the returned columns are
 #'   `fold`, `n_assess`, `metric`, `prediction`, and `estimate`. For
 #'   `level = "pooled"`, the returned columns are `metric`, `prediction`, and
@@ -144,12 +167,12 @@ print.cpm_resamples_summary <- function(x, ...) {
 #'
 #' @examples
 #' withr::local_seed(123)
-#' conmat <- matrix(rnorm(100), ncol = 10)
-#' behav <- rnorm(10)
-#' res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+#' conmat <- matrix(rnorm(200), nrow = 20)
+#' behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
+#' res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 4)
 #'
 #' head(resample_metrics(res))
-#' resample_metrics(res, level = "pooled")
+#' resample_metrics(res, level = "pooled", metrics = "correlation")
 #' @export
 resample_metrics <- function(
   x,
