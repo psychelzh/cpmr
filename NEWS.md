@@ -13,9 +13,13 @@
 
 ## Enhancements
 
-* Added `cpm_spec()` as the native interface for `fit()` and `fit_resamples()`.
-* Added `summary.cpm_resamples()` and made single-fit and resample result
-  objects more consistent.
+* Added `cpm_spec()` as the native interface for `fit()` and `fit_resamples()`,
+  and made single-fit and resample result objects more consistent.
+* Added `summary.cpm_resamples()`, which now reports pooled out-of-fold error
+  metrics by default and keeps pooled / fold-wise correlations as supplementary
+  statistics.
+* Added `resample_metrics()` for direct access to pooled or fold-wise metric
+  tables from a `cpm_resamples` object.
 * Added native-first documentation, including a getting-started vignette and
   reorganized pkgdown reference pages.
 
