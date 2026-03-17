@@ -147,7 +147,7 @@ test_that("resample_metrics validates object type", {
       matrix(rnorm(100), ncol = 10),
       rnorm(10)
     ))),
-    "`x` must be a `cpm_resamples` object.",
+    "`resample_metrics()` requires a `cpm_resamples` object.",
     fixed = TRUE
   )
 })

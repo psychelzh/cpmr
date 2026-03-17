@@ -116,8 +116,8 @@ print.cpm_resamples_summary <- function(x, ...) {
   } else {
     cat(
       paste0(
-        "  Fold-wise correlations: unavailable because fold-level ",
-        "correlations were undefined for all prediction streams.\n"
+        "  Fold-wise correlations: unavailable because they were ",
+        "undefined for all prediction streams.\n"
       )
     )
   }
@@ -158,7 +158,7 @@ resample_metrics <- function(
   correlation_method = c("pearson", "spearman")
 ) {
   if (!inherits(x, "cpm_resamples")) {
-    stop("`x` must be a `cpm_resamples` object.")
+    stop("`resample_metrics()` requires a `cpm_resamples` object.")
   }
 
   level <- match.arg(level)
