@@ -59,7 +59,7 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>The cpmr package is designed for connectome predictive modeling (CPM) in R. Its primary workflow is a native, matrix-first API that keeps CPM-specific training, resampling, and leakage-safe preprocessing inside package-controlled code. This package relies on <a href="https://CRAN.R-project.org/package=Rfast" class="external-link">Rfast</a> for row-oriented calculation.</p>
+<p>The cpmr package implements connectome predictive modeling (CPM) in R. Its primary workflow is native and matrix-first: you pass a subject-by-edge matrix together with a behavioral vector, and <code>cpmr</code> handles CPM-specific training, resampling, and leakage-safe preprocessing inside package code. This package relies on <a href="https://CRAN.R-project.org/package=Rfast" class="external-link">Rfast</a> for row-oriented calculation.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -83,16 +83,16 @@
 <span><span class="va">fit_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="fu"><a href="reference/cpm_spec.html">cpm_spec</a></span><span class="op">(</span><span class="op">)</span>, conmat <span class="op">=</span> <span class="va">conmat</span>, behav <span class="op">=</span> <span class="va">behav</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fit_obj</span></span>
-<span><span class="co">#&gt; CPM results:</span></span>
+<span><span class="co">#&gt; CPM fit:</span></span>
 <span><span class="co">#&gt;   Call: fit(object = cpm_spec(), conmat = conmat, behav = behav)</span></span>
 <span><span class="co">#&gt;   Number of observations: 100</span></span>
 <span><span class="co">#&gt;     Complete cases: 100</span></span>
-<span><span class="co">#&gt;   Number of edges: 1000</span></span>
+<span><span class="co">#&gt;   Candidate edges: 1000</span></span>
 <span><span class="co">#&gt;   Parameters:</span></span>
-<span><span class="co">#&gt;     Covariates:       FALSE</span></span>
+<span><span class="co">#&gt;     Covariates:       none</span></span>
 <span><span class="co">#&gt;     Threshold method: alpha</span></span>
 <span><span class="co">#&gt;     Threshold level:  0.01</span></span>
-<span><span class="co">#&gt;     Bias correction:  TRUE</span></span>
+<span><span class="co">#&gt;     Bias correction:  yes</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_obj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CPM summary:</span></span>
 <span><span class="co">#&gt;   Performance (Pearson):</span></span>
@@ -109,7 +109,20 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">resample_obj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CPM resample summary:</span></span>
 <span><span class="co">#&gt;   Number of folds: 5</span></span>
-<span><span class="co">#&gt;   Performance:</span></span>
+<span><span class="co">#&gt;   Prediction error:</span></span>
+<span><span class="co">#&gt;     RMSE:</span></span>
+<span><span class="co">#&gt;       Combined: 1.243</span></span>
+<span><span class="co">#&gt;       Positive: 1.205</span></span>
+<span><span class="co">#&gt;       Negative: 1.200</span></span>
+<span><span class="co">#&gt;     MAE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.947</span></span>
+<span><span class="co">#&gt;       Positive: 0.962</span></span>
+<span><span class="co">#&gt;       Negative: 0.905</span></span>
+<span><span class="co">#&gt;   Pooled correlations (Pearson):</span></span>
+<span><span class="co">#&gt;     Combined: -0.104</span></span>
+<span><span class="co">#&gt;     Positive: -0.072</span></span>
+<span><span class="co">#&gt;     Negative: -0.074</span></span>
+<span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
 <span><span class="co">#&gt;     Combined: -0.057 (SE 0.062)</span></span>
 <span><span class="co">#&gt;     Positive: 0.008 (SE 0.089)</span></span>
 <span><span class="co">#&gt;     Negative: -0.036 (SE 0.077)</span></span>
@@ -122,17 +135,26 @@
 <span><span class="co">#&gt; 5   5    1  0.43790418 0.002067539  0.2977574 -0.37106308</span></span>
 <span><span class="co">#&gt; 6   6    4  1.33744904 0.659172053  0.5130919  0.37428531</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">resample_obj</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span></span>
-<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/resample_metrics.html">resample_metrics</a></span><span class="op">(</span><span class="va">resample_obj</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   fold n_assess metric prediction  estimate</span></span>
+<span><span class="co">#&gt; 1    1       20   rmse       both 1.1115539</span></span>
+<span><span class="co">#&gt; 2    1       20   rmse        pos 1.1024986</span></span>
+<span><span class="co">#&gt; 3    1       20   rmse        neg 1.0753358</span></span>
+<span><span class="co">#&gt; 4    2       20   rmse       both 0.9556034</span></span>
+<span><span class="co">#&gt; 5    2       20   rmse        pos 0.9872521</span></span>
+<span><span class="co">#&gt; 6    2       20   rmse        neg 1.0424502</span></span></code></pre></div>
+<p><code>summary(resample_obj)</code> gives the default aggregate report, with pooled out-of-fold error metrics shown first and correlations reported as supplementary statistics. Use <code>resample_metrics(resample_obj)</code> when you want pooled or fold-wise metric tables directly.</p>
 </div>
 <div class="section level2">
 <h2 id="choosing-a-path">Choosing a path<a class="anchor" aria-label="anchor" href="#choosing-a-path"></a>
 </h2>
-<p><code>cpmr</code> now treats the native workflow as the primary package story:</p>
+<p><code>cpmr</code> treats this native workflow as the primary package path:</p>
 <ul>
 <li>use <code>fit(cpm_spec(), ...)</code> and <code>fit_resamples(cpm_spec(), ...)</code> for native CPM analyses;</li>
 <li>keep the <code><a href="reference/cpm_spec.html">cpm_spec()</a></code> object around when you want an explicit, reusable parameter object.</li>
 </ul>
-<p>Why this matters: CPM often needs leakage-safe fold-local preprocessing and can benefit from future fold-level caching or threshold-specific optimization. Those workloads fit native <code>cpmr</code> runners better than a generic orchestration layer.</p>
+<p>Why this matters: CPM often needs leakage-safe fold-local preprocessing and can benefit from future fold-level caching or threshold-aware optimization. Those workloads fit native <code>cpmr</code> runners better than a generic orchestration layer.</p>
 </div>
 <div class="section level2">
 <h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>

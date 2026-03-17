@@ -24,10 +24,16 @@
   [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
   as the native interface for
   [`fit()`](https://generics.r-lib.org/reference/fit.html) and
-  [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md).
-- Added
-  [`summary.cpm_resamples()`](https://psychelzh.github.io/cpmr/reference/summary.cpm_resamples.md)
+  [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md),
   and made single-fit and resample result objects more consistent.
+- Added
+  [`summary.cpm_resamples()`](https://psychelzh.github.io/cpmr/reference/summary.cpm_resamples.md),
+  which now reports pooled out-of-fold error metrics by default and
+  keeps pooled / fold-wise correlations as supplementary statistics.
+- Added
+  [`resample_metrics()`](https://psychelzh.github.io/cpmr/reference/resample_metrics.md)
+  for direct access to pooled or fold-wise metric tables from a
+  `cpm_resamples` object.
 - Added native-first documentation, including a getting-started vignette
   and reorganized pkgdown reference pages.
 

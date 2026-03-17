@@ -47,10 +47,31 @@ summary(fit_obj)
 summary(resample_obj)
 #> CPM resample summary:
 #>   Number of folds: 5
-#>   Performance:
+#>   Prediction error:
+#>     RMSE:
+#>       Combined: 1.120
+#>       Positive: 1.149
+#>       Negative: 1.137
+#>     MAE:
+#>       Combined: 0.873
+#>       Positive: 0.900
+#>       Negative: 0.914
+#>   Pooled correlations (Pearson):
+#>     Combined: -0.055
+#>     Positive: -0.141
+#>     Negative: -0.031
+#>   Fold-wise correlations (Pearson):
 #>     Combined: -0.041 (SE 0.202)
 #>     Positive: -0.161 (SE 0.160)
 #>     Negative: 0.025 (SE 0.194)
+head(summary(resample_obj)[["metrics"]])
+#>    level metric prediction  estimate std_error method
+#> 1 pooled   rmse       both 1.1203509        NA   <NA>
+#> 2 pooled   rmse        pos 1.1492880        NA   <NA>
+#> 3 pooled   rmse        neg 1.1373148        NA   <NA>
+#> 4 pooled    mae       both 0.8728802        NA   <NA>
+#> 5 pooled    mae        pos 0.9000038        NA   <NA>
+#> 6 pooled    mae        neg 0.9139934        NA   <NA>
 ```
 
 This workflow is the best fit when you care about:
@@ -67,3 +88,12 @@ want to inspect one fitted CPM model on the current data. Use
 [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
 when you want an out-of-sample performance estimate or a custom
 resampling design.
+
+As a rule of thumb:
+
+- use `summary(fit_obj)` or `tidy(fit_obj)` for single-fit summaries;
+- use `summary(resample_obj)` for the default aggregate resampling
+  report;
+- use `summary(resample_obj)[["metrics"]]` or
+  `resample_metrics(resample_obj)` when you need structured metric
+  tables instead of printed output.

@@ -1,9 +1,10 @@
 # cpmr
 
-The cpmr package is designed for connectome predictive modeling (CPM) in
-R. Its primary workflow is a native, matrix-first API that keeps
-CPM-specific training, resampling, and leakage-safe preprocessing inside
-package-controlled code. This package relies on
+The cpmr package implements connectome predictive modeling (CPM) in R.
+Its primary workflow is native and matrix-first: you pass a
+subject-by-edge matrix together with a behavioral vector, and `cpmr`
+handles CPM-specific training, resampling, and leakage-safe
+preprocessing inside package code. This package relies on
 [Rfast](https://CRAN.R-project.org/package=Rfast) for row-oriented
 calculation.
 
@@ -40,16 +41,16 @@ behav <- rnorm(100)
 fit_obj <- fit(cpm_spec(), conmat = conmat, behav = behav)
 
 fit_obj
-#> CPM results:
+#> CPM fit:
 #>   Call: fit(object = cpm_spec(), conmat = conmat, behav = behav)
 #>   Number of observations: 100
 #>     Complete cases: 100
-#>   Number of edges: 1000
+#>   Candidate edges: 1000
 #>   Parameters:
-#>     Covariates:       FALSE
+#>     Covariates:       none
 #>     Threshold method: alpha
 #>     Threshold level:  0.01
-#>     Bias correction:  TRUE
+#>     Bias correction:  yes
 summary(fit_obj)
 #> CPM summary:
 #>   Performance (Pearson):
@@ -71,7 +72,20 @@ resample_obj <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds
 summary(resample_obj)
 #> CPM resample summary:
 #>   Number of folds: 5
-#>   Performance:
+#>   Prediction error:
+#>     RMSE:
+#>       Combined: 1.243
+#>       Positive: 1.205
+#>       Negative: 1.200
+#>     MAE:
+#>       Combined: 0.947
+#>       Positive: 0.962
+#>       Negative: 0.905
+#>   Pooled correlations (Pearson):
+#>     Combined: -0.104
+#>     Positive: -0.072
+#>     Negative: -0.074
+#>   Fold-wise correlations (Pearson):
 #>     Combined: -0.057 (SE 0.062)
 #>     Positive: 0.008 (SE 0.089)
 #>     Negative: -0.036 (SE 0.077)
@@ -85,11 +99,24 @@ head(resample_obj$predictions)
 #> 6   6    4  1.33744904 0.659172053  0.5130919  0.37428531
 dim(resample_obj$edges)
 #> NULL
+head(resample_metrics(resample_obj))
+#>   fold n_assess metric prediction  estimate
+#> 1    1       20   rmse       both 1.1115539
+#> 2    1       20   rmse        pos 1.1024986
+#> 3    1       20   rmse        neg 1.0753358
+#> 4    2       20   rmse       both 0.9556034
+#> 5    2       20   rmse        pos 0.9872521
+#> 6    2       20   rmse        neg 1.0424502
 ```
+
+`summary(resample_obj)` gives the default aggregate report, with pooled
+out-of-fold error metrics shown first and correlations reported as
+supplementary statistics. Use `resample_metrics(resample_obj)` when you
+want pooled or fold-wise metric tables directly.
 
 ## Choosing a path
 
-`cpmr` now treats the native workflow as the primary package story:
+`cpmr` treats this native workflow as the primary package path:
 
 - use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` for
   native CPM analyses;
@@ -98,7 +125,7 @@ dim(resample_obj$edges)
   object around when you want an explicit, reusable parameter object.
 
 Why this matters: CPM often needs leakage-safe fold-local preprocessing
-and can benefit from future fold-level caching or threshold-specific
+and can benefit from future fold-level caching or threshold-aware
 optimization. Those workloads fit native `cpmr` runners better than a
 generic orchestration layer.
 

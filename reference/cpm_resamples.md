@@ -2,7 +2,8 @@
 
 A `cpm_resamples` object is returned by
 [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
-and stores fold-level outputs from resampling.
+and stores observation-level predictions together with the resampling
+structure that produced them.
 
 ## Structure
 

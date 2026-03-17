@@ -123,17 +123,17 @@ want a native single fit with explicit CPM parameters.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fit_obj</span></span>
-<span><span class="co">#&gt; CPM results:</span></span>
+<span><span class="co">#&gt; CPM fit:</span></span>
 <span><span class="co">#&gt;   Call: fit(object = cpm_spec(thresh_method = "alpha", thresh_level = 0.05), </span></span>
 <span><span class="co">#&gt;     conmat = conmat, behav = behav, covariates = covariates)</span></span>
 <span><span class="co">#&gt;   Number of observations: 80</span></span>
 <span><span class="co">#&gt;     Complete cases: 80</span></span>
-<span><span class="co">#&gt;   Number of edges: 200</span></span>
+<span><span class="co">#&gt;   Candidate edges: 200</span></span>
 <span><span class="co">#&gt;   Parameters:</span></span>
-<span><span class="co">#&gt;     Covariates:       TRUE</span></span>
+<span><span class="co">#&gt;     Covariates:       included</span></span>
 <span><span class="co">#&gt;     Threshold method: alpha</span></span>
 <span><span class="co">#&gt;     Threshold level:  0.05</span></span>
-<span><span class="co">#&gt;     Bias correction:  TRUE</span></span>
+<span><span class="co">#&gt;     Bias correction:  yes</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_obj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CPM summary:</span></span>
 <span><span class="co">#&gt;   Performance (Pearson):</span></span>
@@ -165,20 +165,31 @@ object for an out-of-sample estimate of predictive performance.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">resample_obj</span></span>
-<span><span class="co">#&gt; CPM resample results:</span></span>
+<span><span class="co">#&gt; CPM resamples:</span></span>
 <span><span class="co">#&gt;   Call: fit_resamples(object = cpm_spec(), conmat = conmat, behav = behav, </span></span>
 <span><span class="co">#&gt;     covariates = covariates, kfolds = 5)</span></span>
 <span><span class="co">#&gt;   Number of folds: 5</span></span>
 <span><span class="co">#&gt;   Number of observations: 80</span></span>
-<span><span class="co">#&gt;   Edge storage: none</span></span>
-<span><span class="co">#&gt;   Mean correlations:</span></span>
-<span><span class="co">#&gt;     Combined: -0.075</span></span>
-<span><span class="co">#&gt;     Positive: 0.029</span></span>
-<span><span class="co">#&gt;     Negative: -0.181</span></span>
+<span><span class="co">#&gt;     Complete cases: 80</span></span>
+<span><span class="co">#&gt;   Edge storage: not stored</span></span>
+<span><span class="co">#&gt;   Use summary() for aggregate metrics.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">resample_obj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CPM resample summary:</span></span>
 <span><span class="co">#&gt;   Number of folds: 5</span></span>
-<span><span class="co">#&gt;   Performance:</span></span>
+<span><span class="co">#&gt;   Prediction error:</span></span>
+<span><span class="co">#&gt;     RMSE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.708</span></span>
+<span><span class="co">#&gt;       Positive: 0.645</span></span>
+<span><span class="co">#&gt;       Negative: 0.704</span></span>
+<span><span class="co">#&gt;     MAE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.574</span></span>
+<span><span class="co">#&gt;       Positive: 0.516</span></span>
+<span><span class="co">#&gt;       Negative: 0.559</span></span>
+<span><span class="co">#&gt;   Pooled correlations (Pearson):</span></span>
+<span><span class="co">#&gt;     Combined: -0.093</span></span>
+<span><span class="co">#&gt;     Positive: 0.059</span></span>
+<span><span class="co">#&gt;     Negative: -0.185</span></span>
+<span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
 <span><span class="co">#&gt;     Combined: -0.075 (SE 0.046)</span></span>
 <span><span class="co">#&gt;     Positive: 0.029 (SE 0.054)</span></span>
 <span><span class="co">#&gt;     Negative: -0.181 (SE 0.099)</span></span></code></pre></div>
@@ -189,18 +200,42 @@ selection, and model training inside each resample fold.</p>
 <h2 id="inspect-predictions-and-edges">Inspect Predictions and Edges<a class="anchor" aria-label="anchor" href="#inspect-predictions-and-edges"></a>
 </h2>
 <p>Native resampling results always keep raw observation-level
-predictions on the object, while <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> derives
-fold-level performance when you need an aggregate view.</p>
+predictions on the object, while <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> gives an
+aggregate out-of-fold report with error metrics as the default summary
+and correlations as supplementary output.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">predictions</span> <span class="op">&lt;-</span> <span class="va">resample_obj</span><span class="op">$</span><span class="va">predictions</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">resample_obj</span><span class="op">)</span></span>
+<span><span class="va">resample_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">resample_obj</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">resample_summary</span></span>
 <span><span class="co">#&gt; CPM resample summary:</span></span>
 <span><span class="co">#&gt;   Number of folds: 5</span></span>
-<span><span class="co">#&gt;   Performance:</span></span>
+<span><span class="co">#&gt;   Prediction error:</span></span>
+<span><span class="co">#&gt;     RMSE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.708</span></span>
+<span><span class="co">#&gt;       Positive: 0.645</span></span>
+<span><span class="co">#&gt;       Negative: 0.704</span></span>
+<span><span class="co">#&gt;     MAE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.574</span></span>
+<span><span class="co">#&gt;       Positive: 0.516</span></span>
+<span><span class="co">#&gt;       Negative: 0.559</span></span>
+<span><span class="co">#&gt;   Pooled correlations (Pearson):</span></span>
+<span><span class="co">#&gt;     Combined: -0.093</span></span>
+<span><span class="co">#&gt;     Positive: 0.059</span></span>
+<span><span class="co">#&gt;     Negative: -0.185</span></span>
+<span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
 <span><span class="co">#&gt;     Combined: -0.075 (SE 0.046)</span></span>
 <span><span class="co">#&gt;     Positive: 0.029 (SE 0.054)</span></span>
 <span><span class="co">#&gt;     Negative: -0.181 (SE 0.099)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">resample_summary</span><span class="op">[[</span><span class="st">"metrics"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    level metric prediction  estimate std_error method</span></span>
+<span><span class="co">#&gt; 1 pooled   rmse       both 0.7081353        NA   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2 pooled   rmse        pos 0.6448140        NA   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3 pooled   rmse        neg 0.7036247        NA   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4 pooled    mae       both 0.5743804        NA   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5 pooled    mae        pos 0.5162523        NA   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6 pooled    mae        neg 0.5592357        NA   &lt;NA&gt;</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">predictions</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   row fold       real         both          pos           neg</span></span>
 <span><span class="co">#&gt; 1   1    5 -0.6339456  0.342534590  0.342534590  1.994932e-17</span></span>
@@ -208,7 +243,28 @@ fold-level performance when you need an aggregate view.</p>
 <span><span class="co">#&gt; 3   3    1  0.2898583 -0.032769603  0.073529511 -1.070810e-01</span></span>
 <span><span class="co">#&gt; 4   4    3  0.7870086 -0.001288122 -0.001288122  2.428613e-17</span></span>
 <span><span class="co">#&gt; 5   5    5  0.1169538 -0.023682986 -0.023682986  1.994932e-17</span></span>
-<span><span class="co">#&gt; 6   6    3  0.7875511  0.255961736  0.255961736  2.428613e-17</span></span></code></pre></div>
+<span><span class="co">#&gt; 6   6    3  0.7875511  0.255961736  0.255961736  2.428613e-17</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/resample_metrics.html">resample_metrics</a></span><span class="op">(</span><span class="va">resample_obj</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   fold n_assess metric prediction  estimate</span></span>
+<span><span class="co">#&gt; 1    1       16   rmse       both 0.6175234</span></span>
+<span><span class="co">#&gt; 2    1       16   rmse        pos 0.5564055</span></span>
+<span><span class="co">#&gt; 3    1       16   rmse        neg 0.5860971</span></span>
+<span><span class="co">#&gt; 4    2       16   rmse       both 0.8263091</span></span>
+<span><span class="co">#&gt; 5    2       16   rmse        pos 0.6408348</span></span>
+<span><span class="co">#&gt; 6    2       16   rmse        neg 0.8491404</span></span></code></pre></div>
+<p>These three outputs have slightly different jobs:</p>
+<ul>
+<li>
+<code>summary(resample_obj)</code> prints the default aggregate
+report;</li>
+<li>
+<code>summary(resample_obj)[["metrics"]]</code> exposes the compact
+summary-level metric table stored on the summary object;</li>
+<li>
+<code>resample_metrics(resample_obj)</code> returns the raw pooled
+or fold-wise metric tables for further filtering, plotting, or
+export.</li>
+</ul>
 <p>By default, <code><a href="../reference/fit_resamples.html">fit_resamples()</a></code> uses
 <code>return_edges = "none"</code> and skips edge storage. This keeps
 the resampling object light when you only need predictive
@@ -259,7 +315,20 @@ truly needed.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">custom_obj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CPM resample summary:</span></span>
 <span><span class="co">#&gt;   Number of folds: 4</span></span>
-<span><span class="co">#&gt;   Performance:</span></span>
+<span><span class="co">#&gt;   Prediction error:</span></span>
+<span><span class="co">#&gt;     RMSE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.936</span></span>
+<span><span class="co">#&gt;       Positive: 0.905</span></span>
+<span><span class="co">#&gt;       Negative: 0.944</span></span>
+<span><span class="co">#&gt;     MAE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.679</span></span>
+<span><span class="co">#&gt;       Positive: 0.642</span></span>
+<span><span class="co">#&gt;       Negative: 0.736</span></span>
+<span><span class="co">#&gt;   Pooled correlations (Pearson):</span></span>
+<span><span class="co">#&gt;     Combined: 0.142</span></span>
+<span><span class="co">#&gt;     Positive: 0.173</span></span>
+<span><span class="co">#&gt;     Negative: -0.008</span></span>
+<span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
 <span><span class="co">#&gt;     Combined: 0.158 (SE 0.121)</span></span>
 <span><span class="co">#&gt;     Positive: 0.247 (SE 0.129)</span></span>
 <span><span class="co">#&gt;     Negative: 0.026 (SE 0.113)</span></span></code></pre></div>

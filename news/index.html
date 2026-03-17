@@ -50,8 +50,9 @@
 </ul></div>
 <div class="section level3">
 <h3 id="enhancements-development-version">Enhancements<a class="anchor" aria-label="anchor" href="#enhancements-development-version"></a></h3>
-<ul><li>Added <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> as the native interface for <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> and <code><a href="../reference/fit_resamples.html">fit_resamples()</a></code>.</li>
-<li>Added <code><a href="../reference/summary.cpm_resamples.html">summary.cpm_resamples()</a></code> and made single-fit and resample result objects more consistent.</li>
+<ul><li>Added <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> as the native interface for <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> and <code><a href="../reference/fit_resamples.html">fit_resamples()</a></code>, and made single-fit and resample result objects more consistent.</li>
+<li>Added <code><a href="../reference/summary.cpm_resamples.html">summary.cpm_resamples()</a></code>, which now reports pooled out-of-fold error metrics by default and keeps pooled / fold-wise correlations as supplementary statistics.</li>
+<li>Added <code><a href="../reference/resample_metrics.html">resample_metrics()</a></code> for direct access to pooled or fold-wise metric tables from a <code>cpm_resamples</code> object.</li>
 <li>Added native-first documentation, including a getting-started vignette and reorganized pkgdown reference pages.</li>
 </ul></div>
 <div class="section level3">

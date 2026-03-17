@@ -112,10 +112,23 @@ selection) inside CV as well.</li>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CPM resample summary:</span></span>
 <span><span class="co">#&gt;   Number of folds: 5</span></span>
-<span><span class="co">#&gt;   Performance:</span></span>
+<span><span class="co">#&gt;   Prediction error:</span></span>
+<span><span class="co">#&gt;     RMSE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.514</span></span>
+<span><span class="co">#&gt;       Positive: 0.510</span></span>
+<span><span class="co">#&gt;       Negative: 0.529</span></span>
+<span><span class="co">#&gt;     MAE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.405</span></span>
+<span><span class="co">#&gt;       Positive: 0.408</span></span>
+<span><span class="co">#&gt;       Negative: 0.387</span></span>
+<span><span class="co">#&gt;   Pooled correlations (Pearson):</span></span>
+<span><span class="co">#&gt;     Combined: 0.259</span></span>
+<span><span class="co">#&gt;     Positive: 0.279</span></span>
+<span><span class="co">#&gt;     Negative: -0.104</span></span>
+<span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
 <span><span class="co">#&gt;     Combined: 0.277 (SE 0.132)</span></span>
 <span><span class="co">#&gt;     Positive: 0.303 (SE 0.129)</span></span>
-<span><span class="co">#&gt;     Negative: -0.270 (SE NA)</span></span></code></pre></div>
+<span><span class="co">#&gt;     Negative: -0.270</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="native-api">Native API<a class="anchor" aria-label="anchor" href="#native-api"></a>
@@ -142,7 +155,20 @@ selection) inside CV as well.</li>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">resamples_fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CPM resample summary:</span></span>
 <span><span class="co">#&gt;   Number of folds: 5</span></span>
-<span><span class="co">#&gt;   Performance:</span></span>
+<span><span class="co">#&gt;   Prediction error:</span></span>
+<span><span class="co">#&gt;     RMSE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.514</span></span>
+<span><span class="co">#&gt;       Positive: 0.511</span></span>
+<span><span class="co">#&gt;       Negative: 0.539</span></span>
+<span><span class="co">#&gt;     MAE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.404</span></span>
+<span><span class="co">#&gt;       Positive: 0.406</span></span>
+<span><span class="co">#&gt;       Negative: 0.393</span></span>
+<span><span class="co">#&gt;   Pooled correlations (Pearson):</span></span>
+<span><span class="co">#&gt;     Combined: 0.254</span></span>
+<span><span class="co">#&gt;     Positive: 0.272</span></span>
+<span><span class="co">#&gt;     Negative: -0.080</span></span>
+<span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
 <span><span class="co">#&gt;     Combined: 0.214 (SE 0.120)</span></span>
 <span><span class="co">#&gt;     Positive: 0.235 (SE 0.120)</span></span>
 <span><span class="co">#&gt;     Negative: -0.115 (SE 0.080)</span></span>

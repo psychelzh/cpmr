@@ -114,10 +114,31 @@ across single-fit and resampling calls.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">resample_obj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CPM resample summary:</span></span>
 <span><span class="co">#&gt;   Number of folds: 5</span></span>
-<span><span class="co">#&gt;   Performance:</span></span>
+<span><span class="co">#&gt;   Prediction error:</span></span>
+<span><span class="co">#&gt;     RMSE:</span></span>
+<span><span class="co">#&gt;       Combined: 1.120</span></span>
+<span><span class="co">#&gt;       Positive: 1.149</span></span>
+<span><span class="co">#&gt;       Negative: 1.137</span></span>
+<span><span class="co">#&gt;     MAE:</span></span>
+<span><span class="co">#&gt;       Combined: 0.873</span></span>
+<span><span class="co">#&gt;       Positive: 0.900</span></span>
+<span><span class="co">#&gt;       Negative: 0.914</span></span>
+<span><span class="co">#&gt;   Pooled correlations (Pearson):</span></span>
+<span><span class="co">#&gt;     Combined: -0.055</span></span>
+<span><span class="co">#&gt;     Positive: -0.141</span></span>
+<span><span class="co">#&gt;     Negative: -0.031</span></span>
+<span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
 <span><span class="co">#&gt;     Combined: -0.041 (SE 0.202)</span></span>
 <span><span class="co">#&gt;     Positive: -0.161 (SE 0.160)</span></span>
-<span><span class="co">#&gt;     Negative: 0.025 (SE 0.194)</span></span></code></pre></div>
+<span><span class="co">#&gt;     Negative: 0.025 (SE 0.194)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">resample_obj</span><span class="op">)</span><span class="op">[[</span><span class="st">"metrics"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    level metric prediction  estimate std_error method</span></span>
+<span><span class="co">#&gt; 1 pooled   rmse       both 1.1203509        NA   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2 pooled   rmse        pos 1.1492880        NA   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3 pooled   rmse        neg 1.1373148        NA   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4 pooled    mae       both 0.8728802        NA   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5 pooled    mae        pos 0.9000038        NA   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6 pooled    mae        neg 0.9139934        NA   &lt;NA&gt;</span></span></code></pre></div>
 <p>This workflow is the best fit when you care about:</p>
 <ul>
 <li>large edge spaces;</li>
@@ -133,6 +154,16 @@ reuse.</li>
 <p>Use <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> when you want to inspect one fitted CPM model
 on the current data. Use <code><a href="../reference/fit_resamples.html">fit_resamples()</a></code> when you want an
 out-of-sample performance estimate or a custom resampling design.</p>
+<p>As a rule of thumb:</p>
+<ul>
+<li>use <code>summary(fit_obj)</code> or <code>tidy(fit_obj)</code> for
+single-fit summaries;</li>
+<li>use <code>summary(resample_obj)</code> for the default aggregate
+resampling report;</li>
+<li>use <code>summary(resample_obj)[["metrics"]]</code> or
+<code>resample_metrics(resample_obj)</code> when you need structured
+metric tables instead of printed output.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

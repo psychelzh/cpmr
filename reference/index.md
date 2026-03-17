@@ -24,6 +24,11 @@ S3 result classes returned by single-fit and resampling workflows.
 
 Summary and tidying helpers for fitted results.
 
+- [`resample_metrics()`](https://psychelzh.github.io/cpmr/reference/resample_metrics.md)
+  :
+
+  Extract resampling metrics from a `cpm_resamples` object
+
 - [`summary(`*`<cpm>`*`)`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)
   [`print(`*`<cpm_summary>`*`)`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)
   : Summary of a cpm object.
@@ -32,7 +37,7 @@ Summary and tidying helpers for fitted results.
   [`print(`*`<cpm_resamples_summary>`*`)`](https://psychelzh.github.io/cpmr/reference/summary.cpm_resamples.md)
   :
 
-  Summary of a `cpm_resamples` object
+  Summarize a `cpm_resamples` object
 
 - [`tidy(`*`<cpm>`*`)`](https://psychelzh.github.io/cpmr/reference/tidy.cpm.md)
   :

@@ -34,13 +34,13 @@ print(x, ...)
 
 ## Value
 
-A list of class `cpm_summary` containing two elements:
+A list of class `cpm_summary` containing:
 
-- performance:
+- metrics:
 
-  A matrix of prediction performance, including the correlation between
-  the real and predicted values for both edges, positive edges only, and
-  negative edges only.
+  A data frame with columns `level`, `metric`, `prediction`, `estimate`,
+  `std_error`, and `method`. Single-fit CPM summaries store correlation
+  metrics at `level = "single"`.
 
 - edges:
 

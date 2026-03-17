@@ -43,10 +43,23 @@ fit <- fit_resamples(
 summary(fit)
 #> CPM resample summary:
 #>   Number of folds: 5
-#>   Performance:
+#>   Prediction error:
+#>     RMSE:
+#>       Combined: 0.514
+#>       Positive: 0.510
+#>       Negative: 0.529
+#>     MAE:
+#>       Combined: 0.405
+#>       Positive: 0.408
+#>       Negative: 0.387
+#>   Pooled correlations (Pearson):
+#>     Combined: 0.259
+#>     Positive: 0.279
+#>     Negative: -0.104
+#>   Fold-wise correlations (Pearson):
 #>     Combined: 0.277 (SE 0.132)
 #>     Positive: 0.303 (SE 0.129)
-#>     Negative: -0.270 (SE NA)
+#>     Negative: -0.270
 ```
 
 ## Native API
@@ -73,7 +86,20 @@ resamples_fit <- fit_resamples(
 summary(resamples_fit)
 #> CPM resample summary:
 #>   Number of folds: 5
-#>   Performance:
+#>   Prediction error:
+#>     RMSE:
+#>       Combined: 0.514
+#>       Positive: 0.511
+#>       Negative: 0.539
+#>     MAE:
+#>       Combined: 0.404
+#>       Positive: 0.406
+#>       Negative: 0.393
+#>   Pooled correlations (Pearson):
+#>     Combined: 0.254
+#>     Positive: 0.272
+#>     Negative: -0.080
+#>   Fold-wise correlations (Pearson):
 #>     Combined: 0.214 (SE 0.120)
 #>     Positive: 0.235 (SE 0.120)
 #>     Negative: -0.115 (SE 0.080)

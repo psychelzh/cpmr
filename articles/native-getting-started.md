@@ -53,17 +53,17 @@ fit_obj <- fit(
 )
 
 fit_obj
-#> CPM results:
+#> CPM fit:
 #>   Call: fit(object = cpm_spec(thresh_method = "alpha", thresh_level = 0.05), 
 #>     conmat = conmat, behav = behav, covariates = covariates)
 #>   Number of observations: 80
 #>     Complete cases: 80
-#>   Number of edges: 200
+#>   Candidate edges: 200
 #>   Parameters:
-#>     Covariates:       TRUE
+#>     Covariates:       included
 #>     Threshold method: alpha
 #>     Threshold level:  0.05
-#>     Bias correction:  TRUE
+#>     Bias correction:  yes
 summary(fit_obj)
 #> CPM summary:
 #>   Performance (Pearson):
@@ -102,20 +102,31 @@ resample_obj <- fit_resamples(
 )
 
 resample_obj
-#> CPM resample results:
+#> CPM resamples:
 #>   Call: fit_resamples(object = cpm_spec(), conmat = conmat, behav = behav, 
 #>     covariates = covariates, kfolds = 5)
 #>   Number of folds: 5
 #>   Number of observations: 80
-#>   Edge storage: none
-#>   Mean correlations:
-#>     Combined: -0.075
-#>     Positive: 0.029
-#>     Negative: -0.181
+#>     Complete cases: 80
+#>   Edge storage: not stored
+#>   Use summary() for aggregate metrics.
 summary(resample_obj)
 #> CPM resample summary:
 #>   Number of folds: 5
-#>   Performance:
+#>   Prediction error:
+#>     RMSE:
+#>       Combined: 0.708
+#>       Positive: 0.645
+#>       Negative: 0.704
+#>     MAE:
+#>       Combined: 0.574
+#>       Positive: 0.516
+#>       Negative: 0.559
+#>   Pooled correlations (Pearson):
+#>     Combined: -0.093
+#>     Positive: 0.059
+#>     Negative: -0.185
+#>   Fold-wise correlations (Pearson):
 #>     Combined: -0.075 (SE 0.046)
 #>     Positive: 0.029 (SE 0.054)
 #>     Negative: -0.181 (SE 0.099)
@@ -128,18 +139,42 @@ selection, and model training inside each resample fold.
 
 Native resampling results always keep raw observation-level predictions
 on the object, while [`summary()`](https://rdrr.io/r/base/summary.html)
-derives fold-level performance when you need an aggregate view.
+gives an aggregate out-of-fold report with error metrics as the default
+summary and correlations as supplementary output.
 
 ``` r
 predictions <- resample_obj$predictions
 
-summary(resample_obj)
+resample_summary <- summary(resample_obj)
+
+resample_summary
 #> CPM resample summary:
 #>   Number of folds: 5
-#>   Performance:
+#>   Prediction error:
+#>     RMSE:
+#>       Combined: 0.708
+#>       Positive: 0.645
+#>       Negative: 0.704
+#>     MAE:
+#>       Combined: 0.574
+#>       Positive: 0.516
+#>       Negative: 0.559
+#>   Pooled correlations (Pearson):
+#>     Combined: -0.093
+#>     Positive: 0.059
+#>     Negative: -0.185
+#>   Fold-wise correlations (Pearson):
 #>     Combined: -0.075 (SE 0.046)
 #>     Positive: 0.029 (SE 0.054)
 #>     Negative: -0.181 (SE 0.099)
+head(resample_summary[["metrics"]])
+#>    level metric prediction  estimate std_error method
+#> 1 pooled   rmse       both 0.7081353        NA   <NA>
+#> 2 pooled   rmse        pos 0.6448140        NA   <NA>
+#> 3 pooled   rmse        neg 0.7036247        NA   <NA>
+#> 4 pooled    mae       both 0.5743804        NA   <NA>
+#> 5 pooled    mae        pos 0.5162523        NA   <NA>
+#> 6 pooled    mae        neg 0.5592357        NA   <NA>
 head(predictions)
 #>   row fold       real         both          pos           neg
 #> 1   1    5 -0.6339456  0.342534590  0.342534590  1.994932e-17
@@ -148,7 +183,23 @@ head(predictions)
 #> 4   4    3  0.7870086 -0.001288122 -0.001288122  2.428613e-17
 #> 5   5    5  0.1169538 -0.023682986 -0.023682986  1.994932e-17
 #> 6   6    3  0.7875511  0.255961736  0.255961736  2.428613e-17
+head(resample_metrics(resample_obj))
+#>   fold n_assess metric prediction  estimate
+#> 1    1       16   rmse       both 0.6175234
+#> 2    1       16   rmse        pos 0.5564055
+#> 3    1       16   rmse        neg 0.5860971
+#> 4    2       16   rmse       both 0.8263091
+#> 5    2       16   rmse        pos 0.6408348
+#> 6    2       16   rmse        neg 0.8491404
 ```
+
+These three outputs have slightly different jobs:
+
+- `summary(resample_obj)` prints the default aggregate report;
+- `summary(resample_obj)[["metrics"]]` exposes the compact summary-level
+  metric table stored on the summary object;
+- `resample_metrics(resample_obj)` returns the raw pooled or fold-wise
+  metric tables for further filtering, plotting, or export.
 
 By default,
 [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md)
@@ -202,7 +253,20 @@ custom_obj <- fit_resamples(
 summary(custom_obj)
 #> CPM resample summary:
 #>   Number of folds: 4
-#>   Performance:
+#>   Prediction error:
+#>     RMSE:
+#>       Combined: 0.936
+#>       Positive: 0.905
+#>       Negative: 0.944
+#>     MAE:
+#>       Combined: 0.679
+#>       Positive: 0.642
+#>       Negative: 0.736
+#>   Pooled correlations (Pearson):
+#>     Combined: 0.142
+#>     Positive: 0.173
+#>     Negative: -0.008
+#>   Fold-wise correlations (Pearson):
 #>     Combined: 0.158 (SE 0.121)
 #>     Positive: 0.247 (SE 0.129)
 #>     Negative: 0.026 (SE 0.113)

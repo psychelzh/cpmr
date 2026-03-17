@@ -78,11 +78,11 @@ correlation between the real and predicted values.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list of class <code>cpm_summary</code> containing two elements:</p>
-<dl><dt>performance</dt>
-<dd><p>A matrix of prediction performance, including the
-correlation between the real and predicted values for both edges,
-positive edges only, and negative edges only.</p></dd>
+    <p>A list of class <code>cpm_summary</code> containing:</p>
+<dl><dt>metrics</dt>
+<dd><p>A data frame with columns <code>level</code>, <code>metric</code>, <code>prediction</code>,
+<code>estimate</code>, <code>std_error</code>, and <code>method</code>. Single-fit CPM summaries store
+correlation metrics at <code>level = "single"</code>.</p></dd>
 
 
 <dt>edges</dt>
