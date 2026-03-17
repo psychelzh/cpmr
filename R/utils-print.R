@@ -74,6 +74,10 @@ format_covariates <- function(x) {
   ifelse(is.na(x), "NA", ifelse(isTRUE(x), "included", "none"))
 }
 
+format_method_name <- function(x) {
+  ifelse(is.na(x), "NA", sub("^(.)", "\\U\\1", x, perl = TRUE))
+}
+
 edge_storage_labels <- c(
   none = "not stored",
   sum = "summed across folds",
