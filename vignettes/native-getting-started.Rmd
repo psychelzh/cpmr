@@ -1,8 +1,8 @@
 ---
-title: "Native Getting Started with cpmr"
+title: "Get Started with the Native CPM Workflow"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Native Getting Started with cpmr}
+  %\VignetteIndexEntry{Get Started with the Native CPM Workflow}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,6 +23,7 @@ This vignette walks through:
 
 - how to shape CPM inputs;
 - how to fit a single native CPM model;
+- how to read the helper-based `cpm_spec()` API;
 - how to run leakage-safe resampling;
 - how to inspect predictions and selected edges;
 - how custom resamples and missing-data handling work.
@@ -75,10 +76,53 @@ For a single fit, `fit()` stores a `p x 2` edge-selection mask with `positive`
 and `negative` columns by default. This is useful for inspecting the selected
 network, but the performance reported by `summary()` is still in-sample.
 
+## Build a Readable `cpm_spec()`
+
+The current `cpm_spec()` API tries to keep the big modeling decisions visible
+without forcing every setting into one long flat argument list.
+
+A practical way to read a spec is:
+
+- `screen = cpm_screen(...)`: how candidate edges are associated with the
+  outcome and thresholded;
+- `network_summary`: how positive and negative network strengths are combined;
+- `weighting = cpm_weighting(...)`: whether edges contribute as a hard mask or
+  with smooth weights;
+- `prediction_head`: how the summarized network features map to the final
+  prediction;
+- `bias_correct`: whether fold-local centering and scaling are applied.
+
+For example, this spec reads almost like a short sentence:
+
+```{r}
+readable_spec <- cpm_spec(
+  screen = cpm_screen(
+    association = "spearman",
+    threshold = cpm_threshold("effect_size", level = 0.1)
+  ),
+  network_summary = "difference",
+  weighting = cpm_weighting("sigmoid", scale = 0.03),
+  prediction_head = "linear_no_intercept"
+)
+
+readable_spec
+```
+
+That means:
+
+- rank-based screening with a direct effect-size threshold;
+- one `positive - negative` network feature;
+- smooth edge weights around the fold-local threshold;
+- a no-intercept linear head on the final network feature.
+
 ## Customize the CPM Strategy
 
 `cpm_spec()` keeps the main CPM choices visible while using helpers for the
 parts that naturally come in pairs, such as screening and edge weighting.
+In practice, most customization starts with just two questions:
+
+- do you want a different edge-screening rule?
+- do you want a different way to summarize or weight the network?
 
 ```{r}
 rich_spec <- cpm_spec(
@@ -100,6 +144,15 @@ rich_fit <- fit(
 
 head(rich_fit$predictions)
 ```
+
+Compared with the default spec, the example above changes four things:
+
+- screening uses Spearman association instead of Pearson;
+- thresholding uses a direct effect-size cutoff instead of alpha-based
+  screening;
+- the network is summarized as one `difference` stream instead of the classic
+  `combined` / `positive` / `negative` trio;
+- the final head is fit without an intercept.
 
 Prediction columns depend on `network_summary`:
 
@@ -179,6 +232,13 @@ present and their `fold` value is `NA`.
 When `return_edges = "sum"`, `cpmr` stores fold-summed edge counts for each
 edge. If memory matters, keep the default `return_edges = "none"` or use
 `return_edges = "all"` only when fold-wise edge arrays are truly needed.
+
+As a rule of thumb:
+
+- start with `return_edges = "none"` when you only care about prediction;
+- use `return_edges = "sum"` when you want stable fold-aggregated edge
+  selection rates;
+- use `return_edges = "all"` only when you really need fold-level edge masks.
 
 ## Custom Resamples
 

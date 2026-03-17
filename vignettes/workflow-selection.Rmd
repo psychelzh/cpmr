@@ -1,8 +1,8 @@
 ---
-title: "Choosing a Workflow in cpmr"
+title: "Choose and Reuse a CPM Specification"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Choosing a Workflow in cpmr}
+  %\VignetteIndexEntry{Choose and Reuse a CPM Specification}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -47,6 +47,18 @@ summary(fit_obj)
 summary(resample_obj)
 head(summary(resample_obj)[["metrics"]])
 ```
+
+If you are new to the helper-based spec, the easiest mental model is:
+
+- `screen = cpm_screen(...)` decides how edges get into the model;
+- `network_summary` decides whether you keep classic positive/negative streams
+  or collapse them into one difference score;
+- `weighting = cpm_weighting(...)` decides whether edge contribution is binary
+  or smooth;
+- `prediction_head` and `bias_correct` finish the modeling pipeline.
+
+That means you can usually start from `cpm_spec()` and only open up the part
+you actually want to change, rather than rewriting the whole spec every time.
 
 This workflow is the best fit when you care about:
 
