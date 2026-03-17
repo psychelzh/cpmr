@@ -21,4 +21,3 @@ test_that("prediction labels use full names", {
   expect_identical(prediction_label("positive"), "Positive")
   expect_identical(prediction_label("negative"), "Negative")
 })
-

@@ -53,7 +53,10 @@ print.cpm_resamples <- function(x, ...) {
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
   cat(sprintf(
     "    Complete cases: %d\n",
-    sum(stats::complete.cases(x$predictions[, prediction_columns(x$predictions), drop = FALSE]))
+    sum(stats::complete.cases(x$predictions[,
+      prediction_columns(x$predictions),
+      drop = FALSE
+    ]))
   ))
   cat(sprintf(
     "  Edge storage: %s\n",

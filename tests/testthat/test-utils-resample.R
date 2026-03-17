@@ -78,11 +78,15 @@ test_that("compute_pooled_metric_table summarizes pooled predictions", {
   )
 
   expect_equal(
-    metrics$estimate[metrics$metric == "rmse" & metrics$prediction == "combined"],
+    metrics$estimate[
+      metrics$metric == "rmse" & metrics$prediction == "combined"
+    ],
     0
   )
   expect_equal(
-    metrics$estimate[metrics$metric == "mae" & metrics$prediction == "combined"],
+    metrics$estimate[
+      metrics$metric == "mae" & metrics$prediction == "combined"
+    ],
     0
   )
   expect_equal(
@@ -111,7 +115,9 @@ test_that("compute_pooled_metric_table returns a long metric table", {
   expect_named(metrics, c("metric", "prediction", "estimate"))
   expect_equal(nrow(metrics), 6)
   expect_true(all(c("rmse", "correlation") %in% metrics$metric))
-  expect_true(all(c("combined", "positive", "negative") %in% metrics$prediction))
+  expect_true(all(
+    c("combined", "positive", "negative") %in% metrics$prediction
+  ))
 })
 
 test_that("compute_resample_metric only validates correlation methods when needed", {
@@ -217,4 +223,3 @@ test_that("summarize_resample_edges handles sum, all, and none storage", {
   )
   expect_null(summarize_resample_edges(NULL, "none", 2L))
 })
-

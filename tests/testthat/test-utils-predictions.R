@@ -25,9 +25,11 @@ test_that("compute_fold_predictions annotates rows with fold ids", {
 
   collected <- compute_fold_predictions(real, pred, folds)
 
-  expect_named(collected, c("row", "fold", "real", "combined", "positive", "negative"))
+  expect_named(
+    collected,
+    c("row", "fold", "real", "combined", "positive", "negative")
+  )
   expect_equal(collected$row, 1:4)
   expect_equal(collected$fold, c(2L, 1L, 2L, 1L))
   expect_equal(collected$real, real)
 })
-

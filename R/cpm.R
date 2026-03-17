@@ -42,7 +42,10 @@ print.cpm <- function(x, ...) {
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
   cat(sprintf(
     "    Complete cases: %d\n",
-    sum(stats::complete.cases(x$predictions[, prediction_columns(x$predictions), drop = FALSE]))
+    sum(stats::complete.cases(x$predictions[,
+      prediction_columns(x$predictions),
+      drop = FALSE
+    ]))
   ))
   cat(sprintf("  Candidate edges: %d\n", dim(x$edges)[1]))
   covariates_param <- if (!is.null(x$params$covariates)) {

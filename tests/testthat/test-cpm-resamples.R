@@ -124,4 +124,3 @@ test_that("resample_metrics validates object type", {
     fixed = TRUE
   )
 })
-

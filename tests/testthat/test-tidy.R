@@ -36,4 +36,3 @@ test_that("Support pass arguments of `summary()`", {
     )
   )
 })
-
