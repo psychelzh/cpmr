@@ -12,10 +12,15 @@
 #' - [cpm_model_lm()] defines the outcome model fitted on CPM-derived features.
 #'
 #' @param screen Edge-screening helper created by [cpm_screen()].
-#' @param feature_space How selected positive and negative edges are turned
-#'   into subject-level predictors. `"separate"` keeps the classic CPM positive
-#'   and negative strengths and fits a joint stream from both. `"net"` uses a
-#'   single `positive - negative` strength.
+#' @param feature_space How screened edges are turned into subject-level
+#'   predictors after CPM edge selection. Positive edges are edges whose
+#'   screening association with the outcome is positive and passes the threshold;
+#'   negative edges are the corresponding negatively associated edges.
+#'   `"separate"` constructs a positive strength and a negative strength for
+#'   each subject, fits a `joint` stream from both together, and also returns
+#'   `positive` and `negative` single-strength diagnostic streams. `"net"`
+#'   constructs one `net_strength = positive_strength - negative_strength`
+#'   feature and returns a single `net` stream.
 #' @param weighting Edge-weighting helper created by [cpm_weighting()].
 #' @param model Outcome-model helper created by [cpm_model_lm()]. This stage
 #'   maps CPM-derived subject-level features to the behavioral outcome.

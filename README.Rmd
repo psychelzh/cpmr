@@ -82,6 +82,21 @@ This keeps the main CPM choices visible while grouping naturally paired options
 like screening, edge weighting, and the outcome model into small helper
 objects.
 
+If you are new to CPM, the key idea behind `feature_space` is:
+
+- `positive` edges are edges whose screening association with the outcome is
+  positive and passes the threshold;
+- `negative` edges are edges whose screening association with the outcome is
+  negative and passes the threshold;
+- CPM then collapses those screened edge sets into subject-level network
+  strengths before fitting the outcome model.
+
+With `feature_space = "separate"`, `cpmr` keeps the positive and negative
+strengths as separate predictors and reports the classic `joint`, `positive`,
+and `negative` prediction streams. With `feature_space = "net"`, `cpmr`
+constructs a single `net_strength = positive_strength - negative_strength`
+feature and returns one `net` prediction stream.
+
 Cross-validated resampling uses `fit_resamples()` with the same specification
 object:
 

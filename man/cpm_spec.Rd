@@ -38,10 +38,15 @@ cpm_spec(
 \arguments{
 \item{screen}{Edge-screening helper created by \code{\link[=cpm_screen]{cpm_screen()}}.}
 
-\item{feature_space}{How selected positive and negative edges are turned
-into subject-level predictors. \code{"separate"} keeps the classic CPM positive
-and negative strengths and fits a joint stream from both. \code{"net"} uses a
-single \code{positive - negative} strength.}
+\item{feature_space}{How screened edges are turned into subject-level
+predictors after CPM edge selection. Positive edges are edges whose
+screening association with the outcome is positive and passes the threshold;
+negative edges are the corresponding negatively associated edges.
+\code{"separate"} constructs a positive strength and a negative strength for
+each subject, fits a \code{joint} stream from both together, and also returns
+\code{positive} and \code{negative} single-strength diagnostic streams. \code{"net"}
+constructs one \code{net_strength = positive_strength - negative_strength}
+feature and returns a single \code{net} stream.}
 
 \item{weighting}{Edge-weighting helper created by \code{\link[=cpm_weighting]{cpm_weighting()}}.}
 
