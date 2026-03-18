@@ -177,6 +177,34 @@ test_that("net feature space with lm model produces a single stream", {
   expect_equal(dim(pred), c(nrow(conmat), 1))
 })
 
+test_that("joint stream handles aliased empty-sign features", {
+  network_strengths <- cbind(
+    positive = rep(0, 5),
+    negative = 1:5
+  )
+  behav <- 1:5
+
+  fitted <- fit_prediction_model(
+    network_strengths = network_strengths,
+    behav = behav,
+    feature_space = "separate",
+    prediction_stream = "joint",
+    model_spec = cpm_model_lm()
+  )
+
+  expect_true(is.na(fitted$coefficients[["positive"]]))
+  expect_identical(fitted$prediction_coefficients[["positive"]], 0)
+  expect_equal(
+    predict_prediction_model(
+      fitted_model = fitted,
+      network_strengths = network_strengths,
+      feature_space = "separate",
+      prediction_stream = "joint"
+    ),
+    behav
+  )
+})
+
 test_that("sigmoid edge weighting yields smooth edge weights", {
   behav <- c(1, 2, 3, 4, 5, 6, 7, 8)
   conmat <- cbind(

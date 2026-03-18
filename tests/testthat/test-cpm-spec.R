@@ -479,7 +479,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
 
   expect_equal(single_fit$edges, fold_edges)
   expect_equal(single_fit$model$edges, fold_model$edges)
-  expect_equal(single_fit$model$models, fold_model$models)
+  expect_equal(single_fit$model$outcome_models, fold_model$outcome_models)
   expect_equal(single_fit$model$center, fold_model$center)
   expect_equal(single_fit$model$scale, fold_model$scale)
   expect_equal(predict_model(single_fit$model, assessment$conmat), fold_pred)

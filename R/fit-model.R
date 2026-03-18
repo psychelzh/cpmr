@@ -368,18 +368,23 @@ lm_design_matrix <- function(features) {
 
 fit_lm_outcome_model <- function(features, behav) {
   design <- lm_design_matrix(features)
-  coefficients <- stats::.lm.fit(design, behav)$coefficients
+  fit <- stats::lm.fit(design, behav)
+  coefficients <- fit$coefficients
+  prediction_coefficients <- coefficients
+  prediction_coefficients[is.na(prediction_coefficients)] <- 0
 
   list(
     type = "lm",
     feature_names = colnames(features),
-    coefficients = stats::setNames(coefficients, colnames(design))
+    coefficients = coefficients,
+    prediction_coefficients = prediction_coefficients,
+    rank = fit$rank
   )
 }
 
 predict_lm_outcome_model <- function(fitted_model, features) {
   design <- lm_design_matrix(features)
-  drop(design %*% fitted_model$coefficients)
+  drop(design %*% fitted_model$prediction_coefficients)
 }
 
 prediction_streams_for_feature_space <- function(feature_space) {

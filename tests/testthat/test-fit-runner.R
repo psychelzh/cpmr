@@ -28,7 +28,10 @@ test_that("run_single_fit matches fit() outputs on single data", {
   expect_equal(internal_result$edges, api_result$edges)
   expect_false("folds" %in% names(internal_result))
   expect_false("folds" %in% names(api_result))
-  expect_equal(internal_result$model$models, api_result$model$models)
+  expect_equal(
+    internal_result$model$outcome_models,
+    api_result$model$outcome_models
+  )
 })
 
 test_that("init_pred preserves prediction matrix structure", {
