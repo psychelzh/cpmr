@@ -90,7 +90,7 @@ edge_storage_label <- function(x) {
 
 prediction_labels <- c(
   joint = "Joint",
-  net = "Net",
+  net = "Net strength",
   positive = "Positive",
   negative = "Negative"
 )

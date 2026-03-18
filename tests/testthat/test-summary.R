@@ -309,7 +309,7 @@ test_that("summary.cpm_resamples supports single-stream net summaries", {
     )),
     c(2L, 1L)
   )
-  expect_true(any(grepl("Net:", output, fixed = TRUE)))
+  expect_true(any(grepl("Net strength:", output, fixed = TRUE)))
 })
 
 test_that("summary.cpm_resamples averages fold-wise edges when all edges are stored", {
