@@ -114,7 +114,7 @@
         {
           "type": "logical",
           "attributes": {},
-          "value": [true]
+          "value": [false]
         }
       ]
     }
@@ -139,7 +139,7 @@
           Weighting scale:  0.05
           Outcome model:    linear regression
           Streams:          joint, positive, negative
-          Edge standardization: z-score
+          Edge standardization: none
 
 # Different threshold levels works
 
@@ -257,7 +257,7 @@
         {
           "type": "logical",
           "attributes": {},
-          "value": [true]
+          "value": [false]
         }
       ]
     }
@@ -283,7 +283,7 @@
           Weighting scale:  0.05
           Outcome model:    linear regression
           Streams:          joint, positive, negative
-          Edge standardization: z-score
+          Edge standardization: none
 
 # `na_action` argument works
 
@@ -305,7 +305,7 @@
           Weighting scale:  0.05
           Outcome model:    linear regression
           Streams:          joint, positive, negative
-          Edge standardization: z-score
+          Edge standardization: none
 
 ---
 
@@ -328,7 +328,7 @@
           Weighting scale:  0.05
           Outcome model:    linear regression
           Streams:          joint, positive, negative
-          Edge standardization: z-score
+          Edge standardization: none
 
 ---
 
@@ -351,5 +351,5 @@
           Weighting scale:  0.05
           Outcome model:    linear regression
           Streams:          joint, positive, negative
-          Edge standardization: z-score
+          Edge standardization: none
 

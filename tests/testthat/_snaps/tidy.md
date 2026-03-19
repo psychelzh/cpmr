@@ -68,7 +68,7 @@
         {
           "type": "logical",
           "attributes": {},
-          "value": [true]
+          "value": [false]
         },
         {
           "type": "character",
@@ -163,7 +163,7 @@
         {
           "type": "logical",
           "attributes": {},
-          "value": [true]
+          "value": [false]
         },
         {
           "type": "list",

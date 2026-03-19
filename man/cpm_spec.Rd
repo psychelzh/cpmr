@@ -11,7 +11,7 @@ cpm_spec(
   feature_space = c("separate", "net"),
   weighting = cpm_weighting(),
   model = cpm_model_lm(),
-  standardize_edges = TRUE
+  standardize_edges = FALSE
 )
 
 \method{fit}{cpm_spec}(
@@ -58,7 +58,9 @@ standardized within each training set before CPM feature construction. If
 \code{TRUE}, each edge is centered and scaled to unit variance using the
 training data, and the same transformation is applied again at prediction
 time. This follows the fold-local edge z-scoring approach described by
-Rapuano et al. (2020).}
+Rapuano et al. (2020). Defaults to \code{FALSE} so the default specification
+stays close to the classic CPM network-strength workflow; set it to
+\code{TRUE} when you want this additional preprocessing step explicitly.}
 
 \item{object}{A \code{cpm_spec} object.}
 

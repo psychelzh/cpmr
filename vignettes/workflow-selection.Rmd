@@ -57,7 +57,8 @@ If you are new to the helper-based spec, the easiest mental model is:
   or smooth;
 - `model = cpm_model_lm()` and `standardize_edges` finish the modeling
   pipeline, with `standardize_edges` meaning fold-local edge standardization
-  using the training data statistics.
+  using the training data statistics. The default is `FALSE`, so the default
+  spec stays closer to classic CPM unless you opt in explicitly.
 
 In the current native workflow:
 

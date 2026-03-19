@@ -124,7 +124,9 @@ A practical way to read a spec is:
 - `model = cpm_model_lm()`: how the summarized network features map to the
   final prediction;
 - `standardize_edges`: whether each edge is fold-locally centered and scaled
-  using the training data before the CPM strengths are computed.
+  using the training data before the CPM strengths are computed. The default is
+  `FALSE`, which keeps the default spec close to classic CPM; set it to
+  `TRUE` when you want fold-local edge z-scoring explicitly.
 
 This matches the edge-standardization step described by Rapuano et al. (2020):
 edge strengths are z-scored within each training set and the corresponding

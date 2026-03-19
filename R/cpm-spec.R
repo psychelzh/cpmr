@@ -29,7 +29,9 @@
 #'   `TRUE`, each edge is centered and scaled to unit variance using the
 #'   training data, and the same transformation is applied again at prediction
 #'   time. This follows the fold-local edge z-scoring approach described by
-#'   Rapuano et al. (2020).
+#'   Rapuano et al. (2020). Defaults to `FALSE` so the default specification
+#'   stays close to the classic CPM network-strength workflow; set it to
+#'   `TRUE` when you want this additional preprocessing step explicitly.
 #'
 #' @examples
 #' spec <- cpm_spec(
@@ -56,7 +58,7 @@ cpm_spec <- function(
   feature_space = c("separate", "net"),
   weighting = cpm_weighting(),
   model = cpm_model_lm(),
-  standardize_edges = TRUE
+  standardize_edges = FALSE
 ) {
   feature_space <- match.arg(feature_space)
   validate_cpm_component(

@@ -67,13 +67,13 @@ fit_obj
 #>     Weighting scale:  0.05
 #>     Outcome model:    linear regression
 #>     Streams:          joint, positive, negative
-#>     Edge standardization: z-score
+#>     Edge standardization: none
 summary(fit_obj)
 #> CPM summary:
 #>   Performance (Pearson):
-#>     Joint: 0.676
+#>     Joint: 0.677
 #>     Positive: 0.595
-#>     Negative: 0.387
+#>     Negative: 0.388
 #>   Selected edges:
 #>     Positive: 0.70%
 #>     Negative: 0.20%
@@ -96,17 +96,22 @@ rich_spec <- cpm_spec(
 fit(rich_spec, conmat = conmat, behav = behav)$predictions |>
   head()
 #>   row        real         net
-#> 1   1  0.26499342  0.82985741
-#> 2   2  1.83074748  1.97548933
-#> 3   3 -0.05937826  0.32139217
-#> 4   4 -0.05320937 -0.02564907
-#> 5   5  0.43790418  0.50479001
-#> 6   6  1.33744904  1.35163465
+#> 1   1  0.26499342  0.82238735
+#> 2   2  1.83074748  1.95343095
+#> 3   3 -0.05937826  0.37334450
+#> 4   4 -0.05320937 -0.01398366
+#> 5   5  0.43790418  0.52797214
+#> 6   6  1.33744904  1.35348830
 ```
 
 This keeps the main CPM choices visible while grouping naturally paired
 options like screening, edge weighting, and the outcome model into small
 helper objects.
+
+By default, `cpm_spec()` keeps edge standardization turned off so the
+native workflow stays close to the classic CPM path of screening edges,
+constructing network strengths, and fitting the outcome model. If you
+want fold-local edge z-scoring, opt in with `standardize_edges = TRUE`.
 
 If you are new to CPM, the key idea behind `feature_space` is:
 
@@ -135,39 +140,39 @@ summary(resample_obj)
 #>   Number of folds: 5
 #>   Prediction error:
 #>     RMSE:
-#>       Joint: 1.243
-#>       Positive: 1.205
-#>       Negative: 1.200
+#>       Joint: 1.242
+#>       Positive: 1.204
+#>       Negative: 1.199
 #>     MAE:
-#>       Joint: 0.947
-#>       Positive: 0.962
-#>       Negative: 0.905
+#>       Joint: 0.951
+#>       Positive: 0.956
+#>       Negative: 0.910
 #>   Pooled correlations (Pearson):
-#>     Joint: -0.104
-#>     Positive: -0.072
-#>     Negative: -0.074
+#>     Joint: -0.108
+#>     Positive: -0.074
+#>     Negative: -0.080
 #>   Fold-wise correlations (Pearson):
-#>     Joint: -0.057 (SE 0.062)
-#>     Positive: 0.008 (SE 0.089)
-#>     Negative: -0.036 (SE 0.077)
+#>     Joint: -0.062 (SE 0.064)
+#>     Positive: 0.007 (SE 0.086)
+#>     Negative: -0.039 (SE 0.078)
 head(resample_obj$predictions)
-#>   row fold        real       joint   positive    negative
-#> 1   1    1  0.26499342 0.492748241 -0.2058990  0.76974455
-#> 2   2    5  1.83074748 0.323127546  0.2918329  0.05747766
-#> 3   3    5 -0.05937826 0.901452079  1.1152311 -0.34018567
-#> 4   4    3 -0.05320937 0.659647280  0.5558721  0.26308893
-#> 5   5    1  0.43790418 0.002067539  0.2977574 -0.37106308
-#> 6   6    4  1.33744904 0.659172053  0.5130919  0.37428531
+#>   row fold        real       joint    positive    negative
+#> 1   1    1  0.26499342 0.591709195 -0.08846823  0.76686948
+#> 2   2    5  1.83074748 0.325440165  0.29380525  0.05747766
+#> 3   3    5 -0.05937826 0.845311244  1.05634560 -0.34018567
+#> 4   4    3 -0.05320937 0.664779940  0.56680746  0.25720238
+#> 5   5    1  0.43790418 0.001660943  0.29376910 -0.36672391
+#> 6   6    4  1.33744904 0.591903346  0.45146065  0.34438321
 dim(resample_obj$edges)
 #> NULL
 head(resample_metrics(resample_obj))
 #>   fold n_assess metric prediction  estimate
-#> 1    1       20   rmse      joint 1.1115539
-#> 2    1       20   rmse   positive 1.1024986
-#> 3    1       20   rmse   negative 1.0753358
-#> 4    2       20   rmse      joint 0.9556034
-#> 5    2       20   rmse   positive 0.9872521
-#> 6    2       20   rmse   negative 1.0424502
+#> 1    1       20   rmse      joint 1.1177508
+#> 2    1       20   rmse   positive 1.1031362
+#> 3    1       20   rmse   negative 1.0772173
+#> 4    2       20   rmse      joint 0.9617461
+#> 5    2       20   rmse   positive 0.9885171
+#> 6    2       20   rmse   negative 1.0425730
 ```
 
 `summary(resample_obj)` gives the default aggregate report, with pooled

@@ -151,7 +151,7 @@ test_that("print.cpm reports stored edge count", {
   expect_true(any(grepl("Candidate edges: 10", output, fixed = TRUE)))
   expect_true(any(grepl("Covariates:       none", output, fixed = TRUE)))
   expect_true(any(grepl(
-    "Edge standardization: z-score",
+    "Edge standardization: none",
     output,
     fixed = TRUE
   )))

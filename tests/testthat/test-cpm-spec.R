@@ -56,6 +56,12 @@ test_that("fit.cpm_spec returns a cpm object with correct call", {
   expect_identical(result$spec, spec)
 })
 
+test_that("cpm_spec defaults to classic CPM edge handling", {
+  spec <- cpm_spec()
+
+  expect_false(spec$params$standardize_edges)
+})
+
 test_that("helper constructors validate scalar parameter values", {
   expect_error(
     cpm_threshold(level = -0.1),
