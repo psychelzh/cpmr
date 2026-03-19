@@ -59,9 +59,9 @@ fit_obj
 #>   Candidate edges: 1000
 #>   Parameters:
 #>     Covariates:       none
-#>     Association:      pearson
-#>     Threshold method: alpha
-#>     Threshold level:  0.01
+#>     Rule:             cor_p
+#>     Level:            0.01
+#>     Control:          default
 #>     Feature space:    separate
 #>     Edge weighting:   binary
 #>     Weighting scale:  0.05
@@ -85,8 +85,9 @@ native API surface:
 ``` r
 rich_spec <- cpm_spec(
   screen = cpm_screen(
-    association = "spearman",
-    threshold = cpm_threshold("effect_size", level = 0.1)
+    rule = "cor_abs",
+    level = 0.1,
+    control = list(cor_method = "spearman")
   ),
   feature_space = "net",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
@@ -106,7 +107,9 @@ fit(rich_spec, conmat = conmat, behav = behav)$predictions |>
 
 This keeps the main CPM choices visible while grouping naturally paired
 options like screening, edge weighting, and the outcome model into small
-helper objects.
+helper objects. In practice, the default screening path is just
+`rule + level`; `control` is there when you need a lower-frequency
+override such as Spearman screening.
 
 By default, `cpm_spec()` keeps edge standardization turned off so the
 native workflow stays close to the classic CPM path of screening edges,

@@ -7,7 +7,8 @@
 #' `cpm_spec()` keeps the main CPM decisions visible at the top level while
 #' grouping naturally paired settings into helpers:
 #'
-#' - [cpm_screen()] bundles the edge association measure with its threshold rule.
+#' - [cpm_screen()] bundles the screening rule, its level, and optional advanced
+#'   controls.
 #' - [cpm_weighting()] bundles the edge-weighting method with its scale.
 #' - [cpm_model_lm()] defines the outcome model fitted on CPM-derived features.
 #'
@@ -36,8 +37,9 @@
 #' @examples
 #' spec <- cpm_spec(
 #'   screen = cpm_screen(
-#'     association = "spearman",
-#'     threshold = cpm_threshold("effect_size", level = 0.1)
+#'     rule = "cor_abs",
+#'     level = 0.1,
+#'     control = list(cor_method = "spearman")
 #'   ),
 #'   feature_space = "net",
 #'   weighting = cpm_weighting("sigmoid", scale = 0.03),
@@ -80,9 +82,9 @@ cpm_spec <- function(
 
   new_cpm_spec(
     params = list(
-      association_method = screen$association,
-      threshold_method = screen$threshold$method,
-      threshold_level = screen$threshold$level,
+      screen_rule = screen$rule,
+      screen_level = screen$level,
+      screen_control = screen$control,
       feature_space = feature_space,
       edge_weighting = weighting$method,
       weighting_scale = weighting$scale,
@@ -100,72 +102,61 @@ cpm_spec <- function(
 #' Define CPM edge-screening settings
 #'
 #' Build the screening portion of a `cpm_spec()`. This stage chooses the
-#' association measure used during edge screening and the threshold rule used to
-#' keep positive and negative edges.
+#' screening rule used to keep positive and negative edges together with the
+#' level associated with that rule. Advanced controls stay available via
+#' `control`, but remain optional so the API emphasizes the screening rule
+#' itself. The default path is therefore `rule + level`, with `control`
+#' reserved for lower-frequency adjustments such as switching between Pearson
+#' and Spearman screening.
 #'
-#' @param association Association measure used during edge screening.
-#'   `"pearson"` uses linear correlation and `"spearman"` uses rank-based
-#'   correlation.
-#' @param threshold Threshold helper created by [cpm_threshold()].
+#' @param rule Screening rule used in edge selection. With `"cor_p"`, edges are
+#'   selected by thresholding the absolute association against a critical value
+#'   implied by `level`. With `"sparsity"`, `level` is treated as a per-sign
+#'   proportion and edges are retained from the positive and negative tails
+#'   separately. Because edge counts are discrete and ties at the cutoff are
+#'   retained, the realized proportion may be slightly larger than the requested
+#'   `level`. With `"cor_abs"`, `level` is treated as a direct absolute
+#'   association cutoff.
+#' @param level Numeric level associated with `rule`.
+#' @param control Optional named list of advanced screening controls. For the
+#'   current correlation-based rules, the supported control is
+#'   `cor_method = "pearson"` or `"spearman"`. `NULL` uses the default CPM
+#'   screening controls for the chosen `rule`.
 #'
 #' @examples
+#' cpm_screen("cor_p", level = 0.05)
 #' cpm_screen(
-#'   association = "spearman",
-#'   threshold = cpm_threshold("effect_size", level = 0.1)
+#'   rule = "cor_abs",
+#'   level = 0.1,
+#'   control = list(cor_method = "spearman")
 #' )
 #' @export
 cpm_screen <- function(
-  association = c("pearson", "spearman"),
-  threshold = cpm_threshold()
+  rule = c("cor_p", "sparsity", "cor_abs"),
+  level = 0.01,
+  control = NULL
 ) {
-  association <- match.arg(association)
-  validate_cpm_component(
-    threshold,
-    class = "cpm_threshold_spec",
-    message = "`threshold` must be created by `cpm_threshold()`."
-  )
+  rule <- match.arg(rule)
+  validate_screen_level(level)
+  control <- normalize_screen_control(control, rule)
 
   structure(
     list(
-      association = association,
-      threshold = threshold
+      rule = rule,
+      level = level,
+      control = control
     ),
     class = "cpm_screen_spec"
   )
 }
 
-#' Define CPM edge-threshold settings
-#'
-#' Build the thresholding rule used during the screening stage.
-#'
-#' @param method Threshold method used in edge selection. With `"alpha"`, edges
-#'   are selected by thresholding the absolute association against a critical
-#'   value implied by `level`. With `"sparsity"`, `level` is treated as a
-#'   per-sign proportion and edges are retained from the positive and negative
-#'   tails separately. Because edge counts are discrete and ties at the cutoff
-#'   are retained, the realized proportion may be slightly larger than the
-#'   requested `level`. With `"effect_size"`, `level` is treated as a direct
-#'   absolute association cutoff.
-#' @param level Numeric threshold level associated with `method`.
-#'
-#' @examples
-#' cpm_threshold("alpha", level = 0.05)
-#' cpm_threshold("sparsity", level = 0.1)
 #' @export
-cpm_threshold <- function(
-  method = c("alpha", "sparsity", "effect_size"),
-  level = 0.01
-) {
-  method <- match.arg(method)
-  validate_threshold_level(level)
-
-  structure(
-    list(
-      method = method,
-      level = level
-    ),
-    class = "cpm_threshold_spec"
-  )
+print.cpm_screen_spec <- function(x, ...) {
+  cat("CPM screen:\n")
+  cat(sprintf("  Rule:    %s\n", x$rule))
+  cat(sprintf("  Level:   %s\n", format_threshold_level(x$level)))
+  cat(sprintf("  Control: %s\n", format_screen_control(x$control)))
+  invisible(x)
 }
 
 #' Define CPM edge-weight settings
@@ -220,16 +211,16 @@ print.cpm_spec <- function(x, ...) {
   cat("CPM specification:\n")
   cat("  Screening:\n")
   cat(sprintf(
-    "    Association:      %s\n",
-    x$params$association_method
+    "    Rule:             %s\n",
+    x$params$screen_rule
   ))
   cat(sprintf(
-    "    Threshold method: %s\n",
-    x$params$threshold_method
+    "    Level:            %s\n",
+    format_threshold_level(x$params$screen_level)
   ))
   cat(sprintf(
-    "    Threshold level:  %s\n",
-    format_threshold_level(x$params$threshold_level)
+    "    Control:          %s\n",
+    format_screen_control(x$params$screen_control)
   ))
   cat("  Model:\n")
   cat(sprintf(
@@ -383,11 +374,9 @@ new_cpm_spec <- function(params, helpers = cpm_helpers_from_params(params)) {
 cpm_helpers_from_params <- function(params) {
   list(
     screen = cpm_screen(
-      association = params$association_method,
-      threshold = cpm_threshold(
-        method = params$threshold_method,
-        level = params$threshold_level
-      )
+      rule = params$screen_rule,
+      level = params$screen_level,
+      control = params$screen_control
     ),
     weighting = cpm_weighting(
       method = params$edge_weighting,
@@ -413,7 +402,64 @@ validate_cpm_component <- function(x, class, message) {
   invisible(x)
 }
 
-validate_threshold_level <- function(level) {
+screen_control_defaults <- function(rule) {
+  switch(
+    rule,
+    cor_p = list(cor_method = "pearson"),
+    sparsity = list(cor_method = "pearson"),
+    cor_abs = list(cor_method = "pearson"),
+    stop("`rule` must be a supported CPM screening rule.", call. = FALSE)
+  )
+}
+
+normalize_screen_control <- function(control, rule) {
+  defaults <- screen_control_defaults(rule)
+
+  if (is.null(control)) {
+    return(defaults)
+  }
+
+  if (!is.list(control)) {
+    stop("`control` must be NULL or a named list.", call. = FALSE)
+  }
+
+  if (
+    length(control) && (is.null(names(control)) || any(names(control) == ""))
+  ) {
+    stop("`control` must be a named list.", call. = FALSE)
+  }
+
+  unknown <- setdiff(names(control), names(defaults))
+  if (length(unknown)) {
+    stop(
+      paste0(
+        "`control` contains unsupported fields for `rule = \"",
+        rule,
+        "\"`: ",
+        paste(unknown, collapse = ", "),
+        "."
+      ),
+      call. = FALSE
+    )
+  }
+
+  resolved <- utils::modifyList(defaults, control)
+  if (
+    !is.character(resolved$cor_method) ||
+      length(resolved$cor_method) != 1L ||
+      is.na(resolved$cor_method) ||
+      !resolved$cor_method %in% c("pearson", "spearman")
+  ) {
+    stop(
+      "`control$cor_method` must be either \"pearson\" or \"spearman\".",
+      call. = FALSE
+    )
+  }
+
+  resolved
+}
+
+validate_screen_level <- function(level) {
   if (
     !is.numeric(level) ||
       length(level) != 1L ||

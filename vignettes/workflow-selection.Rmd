@@ -50,7 +50,10 @@ head(summary(resample_obj)[["metrics"]])
 
 If you are new to the helper-based spec, the easiest mental model is:
 
-- `screen = cpm_screen(...)` decides how edges get into the model;
+- `screen = cpm_screen(...)` decides which screening rule gets edges into the
+  model. Most of the time this is just `rule + level`; `control` stays
+  available for lower-frequency details such as Pearson versus Spearman
+  screening;
 - `feature_space` decides how CPM-derived network strengths are exposed to the
   outcome model;
 - `weighting = cpm_weighting(...)` decides whether edge contribution is binary

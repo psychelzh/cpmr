@@ -59,7 +59,8 @@ explicit CPM parameters.
 fit_obj <- fit(
   cpm_spec(
     screen = cpm_screen(
-      threshold = cpm_threshold("alpha", level = 0.05)
+      rule = "cor_p",
+      level = 0.05
     )
   ),
   conmat = conmat,
@@ -114,8 +115,8 @@ without forcing every setting into one long flat argument list.
 
 A practical way to read a spec is:
 
-- `screen = cpm_screen(...)`: how candidate edges are associated with the
-  outcome and thresholded;
+- `screen = cpm_screen(...)`: which screening rule is used, what level it
+  uses, and whether any advanced screening controls are needed;
 - `feature_space`: how positive and negative network strengths are exposed to
   the outcome model after screening has defined the positive and negative edge
   sets;
@@ -137,8 +138,9 @@ For example, this spec reads almost like a short sentence:
 ```{r}
 readable_spec <- cpm_spec(
   screen = cpm_screen(
-    association = "spearman",
-    threshold = cpm_threshold("effect_size", level = 0.1)
+    rule = "cor_abs",
+    level = 0.1,
+    control = list(cor_method = "spearman")
   ),
   feature_space = "net",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
@@ -150,7 +152,7 @@ readable_spec
 
 That means:
 
-- rank-based screening with a direct effect-size threshold;
+- rank-based screening with a direct absolute-correlation threshold;
 - one `net_strength = positive_strength - negative_strength` feature;
 - smooth edge weights around the fold-local threshold;
 - an explicit linear outcome model on the final network feature.
@@ -167,8 +169,9 @@ In practice, most customization starts with just two questions:
 ```{r}
 rich_spec <- cpm_spec(
   screen = cpm_screen(
-    association = "spearman",
-    threshold = cpm_threshold("effect_size", level = 0.1)
+    rule = "cor_abs",
+    level = 0.1,
+    control = list(cor_method = "spearman")
   ),
   feature_space = "net",
   weighting = cpm_weighting("sigmoid", scale = 0.03),
@@ -188,7 +191,8 @@ head(rich_fit$predictions)
 Compared with the default spec, the example above changes four things:
 
 - screening uses Spearman association instead of Pearson;
-- thresholding uses a direct effect-size cutoff instead of alpha-based
+- screening uses a direct absolute-correlation cutoff instead of correlation
+  p-value
   screening;
 - the feature space is exposed as one `net` stream from
   `net_strength = positive_strength - negative_strength` instead of the

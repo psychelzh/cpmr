@@ -34,9 +34,9 @@ run_single_fit <- function(
   edge_screen <- screen_edges(
     conmat = training$conmat,
     behav = training$behav,
-    association_method = params$association_method,
-    threshold_method = params$threshold_method,
-    threshold_level = params$threshold_level,
+    screen_rule = params$screen_rule,
+    screen_level = params$screen_level,
+    screen_control = params$screen_control,
     edge_weighting = params$edge_weighting,
     weighting_scale = params$weighting_scale
   )
@@ -121,9 +121,9 @@ run_resample_fit <- function(
     fold_screen <- screen_edges(
       conmat = training$conmat,
       behav = training$behav,
-      association_method = params$association_method,
-      threshold_method = params$threshold_method,
-      threshold_level = params$threshold_level,
+      screen_rule = params$screen_rule,
+      screen_level = params$screen_level,
+      screen_control = params$screen_control,
       edge_weighting = params$edge_weighting,
       weighting_scale = params$weighting_scale
     )
@@ -183,9 +183,9 @@ new_fit_params <- function(
   c(
     list(
       covariates = !is.null(covariates),
-      association_method = spec_params$association_method,
-      threshold_method = spec_params$threshold_method,
-      threshold_level = spec_params$threshold_level,
+      screen_rule = spec_params$screen_rule,
+      screen_level = spec_params$screen_level,
+      screen_control = spec_params$screen_control,
       feature_space = spec_params$feature_space,
       edge_weighting = spec_params$edge_weighting,
       weighting_scale = spec_params$weighting_scale,

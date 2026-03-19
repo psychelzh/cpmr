@@ -1,13 +1,14 @@
 screen_edges <- function(
   conmat,
   behav,
-  association_method,
-  threshold_method,
-  threshold_level,
+  screen_rule,
+  screen_level,
+  screen_control = list(cor_method = "pearson"),
   edge_weighting = c("binary", "sigmoid"),
   weighting_scale = 0.05
 ) {
   edge_weighting <- match.arg(edge_weighting)
+  association_method <- screen_control$cor_method
   associations <- drop(stats::cor(
     conmat,
     behav,
@@ -16,23 +17,23 @@ screen_edges <- function(
   associations[!is.finite(associations)] <- NA_real_
 
   thresholds <- switch(
-    threshold_method,
-    alpha = stats::setNames(
-      rep(critical_r(nrow(conmat), threshold_level), length(edge_types)),
+    screen_rule,
+    cor_p = stats::setNames(
+      rep(critical_r(nrow(conmat), screen_level), length(edge_types)),
       edge_types
     ),
-    effect_size = stats::setNames(
-      rep(threshold_level, length(edge_types)),
+    cor_abs = stats::setNames(
+      rep(screen_level, length(edge_types)),
       edge_types
     ),
     sparsity = select_sparsity_thresholds(
       associations = associations,
-      proportion = threshold_level
+      proportion = screen_level
     ),
     stop(
       paste(
-        "`threshold_method` must be one of",
-        "\"alpha\", \"sparsity\", or \"effect_size\"."
+        "`screen_rule` must be one of",
+        "\"cor_p\", \"sparsity\", or \"cor_abs\"."
       )
     )
   )
@@ -61,16 +62,16 @@ screen_edges <- function(
 select_edges <- function(
   conmat,
   behav,
-  association_method,
-  threshold_method,
-  threshold_level
+  screen_rule,
+  screen_level,
+  screen_control = list(cor_method = "pearson")
 ) {
   screen_edges(
     conmat = conmat,
     behav = behav,
-    association_method = association_method,
-    threshold_method = threshold_method,
-    threshold_level = threshold_level
+    screen_rule = screen_rule,
+    screen_level = screen_level,
+    screen_control = screen_control
   )$mask
 }
 

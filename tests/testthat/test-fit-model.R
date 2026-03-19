@@ -16,9 +16,8 @@ test_that("select_edges returns a logical positive/negative mask", {
   edges <- select_edges(
     conmat = conmat,
     behav = behav,
-    association_method = "pearson",
-    threshold_method = "alpha",
-    threshold_level = 0.1
+    screen_rule = "cor_p",
+    screen_level = 0.1
   )
 
   expect_equal(dim(edges), c(ncol(conmat), 2))
@@ -34,9 +33,8 @@ test_that("select_edges warns when sparsity selection drops one edge sign", {
     select_edges(
       conmat = conmat,
       behav = behav,
-      association_method = "pearson",
-      threshold_method = "sparsity",
-      threshold_level = 0.25
+      screen_rule = "sparsity",
+      screen_level = 0.25
     ),
     "The requested sparsity level did not retain both positive and negative edges.",
     fixed = TRUE
@@ -78,16 +76,15 @@ test_that("select_edges validates threshold method", {
     select_edges(
       conmat = conmat,
       behav = behav,
-      association_method = "pearson",
-      threshold_method = "bogus",
-      threshold_level = 0.1
+      screen_rule = "bogus",
+      screen_level = 0.1
     ),
-    "`threshold_method` must be one of \"alpha\", \"sparsity\", or \"effect_size\".",
+    "`screen_rule` must be one of \"cor_p\", \"sparsity\", or \"cor_abs\".",
     fixed = TRUE
   )
 })
 
-test_that("select_edges supports spearman and effect_size screening", {
+test_that("select_edges supports spearman and cor_abs screening", {
   behav <- c(1, 2, 3, 4, 5, 6)
   conmat <- cbind(
     behav^3,
@@ -99,9 +96,9 @@ test_that("select_edges supports spearman and effect_size screening", {
   spearman_edges <- select_edges(
     conmat = conmat,
     behav = behav,
-    association_method = "spearman",
-    threshold_method = "effect_size",
-    threshold_level = 0.8
+    screen_rule = "cor_abs",
+    screen_level = 0.8,
+    screen_control = list(cor_method = "spearman")
   )
 
   expect_true(all(spearman_edges[1:2, "positive"]))
@@ -147,9 +144,8 @@ test_that("train_model and predict_model compose correctly", {
   edge_screen <- screen_edges(
     conmat = training$conmat,
     behav = training$behav,
-    association_method = "pearson",
-    threshold_method = "alpha",
-    threshold_level = 0.1
+    screen_rule = "cor_p",
+    screen_level = 0.1
   )
   model <- train_model(
     conmat = training$conmat,
@@ -243,9 +239,8 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
   edge_screen <- screen_edges(
     conmat = conmat,
     behav = behav,
-    association_method = "pearson",
-    threshold_method = "effect_size",
-    threshold_level = 0.4,
+    screen_rule = "cor_abs",
+    screen_level = 0.4,
     edge_weighting = "sigmoid",
     weighting_scale = 0.05
   )

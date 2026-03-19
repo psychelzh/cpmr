@@ -4,7 +4,8 @@ test_that("run_single_fit matches fit() outputs on single data", {
   behav <- rnorm(10)
   spec <- cpm_spec(
     screen = cpm_screen(
-      threshold = cpm_threshold("alpha", level = 0.05)
+      rule = "cor_p",
+      level = 0.05
     )
   )
   call <- quote(fit(object = spec, conmat = conmat, behav = behav))
@@ -63,7 +64,8 @@ test_that("run_resample_fit matches fit_resamples() outputs", {
   behav <- rnorm(10)
   spec <- cpm_spec(
     screen = cpm_screen(
-      threshold = cpm_threshold("sparsity", level = 0.2)
+      rule = "sparsity",
+      level = 0.2
     )
   )
   call <- quote(fit_resamples(object = spec, conmat = conmat, behav = behav))

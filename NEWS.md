@@ -24,12 +24,14 @@
 
 * Added `cpm_spec()` as the native interface for `fit()` and `fit_resamples()`,
   and made single-fit and resample result objects more consistent.
-* Added `cpm_screen()`, `cpm_threshold()`, `cpm_weighting()`, and
-  `cpm_model_lm()` to make native CPM specifications more readable and
-  reusable.
+* Added `cpm_screen()`, `cpm_weighting()`, and `cpm_model_lm()` to make native
+  CPM specifications more readable and reusable, and removed the intermediate
+  `cpm_threshold()` helper.
 * Expanded native CPM screening beyond the previous flat defaults:
-  `association` now supports both Pearson and Spearman screening, while
-  `threshold` supports `alpha`, `sparsity`, and `effect_size`.
+  `cpm_screen()` now exposes `rule = "cor_p"`, `"sparsity"`, or `"cor_abs"`,
+  while optional `control = list(cor_method = ...)` keeps lower-frequency
+  choices like Pearson versus Spearman screening available without crowding the
+  default path.
 * Added explicit native CPM feature construction choices with
   `feature_space = "separate"` and `feature_space = "net"`.
 * Added weighted CPM feature construction with `cpm_weighting("binary")` and

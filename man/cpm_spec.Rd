@@ -114,7 +114,8 @@ parameters required to fit a connectome-based predictive model later with
 \code{cpm_spec()} keeps the main CPM decisions visible at the top level while
 grouping naturally paired settings into helpers:
 \itemize{
-\item \code{\link[=cpm_screen]{cpm_screen()}} bundles the edge association measure with its threshold rule.
+\item \code{\link[=cpm_screen]{cpm_screen()}} bundles the screening rule, its level, and optional advanced
+controls.
 \item \code{\link[=cpm_weighting]{cpm_weighting()}} bundles the edge-weighting method with its scale.
 \item \code{\link[=cpm_model_lm]{cpm_model_lm()}} defines the outcome model fitted on CPM-derived features.
 }
@@ -122,8 +123,9 @@ grouping naturally paired settings into helpers:
 \examples{
 spec <- cpm_spec(
   screen = cpm_screen(
-    association = "spearman",
-    threshold = cpm_threshold("effect_size", level = 0.1)
+    rule = "cor_abs",
+    level = 0.1,
+    control = list(cor_method = "spearman")
   ),
   feature_space = "net",
   weighting = cpm_weighting("sigmoid", scale = 0.03),

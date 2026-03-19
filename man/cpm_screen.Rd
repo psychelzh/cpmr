@@ -4,23 +4,43 @@
 \alias{cpm_screen}
 \title{Define CPM edge-screening settings}
 \usage{
-cpm_screen(association = c("pearson", "spearman"), threshold = cpm_threshold())
+cpm_screen(
+  rule = c("cor_p", "sparsity", "cor_abs"),
+  level = 0.01,
+  control = NULL
+)
 }
 \arguments{
-\item{association}{Association measure used during edge screening.
-\code{"pearson"} uses linear correlation and \code{"spearman"} uses rank-based
-correlation.}
+\item{rule}{Screening rule used in edge selection. With \code{"cor_p"}, edges are
+selected by thresholding the absolute association against a critical value
+implied by \code{level}. With \code{"sparsity"}, \code{level} is treated as a per-sign
+proportion and edges are retained from the positive and negative tails
+separately. Because edge counts are discrete and ties at the cutoff are
+retained, the realized proportion may be slightly larger than the requested
+\code{level}. With \code{"cor_abs"}, \code{level} is treated as a direct absolute
+association cutoff.}
 
-\item{threshold}{Threshold helper created by \code{\link[=cpm_threshold]{cpm_threshold()}}.}
+\item{level}{Numeric level associated with \code{rule}.}
+
+\item{control}{Optional named list of advanced screening controls. For the
+current correlation-based rules, the supported control is
+\code{cor_method = "pearson"} or \code{"spearman"}. \code{NULL} uses the default CPM
+screening controls for the chosen \code{rule}.}
 }
 \description{
 Build the screening portion of a \code{cpm_spec()}. This stage chooses the
-association measure used during edge screening and the threshold rule used to
-keep positive and negative edges.
+screening rule used to keep positive and negative edges together with the
+level associated with that rule. Advanced controls stay available via
+\code{control}, but remain optional so the API emphasizes the screening rule
+itself. The default path is therefore \code{rule + level}, with \code{control}
+reserved for lower-frequency adjustments such as switching between Pearson
+and Spearman screening.
 }
 \examples{
+cpm_screen("cor_p", level = 0.05)
 cpm_screen(
-  association = "spearman",
-  threshold = cpm_threshold("effect_size", level = 0.1)
+  rule = "cor_abs",
+  level = 0.1,
+  control = list(cor_method = "spearman")
 )
 }

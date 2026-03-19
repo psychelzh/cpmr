@@ -62,7 +62,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges"]
+          "value": ["covariates", "screen_rule", "screen_level", "screen_control", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges"]
         }
       },
       "value": [
@@ -74,17 +74,29 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["pearson"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["alpha"]
+          "value": ["cor_p"]
         },
         {
           "type": "double",
           "attributes": {},
           "value": [0.01]
+        },
+        {
+          "type": "list",
+          "attributes": {
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["cor_method"]
+            }
+          },
+          "value": [
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pearson"]
+            }
+          ]
         },
         {
           "type": "character",
@@ -131,9 +143,9 @@
         Candidate edges: 10
         Parameters:
           Covariates:       none
-          Association:      pearson
-          Threshold method: alpha
-          Threshold level:  0.01
+          Rule:             cor_p
+          Level:            0.01
+          Control:          default
           Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05
@@ -205,7 +217,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges"]
+          "value": ["covariates", "screen_rule", "screen_level", "screen_control", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges"]
         }
       },
       "value": [
@@ -217,17 +229,29 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["pearson"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["alpha"]
+          "value": ["cor_p"]
         },
         {
           "type": "double",
           "attributes": {},
           "value": [0.1]
+        },
+        {
+          "type": "list",
+          "attributes": {
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["cor_method"]
+            }
+          },
+          "value": [
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pearson"]
+            }
+          ]
         },
         {
           "type": "character",
@@ -268,16 +292,16 @@
       result
     Output
       CPM fit:
-        Call: fit(object = cpm_spec(screen = cpm_screen(threshold = cpm_threshold(level = 0.1))), 
-          conmat = conmat, behav = behav)
+        Call: fit(object = cpm_spec(screen = cpm_screen(level = 0.1)), conmat = conmat, 
+          behav = behav)
         Number of observations: 10
           Complete cases: 10
         Candidate edges: 10
         Parameters:
           Covariates:       none
-          Association:      pearson
-          Threshold method: alpha
-          Threshold level:  0.1
+          Rule:             cor_p
+          Level:            0.1
+          Control:          default
           Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05
@@ -297,9 +321,9 @@
         Candidate edges: 10
         Parameters:
           Covariates:       none
-          Association:      pearson
-          Threshold method: alpha
-          Threshold level:  0.01
+          Rule:             cor_p
+          Level:            0.01
+          Control:          default
           Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05
@@ -320,9 +344,9 @@
         Candidate edges: 10
         Parameters:
           Covariates:       included
-          Association:      pearson
-          Threshold method: alpha
-          Threshold level:  0.01
+          Rule:             cor_p
+          Level:            0.01
+          Control:          default
           Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05
@@ -343,9 +367,9 @@
         Candidate edges: 10
         Parameters:
           Covariates:       included
-          Association:      pearson
-          Threshold method: alpha
-          Threshold level:  0.01
+          Rule:             cor_p
+          Level:            0.01
+          Control:          default
           Feature space:    separate
           Edge weighting:   binary
           Weighting scale:  0.05

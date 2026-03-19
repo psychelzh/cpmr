@@ -16,7 +16,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges", "method", "joint", "positive", "negative"]
+          "value": ["covariates", "screen_rule", "screen_level", "screen_control", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges", "method", "joint", "positive", "negative"]
         }
       },
       "value": [
@@ -28,17 +28,29 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["pearson"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["alpha"]
+          "value": ["cor_p"]
         },
         {
           "type": "double",
           "attributes": {},
           "value": [0.01]
+        },
+        {
+          "type": "list",
+          "attributes": {
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["cor_method"]
+            }
+          },
+          "value": [
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pearson"]
+            }
+          ]
         },
         {
           "type": "character",
@@ -111,7 +123,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges", "positive", "negative"]
+          "value": ["covariates", "screen_rule", "screen_level", "screen_control", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges", "positive", "negative"]
         }
       },
       "value": [
@@ -123,17 +135,29 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["pearson"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["alpha"]
+          "value": ["cor_p"]
         },
         {
           "type": "double",
           "attributes": {},
           "value": [0.01]
+        },
+        {
+          "type": "list",
+          "attributes": {
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["cor_method"]
+            }
+          },
+          "value": [
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pearson"]
+            }
+          ]
         },
         {
           "type": "character",

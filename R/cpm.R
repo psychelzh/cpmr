@@ -59,16 +59,16 @@ print.cpm <- function(x, ...) {
     format_covariates(covariates_param)
   ))
   cat(sprintf(
-    "    Association:      %s\n",
-    x$params$association_method
+    "    Rule:             %s\n",
+    x$params$screen_rule
   ))
   cat(sprintf(
-    "    Threshold method: %s\n",
-    x$params$threshold_method
+    "    Level:            %s\n",
+    format_threshold_level(x$params$screen_level)
   ))
   cat(sprintf(
-    "    Threshold level:  %s\n",
-    format_threshold_level(x$params$threshold_level)
+    "    Control:          %s\n",
+    format_screen_control(x$params$screen_control)
   ))
   cat(sprintf(
     "    Feature space:    %s\n",

@@ -1,8 +1,9 @@
 test_that("cpm_spec stores model parameters", {
   spec <- cpm_spec(
     screen = cpm_screen(
-      association = "spearman",
-      threshold = cpm_threshold("sparsity", level = 0.05)
+      rule = "sparsity",
+      level = 0.05,
+      control = list(cor_method = "spearman")
     ),
     feature_space = "net",
     weighting = cpm_weighting("sigmoid", scale = 0.02),
@@ -14,9 +15,9 @@ test_that("cpm_spec stores model parameters", {
   expect_s3_class(spec$helpers$screen, "cpm_screen_spec")
   expect_s3_class(spec$helpers$weighting, "cpm_weighting_spec")
   expect_s3_class(spec$helpers$model, "cpm_model_spec")
-  expect_identical(spec$params$association_method, "spearman")
-  expect_identical(spec$params$threshold_method, "sparsity")
-  expect_identical(spec$params$threshold_level, 0.05)
+  expect_identical(spec$params$screen_rule, "sparsity")
+  expect_identical(spec$params$screen_level, 0.05)
+  expect_identical(spec$params$screen_control, list(cor_method = "spearman"))
   expect_identical(spec$params$feature_space, "net")
   expect_identical(spec$params$edge_weighting, "sigmoid")
   expect_identical(spec$params$weighting_scale, 0.02)
@@ -26,9 +27,9 @@ test_that("cpm_spec stores model parameters", {
 
 test_that("new_cpm_spec builds cpm_spec objects", {
   params <- list(
-    association_method = "pearson",
-    threshold_method = "alpha",
-    threshold_level = 0.05,
+    screen_rule = "cor_p",
+    screen_level = 0.05,
+    screen_control = list(cor_method = "pearson"),
     feature_space = "separate",
     edge_weighting = "binary",
     weighting_scale = 0.05,
@@ -64,12 +65,12 @@ test_that("cpm_spec defaults to classic CPM edge handling", {
 
 test_that("helper constructors validate scalar parameter values", {
   expect_error(
-    cpm_threshold(level = -0.1),
+    cpm_screen(level = -0.1),
     "`level` must be a single number between 0 and 1.",
     fixed = TRUE
   )
   expect_error(
-    cpm_threshold(level = c(0.1, 0.2)),
+    cpm_screen(level = c(0.1, 0.2)),
     "`level` must be a single number between 0 and 1.",
     fixed = TRUE
   )
@@ -104,8 +105,23 @@ test_that("helper constructors validate scalar parameter values", {
     fixed = TRUE
   )
   expect_error(
-    cpm_screen(threshold = list()),
-    "`threshold` must be created by `cpm_threshold()`.",
+    cpm_screen(control = "spearman"),
+    "`control` must be NULL or a named list.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_screen(control = list("spearman")),
+    "`control` must be a named list.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_screen(control = list(cor_method = "kendall")),
+    "`control$cor_method` must be either \"pearson\" or \"spearman\".",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_screen(rule = "cor_p", control = list(foo = "bar")),
+    "`control` contains unsupported fields for `rule = \"cor_p\"`: foo.",
     fixed = TRUE
   )
 })
@@ -121,20 +137,42 @@ test_that("model helper constructors round-trip through params", {
   )
 })
 
+test_that("internal screen control defaults validate supported rules", {
+  expect_error(
+    screen_control_defaults("bogus"),
+    "`rule` must be a supported CPM screening rule.",
+    fixed = TRUE
+  )
+})
+
 test_that("print.cpm_spec shows model options", {
   spec <- cpm_spec(
     screen = cpm_screen(
-      threshold = cpm_threshold("sparsity")
+      rule = "sparsity"
     )
   )
 
   expect_output(print(spec), "CPM specification")
   expect_output(print(spec), "Screening")
-  expect_output(print(spec), "Threshold method:\\s+sparsity")
+  expect_output(print(spec), "Rule:\\s+sparsity")
+  expect_output(print(spec), "Control:\\s+default")
   expect_output(print(spec), "Edge weighting")
   expect_output(print(spec), "Outcome model:\\s+linear regression")
   expect_output(print(spec), "Streams")
   expect_output(print(spec), "Edge standardization")
+})
+
+test_that("print.cpm_screen shows readable screen settings", {
+  screen <- cpm_screen(
+    rule = "cor_abs",
+    level = 0.1,
+    control = list(cor_method = "spearman")
+  )
+
+  expect_output(print(screen), "CPM screen")
+  expect_output(print(screen), "Rule:\\s+cor_abs")
+  expect_output(print(screen), "Level:\\s+0.1")
+  expect_output(print(screen), "Control:\\s+cor_method = spearman")
 })
 
 test_that("net feature space yields a single prediction stream", {
@@ -155,7 +193,8 @@ test_that("sigmoid edge weighting stores smooth edge weights in the model", {
   behav <- rnorm(10)
   spec <- cpm_spec(
     screen = cpm_screen(
-      threshold = cpm_threshold("effect_size", level = 0.1)
+      rule = "cor_abs",
+      level = 0.1
     ),
     weighting = cpm_weighting("sigmoid", scale = 0.03)
   )
@@ -420,7 +459,8 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   covariates <- matrix(rnorm(n * 2), ncol = 2)
   spec <- cpm_spec(
     screen = cpm_screen(
-      threshold = cpm_threshold("alpha", level = 0.1)
+      rule = "cor_p",
+      level = 0.1
     )
   )
   resamples <- list(1:5, 6:10, 11:15)
@@ -451,9 +491,9 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   fold_edges <- select_edges(
     conmat = training$conmat,
     behav = training$behav,
-    association_method = spec$params$association_method,
-    threshold_method = spec$params$threshold_method,
-    threshold_level = spec$params$threshold_level
+    screen_rule = spec$params$screen_rule,
+    screen_level = spec$params$screen_level,
+    screen_control = spec$params$screen_control
   )
   fold_model <- train_model(
     conmat = training$conmat,
@@ -461,9 +501,9 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     edge_screen = screen_edges(
       conmat = training$conmat,
       behav = training$behav,
-      association_method = spec$params$association_method,
-      threshold_method = spec$params$threshold_method,
-      threshold_level = spec$params$threshold_level,
+      screen_rule = spec$params$screen_rule,
+      screen_level = spec$params$screen_level,
+      screen_control = spec$params$screen_control,
       edge_weighting = spec$params$edge_weighting,
       weighting_scale = spec$params$weighting_scale
     ),
