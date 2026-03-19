@@ -91,8 +91,8 @@ print.cpm <- function(x, ...) {
     format_prediction_streams(prediction_columns(x$predictions))
   ))
   cat(sprintf(
-    "    Bias correction:  %s\n",
-    format_yes_no(x$params$bias_correct)
+    "    Edge standardization: %s\n",
+    format_edge_standardization(x$params$standardize_edges)
   ))
   invisible(x)
 }

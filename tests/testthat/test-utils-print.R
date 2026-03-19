@@ -7,6 +7,8 @@ test_that("format helpers produce stable display strings", {
   expect_identical(format_threshold_level(0.2), "0.2")
   expect_identical(format_yes_no(TRUE), "yes")
   expect_identical(format_yes_no(FALSE), "no")
+  expect_identical(format_edge_standardization(TRUE), "z-score")
+  expect_identical(format_edge_standardization(FALSE), "none")
   expect_identical(format_covariates(TRUE), "included")
   expect_identical(format_covariates(FALSE), "none")
   expect_identical(format_method_name("pearson"), "Pearson")

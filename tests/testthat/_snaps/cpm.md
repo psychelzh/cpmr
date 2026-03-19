@@ -62,7 +62,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges"]
         }
       },
       "value": [
@@ -139,7 +139,7 @@
           Weighting scale:  0.05
           Outcome model:    linear regression
           Streams:          joint, positive, negative
-          Bias correction:  yes
+          Edge standardization: z-score
 
 # Different threshold levels works
 
@@ -205,7 +205,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "bias_correct"]
+          "value": ["covariates", "association_method", "threshold_method", "threshold_level", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges"]
         }
       },
       "value": [
@@ -283,7 +283,7 @@
           Weighting scale:  0.05
           Outcome model:    linear regression
           Streams:          joint, positive, negative
-          Bias correction:  yes
+          Edge standardization: z-score
 
 # `na_action` argument works
 
@@ -305,7 +305,7 @@
           Weighting scale:  0.05
           Outcome model:    linear regression
           Streams:          joint, positive, negative
-          Bias correction:  yes
+          Edge standardization: z-score
 
 ---
 
@@ -328,7 +328,7 @@
           Weighting scale:  0.05
           Outcome model:    linear regression
           Streams:          joint, positive, negative
-          Bias correction:  yes
+          Edge standardization: z-score
 
 ---
 
@@ -351,5 +351,5 @@
           Weighting scale:  0.05
           Outcome model:    linear regression
           Streams:          joint, positive, negative
-          Bias correction:  yes
+          Edge standardization: z-score
 

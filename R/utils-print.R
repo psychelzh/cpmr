@@ -70,6 +70,10 @@ format_yes_no <- function(x) {
   ifelse(is.na(x), "NA", ifelse(isTRUE(x), "yes", "no"))
 }
 
+format_edge_standardization <- function(x) {
+  ifelse(is.na(x), "NA", ifelse(isTRUE(x), "z-score", "none"))
+}
+
 format_covariates <- function(x) {
   ifelse(is.na(x), "NA", ifelse(isTRUE(x), "included", "none"))
 }

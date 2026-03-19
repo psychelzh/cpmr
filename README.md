@@ -67,7 +67,7 @@ fit_obj
 #>     Weighting scale:  0.05
 #>     Outcome model:    linear regression
 #>     Streams:          joint, positive, negative
-#>     Bias correction:  yes
+#>     Edge standardization: z-score
 summary(fit_obj)
 #> CPM summary:
 #>   Performance (Pearson):

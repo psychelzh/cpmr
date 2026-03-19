@@ -30,7 +30,7 @@ test_that("Support pass arguments of `summary()`", {
       "weighting_scale",
       "model",
       "na_action",
-      "bias_correct",
+      "standardize_edges",
       "positive",
       "negative"
     )

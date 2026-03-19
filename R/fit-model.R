@@ -78,13 +78,13 @@ train_model <- function(
   conmat,
   behav,
   edge_screen,
-  bias_correct,
+  standardize_edges,
   feature_space,
   model_spec
 ) {
   center <- NULL
   scale <- NULL
-  if (bias_correct) {
+  if (standardize_edges) {
     center <- Rfast::colmeans(conmat)
     scale <- Rfast::colVars(conmat, std = TRUE)
     conmat <- fscale(conmat, center, scale)
@@ -105,7 +105,7 @@ train_model <- function(
   names(outcome_models) <- prediction_streams
 
   list(
-    bias_correct = bias_correct,
+    standardize_edges = standardize_edges,
     center = center,
     scale = scale,
     edges = edge_screen$mask,
@@ -121,7 +121,7 @@ train_model <- function(
 }
 
 predict_model <- function(model, conmat_new) {
-  if (model$bias_correct) {
+  if (model$standardize_edges) {
     conmat_new <- fscale(conmat_new, model$center, model$scale)
   }
 

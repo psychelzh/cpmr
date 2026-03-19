@@ -150,7 +150,11 @@ test_that("print.cpm reports stored edge count", {
 
   expect_true(any(grepl("Candidate edges: 10", output, fixed = TRUE)))
   expect_true(any(grepl("Covariates:       none", output, fixed = TRUE)))
-  expect_true(any(grepl("Bias correction:  yes", output, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Edge standardization: z-score",
+    output,
+    fixed = TRUE
+  )))
 })
 
 test_that("Support row/column matrix input of `behav` and `covariates`", {

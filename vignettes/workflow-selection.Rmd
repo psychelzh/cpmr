@@ -55,9 +55,9 @@ If you are new to the helper-based spec, the easiest mental model is:
   outcome model;
 - `weighting = cpm_weighting(...)` decides whether edge contribution is binary
   or smooth;
-- `model = cpm_model_lm()` and `bias_correct` finish the modeling pipeline,
-  with `bias_correct` meaning fold-local edge standardization using the
-  training data statistics.
+- `model = cpm_model_lm()` and `standardize_edges` finish the modeling
+  pipeline, with `standardize_edges` meaning fold-local edge standardization
+  using the training data statistics.
 
 In the current native workflow:
 

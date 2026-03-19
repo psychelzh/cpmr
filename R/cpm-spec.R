@@ -24,12 +24,12 @@
 #' @param weighting Edge-weighting helper created by [cpm_weighting()].
 #' @param model Outcome-model helper created by [cpm_model_lm()]. This stage
 #'   maps CPM-derived subject-level features to the behavioral outcome.
-#' @param bias_correct Logical value indicating if the connectome data should be
-#'   bias-corrected. If `TRUE`, each edge is centered and scaled to unit
-#'   variance using the training data before CPM feature construction, and the
-#'   same transformation is applied again at prediction time. In other words,
-#'   this is fold-local edge standardization under the historical
-#'   `bias_correct` name. See Rapuano et al. (2020) for more details.
+#' @param standardize_edges Logical value indicating if edge strengths should be
+#'   standardized within each training set before CPM feature construction. If
+#'   `TRUE`, each edge is centered and scaled to unit variance using the
+#'   training data, and the same transformation is applied again at prediction
+#'   time. This follows the fold-local edge z-scoring approach described by
+#'   Rapuano et al. (2020).
 #'
 #' @examples
 #' spec <- cpm_spec(
@@ -56,7 +56,7 @@ cpm_spec <- function(
   feature_space = c("separate", "net"),
   weighting = cpm_weighting(),
   model = cpm_model_lm(),
-  bias_correct = TRUE
+  standardize_edges = TRUE
 ) {
   feature_space <- match.arg(feature_space)
   validate_cpm_component(
@@ -74,7 +74,7 @@ cpm_spec <- function(
     class = "cpm_model_spec",
     message = "`model` must be created by `cpm_model_lm()`."
   )
-  validate_bias_correct(bias_correct)
+  validate_standardize_edges(standardize_edges)
 
   new_cpm_spec(
     params = list(
@@ -85,7 +85,7 @@ cpm_spec <- function(
       edge_weighting = weighting$method,
       weighting_scale = weighting$scale,
       model = model$type,
-      bias_correct = bias_correct
+      standardize_edges = standardize_edges
     ),
     helpers = list(
       screen = screen,
@@ -253,8 +253,8 @@ print.cpm_spec <- function(x, ...) {
     )
   ))
   cat(sprintf(
-    "    Bias correction:  %s\n",
-    format_yes_no(x$params$bias_correct)
+    "    Edge standardization: %s\n",
+    format_edge_standardization(x$params$standardize_edges)
   ))
   invisible(x)
 }
@@ -440,16 +440,16 @@ validate_weighting_scale <- function(scale) {
   invisible(scale)
 }
 
-validate_bias_correct <- function(bias_correct) {
+validate_standardize_edges <- function(standardize_edges) {
   if (
-    !is.logical(bias_correct) ||
-      length(bias_correct) != 1L ||
-      is.na(bias_correct)
+    !is.logical(standardize_edges) ||
+      length(standardize_edges) != 1L ||
+      is.na(standardize_edges)
   ) {
-    stop("`bias_correct` must be either TRUE or FALSE.", call. = FALSE)
+    stop("`standardize_edges` must be either TRUE or FALSE.", call. = FALSE)
   }
 
-  invisible(bias_correct)
+  invisible(standardize_edges)
 }
 
 format_model_type <- function(model_type) {

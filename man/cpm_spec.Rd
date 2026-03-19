@@ -11,7 +11,7 @@ cpm_spec(
   feature_space = c("separate", "net"),
   weighting = cpm_weighting(),
   model = cpm_model_lm(),
-  bias_correct = TRUE
+  standardize_edges = TRUE
 )
 
 \method{fit}{cpm_spec}(
@@ -53,12 +53,12 @@ feature and returns a single \code{net} stream.}
 \item{model}{Outcome-model helper created by \code{\link[=cpm_model_lm]{cpm_model_lm()}}. This stage
 maps CPM-derived subject-level features to the behavioral outcome.}
 
-\item{bias_correct}{Logical value indicating if the connectome data should be
-bias-corrected. If \code{TRUE}, each edge is centered and scaled to unit
-variance using the training data before CPM feature construction, and the
-same transformation is applied again at prediction time. In other words,
-this is fold-local edge standardization under the historical
-\code{bias_correct} name. See Rapuano et al. (2020) for more details.}
+\item{standardize_edges}{Logical value indicating if edge strengths should be
+standardized within each training set before CPM feature construction. If
+\code{TRUE}, each edge is centered and scaled to unit variance using the
+training data, and the same transformation is applied again at prediction
+time. This follows the fold-local edge z-scoring approach described by
+Rapuano et al. (2020).}
 
 \item{object}{A \code{cpm_spec} object.}
 

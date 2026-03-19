@@ -7,7 +7,7 @@ test_that("cpm_spec stores model parameters", {
     feature_space = "net",
     weighting = cpm_weighting("sigmoid", scale = 0.02),
     model = cpm_model_lm(),
-    bias_correct = FALSE
+    standardize_edges = FALSE
   )
 
   expect_s3_class(spec, "cpm_spec")
@@ -21,7 +21,7 @@ test_that("cpm_spec stores model parameters", {
   expect_identical(spec$params$edge_weighting, "sigmoid")
   expect_identical(spec$params$weighting_scale, 0.02)
   expect_identical(spec$params$model, "lm")
-  expect_false(spec$params$bias_correct)
+  expect_false(spec$params$standardize_edges)
 })
 
 test_that("new_cpm_spec builds cpm_spec objects", {
@@ -33,7 +33,7 @@ test_that("new_cpm_spec builds cpm_spec objects", {
     edge_weighting = "binary",
     weighting_scale = 0.05,
     model = "lm",
-    bias_correct = TRUE
+    standardize_edges = TRUE
   )
 
   spec <- new_cpm_spec(params = params)
@@ -68,8 +68,8 @@ test_that("helper constructors validate scalar parameter values", {
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(bias_correct = NA),
-    "`bias_correct` must be either TRUE or FALSE.",
+    cpm_spec(standardize_edges = NA),
+    "`standardize_edges` must be either TRUE or FALSE.",
     fixed = TRUE
   )
   expect_error(
@@ -78,8 +78,8 @@ test_that("helper constructors validate scalar parameter values", {
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(bias_correct = c(TRUE, FALSE)),
-    "`bias_correct` must be either TRUE or FALSE.",
+    cpm_spec(standardize_edges = c(TRUE, FALSE)),
+    "`standardize_edges` must be either TRUE or FALSE.",
     fixed = TRUE
   )
   expect_error(
@@ -128,7 +128,7 @@ test_that("print.cpm_spec shows model options", {
   expect_output(print(spec), "Edge weighting")
   expect_output(print(spec), "Outcome model:\\s+linear regression")
   expect_output(print(spec), "Streams")
-  expect_output(print(spec), "Bias correction")
+  expect_output(print(spec), "Edge standardization")
 })
 
 test_that("net feature space yields a single prediction stream", {
@@ -461,7 +461,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
       edge_weighting = spec$params$edge_weighting,
       weighting_scale = spec$params$weighting_scale
     ),
-    bias_correct = spec$params$bias_correct,
+    standardize_edges = spec$params$standardize_edges,
     feature_space = spec$params$feature_space,
     model_spec = spec$helpers$model
   )

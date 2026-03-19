@@ -123,8 +123,12 @@ A practical way to read a spec is:
   with smooth weights;
 - `model = cpm_model_lm()`: how the summarized network features map to the
   final prediction;
-- `bias_correct`: whether each edge is fold-locally centered and scaled using
-  the training data before the CPM strengths are computed.
+- `standardize_edges`: whether each edge is fold-locally centered and scaled
+  using the training data before the CPM strengths are computed.
+
+This matches the edge-standardization step described by Rapuano et al. (2020):
+edge strengths are z-scored within each training set and the corresponding
+transformation is then applied to held-out data on that fold.
 
 For example, this spec reads almost like a short sentence:
 

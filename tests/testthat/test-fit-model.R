@@ -155,7 +155,7 @@ test_that("train_model and predict_model compose correctly", {
     conmat = training$conmat,
     behav = training$behav,
     edge_screen = edge_screen,
-    bias_correct = TRUE,
+    standardize_edges = TRUE,
     feature_space = "separate",
     model_spec = cpm_model_lm()
   )
@@ -192,7 +192,7 @@ test_that("net feature space with lm model produces a single stream", {
     conmat = conmat,
     behav = behav,
     edge_screen = edge_screen,
-    bias_correct = FALSE,
+    standardize_edges = FALSE,
     feature_space = "net",
     model_spec = cpm_model_lm()
   )

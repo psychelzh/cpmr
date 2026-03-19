@@ -44,7 +44,7 @@ run_single_fit <- function(
     conmat = training$conmat,
     behav = training$behav,
     edge_screen = edge_screen,
-    bias_correct = params$bias_correct,
+    standardize_edges = params$standardize_edges,
     feature_space = params$feature_space,
     model_spec = object$helpers$model
   )
@@ -131,7 +131,7 @@ run_resample_fit <- function(
       conmat = training$conmat,
       behav = training$behav,
       edge_screen = fold_screen,
-      bias_correct = params$bias_correct,
+      standardize_edges = params$standardize_edges,
       feature_space = params$feature_space,
       model_spec = object$helpers$model
     )
@@ -191,7 +191,7 @@ new_fit_params <- function(
       weighting_scale = spec_params$weighting_scale,
       model = spec_params$model,
       na_action = na_action,
-      bias_correct = spec_params$bias_correct
+      standardize_edges = spec_params$standardize_edges
     ),
     extras
   )
