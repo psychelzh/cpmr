@@ -25,9 +25,11 @@
 #' @param model Outcome-model helper created by [cpm_model_lm()]. This stage
 #'   maps CPM-derived subject-level features to the behavioral outcome.
 #' @param bias_correct Logical value indicating if the connectome data should be
-#'   bias-corrected. If `TRUE`, the connectome data will be centered and scaled
-#'   to have unit variance based on the training data before model fitting and
-#'   prediction. See Rapuano et al. (2020) for more details.
+#'   bias-corrected. If `TRUE`, each edge is centered and scaled to unit
+#'   variance using the training data before CPM feature construction, and the
+#'   same transformation is applied again at prediction time. In other words,
+#'   this is fold-local edge standardization under the historical
+#'   `bias_correct` name. See Rapuano et al. (2020) for more details.
 #'
 #' @examples
 #' spec <- cpm_spec(
