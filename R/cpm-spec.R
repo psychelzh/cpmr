@@ -138,7 +138,9 @@ cpm_screen <- function(
 #'   are selected by thresholding the absolute association against a critical
 #'   value implied by `level`. With `"sparsity"`, `level` is treated as a
 #'   per-sign proportion and edges are retained from the positive and negative
-#'   tails separately. With `"effect_size"`, `level` is treated as a direct
+#'   tails separately. Because edge counts are discrete and ties at the cutoff
+#'   are retained, the realized proportion may be slightly larger than the
+#'   requested `level`. With `"effect_size"`, `level` is treated as a direct
 #'   absolute association cutoff.
 #' @param level Numeric threshold level associated with `method`.
 #'

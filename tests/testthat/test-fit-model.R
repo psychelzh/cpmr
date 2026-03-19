@@ -43,6 +43,32 @@ test_that("select_edges warns when sparsity selection drops one edge sign", {
   )
 })
 
+test_that("select_sparsity_thresholds applies per-sign proportions", {
+  associations <- c(seq_len(20), -seq_len(80))
+
+  cutoffs <- select_sparsity_thresholds(associations, proportion = 0.1)
+  mask <- threshold_edges_by_cutoffs(associations, cutoffs)
+
+  expect_equal(unname(cutoffs[["positive"]]), 19)
+  expect_equal(unname(cutoffs[["negative"]]), 73)
+  expect_equal(colSums(mask), c(positive = 2, negative = 8))
+})
+
+test_that("sparsity thresholding retains tied edges at the cutoff", {
+  associations <- c(rep(1, 4), rep(-1, 4))
+
+  cutoffs <- select_sparsity_thresholds(associations, proportion = 0.25)
+  mask <- threshold_edges_by_cutoffs(associations, cutoffs)
+
+  expect_equal(cutoffs, c(positive = 1, negative = 1))
+  expect_equal(colSums(mask), c(positive = 4, negative = 4))
+})
+
+test_that("sign_sparsity_cutoff handles empty scores and zero proportions", {
+  expect_identical(sign_sparsity_cutoff(numeric(), proportion = 0.1), Inf)
+  expect_identical(sign_sparsity_cutoff(c(3, 2, 1), proportion = 0), Inf)
+})
+
 test_that("select_edges validates threshold method", {
   withr::local_seed(1)
   conmat <- matrix(rnorm(60), nrow = 10, ncol = 6)

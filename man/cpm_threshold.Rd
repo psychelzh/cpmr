@@ -11,7 +11,9 @@ cpm_threshold(method = c("alpha", "sparsity", "effect_size"), level = 0.01)
 are selected by thresholding the absolute association against a critical
 value implied by \code{level}. With \code{"sparsity"}, \code{level} is treated as a
 per-sign proportion and edges are retained from the positive and negative
-tails separately. With \code{"effect_size"}, \code{level} is treated as a direct
+tails separately. Because edge counts are discrete and ties at the cutoff
+are retained, the realized proportion may be slightly larger than the
+requested \code{level}. With \code{"effect_size"}, \code{level} is treated as a direct
 absolute association cutoff.}
 
 \item{level}{Numeric threshold level associated with \code{method}.}

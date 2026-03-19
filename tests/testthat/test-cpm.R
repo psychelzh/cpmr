@@ -65,10 +65,19 @@ test_that("Alternative threshold method works", {
     behav
   )
   expect_s3_class(result, "cpm")
-  expect_snapshot_value(prediction_matrix(result), style = "json2")
-  expect_snapshot_value(result$edges, style = "json2")
-  expect_snapshot_value(result$params, style = "json2")
-  expect_snapshot(result)
+  expect_equal(sum(prediction_complete_cases(result)), 10)
+  expect_named(
+    result$predictions,
+    c("row", "real", "joint", "positive", "negative")
+  )
+  expect_equal(dim(result$edges), c(ncol(conmat), 2))
+  expect_identical(colnames(result$edges), c("positive", "negative"))
+  expect_true(any(result$edges))
+  expect_identical(result$params$threshold_method, "sparsity")
+  expect_identical(result$params$threshold_level, 0.01)
+  expect_identical(result$params$feature_space, "separate")
+  expect_identical(result$params$edge_weighting, "binary")
+  expect_identical(result$params$model, "lm")
 })
 
 test_that("Different threshold levels works", {

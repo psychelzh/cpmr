@@ -157,30 +157,28 @@ threshold_edges_by_cutoffs <- function(associations, cutoffs) {
 }
 
 select_sparsity_thresholds <- function(associations, proportion) {
-  k <- min(round(proportion * length(associations)), length(associations))
   positive_cutoff <- Inf
   negative_cutoff <- Inf
 
-  if (k > 0L) {
-    pos_idx <- which(!is.na(associations) & associations > 0)
-    neg_idx <- which(!is.na(associations) & associations < 0)
+  pos_idx <- which(!is.na(associations) & associations > 0)
+  neg_idx <- which(!is.na(associations) & associations < 0)
 
-    if (length(pos_idx)) {
-      pos_order <- order(associations[pos_idx], decreasing = TRUE)
-      positive_cutoff <- associations[pos_idx[pos_order][[min(
-        k,
-        length(pos_idx)
-      )]]]
-    }
-    if (length(neg_idx)) {
-      neg_strength <- -associations[neg_idx]
-      neg_order <- order(neg_strength, decreasing = TRUE)
-      negative_cutoff <- neg_strength[neg_order[[min(k, length(neg_idx))]]]
-    }
+  if (length(pos_idx)) {
+    positive_cutoff <- sign_sparsity_cutoff(
+      associations[pos_idx],
+      proportion = proportion
+    )
+  }
+  if (length(neg_idx)) {
+    negative_cutoff <- sign_sparsity_cutoff(
+      -associations[neg_idx],
+      proportion = proportion
+    )
   }
 
   if (
-    k > 0L && (is.infinite(positive_cutoff) || is.infinite(negative_cutoff))
+    proportion > 0L &&
+      (is.infinite(positive_cutoff) || is.infinite(negative_cutoff))
   ) {
     warning(
       paste(
@@ -191,6 +189,15 @@ select_sparsity_thresholds <- function(associations, proportion) {
   }
 
   stats::setNames(c(positive_cutoff, negative_cutoff), edge_types)
+}
+
+sign_sparsity_cutoff <- function(scores, proportion) {
+  if (!length(scores) || proportion <= 0) {
+    return(Inf)
+  }
+
+  k <- min(ceiling(proportion * length(scores)), length(scores))
+  scores[order(scores, decreasing = TRUE)[[k]]]
 }
 
 compute_edge_weights <- function(
