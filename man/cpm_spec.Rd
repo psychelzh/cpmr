@@ -7,11 +7,9 @@
 \title{Define a CPM model specification}
 \usage{
 cpm_spec(
-  screen = cpm_screen(),
-  feature_space = c("separate", "net"),
-  weighting = cpm_weighting(),
-  model = cpm_model_lm(),
-  standardize_edges = FALSE
+  selection = cpm_selection_cor(),
+  construction = cpm_construction_strength(),
+  model = cpm_model_lm()
 )
 
 \method{fit}{cpm_spec}(
@@ -36,31 +34,13 @@ cpm_spec(
 )
 }
 \arguments{
-\item{screen}{Edge-screening helper created by \code{\link[=cpm_screen]{cpm_screen()}}.}
+\item{selection}{Selection helper created by \code{\link[=cpm_selection_cor]{cpm_selection_cor()}}.}
 
-\item{feature_space}{How screened edges are turned into subject-level
-predictors after CPM edge selection. Positive edges are edges whose
-screening association with the outcome is positive and passes the threshold;
-negative edges are the corresponding negatively associated edges.
-\code{"separate"} constructs a positive strength and a negative strength for
-each subject, fits a \code{joint} stream from both together, and also returns
-\code{positive} and \code{negative} single-strength diagnostic streams. \code{"net"}
-constructs one \code{net_strength = positive_strength - negative_strength}
-feature and returns a single \code{net} stream.}
-
-\item{weighting}{Edge-weighting helper created by \code{\link[=cpm_weighting]{cpm_weighting()}}.}
+\item{construction}{Construction helper created by
+\code{\link[=cpm_construction_strength]{cpm_construction_strength()}}.}
 
 \item{model}{Outcome-model helper created by \code{\link[=cpm_model_lm]{cpm_model_lm()}}. This stage
 maps CPM-derived subject-level features to the behavioral outcome.}
-
-\item{standardize_edges}{Logical value indicating if edge strengths should be
-standardized within each training set before CPM feature construction. If
-\code{TRUE}, each edge is centered and scaled to unit variance using the
-training data, and the same transformation is applied again at prediction
-time. This follows the fold-local edge z-scoring approach described by
-Rapuano et al. (2020). Defaults to \code{FALSE} so the default specification
-stays close to the classic CPM network-strength workflow; set it to
-\code{TRUE} when you want this additional preprocessing step explicitly.}
 
 \item{object}{A \code{cpm_spec} object.}
 
@@ -112,23 +92,26 @@ parameters required to fit a connectome-based predictive model later with
 }
 \details{
 \code{cpm_spec()} keeps the main CPM decisions visible at the top level while
-grouping naturally paired settings into helpers:
+grouping stage-specific settings into helpers:
 \itemize{
-\item \code{\link[=cpm_screen]{cpm_screen()}} bundles the screening rule, its level, and optional advanced
-controls.
-\item \code{\link[=cpm_weighting]{cpm_weighting()}} bundles the edge-weighting method with its scale.
+\item \code{\link[=cpm_selection_cor]{cpm_selection_cor()}} configures the current correlation-based edge
+selection path.
+\item \code{\link[=cpm_construction_strength]{cpm_construction_strength()}} configures the current network-strength
+construction path.
 \item \code{\link[=cpm_model_lm]{cpm_model_lm()}} defines the outcome model fitted on CPM-derived features.
 }
 }
 \examples{
 spec <- cpm_spec(
-  screen = cpm_screen(
-    rule = "cor_abs",
-    level = 0.1,
-    control = list(cor_method = "spearman")
+  selection = cpm_selection_cor(
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.1
   ),
-  feature_space = "net",
-  weighting = cpm_weighting("sigmoid", scale = 0.03),
+  construction = cpm_construction_strength(
+    polarity = "net",
+    weighting = cpm_weighting("sigmoid", scale = 0.03)
+  ),
   model = cpm_model_lm()
 )
 spec

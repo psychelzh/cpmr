@@ -24,8 +24,8 @@ and predicted values.}
 
 \item{prediction columns}{One numeric column per configured prediction
 stream. For example, \code{joint}, \code{positive}, and \code{negative} when
-\code{feature_space = "separate"}, or \code{net} when
-\code{feature_space = "net"}.}
+\code{construction_polarity = "separate"}, or \code{net} when
+\code{construction_polarity = "net"}.}
 
 For \code{component = "edges"}:
 

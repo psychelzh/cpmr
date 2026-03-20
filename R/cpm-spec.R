@@ -5,44 +5,31 @@
 #' [fit()] or [fit_resamples()].
 #'
 #' `cpm_spec()` keeps the main CPM decisions visible at the top level while
-#' grouping naturally paired settings into helpers:
+#' grouping stage-specific settings into helpers:
 #'
-#' - [cpm_screen()] bundles the screening rule, its level, and optional advanced
-#'   controls.
-#' - [cpm_weighting()] bundles the edge-weighting method with its scale.
+#' - [cpm_selection_cor()] configures the current correlation-based edge
+#'   selection path.
+#' - [cpm_construction_strength()] configures the current network-strength
+#'   construction path.
 #' - [cpm_model_lm()] defines the outcome model fitted on CPM-derived features.
 #'
-#' @param screen Edge-screening helper created by [cpm_screen()].
-#' @param feature_space How screened edges are turned into subject-level
-#'   predictors after CPM edge selection. Positive edges are edges whose
-#'   screening association with the outcome is positive and passes the threshold;
-#'   negative edges are the corresponding negatively associated edges.
-#'   `"separate"` constructs a positive strength and a negative strength for
-#'   each subject, fits a `joint` stream from both together, and also returns
-#'   `positive` and `negative` single-strength diagnostic streams. `"net"`
-#'   constructs one `net_strength = positive_strength - negative_strength`
-#'   feature and returns a single `net` stream.
-#' @param weighting Edge-weighting helper created by [cpm_weighting()].
+#' @param selection Selection helper created by [cpm_selection_cor()].
+#' @param construction Construction helper created by
+#'   [cpm_construction_strength()].
 #' @param model Outcome-model helper created by [cpm_model_lm()]. This stage
 #'   maps CPM-derived subject-level features to the behavioral outcome.
-#' @param standardize_edges Logical value indicating if edge strengths should be
-#'   standardized within each training set before CPM feature construction. If
-#'   `TRUE`, each edge is centered and scaled to unit variance using the
-#'   training data, and the same transformation is applied again at prediction
-#'   time. This follows the fold-local edge z-scoring approach described by
-#'   Rapuano et al. (2020). Defaults to `FALSE` so the default specification
-#'   stays close to the classic CPM network-strength workflow; set it to
-#'   `TRUE` when you want this additional preprocessing step explicitly.
 #'
 #' @examples
 #' spec <- cpm_spec(
-#'   screen = cpm_screen(
-#'     rule = "cor_abs",
-#'     level = 0.1,
-#'     control = list(cor_method = "spearman")
+#'   selection = cpm_selection_cor(
+#'     method = "spearman",
+#'     criterion = "absolute",
+#'     level = 0.1
 #'   ),
-#'   feature_space = "net",
-#'   weighting = cpm_weighting("sigmoid", scale = 0.03),
+#'   construction = cpm_construction_strength(
+#'     polarity = "net",
+#'     weighting = cpm_weighting("sigmoid", scale = 0.03)
+#'   ),
 #'   model = cpm_model_lm()
 #' )
 #' spec
@@ -56,198 +43,91 @@
 #' summary(resample_obj)
 #' @export
 cpm_spec <- function(
-  screen = cpm_screen(),
-  feature_space = c("separate", "net"),
-  weighting = cpm_weighting(),
-  model = cpm_model_lm(),
-  standardize_edges = FALSE
+  selection = cpm_selection_cor(),
+  construction = cpm_construction_strength(),
+  model = cpm_model_lm()
 ) {
-  feature_space <- match.arg(feature_space)
   validate_cpm_component(
-    screen,
-    class = "cpm_screen_spec",
-    message = "`screen` must be created by `cpm_screen()`."
+    selection,
+    class = "cpm_selection_spec",
+    message = "`selection` must be created by `cpm_selection_cor()`."
   )
   validate_cpm_component(
-    weighting,
-    class = "cpm_weighting_spec",
-    message = "`weighting` must be created by `cpm_weighting()`."
+    construction,
+    class = "cpm_construction_spec",
+    message = paste(
+      "`construction` must be created by",
+      "`cpm_construction_strength()`."
+    )
   )
   validate_cpm_component(
     model,
     class = "cpm_model_spec",
     message = "`model` must be created by `cpm_model_lm()`."
   )
-  validate_standardize_edges(standardize_edges)
+
+  construction_params <- utils::modifyList(
+    unclass(construction),
+    list(weighting = unclass(construction$weighting))
+  )
 
   new_cpm_spec(
     params = list(
-      screen_rule = screen$rule,
-      screen_level = screen$level,
-      screen_control = screen$control,
-      feature_space = feature_space,
-      edge_weighting = weighting$method,
-      weighting_scale = weighting$scale,
-      model = model$type,
-      standardize_edges = standardize_edges
+      selection = unclass(selection),
+      construction = construction_params,
+      model = unclass(model)
     ),
     helpers = list(
-      screen = screen,
-      weighting = weighting,
+      selection = selection,
+      construction = construction,
       model = model
     )
-  )
-}
-
-#' Define CPM edge-screening settings
-#'
-#' Build the screening portion of a `cpm_spec()`. This stage chooses the
-#' screening rule used to keep positive and negative edges together with the
-#' level associated with that rule. Advanced controls stay available via
-#' `control`, but remain optional so the API emphasizes the screening rule
-#' itself. The default path is therefore `rule + level`, with `control`
-#' reserved for lower-frequency adjustments such as switching between Pearson
-#' and Spearman screening.
-#'
-#' @param rule Screening rule used in edge selection. With `"cor_p"`, edges are
-#'   selected by thresholding the absolute association against a critical value
-#'   implied by `level`. With `"sparsity"`, `level` is treated as a per-sign
-#'   proportion and edges are retained from the positive and negative tails
-#'   separately. Because edge counts are discrete and ties at the cutoff are
-#'   retained, the realized proportion may be slightly larger than the requested
-#'   `level`. With `"cor_abs"`, `level` is treated as a direct absolute
-#'   association cutoff.
-#' @param level Numeric level associated with `rule`.
-#' @param control Optional named list of advanced screening controls. For the
-#'   current correlation-based rules, the supported control is
-#'   `cor_method = "pearson"` or `"spearman"`. `NULL` uses the default CPM
-#'   screening controls for the chosen `rule`.
-#'
-#' @examples
-#' cpm_screen("cor_p", level = 0.05)
-#' cpm_screen(
-#'   rule = "cor_abs",
-#'   level = 0.1,
-#'   control = list(cor_method = "spearman")
-#' )
-#' @export
-cpm_screen <- function(
-  rule = c("cor_p", "sparsity", "cor_abs"),
-  level = 0.01,
-  control = NULL
-) {
-  rule <- match.arg(rule)
-  validate_screen_level(level)
-  control <- normalize_screen_control(control, rule)
-
-  structure(
-    list(
-      rule = rule,
-      level = level,
-      control = control
-    ),
-    class = "cpm_screen_spec"
-  )
-}
-
-#' @export
-print.cpm_screen_spec <- function(x, ...) {
-  cat("CPM screen:\n")
-  cat(sprintf("  Rule:    %s\n", x$rule))
-  cat(sprintf("  Level:   %s\n", format_threshold_level(x$level)))
-  cat(sprintf("  Control: %s\n", format_screen_control(x$control)))
-  invisible(x)
-}
-
-#' Define CPM edge-weight settings
-#'
-#' Build the edge-weighting rule used during CPM feature construction.
-#'
-#' @param method How edge-level statistics are converted into weights before
-#'   CPM feature construction. `"binary"` uses the hard thresholded edge mask.
-#'   `"sigmoid"` uses a smooth sigmoid weight centered on the threshold, so
-#'   edges closer to or beyond the cutoff contribute more strongly.
-#' @param scale Positive scale parameter used when `method = "sigmoid"`.
-#'   Smaller values make the weighting curve sharper around the threshold.
-#'
-#' @examples
-#' cpm_weighting("binary")
-#' cpm_weighting("sigmoid", scale = 0.03)
-#' @export
-cpm_weighting <- function(
-  method = c("binary", "sigmoid"),
-  scale = 0.05
-) {
-  method <- match.arg(method)
-  validate_weighting_scale(scale)
-
-  structure(
-    list(
-      method = method,
-      scale = scale
-    ),
-    class = "cpm_weighting_spec"
-  )
-}
-
-#' Define the outcome model used after CPM feature construction
-#'
-#' Build the second-stage model used after CPM has converted selected edges
-#' into subject-level predictors. `cpm_model_lm()` fits an intercept-inclusive
-#' linear regression with the CPM-derived features for each prediction stream.
-#'
-#' @examples
-#' cpm_model_lm()
-#' @export
-cpm_model_lm <- function() {
-  structure(
-    list(type = "lm"),
-    class = "cpm_model_spec"
   )
 }
 
 #' @export
 print.cpm_spec <- function(x, ...) {
   cat("CPM specification:\n")
-  cat("  Screening:\n")
+  cat("  Selection:\n")
   cat(sprintf(
-    "    Rule:             %s\n",
-    x$params$screen_rule
+    "    Method:           %s\n",
+    x$params$selection$method
+  ))
+  cat(sprintf(
+    "    Criterion:        %s\n",
+    x$params$selection$criterion
   ))
   cat(sprintf(
     "    Level:            %s\n",
-    format_threshold_level(x$params$screen_level)
+    format_threshold_level(x$params$selection$level)
   ))
+  cat("  Construction:\n")
   cat(sprintf(
-    "    Control:          %s\n",
-    format_screen_control(x$params$screen_control)
-  ))
-  cat("  Model:\n")
-  cat(sprintf(
-    "    Feature space:    %s\n",
-    x$params$feature_space
+    "    Polarity:         %s\n",
+    x$params$construction$polarity
   ))
   cat(sprintf(
     "    Edge weighting:   %s\n",
-    x$params$edge_weighting
+    x$params$construction$weighting$method
   ))
   cat(sprintf(
     "    Weighting scale:  %s\n",
-    format_threshold_level(x$params$weighting_scale)
+    format_threshold_level(x$params$construction$weighting$scale)
   ))
   cat(sprintf(
-    "    Outcome model:    %s\n",
-    format_model_type(x$params$model)
+    "    Edge standardization: %s\n",
+    format_edge_standardization(x$params$construction$standardize_edges)
   ))
   cat(sprintf(
     "    Streams:          %s\n",
     format_prediction_streams(
-      prediction_streams_for_feature_space(x$params$feature_space)
+      prediction_streams_for_polarity(x$params$construction$polarity)
     )
   ))
+  cat("  Model:\n")
   cat(sprintf(
-    "    Edge standardization: %s\n",
-    format_edge_standardization(x$params$standardize_edges)
+    "    Outcome model:    %s\n",
+    format_model_type(x$params$model$type)
   ))
   invisible(x)
 }
@@ -373,137 +253,55 @@ new_cpm_spec <- function(params, helpers = cpm_helpers_from_params(params)) {
 
 cpm_helpers_from_params <- function(params) {
   list(
-    screen = cpm_screen(
-      rule = params$screen_rule,
-      level = params$screen_level,
-      control = params$screen_control
+    selection = selection_from_params(
+      type = params$selection$type,
+      method = params$selection$method,
+      criterion = params$selection$criterion,
+      level = params$selection$level
     ),
-    weighting = cpm_weighting(
-      method = params$edge_weighting,
-      scale = params$weighting_scale
+    construction = construction_from_params(
+      type = params$construction$type,
+      polarity = params$construction$polarity,
+      edge_weighting = params$construction$weighting$method,
+      weighting_scale = params$construction$weighting$scale,
+      standardize_edges = params$construction$standardize_edges
     ),
-    model = cpm_model_from_params(params$model)
+    model = cpm_model_from_params(params$model$type)
   )
 }
 
-cpm_model_from_params <- function(model_type) {
+selection_from_params <- function(type, method, criterion, level) {
   switch(
-    model_type,
-    lm = cpm_model_lm(),
-    stop("`model` must be a supported CPM outcome model.", call. = FALSE)
+    type,
+    cor = cpm_selection_cor(
+      method = method,
+      criterion = criterion,
+      level = level
+    ),
+    stop("`selection` must be a supported CPM selection type.", call. = FALSE)
   )
 }
 
-validate_cpm_component <- function(x, class, message) {
-  if (!inherits(x, class)) {
-    stop(message, call. = FALSE)
-  }
-
-  invisible(x)
-}
-
-screen_control_defaults <- function(rule) {
+construction_from_params <- function(
+  type,
+  polarity,
+  edge_weighting,
+  weighting_scale,
+  standardize_edges
+) {
   switch(
-    rule,
-    cor_p = list(cor_method = "pearson"),
-    sparsity = list(cor_method = "pearson"),
-    cor_abs = list(cor_method = "pearson"),
-    stop("`rule` must be a supported CPM screening rule.", call. = FALSE)
-  )
-}
-
-normalize_screen_control <- function(control, rule) {
-  defaults <- screen_control_defaults(rule)
-
-  if (is.null(control)) {
-    return(defaults)
-  }
-
-  if (!is.list(control)) {
-    stop("`control` must be NULL or a named list.", call. = FALSE)
-  }
-
-  if (
-    length(control) && (is.null(names(control)) || any(names(control) == ""))
-  ) {
-    stop("`control` must be a named list.", call. = FALSE)
-  }
-
-  unknown <- setdiff(names(control), names(defaults))
-  if (length(unknown)) {
-    stop(
-      paste0(
-        "`control` contains unsupported fields for `rule = \"",
-        rule,
-        "\"`: ",
-        paste(unknown, collapse = ", "),
-        "."
+    type,
+    strength = cpm_construction_strength(
+      polarity = polarity,
+      weighting = cpm_weighting(
+        method = edge_weighting,
+        scale = weighting_scale
       ),
-      call. = FALSE
-    )
-  }
-
-  resolved <- utils::modifyList(defaults, control)
-  if (
-    !is.character(resolved$cor_method) ||
-      length(resolved$cor_method) != 1L ||
-      is.na(resolved$cor_method) ||
-      !resolved$cor_method %in% c("pearson", "spearman")
-  ) {
+      standardize_edges = standardize_edges
+    ),
     stop(
-      "`control$cor_method` must be either \"pearson\" or \"spearman\".",
+      "`construction` must be a supported CPM construction type.",
       call. = FALSE
     )
-  }
-
-  resolved
-}
-
-validate_screen_level <- function(level) {
-  if (
-    !is.numeric(level) ||
-      length(level) != 1L ||
-      is.na(level) ||
-      !is.finite(level) ||
-      level < 0 ||
-      level > 1
-  ) {
-    stop("`level` must be a single number between 0 and 1.", call. = FALSE)
-  }
-
-  invisible(level)
-}
-
-validate_weighting_scale <- function(scale) {
-  if (
-    !is.numeric(scale) ||
-      length(scale) != 1L ||
-      is.na(scale) ||
-      !is.finite(scale) ||
-      scale <= 0
-  ) {
-    stop("`scale` must be a single positive number.", call. = FALSE)
-  }
-
-  invisible(scale)
-}
-
-validate_standardize_edges <- function(standardize_edges) {
-  if (
-    !is.logical(standardize_edges) ||
-      length(standardize_edges) != 1L ||
-      is.na(standardize_edges)
-  ) {
-    stop("`standardize_edges` must be either TRUE or FALSE.", call. = FALSE)
-  }
-
-  invisible(standardize_edges)
-}
-
-format_model_type <- function(model_type) {
-  switch(
-    model_type,
-    lm = "linear regression",
-    model_type
   )
 }

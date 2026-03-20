@@ -74,22 +74,6 @@ format_edge_standardization <- function(x) {
   ifelse(is.na(x), "NA", ifelse(isTRUE(x), "z-score", "none"))
 }
 
-format_screen_control <- function(control) {
-  default <- list(cor_method = "pearson")
-  if (is.null(control) || identical(control, default)) {
-    return("default")
-  }
-
-  paste(
-    sprintf(
-      "%s = %s",
-      names(control),
-      vapply(control, as.character, character(1))
-    ),
-    collapse = ", "
-  )
-}
-
 format_covariates <- function(x) {
   ifelse(is.na(x), "NA", ifelse(isTRUE(x), "included", "none"))
 }

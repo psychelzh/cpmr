@@ -1,48 +1,57 @@
-test_that("cpm_spec stores model parameters", {
+test_that("cpm_spec stores staged model parameters", {
   spec <- cpm_spec(
-    screen = cpm_screen(
-      rule = "sparsity",
-      level = 0.05,
-      control = list(cor_method = "spearman")
+    selection = cpm_selection_cor(
+      method = "spearman",
+      criterion = "proportion",
+      level = 0.05
     ),
-    feature_space = "net",
-    weighting = cpm_weighting("sigmoid", scale = 0.02),
-    model = cpm_model_lm(),
-    standardize_edges = FALSE
+    construction = cpm_construction_strength(
+      polarity = "net",
+      weighting = cpm_weighting("sigmoid", scale = 0.02),
+      standardize_edges = FALSE
+    ),
+    model = cpm_model_lm()
   )
 
   expect_s3_class(spec, "cpm_spec")
-  expect_s3_class(spec$helpers$screen, "cpm_screen_spec")
-  expect_s3_class(spec$helpers$weighting, "cpm_weighting_spec")
+  expect_s3_class(spec$helpers$selection, "cpm_selection_spec")
+  expect_s3_class(spec$helpers$construction, "cpm_construction_spec")
   expect_s3_class(spec$helpers$model, "cpm_model_spec")
-  expect_identical(spec$params$screen_rule, "sparsity")
-  expect_identical(spec$params$screen_level, 0.05)
-  expect_identical(spec$params$screen_control, list(cor_method = "spearman"))
-  expect_identical(spec$params$feature_space, "net")
-  expect_identical(spec$params$edge_weighting, "sigmoid")
-  expect_identical(spec$params$weighting_scale, 0.02)
-  expect_identical(spec$params$model, "lm")
-  expect_false(spec$params$standardize_edges)
+  expect_identical(spec$params$selection$type, "cor")
+  expect_identical(spec$params$selection$method, "spearman")
+  expect_identical(spec$params$selection$criterion, "proportion")
+  expect_identical(spec$params$selection$level, 0.05)
+  expect_identical(spec$params$construction$type, "strength")
+  expect_identical(spec$params$construction$polarity, "net")
+  expect_identical(spec$params$construction$weighting$method, "sigmoid")
+  expect_identical(spec$params$construction$weighting$scale, 0.02)
+  expect_false(spec$params$construction$standardize_edges)
+  expect_identical(spec$params$model$type, "lm")
 })
 
 test_that("new_cpm_spec builds cpm_spec objects", {
   params <- list(
-    screen_rule = "cor_p",
-    screen_level = 0.05,
-    screen_control = list(cor_method = "pearson"),
-    feature_space = "separate",
-    edge_weighting = "binary",
-    weighting_scale = 0.05,
-    model = "lm",
-    standardize_edges = TRUE
+    selection = list(
+      type = "cor",
+      method = "pearson",
+      criterion = "p_value",
+      level = 0.05
+    ),
+    construction = list(
+      type = "strength",
+      polarity = "separate",
+      weighting = list(method = "binary", scale = 0.05),
+      standardize_edges = TRUE
+    ),
+    model = list(type = "lm")
   )
 
   spec <- new_cpm_spec(params = params)
 
   expect_s3_class(spec, "cpm_spec")
   expect_identical(spec$params, params)
-  expect_s3_class(spec$helpers$screen, "cpm_screen_spec")
-  expect_s3_class(spec$helpers$weighting, "cpm_weighting_spec")
+  expect_s3_class(spec$helpers$selection, "cpm_selection_spec")
+  expect_s3_class(spec$helpers$construction, "cpm_construction_spec")
   expect_s3_class(spec$helpers$model, "cpm_model_spec")
 })
 
@@ -60,22 +69,29 @@ test_that("fit.cpm_spec returns a cpm object with correct call", {
 test_that("cpm_spec defaults to classic CPM edge handling", {
   spec <- cpm_spec()
 
-  expect_false(spec$params$standardize_edges)
+  expect_identical(spec$params$selection$type, "cor")
+  expect_identical(spec$params$selection$method, "pearson")
+  expect_identical(spec$params$selection$criterion, "p_value")
+  expect_identical(spec$params$selection$level, 0.01)
+  expect_identical(spec$params$construction$type, "strength")
+  expect_identical(spec$params$construction$polarity, "separate")
+  expect_identical(spec$params$construction$weighting$method, "binary")
+  expect_false(spec$params$construction$standardize_edges)
 })
 
 test_that("helper constructors validate scalar parameter values", {
   expect_error(
-    cpm_screen(level = -0.1),
+    cpm_selection_cor(level = -0.1),
     "`level` must be a single number between 0 and 1.",
     fixed = TRUE
   )
   expect_error(
-    cpm_screen(level = c(0.1, 0.2)),
+    cpm_selection_cor(level = c(0.1, 0.2)),
     "`level` must be a single number between 0 and 1.",
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(standardize_edges = NA),
+    cpm_construction_strength(standardize_edges = NA),
     "`standardize_edges` must be either TRUE or FALSE.",
     fixed = TRUE
   )
@@ -85,18 +101,21 @@ test_that("helper constructors validate scalar parameter values", {
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(standardize_edges = c(TRUE, FALSE)),
+    cpm_construction_strength(standardize_edges = c(TRUE, FALSE)),
     "`standardize_edges` must be either TRUE or FALSE.",
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(screen = list()),
-    "`screen` must be created by `cpm_screen()`.",
+    cpm_spec(selection = list()),
+    "`selection` must be created by `cpm_selection_cor()`.",
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(weighting = list()),
-    "`weighting` must be created by `cpm_weighting()`.",
+    cpm_spec(construction = list()),
+    paste(
+      "`construction` must be created by",
+      "`cpm_construction_strength()`."
+    ),
     fixed = TRUE
   )
   expect_error(
@@ -104,29 +123,9 @@ test_that("helper constructors validate scalar parameter values", {
     "`model` must be created by `cpm_model_lm()`.",
     fixed = TRUE
   )
-  expect_error(
-    cpm_screen(control = "spearman"),
-    "`control` must be NULL or a named list.",
-    fixed = TRUE
-  )
-  expect_error(
-    cpm_screen(control = list("spearman")),
-    "`control` must be a named list.",
-    fixed = TRUE
-  )
-  expect_error(
-    cpm_screen(control = list(cor_method = "kendall")),
-    "`control$cor_method` must be either \"pearson\" or \"spearman\".",
-    fixed = TRUE
-  )
-  expect_error(
-    cpm_screen(rule = "cor_p", control = list(foo = "bar")),
-    "`control` contains unsupported fields for `rule = \"cor_p\"`: foo.",
-    fixed = TRUE
-  )
 })
 
-test_that("model helper constructors round-trip through params", {
+test_that("helper constructors round-trip through params", {
   expect_s3_class(cpm_model_lm(), "cpm_model_spec")
   expect_identical(cpm_model_lm()$type, "lm")
   expect_identical(format_model_type("custom"), "custom")
@@ -135,51 +134,76 @@ test_that("model helper constructors round-trip through params", {
     "`model` must be a supported CPM outcome model.",
     fixed = TRUE
   )
-})
-
-test_that("internal screen control defaults validate supported rules", {
   expect_error(
-    screen_control_defaults("bogus"),
-    "`rule` must be a supported CPM screening rule.",
+    selection_from_params(
+      "bogus",
+      method = "pearson",
+      criterion = "p_value",
+      level = 0.1
+    ),
+    "`selection` must be a supported CPM selection type.",
+    fixed = TRUE
+  )
+  expect_error(
+    construction_from_params(
+      "bogus",
+      polarity = "separate",
+      edge_weighting = "binary",
+      weighting_scale = 0.05,
+      standardize_edges = FALSE
+    ),
+    "`construction` must be a supported CPM construction type.",
     fixed = TRUE
   )
 })
 
-test_that("print.cpm_spec shows model options", {
+test_that("print methods show readable staged settings", {
   spec <- cpm_spec(
-    screen = cpm_screen(
-      rule = "sparsity"
+    selection = cpm_selection_cor(
+      method = "spearman",
+      criterion = "absolute",
+      level = 0.1
+    ),
+    construction = cpm_construction_strength(
+      polarity = "net",
+      weighting = cpm_weighting("sigmoid", scale = 0.03),
+      standardize_edges = TRUE
     )
   )
 
   expect_output(print(spec), "CPM specification")
-  expect_output(print(spec), "Screening")
-  expect_output(print(spec), "Rule:\\s+sparsity")
-  expect_output(print(spec), "Control:\\s+default")
-  expect_output(print(spec), "Edge weighting")
+  expect_output(print(spec), "Selection")
+  expect_output(print(spec), "Method:\\s+spearman")
+  expect_output(print(spec), "Criterion:\\s+absolute")
+  expect_output(print(spec), "Construction")
+  expect_output(print(spec), "Polarity:\\s+net")
   expect_output(print(spec), "Outcome model:\\s+linear regression")
-  expect_output(print(spec), "Streams")
-  expect_output(print(spec), "Edge standardization")
-})
 
-test_that("print.cpm_screen shows readable screen settings", {
-  screen <- cpm_screen(
-    rule = "cor_abs",
-    level = 0.1,
-    control = list(cor_method = "spearman")
+  selection <- cpm_selection_cor(
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.1
   )
+  expect_output(print(selection), "CPM selection \\(correlation\\)")
+  expect_output(print(selection), "Criterion:\\s+absolute")
 
-  expect_output(print(screen), "CPM screen")
-  expect_output(print(screen), "Rule:\\s+cor_abs")
-  expect_output(print(screen), "Level:\\s+0.1")
-  expect_output(print(screen), "Control:\\s+cor_method = spearman")
+  construction <- cpm_construction_strength(
+    polarity = "net",
+    weighting = cpm_weighting("sigmoid", scale = 0.03),
+    standardize_edges = TRUE
+  )
+  expect_output(print(construction), "CPM construction \\(network strength\\)")
+  expect_output(print(construction), "Polarity:\\s+net")
+  expect_output(print(construction), "Edge standardization:\\s+z-score")
 })
 
-test_that("net feature space yields a single prediction stream", {
+test_that("net construction yields a single prediction stream", {
   withr::local_seed(101)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(feature_space = "net")
+  spec <- cpm_spec(
+    construction = cpm_construction_strength(polarity = "net")
+  )
 
   result <- fit(spec, conmat = conmat, behav = behav)
 
@@ -192,11 +216,13 @@ test_that("sigmoid edge weighting stores smooth edge weights in the model", {
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(
-    screen = cpm_screen(
-      rule = "cor_abs",
+    selection = cpm_selection_cor(
+      criterion = "absolute",
       level = 0.1
     ),
-    weighting = cpm_weighting("sigmoid", scale = 0.03)
+    construction = cpm_construction_strength(
+      weighting = cpm_weighting("sigmoid", scale = 0.03)
+    )
   )
 
   result <- fit(spec, conmat = conmat, behav = behav)
@@ -458,8 +484,8 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   behav <- rnorm(n)
   covariates <- matrix(rnorm(n * 2), ncol = 2)
   spec <- cpm_spec(
-    screen = cpm_screen(
-      rule = "cor_p",
+    selection = cpm_selection_cor(
+      criterion = "p_value",
       level = 0.1
     )
   )
@@ -491,9 +517,9 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   fold_edges <- select_edges(
     conmat = training$conmat,
     behav = training$behav,
-    screen_rule = spec$params$screen_rule,
-    screen_level = spec$params$screen_level,
-    screen_control = spec$params$screen_control
+    selection_method = spec$params$selection$method,
+    selection_criterion = spec$params$selection$criterion,
+    selection_level = spec$params$selection$level
   )
   fold_model <- train_model(
     conmat = training$conmat,
@@ -501,14 +527,14 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     edge_screen = screen_edges(
       conmat = training$conmat,
       behav = training$behav,
-      screen_rule = spec$params$screen_rule,
-      screen_level = spec$params$screen_level,
-      screen_control = spec$params$screen_control,
-      edge_weighting = spec$params$edge_weighting,
-      weighting_scale = spec$params$weighting_scale
+      selection_method = spec$params$selection$method,
+      selection_criterion = spec$params$selection$criterion,
+      selection_level = spec$params$selection$level,
+      edge_weighting = spec$params$construction$weighting$method,
+      weighting_scale = spec$params$construction$weighting$scale
     ),
-    standardize_edges = spec$params$standardize_edges,
-    feature_space = spec$params$feature_space,
+    standardize_edges = spec$params$construction$standardize_edges,
+    construction_polarity = spec$params$construction$polarity,
     model_spec = spec$helpers$model
   )
   resampled <- fit_resamples(

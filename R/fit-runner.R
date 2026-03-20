@@ -7,8 +7,8 @@ run_single_fit <- function(
   call = NULL
 ) {
   params <- object$params
-  prediction_streams <- prediction_streams_for_feature_space(
-    params$feature_space
+  prediction_streams <- prediction_streams_for_polarity(
+    params$construction$polarity
   )
   fit_context <- resolve_fit_context(
     conmat = conmat,
@@ -34,18 +34,18 @@ run_single_fit <- function(
   edge_screen <- screen_edges(
     conmat = training$conmat,
     behav = training$behav,
-    screen_rule = params$screen_rule,
-    screen_level = params$screen_level,
-    screen_control = params$screen_control,
-    edge_weighting = params$edge_weighting,
-    weighting_scale = params$weighting_scale
+    selection_method = params$selection$method,
+    selection_criterion = params$selection$criterion,
+    selection_level = params$selection$level,
+    edge_weighting = params$construction$weighting$method,
+    weighting_scale = params$construction$weighting$scale
   )
   model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
     edge_screen = edge_screen,
-    standardize_edges = params$standardize_edges,
-    feature_space = params$feature_space,
+    standardize_edges = params$construction$standardize_edges,
+    construction_polarity = params$construction$polarity,
     model_spec = object$helpers$model
   )
   pred[include_cases, ] <- predict_model(model, training$conmat)
@@ -80,8 +80,8 @@ run_resample_fit <- function(
   call = NULL
 ) {
   params <- object$params
-  prediction_streams <- prediction_streams_for_feature_space(
-    params$feature_space
+  prediction_streams <- prediction_streams_for_polarity(
+    params$construction$polarity
   )
   return_edges <- match.arg(return_edges)
   if (is.null(fit_context)) {
@@ -121,18 +121,18 @@ run_resample_fit <- function(
     fold_screen <- screen_edges(
       conmat = training$conmat,
       behav = training$behav,
-      screen_rule = params$screen_rule,
-      screen_level = params$screen_level,
-      screen_control = params$screen_control,
-      edge_weighting = params$edge_weighting,
-      weighting_scale = params$weighting_scale
+      selection_method = params$selection$method,
+      selection_criterion = params$selection$criterion,
+      selection_level = params$selection$level,
+      edge_weighting = params$construction$weighting$method,
+      weighting_scale = params$construction$weighting$scale
     )
     fold_model <- train_model(
       conmat = training$conmat,
       behav = training$behav,
       edge_screen = fold_screen,
-      standardize_edges = params$standardize_edges,
-      feature_space = params$feature_space,
+      standardize_edges = params$construction$standardize_edges,
+      construction_polarity = params$construction$polarity,
       model_spec = object$helpers$model
     )
     assessment <- prepare_assessment_data(
@@ -180,20 +180,15 @@ new_fit_params <- function(
   na_action,
   extras = list()
 ) {
-  c(
-    list(
-      covariates = !is.null(covariates),
-      screen_rule = spec_params$screen_rule,
-      screen_level = spec_params$screen_level,
-      screen_control = spec_params$screen_control,
-      feature_space = spec_params$feature_space,
-      edge_weighting = spec_params$edge_weighting,
-      weighting_scale = spec_params$weighting_scale,
-      model = spec_params$model,
-      na_action = na_action,
-      standardize_edges = spec_params$standardize_edges
-    ),
-    extras
+  utils::modifyList(
+    spec_params,
+    c(
+      list(
+        covariates = !is.null(covariates),
+        na_action = na_action
+      ),
+      extras
+    )
   )
 }
 

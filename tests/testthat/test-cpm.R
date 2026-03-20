@@ -26,8 +26,8 @@ test_that("new_cpm builds single-fit CPM objects", {
   conmat <- matrix(rnorm(120), nrow = 10, ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(
-    screen = cpm_screen(
-      rule = "cor_p",
+    selection = cpm_selection_cor(
+      criterion = "p_value",
       level = 0.05
     )
   )
@@ -61,7 +61,7 @@ test_that("Alternative threshold method works", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
   result <- fit(
-    cpm_spec(screen = cpm_screen(rule = "sparsity")),
+    cpm_spec(selection = cpm_selection_cor(criterion = "proportion")),
     conmat,
     behav
   )
@@ -74,11 +74,13 @@ test_that("Alternative threshold method works", {
   expect_equal(dim(result$edges), c(ncol(conmat), 2))
   expect_identical(colnames(result$edges), c("positive", "negative"))
   expect_true(any(result$edges))
-  expect_identical(result$params$screen_rule, "sparsity")
-  expect_identical(result$params$screen_level, 0.01)
-  expect_identical(result$params$feature_space, "separate")
-  expect_identical(result$params$edge_weighting, "binary")
-  expect_identical(result$params$model, "lm")
+  expect_identical(result$params$selection$type, "cor")
+  expect_identical(result$params$selection$criterion, "proportion")
+  expect_identical(result$params$selection$level, 0.01)
+  expect_identical(result$params$construction$type, "strength")
+  expect_identical(result$params$construction$polarity, "separate")
+  expect_identical(result$params$construction$weighting$method, "binary")
+  expect_identical(result$params$model$type, "lm")
 })
 
 test_that("Different threshold levels works", {
@@ -86,7 +88,7 @@ test_that("Different threshold levels works", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
   result <- fit(
-    cpm_spec(screen = cpm_screen(level = 0.1)),
+    cpm_spec(selection = cpm_selection_cor(level = 0.1)),
     conmat,
     behav
   )

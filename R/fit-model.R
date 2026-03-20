@@ -1,39 +1,40 @@
 screen_edges <- function(
   conmat,
   behav,
-  screen_rule,
-  screen_level,
-  screen_control = list(cor_method = "pearson"),
+  selection_method = c("pearson", "spearman"),
+  selection_criterion = c("p_value", "absolute", "proportion"),
+  selection_level = 0.01,
   edge_weighting = c("binary", "sigmoid"),
   weighting_scale = 0.05
 ) {
+  selection_method <- match.arg(selection_method)
+  selection_criterion <- match.arg(selection_criterion)
   edge_weighting <- match.arg(edge_weighting)
-  association_method <- screen_control$cor_method
   associations <- drop(stats::cor(
     conmat,
     behav,
-    method = association_method
+    method = selection_method
   ))
   associations[!is.finite(associations)] <- NA_real_
 
   thresholds <- switch(
-    screen_rule,
-    cor_p = stats::setNames(
-      rep(critical_r(nrow(conmat), screen_level), length(edge_types)),
+    selection_criterion,
+    p_value = stats::setNames(
+      rep(critical_r(nrow(conmat), selection_level), length(edge_types)),
       edge_types
     ),
-    cor_abs = stats::setNames(
-      rep(screen_level, length(edge_types)),
+    absolute = stats::setNames(
+      rep(selection_level, length(edge_types)),
       edge_types
     ),
-    sparsity = select_sparsity_thresholds(
+    proportion = select_sparsity_thresholds(
       associations = associations,
-      proportion = screen_level
+      proportion = selection_level
     ),
     stop(
       paste(
-        "`screen_rule` must be one of",
-        "\"cor_p\", \"sparsity\", or \"cor_abs\"."
+        "`selection_criterion` must be one of",
+        "\"p_value\", \"absolute\", or \"proportion\"."
       )
     )
   )
@@ -62,16 +63,16 @@ screen_edges <- function(
 select_edges <- function(
   conmat,
   behav,
-  screen_rule,
-  screen_level,
-  screen_control = list(cor_method = "pearson")
+  selection_method = c("pearson", "spearman"),
+  selection_criterion = c("p_value", "absolute", "proportion"),
+  selection_level = 0.01
 ) {
   screen_edges(
     conmat = conmat,
     behav = behav,
-    screen_rule = screen_rule,
-    screen_level = screen_level,
-    screen_control = screen_control
+    selection_method = selection_method,
+    selection_criterion = selection_criterion,
+    selection_level = selection_level
   )$mask
 }
 
@@ -80,7 +81,7 @@ train_model <- function(
   behav,
   edge_screen,
   standardize_edges,
-  feature_space,
+  construction_polarity,
   model_spec
 ) {
   center <- NULL
@@ -92,13 +93,13 @@ train_model <- function(
   }
 
   network_strengths <- compute_network_strengths(conmat, edge_screen$weights)
-  prediction_streams <- prediction_streams_for_feature_space(feature_space)
+  prediction_streams <- prediction_streams_for_polarity(construction_polarity)
 
   outcome_models <- lapply(prediction_streams, function(prediction_stream) {
     fit_prediction_model(
       network_strengths = network_strengths,
       behav = behav,
-      feature_space = feature_space,
+      construction_polarity = construction_polarity,
       prediction_stream = prediction_stream,
       model_spec = model_spec
     )
@@ -114,7 +115,7 @@ train_model <- function(
     edge_weighting = edge_screen$edge_weighting,
     weighting_scale = edge_screen$weighting_scale,
     edge_thresholds = edge_screen$thresholds,
-    feature_space = feature_space,
+    construction_polarity = construction_polarity,
     model_spec = model_spec,
     prediction_streams = prediction_streams,
     outcome_models = outcome_models
@@ -138,7 +139,7 @@ predict_model <- function(model, conmat_new) {
     pred[, prediction_stream] <- predict_prediction_model(
       fitted_model = model$outcome_models[[prediction_stream]],
       network_strengths = network_strengths,
-      feature_space = model$feature_space,
+      construction_polarity = model$construction_polarity,
       prediction_stream = prediction_stream
     )
   }
@@ -272,13 +273,13 @@ weighted_row_sums_or_zero <- function(conmat, weights) {
 fit_prediction_model <- function(
   network_strengths,
   behav,
-  feature_space,
+  construction_polarity,
   prediction_stream,
   model_spec
 ) {
   features <- prediction_features(
     network_strengths = network_strengths,
-    feature_space = feature_space,
+    construction_polarity = construction_polarity,
     prediction_stream = prediction_stream
   )
 
@@ -292,12 +293,12 @@ fit_prediction_model <- function(
 predict_prediction_model <- function(
   fitted_model,
   network_strengths,
-  feature_space,
+  construction_polarity,
   prediction_stream
 ) {
   features <- prediction_features(
     network_strengths = network_strengths,
-    feature_space = feature_space,
+    construction_polarity = construction_polarity,
     prediction_stream = prediction_stream
   )
 
@@ -309,11 +310,11 @@ predict_prediction_model <- function(
 
 prediction_features <- function(
   network_strengths,
-  feature_space,
+  construction_polarity,
   prediction_stream
 ) {
   switch(
-    feature_space,
+    construction_polarity,
     separate = separate_prediction_features(
       network_strengths = network_strengths,
       prediction_stream = prediction_stream
@@ -325,7 +326,7 @@ prediction_features <- function(
     ),
     stop(
       paste(
-        "`feature_space` must be either \"separate\" or \"net\"."
+        "`construction_polarity` must be either \"separate\" or \"net\"."
       )
     )
   )
@@ -344,7 +345,7 @@ separate_prediction_features <- function(network_strengths, prediction_stream) {
       paste0(
         "`prediction_stream` must be one of ",
         "\"joint\", \"positive\", or \"negative\" for ",
-        "`feature_space = \"separate\"`."
+        "`construction_polarity = \"separate\"`."
       ),
       call. = FALSE
     )
@@ -395,14 +396,14 @@ predict_lm_outcome_model <- function(fitted_model, features) {
   drop(design %*% fitted_model$prediction_coefficients)
 }
 
-prediction_streams_for_feature_space <- function(feature_space) {
+prediction_streams_for_polarity <- function(construction_polarity) {
   switch(
-    feature_space,
+    construction_polarity,
     separate = c("joint", edge_types),
     net = "net",
     stop(
       paste(
-        "`feature_space` must be either \"separate\" or \"net\"."
+        "`construction_polarity` must be either \"separate\" or \"net\"."
       )
     )
   )

@@ -16,7 +16,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "screen_rule", "screen_level", "screen_control", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges", "method", "joint", "positive", "negative"]
+          "value": ["covariates", "na_action", "selection_type", "selection_method", "selection_criterion", "selection_level", "construction_type", "construction_polarity", "edge_weighting", "weighting_scale", "standardize_edges", "model_type", "method", "joint", "positive", "negative"]
         }
       },
       "value": [
@@ -28,7 +28,22 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["cor_p"]
+          "value": ["fail"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["cor"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["pearson"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["p_value"]
         },
         {
           "type": "double",
@@ -36,21 +51,9 @@
           "value": [0.01]
         },
         {
-          "type": "list",
-          "attributes": {
-            "names": {
-              "type": "character",
-              "attributes": {},
-              "value": ["cor_method"]
-            }
-          },
-          "value": [
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pearson"]
-            }
-          ]
+          "type": "character",
+          "attributes": {},
+          "value": ["strength"]
         },
         {
           "type": "character",
@@ -68,19 +71,14 @@
           "value": [0.05]
         },
         {
-          "type": "character",
-          "attributes": {},
-          "value": ["lm"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["fail"]
-        },
-        {
           "type": "logical",
           "attributes": {},
           "value": [false]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["lm"]
         },
         {
           "type": "character",
@@ -123,7 +121,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "screen_rule", "screen_level", "screen_control", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges", "positive", "negative"]
+          "value": ["covariates", "na_action", "selection_type", "selection_method", "selection_criterion", "selection_level", "construction_type", "construction_polarity", "edge_weighting", "weighting_scale", "standardize_edges", "model_type", "positive", "negative"]
         }
       },
       "value": [
@@ -135,7 +133,22 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["cor_p"]
+          "value": ["fail"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["cor"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["pearson"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["p_value"]
         },
         {
           "type": "double",
@@ -143,21 +156,9 @@
           "value": [0.01]
         },
         {
-          "type": "list",
-          "attributes": {
-            "names": {
-              "type": "character",
-              "attributes": {},
-              "value": ["cor_method"]
-            }
-          },
-          "value": [
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pearson"]
-            }
-          ]
+          "type": "character",
+          "attributes": {},
+          "value": ["strength"]
         },
         {
           "type": "character",
@@ -175,19 +176,14 @@
           "value": [0.05]
         },
         {
-          "type": "character",
-          "attributes": {},
-          "value": ["lm"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["fail"]
-        },
-        {
           "type": "logical",
           "attributes": {},
           "value": [false]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["lm"]
         },
         {
           "type": "list",

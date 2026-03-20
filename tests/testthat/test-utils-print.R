@@ -9,14 +9,6 @@ test_that("format helpers produce stable display strings", {
   expect_identical(format_yes_no(FALSE), "no")
   expect_identical(format_edge_standardization(TRUE), "z-score")
   expect_identical(format_edge_standardization(FALSE), "none")
-  expect_identical(
-    format_screen_control(list(cor_method = "pearson")),
-    "default"
-  )
-  expect_identical(
-    format_screen_control(list(cor_method = "spearman")),
-    "cor_method = spearman"
-  )
   expect_identical(format_covariates(TRUE), "included")
   expect_identical(format_covariates(FALSE), "none")
   expect_identical(format_method_name("pearson"), "Pearson")

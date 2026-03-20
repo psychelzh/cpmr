@@ -3,8 +3,8 @@ test_that("run_single_fit matches fit() outputs on single data", {
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(
-    screen = cpm_screen(
-      rule = "cor_p",
+    selection = cpm_selection_cor(
+      criterion = "p_value",
       level = 0.05
     )
   )
@@ -63,8 +63,8 @@ test_that("run_resample_fit matches fit_resamples() outputs", {
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(
-    screen = cpm_screen(
-      rule = "sparsity",
+    selection = cpm_selection_cor(
+      criterion = "proportion",
       level = 0.2
     )
   )

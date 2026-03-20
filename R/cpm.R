@@ -59,32 +59,32 @@ print.cpm <- function(x, ...) {
     format_covariates(covariates_param)
   ))
   cat(sprintf(
-    "    Rule:             %s\n",
-    x$params$screen_rule
+    "    Selection method: %s\n",
+    x$params$selection$method
   ))
   cat(sprintf(
-    "    Level:            %s\n",
-    format_threshold_level(x$params$screen_level)
+    "    Selection criterion: %s\n",
+    x$params$selection$criterion
   ))
   cat(sprintf(
-    "    Control:          %s\n",
-    format_screen_control(x$params$screen_control)
+    "    Selection level:  %s\n",
+    format_threshold_level(x$params$selection$level)
   ))
   cat(sprintf(
-    "    Feature space:    %s\n",
-    x$params$feature_space
+    "    Construction polarity: %s\n",
+    x$params$construction$polarity
   ))
   cat(sprintf(
     "    Edge weighting:   %s\n",
-    x$params$edge_weighting
+    x$params$construction$weighting$method
   ))
   cat(sprintf(
     "    Weighting scale:  %s\n",
-    format_threshold_level(x$params$weighting_scale)
+    format_threshold_level(x$params$construction$weighting$scale)
   ))
   cat(sprintf(
     "    Outcome model:    %s\n",
-    format_model_type(x$params$model)
+    format_model_type(x$params$model$type)
   ))
   cat(sprintf(
     "    Streams:          %s\n",
@@ -92,7 +92,7 @@ print.cpm <- function(x, ...) {
   ))
   cat(sprintf(
     "    Edge standardization: %s\n",
-    format_edge_standardization(x$params$standardize_edges)
+    format_edge_standardization(x$params$construction$standardize_edges)
   ))
   invisible(x)
 }
@@ -185,8 +185,8 @@ print.cpm_summary <- function(x, ...) {
 #'
 #'   \item{prediction columns}{One numeric column per configured prediction
 #'   stream. For example, `joint`, `positive`, and `negative` when
-#'   `feature_space = "separate"`, or `net` when
-#'   `feature_space = "net"`.}
+#'   `construction_polarity = "separate"`, or `net` when
+#'   `construction_polarity = "net"`.}
 #'
 #'   For `component = "edges"`:
 #'
@@ -198,7 +198,7 @@ print.cpm_summary <- function(x, ...) {
 #' @export
 tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
   component <- match.arg(component)
-  params <- tibble::as_tibble(x$params)
+  params <- tibble::as_tibble(flatten_cpm_params(x$params))
   sum_x <- summary(x, ...)
   switch(
     component,

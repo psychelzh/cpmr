@@ -22,15 +22,17 @@ test_that("Support pass arguments of `summary()`", {
     tidy(result, component = "edges"),
     c(
       "covariates",
-      "screen_rule",
-      "screen_level",
-      "screen_control",
-      "feature_space",
+      "na_action",
+      "selection_type",
+      "selection_method",
+      "selection_criterion",
+      "selection_level",
+      "construction_type",
+      "construction_polarity",
       "edge_weighting",
       "weighting_scale",
-      "model",
-      "na_action",
       "standardize_edges",
+      "model_type",
       "positive",
       "negative"
     )

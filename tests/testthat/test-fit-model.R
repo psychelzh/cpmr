@@ -16,8 +16,8 @@ test_that("select_edges returns a logical positive/negative mask", {
   edges <- select_edges(
     conmat = conmat,
     behav = behav,
-    screen_rule = "cor_p",
-    screen_level = 0.1
+    selection_criterion = "p_value",
+    selection_level = 0.1
   )
 
   expect_equal(dim(edges), c(ncol(conmat), 2))
@@ -33,8 +33,8 @@ test_that("select_edges warns when sparsity selection drops one edge sign", {
     select_edges(
       conmat = conmat,
       behav = behav,
-      screen_rule = "sparsity",
-      screen_level = 0.25
+      selection_criterion = "proportion",
+      selection_level = 0.25
     ),
     "The requested sparsity level did not retain both positive and negative edges.",
     fixed = TRUE
@@ -76,15 +76,15 @@ test_that("select_edges validates threshold method", {
     select_edges(
       conmat = conmat,
       behav = behav,
-      screen_rule = "bogus",
-      screen_level = 0.1
+      selection_criterion = "bogus",
+      selection_level = 0.1
     ),
-    "`screen_rule` must be one of \"cor_p\", \"sparsity\", or \"cor_abs\".",
-    fixed = TRUE
+    "'arg' should be one of",
+    fixed = FALSE
   )
 })
 
-test_that("select_edges supports spearman and cor_abs screening", {
+test_that("select_edges supports spearman and absolute screening", {
   behav <- c(1, 2, 3, 4, 5, 6)
   conmat <- cbind(
     behav^3,
@@ -96,9 +96,9 @@ test_that("select_edges supports spearman and cor_abs screening", {
   spearman_edges <- select_edges(
     conmat = conmat,
     behav = behav,
-    screen_rule = "cor_abs",
-    screen_level = 0.8,
-    screen_control = list(cor_method = "spearman")
+    selection_method = "spearman",
+    selection_criterion = "absolute",
+    selection_level = 0.8
   )
 
   expect_true(all(spearman_edges[1:2, "positive"]))
@@ -144,15 +144,15 @@ test_that("train_model and predict_model compose correctly", {
   edge_screen <- screen_edges(
     conmat = training$conmat,
     behav = training$behav,
-    screen_rule = "cor_p",
-    screen_level = 0.1
+    selection_criterion = "p_value",
+    selection_level = 0.1
   )
   model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
     edge_screen = edge_screen,
     standardize_edges = TRUE,
-    feature_space = "separate",
+    construction_polarity = "separate",
     model_spec = cpm_model_lm()
   )
 
@@ -189,7 +189,7 @@ test_that("net feature space with lm model produces a single stream", {
     behav = behav,
     edge_screen = edge_screen,
     standardize_edges = FALSE,
-    feature_space = "net",
+    construction_polarity = "net",
     model_spec = cpm_model_lm()
   )
   pred <- predict_model(model, conmat)
@@ -209,7 +209,7 @@ test_that("joint stream handles aliased empty-sign features", {
   fitted <- fit_prediction_model(
     network_strengths = network_strengths,
     behav = behav,
-    feature_space = "separate",
+    construction_polarity = "separate",
     prediction_stream = "joint",
     model_spec = cpm_model_lm()
   )
@@ -220,7 +220,7 @@ test_that("joint stream handles aliased empty-sign features", {
     predict_prediction_model(
       fitted_model = fitted,
       network_strengths = network_strengths,
-      feature_space = "separate",
+      construction_polarity = "separate",
       prediction_stream = "joint"
     ),
     behav
@@ -239,8 +239,8 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
   edge_screen <- screen_edges(
     conmat = conmat,
     behav = behav,
-    screen_rule = "cor_abs",
-    screen_level = 0.4,
+    selection_criterion = "absolute",
+    selection_level = 0.4,
     edge_weighting = "sigmoid",
     weighting_scale = 0.05
   )
@@ -285,23 +285,23 @@ test_that("prediction helpers validate unsupported modes", {
   expect_error(
     prediction_features(
       network_strengths = network_strengths,
-      feature_space = "separate",
+      construction_polarity = "separate",
       prediction_stream = "bogus"
     ),
     paste0(
       "`prediction_stream` must be one of ",
       "\"joint\", \"positive\", or \"negative\" for ",
-      "`feature_space = \"separate\"`."
+      "`construction_polarity = \"separate\"`."
     ),
     fixed = TRUE
   )
   expect_error(
     prediction_features(
       network_strengths = network_strengths,
-      feature_space = "bogus",
+      construction_polarity = "bogus",
       prediction_stream = "joint"
     ),
-    "`feature_space` must be either \"separate\" or \"net\".",
+    "`construction_polarity` must be either \"separate\" or \"net\".",
     fixed = TRUE
   )
   expect_error(
@@ -314,8 +314,8 @@ test_that("prediction helpers validate unsupported modes", {
     fixed = TRUE
   )
   expect_error(
-    prediction_streams_for_feature_space("bogus"),
-    "`feature_space` must be either \"separate\" or \"net\".",
+    prediction_streams_for_polarity("bogus"),
+    "`construction_polarity` must be either \"separate\" or \"net\".",
     fixed = TRUE
   )
 })

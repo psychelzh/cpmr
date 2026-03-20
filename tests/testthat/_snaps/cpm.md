@@ -62,24 +62,41 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "screen_rule", "screen_level", "screen_control", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges"]
+          "value": ["selection", "construction", "model", "covariates", "na_action"]
         }
       },
       "value": [
         {
-          "type": "logical",
-          "attributes": {},
-          "value": [false]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["cor_p"]
-        },
-        {
-          "type": "double",
-          "attributes": {},
-          "value": [0.01]
+          "type": "list",
+          "attributes": {
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["type", "method", "criterion", "level"]
+            }
+          },
+          "value": [
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["cor"]
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pearson"]
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["p_value"]
+            },
+            {
+              "type": "double",
+              "attributes": {},
+              "value": [0.01]
+            }
+          ]
         },
         {
           "type": "list",
@@ -87,46 +104,80 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["cor_method"]
+              "value": ["type", "polarity", "weighting", "standardize_edges"]
             }
           },
           "value": [
             {
               "type": "character",
               "attributes": {},
-              "value": ["pearson"]
+              "value": ["strength"]
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["separate"]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["method", "scale"]
+                },
+                "class": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["cpm_weighting_spec"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["binary"]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [0.05]
+                }
+              ]
+            },
+            {
+              "type": "logical",
+              "attributes": {},
+              "value": [false]
             }
           ]
         },
         {
-          "type": "character",
-          "attributes": {},
-          "value": ["separate"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["binary"]
-        },
-        {
-          "type": "double",
-          "attributes": {},
-          "value": [0.05]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["lm"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["fail"]
+          "type": "list",
+          "attributes": {
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["type"]
+            }
+          },
+          "value": [
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["lm"]
+            }
+          ]
         },
         {
           "type": "logical",
           "attributes": {},
           "value": [false]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         }
       ]
     }
@@ -143,10 +194,10 @@
         Candidate edges: 10
         Parameters:
           Covariates:       none
-          Rule:             cor_p
-          Level:            0.01
-          Control:          default
-          Feature space:    separate
+          Selection method: pearson
+          Selection criterion: p_value
+          Selection level:  0.01
+          Construction polarity: separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
@@ -217,24 +268,41 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "screen_rule", "screen_level", "screen_control", "feature_space", "edge_weighting", "weighting_scale", "model", "na_action", "standardize_edges"]
+          "value": ["selection", "construction", "model", "covariates", "na_action"]
         }
       },
       "value": [
         {
-          "type": "logical",
-          "attributes": {},
-          "value": [false]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["cor_p"]
-        },
-        {
-          "type": "double",
-          "attributes": {},
-          "value": [0.1]
+          "type": "list",
+          "attributes": {
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["type", "method", "criterion", "level"]
+            }
+          },
+          "value": [
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["cor"]
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["pearson"]
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["p_value"]
+            },
+            {
+              "type": "double",
+              "attributes": {},
+              "value": [0.1]
+            }
+          ]
         },
         {
           "type": "list",
@@ -242,46 +310,80 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["cor_method"]
+              "value": ["type", "polarity", "weighting", "standardize_edges"]
             }
           },
           "value": [
             {
               "type": "character",
               "attributes": {},
-              "value": ["pearson"]
+              "value": ["strength"]
+            },
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["separate"]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["method", "scale"]
+                },
+                "class": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["cpm_weighting_spec"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["binary"]
+                },
+                {
+                  "type": "double",
+                  "attributes": {},
+                  "value": [0.05]
+                }
+              ]
+            },
+            {
+              "type": "logical",
+              "attributes": {},
+              "value": [false]
             }
           ]
         },
         {
-          "type": "character",
-          "attributes": {},
-          "value": ["separate"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["binary"]
-        },
-        {
-          "type": "double",
-          "attributes": {},
-          "value": [0.05]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["lm"]
-        },
-        {
-          "type": "character",
-          "attributes": {},
-          "value": ["fail"]
+          "type": "list",
+          "attributes": {
+            "names": {
+              "type": "character",
+              "attributes": {},
+              "value": ["type"]
+            }
+          },
+          "value": [
+            {
+              "type": "character",
+              "attributes": {},
+              "value": ["lm"]
+            }
+          ]
         },
         {
           "type": "logical",
           "attributes": {},
           "value": [false]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["fail"]
         }
       ]
     }
@@ -292,17 +394,17 @@
       result
     Output
       CPM fit:
-        Call: fit(object = cpm_spec(screen = cpm_screen(level = 0.1)), conmat = conmat, 
-          behav = behav)
+        Call: fit(object = cpm_spec(selection = cpm_selection_cor(level = 0.1)), 
+          conmat = conmat, behav = behav)
         Number of observations: 10
           Complete cases: 10
         Candidate edges: 10
         Parameters:
           Covariates:       none
-          Rule:             cor_p
-          Level:            0.1
-          Control:          default
-          Feature space:    separate
+          Selection method: pearson
+          Selection criterion: p_value
+          Selection level:  0.1
+          Construction polarity: separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
@@ -321,10 +423,10 @@
         Candidate edges: 10
         Parameters:
           Covariates:       none
-          Rule:             cor_p
-          Level:            0.01
-          Control:          default
-          Feature space:    separate
+          Selection method: pearson
+          Selection criterion: p_value
+          Selection level:  0.01
+          Construction polarity: separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
@@ -344,10 +446,10 @@
         Candidate edges: 10
         Parameters:
           Covariates:       included
-          Rule:             cor_p
-          Level:            0.01
-          Control:          default
-          Feature space:    separate
+          Selection method: pearson
+          Selection criterion: p_value
+          Selection level:  0.01
+          Construction polarity: separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
@@ -367,10 +469,10 @@
         Candidate edges: 10
         Parameters:
           Covariates:       included
-          Rule:             cor_p
-          Level:            0.01
-          Control:          default
-          Feature space:    separate
+          Selection method: pearson
+          Selection criterion: p_value
+          Selection level:  0.01
+          Construction polarity: separate
           Edge weighting:   binary
           Weighting scale:  0.05
           Outcome model:    linear regression
