@@ -65,13 +65,15 @@ API surface:
 
 ```{r rich-spec}
 rich_spec <- cpm_spec(
-  screen = cpm_screen(
-    rule = "cor_abs",
-    level = 0.1,
-    control = list(cor_method = "spearman")
+  selection = cpm_selection_cor(
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.1
   ),
-  feature_space = "net",
-  weighting = cpm_weighting("sigmoid", scale = 0.03),
+  construction = cpm_construction_strength(
+    polarity = "net",
+    weighting = cpm_weighting("sigmoid", scale = 0.03)
+  ),
   model = cpm_model_lm()
 )
 
@@ -79,18 +81,23 @@ fit(rich_spec, conmat = conmat, behav = behav)$predictions |>
   head()
 ```
 
-This keeps the main CPM choices visible while grouping naturally paired options
-like screening, edge weighting, and the outcome model into small helper
-objects. In practice, the default screening path is just `rule + level`;
-`control` is there when you need a lower-frequency override such as Spearman
-screening.
+This keeps the main CPM stages visible while grouping naturally paired options
+into small helpers:
+
+- `selection = cpm_selection_cor(...)` defines how edges are screened;
+- `construction = cpm_construction_strength(...)` defines how screened edges
+  become CPM-derived predictors;
+- `model = cpm_model_lm()` defines the outcome model fitted on those
+  predictors.
 
 By default, `cpm_spec()` keeps edge standardization turned off so the native
 workflow stays close to the classic CPM path of screening edges, constructing
 network strengths, and fitting the outcome model. If you want fold-local edge
-z-scoring, opt in with `standardize_edges = TRUE`.
+z-scoring, opt in with
+`cpm_construction_strength(standardize_edges = TRUE)`.
 
-If you are new to CPM, the key idea behind `feature_space` is:
+If you are new to CPM, the key idea behind the current strength-based
+construction is:
 
 - `positive` edges are edges whose screening association with the outcome is
   positive and passes the threshold;
@@ -99,11 +106,11 @@ If you are new to CPM, the key idea behind `feature_space` is:
 - CPM then collapses those screened edge sets into subject-level network
   strengths before fitting the outcome model.
 
-With `feature_space = "separate"`, `cpmr` keeps the positive and negative
-strengths as separate predictors and reports the classic `joint`, `positive`,
-and `negative` prediction streams. With `feature_space = "net"`, `cpmr`
-constructs a single `net_strength = positive_strength - negative_strength`
-feature and returns one `net` prediction stream.
+With `polarity = "separate"`, `cpmr` keeps the positive and negative strengths
+as separate predictors and reports the classic `joint`, `positive`, and
+`negative` prediction streams. With `polarity = "net"`, `cpmr` constructs a
+single `net_strength = positive_strength - negative_strength` feature and
+returns one `net` prediction stream.
 
 Cross-validated resampling uses `fit_resamples()` with the same specification
 object:

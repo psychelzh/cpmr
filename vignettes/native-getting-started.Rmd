@@ -58,8 +58,8 @@ explicit CPM parameters.
 ```{r}
 fit_obj <- fit(
   cpm_spec(
-    screen = cpm_screen(
-      rule = "cor_p",
+    selection = cpm_selection_cor(
+      criterion = "p_value",
       level = 0.05
     )
   ),
@@ -98,13 +98,13 @@ That gives a simple mental model:
 - `negative_strength`: how strongly a subject expresses the screened
   outcome-negative edge set.
 
-`feature_space` only decides how those CPM-derived strengths are exposed to the
-second-stage outcome model:
+In the current strength-based construction, `polarity` only decides how those
+CPM-derived strengths are exposed to the second-stage outcome model:
 
-- `feature_space = "separate"` keeps both strengths. The `joint` stream fits a
+- `polarity = "separate"` keeps both strengths. The `joint` stream fits a
   model with `positive_strength` and `negative_strength` together, while the
   `positive` and `negative` streams are single-strength diagnostics.
-- `feature_space = "net"` uses one
+- `polarity = "net"` uses one
   `net_strength = positive_strength - negative_strength` feature and returns a
   single `net` stream.
 
@@ -115,19 +115,21 @@ without forcing every setting into one long flat argument list.
 
 A practical way to read a spec is:
 
-- `screen = cpm_screen(...)`: which screening rule is used, what level it
-  uses, and whether any advanced screening controls are needed;
-- `feature_space`: how positive and negative network strengths are exposed to
-  the outcome model after screening has defined the positive and negative edge
-  sets;
-- `weighting = cpm_weighting(...)`: whether edges contribute as a hard mask or
-  with smooth weights;
-- `model = cpm_model_lm()`: how the summarized network features map to the
-  final prediction;
-- `standardize_edges`: whether each edge is fold-locally centered and scaled
-  using the training data before the CPM strengths are computed. The default is
-  `FALSE`, which keeps the default spec close to classic CPM; set it to
-  `TRUE` when you want fold-local edge z-scoring explicitly.
+- `selection = cpm_selection_cor(...)`: which correlation method is used to
+  screen edges, how `level` is interpreted, and where the cutoff is set;
+- `construction = cpm_construction_strength(...)`: how positive and negative
+  screened edges become subject-level CPM predictors;
+- `model = cpm_model_lm()`: how those CPM-derived predictors map to the final
+  prediction.
+
+Within `cpm_construction_strength(...)`:
+
+- `polarity` decides whether positive and negative strengths stay separate or
+  collapse to one net-strength feature;
+- `weighting = cpm_weighting(...)` decides whether edges contribute as a hard
+  mask or with smooth weights;
+- `standardize_edges` decides whether each edge is fold-locally centered and
+  scaled using the training data before the CPM strengths are computed.
 
 This matches the edge-standardization step described by Rapuano et al. (2020):
 edge strengths are z-scored within each training set and the corresponding
@@ -137,13 +139,15 @@ For example, this spec reads almost like a short sentence:
 
 ```{r}
 readable_spec <- cpm_spec(
-  screen = cpm_screen(
-    rule = "cor_abs",
-    level = 0.1,
-    control = list(cor_method = "spearman")
+  selection = cpm_selection_cor(
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.1
   ),
-  feature_space = "net",
-  weighting = cpm_weighting("sigmoid", scale = 0.03),
+  construction = cpm_construction_strength(
+    polarity = "net",
+    weighting = cpm_weighting("sigmoid", scale = 0.03)
+  ),
   model = cpm_model_lm()
 )
 
@@ -168,13 +172,15 @@ In practice, most customization starts with just two questions:
 
 ```{r}
 rich_spec <- cpm_spec(
-  screen = cpm_screen(
-    rule = "cor_abs",
-    level = 0.1,
-    control = list(cor_method = "spearman")
+  selection = cpm_selection_cor(
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.1
   ),
-  feature_space = "net",
-  weighting = cpm_weighting("sigmoid", scale = 0.03),
+  construction = cpm_construction_strength(
+    polarity = "net",
+    weighting = cpm_weighting("sigmoid", scale = 0.03)
+  ),
   model = cpm_model_lm()
 )
 
@@ -194,17 +200,17 @@ Compared with the default spec, the example above changes four things:
 - screening uses a direct absolute-correlation cutoff instead of correlation
   p-value
   screening;
-- the feature space is exposed as one `net` stream from
+- the construction polarity is exposed as one `net` stream from
   `net_strength = positive_strength - negative_strength` instead of the
   classic `joint` / `positive` / `negative` trio;
 - the second-stage model is made explicit, even though it still uses the
   default linear regression helper.
 
-Prediction columns depend on `feature_space`:
+Prediction columns depend on `construction` polarity:
 
-- `feature_space = "separate"` yields `joint`, `positive`, and `negative`
+- `polarity = "separate"` yields `joint`, `positive`, and `negative`
   streams built from the positive and negative strengths;
-- `feature_space = "net"` yields a single `net` stream built from
+- `polarity = "net"` yields a single `net` stream built from
   `net_strength = positive_strength - negative_strength`.
 
 ## Cross-Validated Resampling with `fit_resamples()`

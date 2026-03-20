@@ -25,7 +25,8 @@ reference:
   - title: Specification Helpers
     desc: Helper constructors for composing CPM model specifications.
     contents:
-      - cpm_screen
+      - cpm_selection_cor
+      - cpm_construction_strength
       - cpm_weighting
       - cpm_model_lm
 

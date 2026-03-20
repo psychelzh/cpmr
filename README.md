@@ -59,10 +59,10 @@ fit_obj
 #>   Candidate edges: 1000
 #>   Parameters:
 #>     Covariates:       none
-#>     Rule:             cor_p
-#>     Level:            0.01
-#>     Control:          default
-#>     Feature space:    separate
+#>     Selection method: pearson
+#>     Selection criterion: p_value
+#>     Selection level:  0.01
+#>     Construction polarity: separate
 #>     Edge weighting:   binary
 #>     Weighting scale:  0.05
 #>     Outcome model:    linear regression
@@ -84,13 +84,15 @@ native API surface:
 
 ``` r
 rich_spec <- cpm_spec(
-  screen = cpm_screen(
-    rule = "cor_abs",
-    level = 0.1,
-    control = list(cor_method = "spearman")
+  selection = cpm_selection_cor(
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.1
   ),
-  feature_space = "net",
-  weighting = cpm_weighting("sigmoid", scale = 0.03),
+  construction = cpm_construction_strength(
+    polarity = "net",
+    weighting = cpm_weighting("sigmoid", scale = 0.03)
+  ),
   model = cpm_model_lm()
 )
 
@@ -105,18 +107,23 @@ fit(rich_spec, conmat = conmat, behav = behav)$predictions |>
 #> 6   6  1.33744904  1.35348830
 ```
 
-This keeps the main CPM choices visible while grouping naturally paired
-options like screening, edge weighting, and the outcome model into small
-helper objects. In practice, the default screening path is just
-`rule + level`; `control` is there when you need a lower-frequency
-override such as Spearman screening.
+This keeps the main CPM stages visible while grouping naturally paired
+options into small helpers:
+
+- `selection = cpm_selection_cor(...)` defines how edges are screened;
+- `construction = cpm_construction_strength(...)` defines how screened
+  edges become CPM-derived predictors;
+- `model = cpm_model_lm()` defines the outcome model fitted on those
+  predictors.
 
 By default, `cpm_spec()` keeps edge standardization turned off so the
 native workflow stays close to the classic CPM path of screening edges,
 constructing network strengths, and fitting the outcome model. If you
-want fold-local edge z-scoring, opt in with `standardize_edges = TRUE`.
+want fold-local edge z-scoring, opt in with
+`cpm_construction_strength(standardize_edges = TRUE)`.
 
-If you are new to CPM, the key idea behind `feature_space` is:
+If you are new to CPM, the key idea behind the current strength-based
+construction is:
 
 - `positive` edges are edges whose screening association with the
   outcome is positive and passes the threshold;
@@ -125,10 +132,10 @@ If you are new to CPM, the key idea behind `feature_space` is:
 - CPM then collapses those screened edge sets into subject-level network
   strengths before fitting the outcome model.
 
-With `feature_space = "separate"`, `cpmr` keeps the positive and
-negative strengths as separate predictors and reports the classic
-`joint`, `positive`, and `negative` prediction streams. With
-`feature_space = "net"`, `cpmr` constructs a single
+With `polarity = "separate"`, `cpmr` keeps the positive and negative
+strengths as separate predictors and reports the classic `joint`,
+`positive`, and `negative` prediction streams. With `polarity = "net"`,
+`cpmr` constructs a single
 `net_strength = positive_strength - negative_strength` feature and
 returns one `net` prediction stream.
 

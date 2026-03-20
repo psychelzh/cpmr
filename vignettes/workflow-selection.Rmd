@@ -50,25 +50,20 @@ head(summary(resample_obj)[["metrics"]])
 
 If you are new to the helper-based spec, the easiest mental model is:
 
-- `screen = cpm_screen(...)` decides which screening rule gets edges into the
-  model. Most of the time this is just `rule + level`; `control` stays
-  available for lower-frequency details such as Pearson versus Spearman
-  screening;
-- `feature_space` decides how CPM-derived network strengths are exposed to the
-  outcome model;
-- `weighting = cpm_weighting(...)` decides whether edge contribution is binary
-  or smooth;
-- `model = cpm_model_lm()` and `standardize_edges` finish the modeling
-  pipeline, with `standardize_edges` meaning fold-local edge standardization
-  using the training data statistics. The default is `FALSE`, so the default
-  spec stays closer to classic CPM unless you opt in explicitly.
+- `selection = cpm_selection_cor(...)` decides which correlation-based edge
+  screening rule gets edges into the model. Most of the time this is just
+  `method + criterion + level`;
+- `construction = cpm_construction_strength(...)` decides how CPM-derived
+  network strengths are exposed to the outcome model and whether edges are
+  weighted or standardized before strength construction;
+- `model = cpm_model_lm()` finishes the modeling pipeline.
 
 In the current native workflow:
 
 - screened positive-association edges define a `positive_strength`;
 - screened negative-association edges define a `negative_strength`;
-- `feature_space = "separate"` keeps those strengths available directly;
-- `feature_space = "net"` uses one
+- `polarity = "separate"` keeps those strengths available directly;
+- `polarity = "net"` uses one
   `net_strength = positive_strength - negative_strength` feature.
 
 That means the classic `joint` stream is not a third strength. It is the

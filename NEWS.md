@@ -10,32 +10,27 @@
 * `cpm_resamples` no longer stores redundant resample metrics, and the
   `collect_*()` helpers have been removed. Use `summary()` for aggregated
   resample results and `predictions`, `edges`, and `folds` for raw outputs.
-* `cpm_spec()` has moved from a flat threshold-only API to a helper-based
-  interface with explicit `screen`, `feature_space`, `weighting`, and `model`
+* `cpm_spec()` has moved from a flat threshold-only API to a staged helper
+  interface with explicit `selection`, `construction`, and `model`
   components.
-* `bias_correct` has been renamed to `standardize_edges`, and now defaults to
-  `FALSE` so the default native workflow stays closer to classic CPM
-  network-strength construction.
-* Native CPM terminology has been updated: `network_summary` is now
-  `feature_space`, the classic multi-strength stream is `joint`, and the
-  single signed stream is `net`.
 
 ## Enhancements
 
 * Added `cpm_spec()` as the native interface for `fit()` and `fit_resamples()`,
   and made single-fit and resample result objects more consistent.
-* Added `cpm_screen()`, `cpm_weighting()`, and `cpm_model_lm()` to make native
-  CPM specifications more readable and reusable, and removed the intermediate
-  `cpm_threshold()` helper.
-* Expanded native CPM screening beyond the previous flat defaults:
-  `cpm_screen()` now exposes `rule = "cor_p"`, `"sparsity"`, or `"cor_abs"`,
-  while optional `control = list(cor_method = ...)` keeps lower-frequency
-  choices like Pearson versus Spearman screening available without crowding the
-  default path.
-* Added explicit native CPM feature construction choices with
-  `feature_space = "separate"` and `feature_space = "net"`.
+* Added `cpm_selection_cor()`, `cpm_construction_strength()`,
+  `cpm_weighting()`, and `cpm_model_lm()` to make native CPM specifications
+  more readable and reusable.
+* Expanded correlation-based CPM selection beyond the previous flat defaults:
+  `cpm_selection_cor()` now exposes `method`, `criterion`, and `level`, where
+  `criterion` can be `"p_value"`, `"absolute"`, or `"proportion"`.
+* Added explicit strength-based CPM construction choices with
+  `polarity = "separate"` and `polarity = "net"`.
 * Added weighted CPM feature construction with `cpm_weighting("binary")` and
   `cpm_weighting("sigmoid")`.
+* Renamed `bias_correct` to `standardize_edges`, moved it into
+  `cpm_construction_strength()`, and defaulted it to `FALSE` so the default
+  native workflow stays closer to classic CPM network-strength construction.
 * Added `summary.cpm_resamples()`, which now reports pooled out-of-fold error
   metrics by default and keeps pooled / fold-wise correlations as supplementary
   statistics.
@@ -50,7 +45,7 @@
   and resampling behavior.
 * Hardened resample validation so each fold must retain at least 3
   complete-case training observations.
-* Applied `sparsity` thresholding per sign, rather than reusing one absolute
+* Applied proportion-based screening per sign, rather than reusing one absolute
   cutoff across both tails.
 * Fixed the `joint` linear-model path when one CPM strength is aliased or
   empty.
