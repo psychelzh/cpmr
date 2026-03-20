@@ -1,4 +1,4 @@
-screen_edges <- function(
+run_edge_selection <- function(
   conmat,
   behav,
   selection_method = c("pearson", "spearman"),
@@ -20,12 +20,12 @@ screen_edges <- function(
   thresholds <- switch(
     selection_criterion,
     p_value = stats::setNames(
-      rep(critical_r(nrow(conmat), selection_level), length(edge_types)),
-      edge_types
+      rep(critical_r(nrow(conmat), selection_level), length(edge_signs)),
+      edge_signs
     ),
     absolute = stats::setNames(
-      rep(selection_level, length(edge_types)),
-      edge_types
+      rep(selection_level, length(edge_signs)),
+      edge_signs
     ),
     proportion = select_sparsity_thresholds(
       associations = associations,
@@ -39,7 +39,7 @@ screen_edges <- function(
     )
   )
 
-  mask <- threshold_edges_by_cutoffs(
+  mask <- edge_mask_from_cutoffs(
     associations = associations,
     cutoffs = thresholds
   )
@@ -60,14 +60,14 @@ screen_edges <- function(
   )
 }
 
-select_edges <- function(
+select_edge_mask <- function(
   conmat,
   behav,
   selection_method = c("pearson", "spearman"),
   selection_criterion = c("p_value", "absolute", "proportion"),
   selection_level = 0.01
 ) {
-  screen_edges(
+  run_edge_selection(
     conmat = conmat,
     behav = behav,
     selection_method = selection_method,
@@ -79,7 +79,7 @@ select_edges <- function(
 train_model <- function(
   conmat,
   behav,
-  edge_screen,
+  edge_selection,
   standardize_edges,
   construction_polarity,
   model_spec
@@ -92,11 +92,11 @@ train_model <- function(
     conmat <- fscale(conmat, center, scale)
   }
 
-  network_strengths <- compute_network_strengths(conmat, edge_screen$weights)
+  network_strengths <- compute_network_strengths(conmat, edge_selection$weights)
   prediction_streams <- prediction_streams_for_polarity(construction_polarity)
 
   outcome_models <- lapply(prediction_streams, function(prediction_stream) {
-    fit_prediction_model(
+    fit_stream_model(
       network_strengths = network_strengths,
       behav = behav,
       construction_polarity = construction_polarity,
@@ -110,13 +110,12 @@ train_model <- function(
     standardize_edges = standardize_edges,
     center = center,
     scale = scale,
-    edges = edge_screen$mask,
-    edge_weights = edge_screen$weights,
-    edge_weighting = edge_screen$edge_weighting,
-    weighting_scale = edge_screen$weighting_scale,
-    edge_thresholds = edge_screen$thresholds,
+    edges = edge_selection$mask,
+    edge_weights = edge_selection$weights,
+    edge_weighting = edge_selection$edge_weighting,
+    weighting_scale = edge_selection$weighting_scale,
+    selection_thresholds = edge_selection$thresholds,
     construction_polarity = construction_polarity,
-    model_spec = model_spec,
     prediction_streams = prediction_streams,
     outcome_models = outcome_models
   )
@@ -136,7 +135,7 @@ predict_model <- function(model, conmat_new) {
     dimnames = list(NULL, prediction_streams)
   )
   for (prediction_stream in prediction_streams) {
-    pred[, prediction_stream] <- predict_prediction_model(
+    pred[, prediction_stream] <- predict_stream_model(
       fitted_model = model$outcome_models[[prediction_stream]],
       network_strengths = network_strengths,
       construction_polarity = model$construction_polarity,
@@ -147,14 +146,14 @@ predict_model <- function(model, conmat_new) {
   pred
 }
 
-threshold_edges_by_cutoffs <- function(associations, cutoffs) {
+edge_mask_from_cutoffs <- function(associations, cutoffs) {
   matrix(
     c(
       !is.na(associations) & associations >= cutoffs[["positive"]],
       !is.na(associations) & (-associations) >= cutoffs[["negative"]]
     ),
     ncol = 2,
-    dimnames = list(NULL, edge_types)
+    dimnames = list(NULL, edge_signs)
   )
 }
 
@@ -190,7 +189,7 @@ select_sparsity_thresholds <- function(associations, proportion) {
     ) # nocov
   }
 
-  stats::setNames(c(positive_cutoff, negative_cutoff), edge_types)
+  stats::setNames(c(positive_cutoff, negative_cutoff), edge_signs)
 }
 
 sign_sparsity_cutoff <- function(scores, proportion) {
@@ -213,8 +212,8 @@ compute_edge_weights <- function(
     edge_weighting,
     binary = matrix(
       as.numeric(mask),
-      ncol = length(edge_types),
-      dimnames = list(NULL, edge_types)
+      ncol = length(edge_signs),
+      dimnames = list(NULL, edge_signs)
     ),
     sigmoid = cbind(
       positive = smooth_threshold_weights(
@@ -247,14 +246,14 @@ compute_network_strengths <- function(conmat, edge_weights) {
   strengths <- matrix(
     0,
     nrow = nrow(conmat),
-    ncol = length(edge_types),
-    dimnames = list(NULL, edge_types)
+    ncol = length(edge_signs),
+    dimnames = list(NULL, edge_signs)
   )
 
-  for (edge_type in edge_types) {
-    strengths[, edge_type] <- weighted_row_sums_or_zero(
+  for (edge_sign in edge_signs) {
+    strengths[, edge_sign] <- weighted_row_sums_or_zero(
       conmat = conmat,
-      weights = edge_weights[, edge_type]
+      weights = edge_weights[, edge_sign]
     )
   }
 
@@ -270,14 +269,14 @@ weighted_row_sums_or_zero <- function(conmat, weights) {
   drop(conmat[, idx, drop = FALSE] %*% weights[idx])
 }
 
-fit_prediction_model <- function(
+fit_stream_model <- function(
   network_strengths,
   behav,
   construction_polarity,
   prediction_stream,
   model_spec
 ) {
-  features <- prediction_features(
+  features <- stream_features(
     network_strengths = network_strengths,
     construction_polarity = construction_polarity,
     prediction_stream = prediction_stream
@@ -290,13 +289,13 @@ fit_prediction_model <- function(
   )
 }
 
-predict_prediction_model <- function(
+predict_stream_model <- function(
   fitted_model,
   network_strengths,
   construction_polarity,
   prediction_stream
 ) {
-  features <- prediction_features(
+  features <- stream_features(
     network_strengths = network_strengths,
     construction_polarity = construction_polarity,
     prediction_stream = prediction_stream
@@ -308,14 +307,14 @@ predict_prediction_model <- function(
   )
 }
 
-prediction_features <- function(
+stream_features <- function(
   network_strengths,
   construction_polarity,
   prediction_stream
 ) {
   switch(
     construction_polarity,
-    separate = separate_prediction_features(
+    separate = separate_stream_features(
       network_strengths = network_strengths,
       prediction_stream = prediction_stream
     ),
@@ -332,9 +331,9 @@ prediction_features <- function(
   )
 }
 
-separate_prediction_features <- function(network_strengths, prediction_stream) {
+separate_stream_features <- function(network_strengths, prediction_stream) {
   feature_sets <- list(
-    joint = edge_types,
+    joint = edge_signs,
     positive = "positive",
     negative = "negative"
   )
@@ -399,7 +398,7 @@ predict_lm_outcome_model <- function(fitted_model, features) {
 prediction_streams_for_polarity <- function(construction_polarity) {
   switch(
     construction_polarity,
-    separate = c("joint", edge_types),
+    separate = c("joint", edge_signs),
     net = "net",
     stop(
       paste(
@@ -409,7 +408,7 @@ prediction_streams_for_polarity <- function(construction_polarity) {
   )
 }
 
-edge_types <- c("positive", "negative")
+edge_signs <- c("positive", "negative")
 
 critical_r <- function(n, alpha) {
   df <- n - 2

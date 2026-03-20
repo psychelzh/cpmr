@@ -31,7 +31,7 @@ run_single_fit <- function(
     rows_train = include_cases
   )
 
-  edge_screen <- screen_edges(
+  edge_selection <- run_edge_selection(
     conmat = training$conmat,
     behav = training$behav,
     selection_method = params$selection$method,
@@ -43,7 +43,7 @@ run_single_fit <- function(
   model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
-    edge_screen = edge_screen,
+    edge_selection = edge_selection,
     standardize_edges = params$construction$standardize_edges,
     construction_polarity = params$construction$polarity,
     model_spec = object$helpers$model
@@ -63,7 +63,7 @@ run_single_fit <- function(
       na_action = na_action
     ),
     predictions = predictions,
-    edges = edge_screen$mask,
+    edges = edge_selection$mask,
     model = model
   )
 }
@@ -118,7 +118,7 @@ run_resample_fit <- function(
       covariates = covariates,
       rows_train = rows_train
     )
-    fold_screen <- screen_edges(
+    edge_selection <- run_edge_selection(
       conmat = training$conmat,
       behav = training$behav,
       selection_method = params$selection$method,
@@ -130,7 +130,7 @@ run_resample_fit <- function(
     fold_model <- train_model(
       conmat = training$conmat,
       behav = training$behav,
-      edge_screen = fold_screen,
+      edge_selection = edge_selection,
       standardize_edges = params$construction$standardize_edges,
       construction_polarity = params$construction$polarity,
       model_spec = object$helpers$model
@@ -148,9 +148,9 @@ run_resample_fit <- function(
     real[rows_test] <- assessment$behav
 
     if (return_edges == "all") {
-      edges[,, fold] <- fold_screen$mask
+      edges[,, fold] <- edge_selection$mask
     } else if (return_edges == "sum") {
-      edges <- edges + fold_screen$mask
+      edges <- edges + edge_selection$mask
     }
   }
 
@@ -204,13 +204,13 @@ init_edges <- function(return_edges, conmat, kfolds) {
   switch(
     return_edges,
     all = array(
-      dim = c(dim(conmat)[2], length(edge_types), kfolds),
-      dimnames = list(NULL, edge_types, NULL)
+      dim = c(dim(conmat)[2], length(edge_signs), kfolds),
+      dimnames = list(NULL, edge_signs, NULL)
     ),
     sum = array(
       0,
-      dim = c(dim(conmat)[2], length(edge_types)),
-      dimnames = list(NULL, edge_types)
+      dim = c(dim(conmat)[2], length(edge_signs)),
+      dimnames = list(NULL, edge_signs)
     ),
     none = NULL
   )

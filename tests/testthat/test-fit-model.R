@@ -8,12 +8,12 @@ test_that("critical_r matches the t-statistic conversion", {
   )
 })
 
-test_that("select_edges returns a logical positive/negative mask", {
+test_that("select_edge_mask returns a logical positive/negative mask", {
   withr::local_seed(1)
   conmat <- matrix(rnorm(60), nrow = 10, ncol = 6)
   behav <- rnorm(10)
 
-  edges <- select_edges(
+  edges <- select_edge_mask(
     conmat = conmat,
     behav = behav,
     selection_criterion = "p_value",
@@ -25,12 +25,12 @@ test_that("select_edges returns a logical positive/negative mask", {
   expect_identical(colnames(edges), c("positive", "negative"))
 })
 
-test_that("select_edges warns when sparsity selection drops one edge sign", {
+test_that("select_edge_mask warns when proportion selection drops one edge sign", {
   behav <- 1:10
   conmat <- cbind(behav, behav * 2, behav * 3, behav * 4)
 
   expect_warning(
-    select_edges(
+    select_edge_mask(
       conmat = conmat,
       behav = behav,
       selection_criterion = "proportion",
@@ -45,7 +45,7 @@ test_that("select_sparsity_thresholds applies per-sign proportions", {
   associations <- c(seq_len(20), -seq_len(80))
 
   cutoffs <- select_sparsity_thresholds(associations, proportion = 0.1)
-  mask <- threshold_edges_by_cutoffs(associations, cutoffs)
+  mask <- edge_mask_from_cutoffs(associations, cutoffs)
 
   expect_equal(unname(cutoffs[["positive"]]), 19)
   expect_equal(unname(cutoffs[["negative"]]), 73)
@@ -56,7 +56,7 @@ test_that("sparsity thresholding retains tied edges at the cutoff", {
   associations <- c(rep(1, 4), rep(-1, 4))
 
   cutoffs <- select_sparsity_thresholds(associations, proportion = 0.25)
-  mask <- threshold_edges_by_cutoffs(associations, cutoffs)
+  mask <- edge_mask_from_cutoffs(associations, cutoffs)
 
   expect_equal(cutoffs, c(positive = 1, negative = 1))
   expect_equal(colSums(mask), c(positive = 4, negative = 4))
@@ -67,13 +67,13 @@ test_that("sign_sparsity_cutoff handles empty scores and zero proportions", {
   expect_identical(sign_sparsity_cutoff(c(3, 2, 1), proportion = 0), Inf)
 })
 
-test_that("select_edges validates threshold method", {
+test_that("select_edge_mask validates selection criterion", {
   withr::local_seed(1)
   conmat <- matrix(rnorm(60), nrow = 10, ncol = 6)
   behav <- rnorm(10)
 
   expect_error(
-    select_edges(
+    select_edge_mask(
       conmat = conmat,
       behav = behav,
       selection_criterion = "bogus",
@@ -84,7 +84,7 @@ test_that("select_edges validates threshold method", {
   )
 })
 
-test_that("select_edges supports spearman and absolute screening", {
+test_that("select_edge_mask supports spearman and absolute screening", {
   behav <- c(1, 2, 3, 4, 5, 6)
   conmat <- cbind(
     behav^3,
@@ -93,7 +93,7 @@ test_that("select_edges supports spearman and absolute screening", {
     c(3, 1, 4, 1, 5, 9)
   )
 
-  spearman_edges <- select_edges(
+  spearman_edges <- select_edge_mask(
     conmat = conmat,
     behav = behav,
     selection_method = "spearman",
@@ -141,7 +141,7 @@ test_that("train_model and predict_model compose correctly", {
     covariates_train = training$covariates
   )
 
-  edge_screen <- screen_edges(
+  edge_selection <- run_edge_selection(
     conmat = training$conmat,
     behav = training$behav,
     selection_criterion = "p_value",
@@ -150,13 +150,13 @@ test_that("train_model and predict_model compose correctly", {
   model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
-    edge_screen = edge_screen,
+    edge_selection = edge_selection,
     standardize_edges = TRUE,
     construction_polarity = "separate",
     model_spec = cpm_model_lm()
   )
 
-  expect_equal(dim(edge_screen$mask), c(p, 2))
+  expect_equal(dim(edge_selection$mask), c(p, 2))
   expect_named(model$outcome_models, c("joint", "positive", "negative"))
   expect_equal(
     dim(predict_model(model, assessment$conmat)),
@@ -164,11 +164,11 @@ test_that("train_model and predict_model compose correctly", {
   )
 })
 
-test_that("net feature space with lm model produces a single stream", {
+test_that("net polarity with lm model produces a single stream", {
   withr::local_seed(2)
   conmat <- matrix(rnorm(40), nrow = 8, ncol = 5)
   behav <- rnorm(8)
-  edge_screen <- list(
+  edge_selection <- list(
     mask = matrix(
       c(TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE),
       ncol = 2,
@@ -187,7 +187,7 @@ test_that("net feature space with lm model produces a single stream", {
   model <- train_model(
     conmat = conmat,
     behav = behav,
-    edge_screen = edge_screen,
+    edge_selection = edge_selection,
     standardize_edges = FALSE,
     construction_polarity = "net",
     model_spec = cpm_model_lm()
@@ -206,7 +206,7 @@ test_that("joint stream handles aliased empty-sign features", {
   )
   behav <- 1:5
 
-  fitted <- fit_prediction_model(
+  fitted <- fit_stream_model(
     network_strengths = network_strengths,
     behav = behav,
     construction_polarity = "separate",
@@ -217,7 +217,7 @@ test_that("joint stream handles aliased empty-sign features", {
   expect_true(is.na(fitted$coefficients[["positive"]]))
   expect_identical(fitted$prediction_coefficients[["positive"]], 0)
   expect_equal(
-    predict_prediction_model(
+    predict_stream_model(
       fitted_model = fitted,
       network_strengths = network_strengths,
       construction_polarity = "separate",
@@ -236,7 +236,7 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
     c(1, 2, 1, 2, 1, 2, 1, 2)
   )
 
-  edge_screen <- screen_edges(
+  edge_selection <- run_edge_selection(
     conmat = conmat,
     behav = behav,
     selection_criterion = "absolute",
@@ -245,10 +245,10 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
     weighting_scale = 0.05
   )
 
-  expect_true(is.double(edge_screen$weights))
-  expect_true(any(edge_screen$weights > 0 & edge_screen$weights < 1))
-  expect_true(all(edge_screen$weights[edge_screen$mask] >= 0.5))
-  expect_true(all(edge_screen$weights[!edge_screen$mask] <= 0.5))
+  expect_true(is.double(edge_selection$weights))
+  expect_true(any(edge_selection$weights > 0 & edge_selection$weights < 1))
+  expect_true(all(edge_selection$weights[edge_selection$mask] >= 0.5))
+  expect_true(all(edge_selection$weights[!edge_selection$mask] <= 0.5))
 })
 
 test_that("compute_edge_weights validates weighting mode", {
@@ -283,7 +283,7 @@ test_that("prediction helpers validate unsupported modes", {
   )
 
   expect_error(
-    prediction_features(
+    stream_features(
       network_strengths = network_strengths,
       construction_polarity = "separate",
       prediction_stream = "bogus"
@@ -296,7 +296,7 @@ test_that("prediction helpers validate unsupported modes", {
     fixed = TRUE
   )
   expect_error(
-    prediction_features(
+    stream_features(
       network_strengths = network_strengths,
       construction_polarity = "bogus",
       prediction_stream = "joint"

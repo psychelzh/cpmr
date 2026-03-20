@@ -514,7 +514,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     rows_test = rows_test,
     covariates_train = training$covariates
   )
-  fold_edges <- select_edges(
+  fold_edges <- select_edge_mask(
     conmat = training$conmat,
     behav = training$behav,
     selection_method = spec$params$selection$method,
@@ -524,7 +524,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   fold_model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
-    edge_screen = screen_edges(
+    edge_selection = run_edge_selection(
       conmat = training$conmat,
       behav = training$behav,
       selection_method = spec$params$selection$method,

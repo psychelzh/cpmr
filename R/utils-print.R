@@ -39,7 +39,7 @@ print_edge_rate_block <- function(edges, header = "  Selected edges:\n") {
   }
 
   cat(header)
-  for (edge_type in edge_types) {
+  for (edge_type in edge_signs) {
     cat(sprintf(
       "    %s: %s\n",
       prediction_label(edge_type),
