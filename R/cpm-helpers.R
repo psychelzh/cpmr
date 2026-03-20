@@ -168,6 +168,57 @@ cpm_model_lm <- function() {
   )
 }
 
+selection_to_params <- function(selection) {
+  unclass(selection)
+}
+
+construction_to_params <- function(construction) {
+  utils::modifyList(
+    unclass(construction),
+    list(weighting = unclass(construction$weighting))
+  )
+}
+
+model_to_params <- function(model) {
+  unclass(model)
+}
+
+selection_from_params <- function(type, method, criterion, level) {
+  switch(
+    type,
+    cor = cpm_selection_cor(
+      method = method,
+      criterion = criterion,
+      level = level
+    ),
+    stop("`selection` must be a supported CPM selection type.", call. = FALSE)
+  )
+}
+
+construction_from_params <- function(
+  type,
+  polarity,
+  edge_weighting,
+  weighting_scale,
+  standardize_edges
+) {
+  switch(
+    type,
+    strength = cpm_construction_strength(
+      polarity = polarity,
+      weighting = cpm_weighting(
+        method = edge_weighting,
+        scale = weighting_scale
+      ),
+      standardize_edges = standardize_edges
+    ),
+    stop(
+      "`construction` must be a supported CPM construction type.",
+      call. = FALSE
+    )
+  )
+}
+
 cpm_model_from_params <- function(model_type) {
   switch(
     model_type,

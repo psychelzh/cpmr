@@ -3,13 +3,10 @@ run_edge_selection <- function(
   behav,
   selection_method = c("pearson", "spearman"),
   selection_criterion = c("p_value", "absolute", "proportion"),
-  selection_level = 0.01,
-  edge_weighting = c("binary", "sigmoid"),
-  weighting_scale = 0.05
+  selection_level = 0.01
 ) {
   selection_method <- match.arg(selection_method)
   selection_criterion <- match.arg(selection_criterion)
-  edge_weighting <- match.arg(edge_weighting)
   associations <- drop(stats::cor(
     conmat,
     behav,
@@ -47,16 +44,7 @@ run_edge_selection <- function(
   list(
     associations = associations,
     thresholds = thresholds,
-    mask = mask,
-    weights = compute_edge_weights(
-      associations = associations,
-      cutoffs = thresholds,
-      mask = mask,
-      edge_weighting = edge_weighting,
-      weighting_scale = weighting_scale
-    ),
-    edge_weighting = edge_weighting,
-    weighting_scale = weighting_scale
+    mask = mask
   )
 }
 
@@ -80,26 +68,34 @@ train_model <- function(
   conmat,
   behav,
   edge_selection,
-  standardize_edges,
-  construction_polarity,
+  construction_spec,
   model_spec
 ) {
   center <- NULL
   scale <- NULL
-  if (standardize_edges) {
+  if (construction_spec$standardize_edges) {
     center <- Rfast::colmeans(conmat)
     scale <- Rfast::colVars(conmat, std = TRUE)
     conmat <- fscale(conmat, center, scale)
   }
 
-  network_strengths <- compute_network_strengths(conmat, edge_selection$weights)
-  prediction_streams <- prediction_streams_for_polarity(construction_polarity)
+  edge_weights <- compute_edge_weights(
+    associations = edge_selection$associations,
+    cutoffs = edge_selection$thresholds,
+    mask = edge_selection$mask,
+    edge_weighting = construction_spec$weighting$method,
+    weighting_scale = construction_spec$weighting$scale
+  )
+  network_strengths <- compute_network_strengths(conmat, edge_weights)
+  prediction_streams <- prediction_streams_for_polarity(
+    construction_spec$polarity
+  )
 
   outcome_models <- lapply(prediction_streams, function(prediction_stream) {
     fit_stream_model(
       network_strengths = network_strengths,
       behav = behav,
-      construction_polarity = construction_polarity,
+      construction_polarity = construction_spec$polarity,
       prediction_stream = prediction_stream,
       model_spec = model_spec
     )
@@ -107,15 +103,15 @@ train_model <- function(
   names(outcome_models) <- prediction_streams
 
   list(
-    standardize_edges = standardize_edges,
+    standardize_edges = construction_spec$standardize_edges,
     center = center,
     scale = scale,
     edges = edge_selection$mask,
-    edge_weights = edge_selection$weights,
-    edge_weighting = edge_selection$edge_weighting,
-    weighting_scale = edge_selection$weighting_scale,
+    edge_weights = edge_weights,
+    edge_weighting = construction_spec$weighting$method,
+    weighting_scale = construction_spec$weighting$scale,
     selection_thresholds = edge_selection$thresholds,
-    construction_polarity = construction_polarity,
+    construction_polarity = construction_spec$polarity,
     prediction_streams = prediction_streams,
     outcome_models = outcome_models
   )

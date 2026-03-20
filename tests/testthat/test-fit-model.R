@@ -151,8 +151,11 @@ test_that("train_model and predict_model compose correctly", {
     conmat = training$conmat,
     behav = training$behav,
     edge_selection = edge_selection,
-    standardize_edges = TRUE,
-    construction_polarity = "separate",
+    construction_spec = list(
+      polarity = "separate",
+      weighting = list(method = "binary", scale = 0.05),
+      standardize_edges = TRUE
+    ),
     model_spec = cpm_model_lm()
   )
 
@@ -169,18 +172,12 @@ test_that("net polarity with lm model produces a single stream", {
   conmat <- matrix(rnorm(40), nrow = 8, ncol = 5)
   behav <- rnorm(8)
   edge_selection <- list(
+    associations = c(0.2, -0.2, NA_real_, 0.3, 0.4),
     mask = matrix(
       c(TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE),
       ncol = 2,
       dimnames = list(NULL, c("positive", "negative"))
     ),
-    weights = matrix(
-      c(1, 0, 0, 1, 1, 0, 0, 1, 0, 1),
-      ncol = 2,
-      dimnames = list(NULL, c("positive", "negative"))
-    ),
-    edge_weighting = "binary",
-    weighting_scale = 0.05,
     thresholds = c(positive = 0.1, negative = 0.1)
   )
 
@@ -188,8 +185,11 @@ test_that("net polarity with lm model produces a single stream", {
     conmat = conmat,
     behav = behav,
     edge_selection = edge_selection,
-    standardize_edges = FALSE,
-    construction_polarity = "net",
+    construction_spec = list(
+      polarity = "net",
+      weighting = list(method = "binary", scale = 0.05),
+      standardize_edges = FALSE
+    ),
     model_spec = cpm_model_lm()
   )
   pred <- predict_model(model, conmat)
@@ -240,15 +240,20 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
     conmat = conmat,
     behav = behav,
     selection_criterion = "absolute",
-    selection_level = 0.4,
+    selection_level = 0.4
+  )
+  edge_weights <- compute_edge_weights(
+    associations = edge_selection$associations,
+    cutoffs = edge_selection$thresholds,
+    mask = edge_selection$mask,
     edge_weighting = "sigmoid",
     weighting_scale = 0.05
   )
 
-  expect_true(is.double(edge_selection$weights))
-  expect_true(any(edge_selection$weights > 0 & edge_selection$weights < 1))
-  expect_true(all(edge_selection$weights[edge_selection$mask] >= 0.5))
-  expect_true(all(edge_selection$weights[!edge_selection$mask] <= 0.5))
+  expect_true(is.double(edge_weights))
+  expect_true(any(edge_weights > 0 & edge_weights < 1))
+  expect_true(all(edge_weights[edge_selection$mask] >= 0.5))
+  expect_true(all(edge_weights[!edge_selection$mask] <= 0.5))
 })
 
 test_that("compute_edge_weights validates weighting mode", {

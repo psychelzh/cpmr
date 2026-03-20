@@ -66,16 +66,11 @@ cpm_spec <- function(
     message = "`model` must be created by `cpm_model_lm()`."
   )
 
-  construction_params <- utils::modifyList(
-    unclass(construction),
-    list(weighting = unclass(construction$weighting))
-  )
-
   new_cpm_spec(
     params = list(
-      selection = unclass(selection),
-      construction = construction_params,
-      model = unclass(model)
+      selection = selection_to_params(selection),
+      construction = construction_to_params(construction),
+      model = model_to_params(model)
     ),
     helpers = list(
       selection = selection,
@@ -267,41 +262,5 @@ cpm_helpers_from_params <- function(params) {
       standardize_edges = params$construction$standardize_edges
     ),
     model = cpm_model_from_params(params$model$type)
-  )
-}
-
-selection_from_params <- function(type, method, criterion, level) {
-  switch(
-    type,
-    cor = cpm_selection_cor(
-      method = method,
-      criterion = criterion,
-      level = level
-    ),
-    stop("`selection` must be a supported CPM selection type.", call. = FALSE)
-  )
-}
-
-construction_from_params <- function(
-  type,
-  polarity,
-  edge_weighting,
-  weighting_scale,
-  standardize_edges
-) {
-  switch(
-    type,
-    strength = cpm_construction_strength(
-      polarity = polarity,
-      weighting = cpm_weighting(
-        method = edge_weighting,
-        scale = weighting_scale
-      ),
-      standardize_edges = standardize_edges
-    ),
-    stop(
-      "`construction` must be a supported CPM construction type.",
-      call. = FALSE
-    )
   )
 }

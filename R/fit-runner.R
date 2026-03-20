@@ -36,16 +36,13 @@ run_single_fit <- function(
     behav = training$behav,
     selection_method = params$selection$method,
     selection_criterion = params$selection$criterion,
-    selection_level = params$selection$level,
-    edge_weighting = params$construction$weighting$method,
-    weighting_scale = params$construction$weighting$scale
+    selection_level = params$selection$level
   )
   model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
     edge_selection = edge_selection,
-    standardize_edges = params$construction$standardize_edges,
-    construction_polarity = params$construction$polarity,
+    construction_spec = params$construction,
     model_spec = object$helpers$model
   )
   pred[include_cases, ] <- predict_model(model, training$conmat)
@@ -123,16 +120,13 @@ run_resample_fit <- function(
       behav = training$behav,
       selection_method = params$selection$method,
       selection_criterion = params$selection$criterion,
-      selection_level = params$selection$level,
-      edge_weighting = params$construction$weighting$method,
-      weighting_scale = params$construction$weighting$scale
+      selection_level = params$selection$level
     )
     fold_model <- train_model(
       conmat = training$conmat,
       behav = training$behav,
       edge_selection = edge_selection,
-      standardize_edges = params$construction$standardize_edges,
-      construction_polarity = params$construction$polarity,
+      construction_spec = params$construction,
       model_spec = object$helpers$model
     )
     assessment <- prepare_assessment_data(

@@ -529,12 +529,9 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
       behav = training$behav,
       selection_method = spec$params$selection$method,
       selection_criterion = spec$params$selection$criterion,
-      selection_level = spec$params$selection$level,
-      edge_weighting = spec$params$construction$weighting$method,
-      weighting_scale = spec$params$construction$weighting$scale
+      selection_level = spec$params$selection$level
     ),
-    standardize_edges = spec$params$construction$standardize_edges,
-    construction_polarity = spec$params$construction$polarity,
+    construction_spec = spec$params$construction,
     model_spec = spec$helpers$model
   )
   resampled <- fit_resamples(
