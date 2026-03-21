@@ -130,7 +130,7 @@ resolve_kfolds <- function(kfolds, include_cases) {
 }
 
 compute_resample_metric <- function(
-  real,
+  observed,
   predicted,
   metric = c("rmse", "mae", "correlation"),
   correlation_method = c("pearson", "spearman")
@@ -139,10 +139,10 @@ compute_resample_metric <- function(
 
   switch(
     metric,
-    rmse = safe_rmse(real, predicted),
-    mae = safe_mae(real, predicted),
+    rmse = safe_rmse(observed, predicted),
+    mae = safe_mae(observed, predicted),
     correlation = safe_cor(
-      real,
+      observed,
       predicted,
       method = match.arg(correlation_method)
     )
@@ -163,7 +163,7 @@ compute_pooled_metric_table <- function(
       prediction_streams,
       function(prediction_stream) {
         compute_resample_metric(
-          predictions$real,
+          predictions$observed,
           predictions[[prediction_stream]],
           metric = metric,
           correlation_method = correlation_method
@@ -200,7 +200,7 @@ compute_fold_metric_table <- function(
         prediction_streams,
         function(prediction_stream) {
           compute_resample_metric(
-            predictions$real[rows],
+            predictions$observed[rows],
             predictions[[prediction_stream]][rows],
             metric = metric,
             correlation_method = correlation_method

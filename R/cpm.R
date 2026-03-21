@@ -10,7 +10,7 @@
 #'   \item{`spec`}{The originating `cpm_spec` object.}
 #'   \item{`params`}{Parameter list used at fit time.}
 #'   \item{`predictions`}{Data frame of observation-level outputs with columns
-#'     `row`, `real`, and one column per configured prediction stream.}
+#'     `row`, `observed`, and one column per configured prediction stream.}
 #'   \item{`edges`}{Stored single-fit edge mask as a `p x 2` logical matrix
 #'     with `positive` and `negative` columns.}
 #'   \item{`model`}{Trained CPM model components used by prediction.}
@@ -106,7 +106,7 @@ print.cpm <- function(x, ...) {
 #' @param object An object of class \code{cpm}.
 #' @param ... Other parameters passed to the function.
 #' @param method A character vector indicating the method used to calculate the
-#'   correlation between the real and predicted values.
+#'   correlation between the observed and predicted values.
 #' @return A list of class \code{cpm_summary} containing:
 #'   \item{metrics}{A data frame with columns `level`, `metric`, `prediction`,
 #'     `estimate`, `std_error`, and `method`. Single-fit CPM summaries store
@@ -180,8 +180,8 @@ print.cpm_summary <- function(x, ...) {
 #'
 #'   For `component = "performance"`:
 #'
-#'   \item{method}{The method used to calculate the correlation between the real
-#'   and predicted values.}
+#'   \item{method}{The method used to calculate the correlation between the
+#'   observed and predicted values.}
 #'
 #'   \item{prediction columns}{One numeric column per configured prediction
 #'   stream. For example, `joint`, `positive`, and `negative` when

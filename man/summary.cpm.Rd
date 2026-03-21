@@ -15,7 +15,7 @@
 \item{...}{Other parameters passed to the function.}
 
 \item{method}{A character vector indicating the method used to calculate the
-correlation between the real and predicted values.}
+correlation between the observed and predicted values.}
 
 \item{x}{An object of class \code{cpm_summary}.}
 }

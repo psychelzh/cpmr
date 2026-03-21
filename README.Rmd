@@ -107,10 +107,15 @@ construction is:
   features before fitting the outcome model.
 
 With `polarity = "separate"`, `cpmr` keeps the positive and negative summaries
-as separate predictors and reports the classic `joint`, `positive`, and
-`negative` prediction streams. With `polarity = "net"`, `cpmr` constructs a
-single `net_summary = positive_summary - negative_summary` feature and
-returns one `net` prediction stream.
+as separate predictors and reports three prediction streams:
+
+- `joint`, which fits one model with both summaries together;
+- `positive`, a positive-only diagnostic stream;
+- `negative`, a negative-only diagnostic stream.
+
+With `polarity = "net"`, `cpmr` constructs a single
+`net_summary = positive_summary - negative_summary` feature and returns one
+`net` prediction stream.
 
 Cross-validated resampling uses `fit_resamples()` with the same specification
 object:

@@ -103,7 +103,8 @@ CPM-derived summaries are exposed to the second-stage outcome model:
 
 - `polarity = "separate"` keeps both summaries. The `joint` stream fits a
   model with `positive_summary` and `negative_summary` together, while the
-  `positive` and `negative` streams are single-summary diagnostics.
+  `positive` and `negative` streams are positive-only / negative-only
+  diagnostics.
 - `polarity = "net"` uses one
   `net_summary = positive_summary - negative_summary` feature and returns a
   single `net` stream.
@@ -209,8 +210,9 @@ Compared with the default spec, the example above changes four things:
 
 Prediction columns depend on `construction` polarity:
 
-- `polarity = "separate"` yields `joint`, `positive`, and `negative`
-  streams built from the positive and negative summaries;
+- `polarity = "separate"` yields a `joint` stream plus `positive` and
+  `negative` positive-only / negative-only diagnostic streams built from the
+  positive and negative summaries;
 - `polarity = "net"` yields a single `net` stream built from
   `net_summary = positive_summary - negative_summary`.
 

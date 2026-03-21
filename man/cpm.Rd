@@ -15,7 +15,7 @@ A \code{cpm} object is a list with the following elements:
 \item{\code{spec}}{The originating \code{cpm_spec} object.}
 \item{\code{params}}{Parameter list used at fit time.}
 \item{\code{predictions}}{Data frame of observation-level outputs with columns
-\code{row}, \code{real}, and one column per configured prediction stream.}
+\code{row}, \code{observed}, and one column per configured prediction stream.}
 \item{\code{edges}}{Stored single-fit edge mask as a \verb{p x 2} logical matrix
 with \code{positive} and \code{negative} columns.}
 \item{\code{model}}{Trained CPM model components used by prediction.}

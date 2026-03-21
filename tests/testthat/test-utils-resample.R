@@ -66,7 +66,7 @@ test_that("compute_pooled_metric_table summarizes pooled predictions", {
   predictions <- data.frame(
     row = 1:4,
     fold = c(1L, 1L, 2L, 2L),
-    real = c(1, 2, 3, 4),
+    observed = c(1, 2, 3, 4),
     joint = c(1, 2, 3, 4),
     positive = c(1, 2, 3, 4),
     negative = c(4, 3, 2, 1)
@@ -101,7 +101,7 @@ test_that("compute_pooled_metric_table returns a long metric table", {
   predictions <- data.frame(
     row = 1:4,
     fold = c(1L, 1L, 2L, 2L),
-    real = c(1, 2, 3, 4),
+    observed = c(1, 2, 3, 4),
     joint = c(1, 2, 3, 4),
     positive = c(1, 2, 3, 4),
     negative = c(4, 3, 2, 1)
@@ -123,7 +123,7 @@ test_that("compute_pooled_metric_table returns a long metric table", {
 test_that("compute_resample_metric only validates correlation methods when needed", {
   expect_equal(
     compute_resample_metric(
-      real = c(1, 2),
+      observed = c(1, 2),
       predicted = c(1, 2),
       metric = "rmse",
       correlation_method = "kendall"
@@ -136,7 +136,7 @@ test_that("compute_resample_summary_metrics combines pooled and foldwise summari
   predictions <- data.frame(
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
-    real = c(1, 2, 3, 4, 5, 6),
+    observed = c(1, 2, 3, 4, 5, 6),
     joint = c(1, 2, 3, 6, 5, 4),
     positive = c(1, 2, 3, 4, 5, 6),
     negative = c(3, 2, 1, 6, 5, 4)
@@ -173,7 +173,7 @@ test_that("compute_fold_metric_table returns one row per fold, metric, and strea
   predictions <- data.frame(
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
-    real = c(1, 2, 3, 4, 5, 6),
+    observed = c(1, 2, 3, 4, 5, 6),
     joint = c(1, 2, 3, 6, 5, 4),
     positive = c(1, 2, 3, 4, 5, 6),
     negative = c(3, 2, 1, 6, 5, 4)

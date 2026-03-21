@@ -19,8 +19,8 @@ A \link[tibble:tibble-package]{tibble} with columns storing parameters of the
 
 For \code{component = "performance"}:
 
-\item{method}{The method used to calculate the correlation between the real
-and predicted values.}
+\item{method}{The method used to calculate the correlation between the
+observed and predicted values.}
 
 \item{prediction columns}{One numeric column per configured prediction
 stream. For example, \code{joint}, \code{positive}, and \code{negative} when

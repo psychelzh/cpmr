@@ -68,7 +68,8 @@ In the current native workflow:
 
 That means the classic `joint` stream is not a third summary. It is the
 prediction stream that fits one model with both `positive_summary` and
-`negative_summary` together.
+`negative_summary` together. The `positive` and `negative` streams are the
+matching positive-only / negative-only diagnostics.
 
 That means you can usually start from `cpm_spec()` and only open up the part
 you actually want to change, rather than rewriting the whole spec every time.

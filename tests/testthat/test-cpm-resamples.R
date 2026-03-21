@@ -25,7 +25,7 @@ test_that("new_cpm_resamples builds resampling objects", {
   predictions <- data.frame(
     row = 1:2,
     fold = 1L,
-    real = c(1, 2),
+    observed = c(1, 2),
     joint = c(1.1, 1.9),
     positive = c(1.0, 2.0),
     negative = c(0.9, 2.1)
@@ -53,7 +53,7 @@ test_that("print.cpm_resamples uses human-readable edge storage labels", {
       predictions = data.frame(
         row = 1:6,
         fold = c(1L, 1L, 1L, 2L, 2L, 2L),
-        real = c(1, 2, 3, 4, 5, 6),
+        observed = c(1, 2, 3, 4, 5, 6),
         joint = c(1, 2, 3, 6, 5, 4),
         positive = c(1, 2, 3, 4, 5, 6),
         negative = c(3, 2, 1, 6, 5, 4)

@@ -174,7 +174,7 @@ test_that("net construction yields a single prediction stream", {
 
   result <- fit(spec, conmat = conmat, behav = behav)
 
-  expect_named(result$predictions, c("row", "real", "net"))
+  expect_named(result$predictions, c("row", "observed", "net"))
   expect_named(result$model$outcome_models, "net")
 })
 
@@ -216,7 +216,7 @@ test_that("fit_resamples returns predictions and folds", {
   expect_equal(nrow(res$predictions), 10)
   expect_named(
     res$predictions,
-    c("row", "fold", "real", "joint", "positive", "negative")
+    c("row", "fold", "observed", "joint", "positive", "negative")
   )
   expect_null(res$edges)
   expect_s3_class(summary(res), "cpm_resamples_summary")
@@ -524,7 +524,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     fold_pred,
     ignore_attr = TRUE
   )
-  expect_equal(collected$real[rows_test], assessment$behav)
+  expect_equal(collected$observed[rows_test], assessment$behav)
 })
 
 test_that("fit_resamples excludes incomplete rows consistently with covariates", {

@@ -47,9 +47,9 @@ run_single_fit <- function(
   )
   pred[include_cases, ] <- predict_model(model, training$conmat)
 
-  real <- behav
-  real[include_cases] <- training$behav
-  predictions <- compute_single_predictions(real, pred)
+  observed <- behav
+  observed[include_cases] <- training$behav
+  predictions <- compute_single_predictions(observed, pred)
 
   new_cpm(
     call = call,
@@ -103,7 +103,7 @@ run_resample_fit <- function(
 
   pred <- init_pred(behav, prediction_streams)
   edges <- init_edges(return_edges, conmat, kfolds)
-  real <- behav
+  observed <- behav
 
   for (fold in seq_len(kfolds)) {
     rows_test <- folds[[fold]]
@@ -139,7 +139,7 @@ run_resample_fit <- function(
     )
 
     pred[rows_test, ] <- predict_model(fold_model, assessment$conmat)
-    real[rows_test] <- assessment$behav
+    observed[rows_test] <- assessment$behav
 
     if (return_edges == "all") {
       edges[,, fold] <- edge_selection$mask
@@ -148,7 +148,7 @@ run_resample_fit <- function(
     }
   }
 
-  predictions <- compute_fold_predictions(real, pred, folds)
+  predictions <- compute_fold_predictions(observed, pred, folds)
 
   new_cpm_resamples(
     call = call,

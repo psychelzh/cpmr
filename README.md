@@ -98,7 +98,7 @@ rich_spec <- cpm_spec(
 
 fit(rich_spec, conmat = conmat, behav = behav)$predictions |>
   head()
-#>   row        real         net
+#>   row    observed         net
 #> 1   1  0.26499342  0.82238735
 #> 2   2  1.83074748  1.95343095
 #> 3   3 -0.05937826  0.37334450
@@ -133,9 +133,13 @@ construction is:
   features before fitting the outcome model.
 
 With `polarity = "separate"`, `cpmr` keeps the positive and negative
-summaries as separate predictors and reports the classic `joint`,
-`positive`, and `negative` prediction streams. With `polarity = "net"`,
-`cpmr` constructs a single
+summaries as separate predictors and reports three prediction streams:
+
+- `joint`, which fits one model with both summaries together;
+- `positive`, a positive-only diagnostic stream;
+- `negative`, a negative-only diagnostic stream.
+
+With `polarity = "net"`, `cpmr` constructs a single
 `net_summary = positive_summary - negative_summary` feature and returns
 one `net` prediction stream.
 
@@ -166,7 +170,7 @@ summary(resample_obj)
 #>     Positive: 0.007 (SE 0.086)
 #>     Negative: -0.039 (SE 0.078)
 head(resample_obj$predictions)
-#>   row fold        real       joint    positive    negative
+#>   row fold    observed       joint    positive    negative
 #> 1   1    1  0.26499342 0.591709195 -0.08846823  0.76686948
 #> 2   2    5  1.83074748 0.325440165  0.29380525  0.05747766
 #> 3   3    5 -0.05937826 0.845311244  1.05634560 -0.34018567

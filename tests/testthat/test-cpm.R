@@ -69,7 +69,7 @@ test_that("Alternative threshold method works", {
   expect_equal(sum(prediction_complete_cases(result)), 10)
   expect_named(
     result$predictions,
-    c("row", "real", "joint", "positive", "negative")
+    c("row", "observed", "joint", "positive", "negative")
   )
   expect_equal(dim(result$edges), c(ncol(conmat), 2))
   expect_identical(colnames(result$edges), c("positive", "negative"))
@@ -124,7 +124,7 @@ test_that("fit with covariates uses in-sample residualized target scale", {
 
   behav_resid <- stats::.lm.fit(cbind(1, covariates), behav)$residuals
 
-  expect_equal(result$predictions$real, behav_resid)
+  expect_equal(result$predictions$observed, behav_resid)
   expect_true(isTRUE(all(prediction_complete_cases(result))))
 })
 
@@ -214,7 +214,7 @@ test_that("`na_action` argument works", {
     "Missing values found in `behav`"
   )
   result <- fit(cpm_spec(), conmat, behav, na_action = "exclude")
-  expect_equal(sum(complete.cases(result$predictions$real)), 9)
+  expect_equal(sum(complete.cases(result$predictions$observed)), 9)
   expect_equal(sum(prediction_complete_cases(result)), 9)
   expect_snapshot(result)
   covariates <- matrix(rnorm(10), ncol = 1)
@@ -227,7 +227,7 @@ test_that("`na_action` argument works", {
     na_action = "exclude"
   )
   expect_equal(
-    sum(complete.cases(result$predictions$real)),
+    sum(complete.cases(result$predictions$observed)),
     sum(complete.cases(behav))
   )
   expect_equal(sum(prediction_complete_cases(result)), 8)
@@ -241,7 +241,7 @@ test_that("`na_action` argument works", {
     na_action = "exclude"
   )
   expect_equal(
-    sum(complete.cases(result$predictions$real)),
+    sum(complete.cases(result$predictions$observed)),
     sum(complete.cases(behav))
   )
   expect_equal(sum(prediction_complete_cases(result)), 8)

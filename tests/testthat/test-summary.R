@@ -66,7 +66,7 @@ test_that("summary.cpm returns NA when fewer than two valid pairs", {
     list(
       predictions = data.frame(
         row = 1:3,
-        real = c(NA_real_, 2, NA_real_),
+        observed = c(NA_real_, 2, NA_real_),
         joint = c(1, 2, 3),
         positive = c(1, 2, 3),
         negative = c(1, 2, 3)
@@ -126,7 +126,7 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
   predictions <- data.frame(
     row = 1:6,
     fold = c(1L, 1L, 1L, 2L, 2L, 2L),
-    real = c(1, 2, 3, 4, 5, 6),
+    observed = c(1, 2, 3, 4, 5, 6),
     joint = c(1, 2, 3, 6, 5, 4),
     positive = c(1, 2, 3, 4, 5, 6),
     negative = c(3, 2, 1, 6, 5, 4)
@@ -166,12 +166,12 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
     rbind(
       rmse = vapply(
         prediction_streams,
-        function(type) safe_rmse(predictions$real, predictions[[type]]),
+        function(type) safe_rmse(predictions$observed, predictions[[type]]),
         numeric(1)
       ),
       mae = vapply(
         prediction_streams,
-        function(type) safe_mae(predictions$real, predictions[[type]]),
+        function(type) safe_mae(predictions$observed, predictions[[type]]),
         numeric(1)
       )
     )
@@ -184,7 +184,7 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
     ),
     vapply(
       prediction_streams,
-      function(type) safe_cor(predictions$real, predictions[[type]]),
+      function(type) safe_cor(predictions$observed, predictions[[type]]),
       numeric(1)
     )
   )
@@ -234,7 +234,7 @@ test_that("summary.cpm_resamples returns NULL edges when resamples did not store
       predictions = data.frame(
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
-        real = c(NA_real_, NA_real_, NA_real_, NA_real_),
+        observed = c(NA_real_, NA_real_, NA_real_, NA_real_),
         joint = c(1, 2, 3, 4),
         positive = c(1, 2, 3, 4),
         negative = c(4, 3, 2, 1)
@@ -336,7 +336,7 @@ test_that("summary.cpm_resamples averages fold-wise edges when all edges are sto
       predictions = data.frame(
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
-        real = c(1, 2, 3, 4),
+        observed = c(1, 2, 3, 4),
         joint = c(1, 2, 3, 4),
         positive = c(1, 2, 3, 4),
         negative = c(4, 3, 2, 1)

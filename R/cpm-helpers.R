@@ -61,9 +61,9 @@ print.cpm_selection_spec <- function(x, ...) {
 #' @param polarity How positive and negative screened information is represented.
 #'   `"separate"` constructs `positive_summary` and `negative_summary`, fits a
 #'   `joint` stream from both together, and also returns `positive` and
-#'   `negative` single-summary diagnostic streams. `"net"` constructs one
-#'   `net_summary = positive_summary - negative_summary` feature and returns
-#'   a single `net` stream.
+#'   `negative` positive-only / negative-only diagnostic streams. `"net"`
+#'   constructs one `net_summary = positive_summary - negative_summary`
+#'   feature and returns a single `net` stream.
 #' @param weight_scale Non-negative scale controlling optional sigmoid-style
 #'   edge weighting before summary construction. `0` disables additional
 #'   weighting and keeps the classic hard-threshold CPM summary. Values greater
