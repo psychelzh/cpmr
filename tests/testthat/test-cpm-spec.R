@@ -124,7 +124,7 @@ test_that("helper constructors round-trip through params", {
   expect_identical(format_model_type("custom"), "custom")
 })
 
-test_that("print methods show readable staged settings", {
+test_that("print.cpm_spec shows readable staged settings", {
   spec <- cpm_spec(
     selection = cpm_selection_cor(
       method = "spearman",
@@ -145,23 +145,6 @@ test_that("print methods show readable staged settings", {
   expect_output(print(spec), "Construction")
   expect_output(print(spec), "Polarity:\\s+net")
   expect_output(print(spec), "Outcome model:\\s+linear regression")
-
-  selection <- cpm_selection_cor(
-    method = "spearman",
-    criterion = "absolute",
-    level = 0.1
-  )
-  expect_output(print(selection), "CPM selection \\(correlation\\)")
-  expect_output(print(selection), "Criterion:\\s+absolute")
-
-  construction <- cpm_construction_summary(
-    polarity = "net",
-    weight_scale = 0.03,
-    standardize_edges = TRUE
-  )
-  expect_output(print(construction), "CPM construction \\(summary\\)")
-  expect_output(print(construction), "Polarity:\\s+net")
-  expect_output(print(construction), "Edge standardization:\\s+z-score")
 })
 
 test_that("net construction yields a single prediction stream", {

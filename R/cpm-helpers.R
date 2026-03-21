@@ -41,15 +41,6 @@ cpm_selection_cor <- function(
   )
 }
 
-#' @export
-print.cpm_selection_spec <- function(x, ...) {
-  cat("CPM selection (correlation):\n")
-  cat(sprintf("  Method:    %s\n", x$method))
-  cat(sprintf("  Criterion: %s\n", x$criterion))
-  cat(sprintf("  Level:     %s\n", format_threshold_level(x$level)))
-  invisible(x)
-}
-
 #' Define CPM summary-construction settings
 #'
 #' Build the feature-construction portion of a `cpm_spec()`. This helper
@@ -103,25 +94,6 @@ cpm_construction_summary <- function(
     ),
     class = "cpm_construction_spec"
   )
-}
-
-#' @export
-print.cpm_construction_spec <- function(x, ...) {
-  cat("CPM construction (summary):\n")
-  cat(sprintf("  Polarity:             %s\n", x$polarity))
-  cat(sprintf(
-    "  Edge weighting:       %s\n",
-    format_weighting_label(x$weight_scale)
-  ))
-  cat(sprintf(
-    "  Weight scale:         %s\n",
-    format_weight_scale(x$weight_scale)
-  ))
-  cat(sprintf(
-    "  Edge standardization: %s\n",
-    format_edge_standardization(x$standardize_edges)
-  ))
-  invisible(x)
 }
 
 #' Define the outcome model used after CPM feature construction
