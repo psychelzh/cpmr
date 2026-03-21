@@ -27,6 +27,10 @@ The main choice is not between different API families. It is between:
 - `fit_resamples(..., resamples = ...)` when you already have a partition
   scheme you want to enforce.
 
+In that resampling interface, `resamples = NULL` means leave-one-out
+resampling, a single integer such as `resamples = 5` means k-fold resampling,
+and a list passed to `resamples` enforces manual assessment folds.
+
 ## Start with `cpm_spec()`
 
 For most analyses, start with `cpm_spec()` and reuse it across single-fit and
@@ -41,7 +45,7 @@ behav <- rnorm(80)
 spec <- cpm_spec()
 
 fit_obj <- fit(spec, conmat = conmat, behav = behav)
-resample_obj <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
+resample_obj <- fit_resamples(spec, conmat = conmat, behav = behav, resamples = 5)
 
 summary(fit_obj)
 summary(resample_obj)

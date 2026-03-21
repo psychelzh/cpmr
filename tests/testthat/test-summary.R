@@ -36,7 +36,7 @@ example_resample_summary <- function(
   ),
   edges = NULL,
   params = list(
-    kfolds = 5L,
+    n_folds = 5L,
     return_edges = "none",
     correlation_method = "pearson",
     prediction_streams = prediction_streams
@@ -136,7 +136,7 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
     new_cpm_resamples(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       spec = cpm_spec(),
-      params = list(kfolds = 2L, return_edges = "sum"),
+      params = list(return_edges = "sum"),
       predictions = predictions,
       edges = matrix(
         c(2, 0, 1, 2),
@@ -230,7 +230,7 @@ test_that("summary.cpm_resamples returns NULL edges when resamples did not store
     new_cpm_resamples(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       spec = cpm_spec(),
-      params = list(kfolds = 2L, return_edges = "none"),
+      params = list(return_edges = "none"),
       predictions = data.frame(
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
@@ -294,7 +294,7 @@ test_that("summary.cpm_resamples supports single-stream net summaries", {
     cpm_spec(construction = cpm_construction_summary(polarity = "net")),
     conmat = conmat,
     behav = behav,
-    kfolds = 4
+    resamples = 4
   )
   summary_result <- summary(result)
   output <- capture.output(print(summary_result))
@@ -327,7 +327,7 @@ test_that("summary.cpm_resamples supports configurable correlation methods", {
     new_cpm_resamples(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       spec = cpm_spec(),
-      params = list(kfolds = 2L, return_edges = "none"),
+      params = list(return_edges = "none"),
       predictions = predictions,
       edges = NULL,
       folds = folds
@@ -370,7 +370,7 @@ test_that("summary.cpm_resamples averages fold-wise edges when all edges are sto
     new_cpm_resamples(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       spec = cpm_spec(),
-      params = list(kfolds = 2L, return_edges = "all"),
+      params = list(return_edges = "all"),
       predictions = data.frame(
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
@@ -395,7 +395,7 @@ test_that("print.cpm_resamples_summary reports fold count and rates", {
       dimnames = list(NULL, c("positive", "negative"))
     ),
     params = list(
-      kfolds = 5L,
+      n_folds = 5L,
       return_edges = "sum",
       correlation_method = "pearson",
       prediction_streams = prediction_streams

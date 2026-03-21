@@ -147,7 +147,12 @@ Cross-validated resampling uses `fit_resamples()` with the same
 specification object:
 
 ``` r
-resample_obj <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+resample_obj <- fit_resamples(
+  cpm_spec(),
+  conmat = conmat,
+  behav = behav,
+  resamples = 5
+)
 
 summary(resample_obj)
 #> CPM resample summary:
@@ -193,6 +198,10 @@ head(resample_metrics(resample_obj))
 out-of-fold error metrics shown first and correlations reported as
 supplementary statistics. Use `resample_metrics(resample_obj)` when you
 want pooled or fold-wise metric tables directly.
+
+For `fit_resamples()`, `resamples = NULL` means leave-one-out
+resampling, `resamples = 5` means 5-fold resampling, and a list passed
+to `resamples` enforces a manual assessment-fold partition.
 
 ## Choosing a path
 

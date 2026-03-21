@@ -39,7 +39,7 @@
 #' fit_obj <- fit(spec, conmat = conmat, behav = behav)
 #' summary(fit_obj)
 #'
-#' resample_obj <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
+#' resample_obj <- fit_resamples(spec, conmat = conmat, behav = behav, resamples = 5)
 #' summary(resample_obj)
 #' @export
 cpm_spec <- function(
@@ -118,11 +118,10 @@ fit.cpm_spec <- function(
 #' Fit a CPM model specification on resamples
 #'
 #' @rdname cpm_spec
-#' @param resamples Optional list of assessment indices defining resamples.
-#'   Each element must be an integer vector indexing rows in `conmat`. If
-#'   `NULL`, folds are generated from `kfolds`.
-#' @param kfolds Number of folds used when `resamples` is `NULL`. If `NULL`,
-#'   it is set to the number of complete-case observations (LOOCV).
+#' @param resamples Optional resampling specification. Use `NULL` for leave-one-
+#'   out resampling, a single integer greater than or equal to 2 to request
+#'   k-fold resampling, or a list of assessment indices for manual folds. Manual
+#'   resamples must contain integer vectors indexing rows in `conmat`.
 #' @param return_edges A character string indicating the return value of the
 #'   selected edges. `"none"` skips edge storage, `"sum"` stores fold counts for
 #'   each selected edge, and `"all"` stores the fold-wise edge masks.
@@ -151,7 +150,6 @@ fit_resamples.cpm_spec <- function(
   ...,
   covariates = NULL,
   resamples = NULL,
-  kfolds = NULL,
   return_edges = c("none", "sum", "all"),
   na_action = c("fail", "exclude")
 ) {
@@ -169,7 +167,6 @@ fit_resamples.cpm_spec <- function(
 
   resolved <- resolve_resample_folds(
     resamples = resamples,
-    kfolds = kfolds,
     include_cases = fit_context$include_cases
   )
 

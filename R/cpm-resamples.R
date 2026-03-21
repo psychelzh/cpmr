@@ -96,7 +96,7 @@ print.cpm_resamples <- function(x, ...) {
 #' withr::local_seed(123)
 #' conmat <- matrix(rnorm(200), nrow = 20)
 #' behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
-#' res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 4)
+#' res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, resamples = 4)
 #'
 #' summary(res)
 #' @export
@@ -117,10 +117,10 @@ summary.cpm_resamples <- function(
       edges = summarize_resample_edges(
         object$edges,
         return_edges = object$params$return_edges,
-        kfolds = object$params$kfolds
+        n_folds = length(object$folds)
       ),
       params = list(
-        kfolds = object$params$kfolds,
+        n_folds = length(object$folds),
         return_edges = object$params$return_edges,
         correlation_method = correlation_method,
         prediction_streams = prediction_columns(object$predictions)
@@ -142,7 +142,7 @@ print.cpm_resamples_summary <- function(x, ...) {
   )
 
   cat("CPM resample summary:\n")
-  cat(sprintf("  Number of folds: %d\n", x$params$kfolds))
+  cat(sprintf("  Number of folds: %d\n", x$params$n_folds))
   print_error_block(summary_metric_matrix(
     x$metrics,
     level = "pooled",
@@ -222,7 +222,7 @@ print.cpm_resamples_summary <- function(x, ...) {
 #' withr::local_seed(123)
 #' conmat <- matrix(rnorm(200), nrow = 20)
 #' behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
-#' res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 4)
+#' res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, resamples = 4)
 #'
 #' head(resample_metrics(res))
 #' resample_metrics(res, level = "pooled", metrics = "correlation")

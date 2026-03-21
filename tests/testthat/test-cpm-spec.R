@@ -300,7 +300,7 @@ test_that("fit_resamples returns predictions and folds", {
   behav <- rnorm(10)
   spec <- cpm_spec()
 
-  res <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
+  res <- fit_resamples(spec, conmat = conmat, behav = behav, resamples = 5)
 
   expect_s3_class(res, "cpm_resamples")
   expect_identical(as.character(res$call[[1]]), "fit_resamples")
@@ -334,35 +334,24 @@ test_that("fit_resamples accepts custom resample indices", {
   expect_identical(res$folds, resamples)
 })
 
-test_that("fit_resamples validates kfolds", {
+test_that("fit_resamples validates fold-count resamples", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
   spec <- cpm_spec()
 
   expect_error(
-    fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 1),
-    "`kfolds` must be NULL or a single integer greater than or equal to 2.",
+    fit_resamples(spec, conmat = conmat, behav = behav, resamples = 1),
+    "`resamples` must be NULL, a single integer greater than or equal to 2, or a non-empty list of assessment indices.",
     fixed = TRUE
   )
   expect_error(
-    fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 2.5),
-    "`kfolds` must be NULL or a single integer greater than or equal to 2.",
+    fit_resamples(spec, conmat = conmat, behav = behav, resamples = 2.5),
+    "`resamples` must be NULL, a single integer greater than or equal to 2, or a non-empty list of assessment indices.",
     fixed = TRUE
   )
   expect_error(
-    fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 11),
-    "`kfolds` must be less than or equal to complete-case observations.",
-    fixed = TRUE
-  )
-  expect_error(
-    fit_resamples(
-      spec,
-      conmat = conmat,
-      behav = behav,
-      kfolds = 5,
-      resamples = list(1:5, 6:10)
-    ),
-    "Specify either `resamples` or `kfolds`, not both.",
+    fit_resamples(spec, conmat = conmat, behav = behav, resamples = 11),
+    "`resamples` as a fold count must be less than or equal to complete-case observations.",
     fixed = TRUE
   )
 })
@@ -456,7 +445,7 @@ test_that("fit_resamples errors when any fold leaves fewer than 3 training rows"
   spec <- cpm_spec()
 
   expect_error(
-    fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 2),
+    fit_resamples(spec, conmat = conmat, behav = behav, resamples = 2),
     "Each resample must leave at least 3 complete-case training observations.",
     fixed = TRUE
   )
@@ -483,7 +472,7 @@ test_that("fit_resamples can store summed edges", {
     spec,
     conmat = conmat,
     behav = behav,
-    kfolds = 5,
+    resamples = 5,
     return_edges = "sum"
   )
 
@@ -502,7 +491,7 @@ test_that("fit_resamples can store fold-wise edges", {
     spec,
     conmat = conmat,
     behav = behav,
-    kfolds = 5,
+    resamples = 5,
     return_edges = "all"
   )
 
@@ -526,7 +515,7 @@ test_that("fit_resamples handles covariates in assessment pipeline", {
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    kfolds = 6,
+    resamples = 6,
     return_edges = "sum"
   )
 

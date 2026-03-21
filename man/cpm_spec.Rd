@@ -28,7 +28,6 @@ cpm_spec(
   ...,
   covariates = NULL,
   resamples = NULL,
-  kfolds = NULL,
   return_edges = c("none", "sum", "all"),
   na_action = c("fail", "exclude")
 )
@@ -61,12 +60,10 @@ are found in the inputs. \code{"fail"} stops immediately when any required value
 is missing. \code{"exclude"} fits on complete cases and keeps the original row
 layout in the returned predictions.}
 
-\item{resamples}{Optional list of assessment indices defining resamples.
-Each element must be an integer vector indexing rows in \code{conmat}. If
-\code{NULL}, folds are generated from \code{kfolds}.}
-
-\item{kfolds}{Number of folds used when \code{resamples} is \code{NULL}. If \code{NULL},
-it is set to the number of complete-case observations (LOOCV).}
+\item{resamples}{Optional resampling specification. Use \code{NULL} for leave-one-
+out resampling, a single integer greater than or equal to 2 to request
+k-fold resampling, or a list of assessment indices for manual folds. Manual
+resamples must contain integer vectors indexing rows in \code{conmat}.}
 
 \item{return_edges}{A character string indicating the return value of the
 selected edges. \code{"none"} skips edge storage, \code{"sum"} stores fold counts for
@@ -121,6 +118,6 @@ behav <- rnorm(100)
 fit_obj <- fit(spec, conmat = conmat, behav = behav)
 summary(fit_obj)
 
-resample_obj <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
+resample_obj <- fit_resamples(spec, conmat = conmat, behav = behav, resamples = 5)
 summary(resample_obj)
 }

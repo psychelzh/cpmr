@@ -227,7 +227,7 @@ resample_obj <- fit_resamples(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
-  kfolds = 5
+  resamples = 5
 )
 
 resample_obj
@@ -236,6 +236,10 @@ summary(resample_obj)
 
 This keeps CPM-specific steps such as covariate handling, edge selection, and
 model training inside each resample fold.
+
+Here `resamples = NULL` would request leave-one-out resampling, `resamples = 5`
+requests 5-fold resampling, and a list supplied to `resamples` enforces a
+manual assessment-fold design.
 
 ## Inspect Predictions and Edges
 
@@ -274,7 +278,7 @@ edge_resample_obj <- fit_resamples(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
-  kfolds = 5,
+  resamples = 5,
   return_edges = "sum"
 )
 
@@ -339,7 +343,7 @@ na_obj <- fit_resamples(
   cpm_spec(),
   conmat = conmat,
   behav = behav_with_na,
-  kfolds = 5,
+  resamples = 5,
   na_action = "exclude"
 )
 

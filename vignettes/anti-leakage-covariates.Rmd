@@ -51,7 +51,7 @@ fit <- fit_resamples(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
-  kfolds = 5
+  resamples = 5
 )
 
 summary(fit)
@@ -74,7 +74,7 @@ resamples_fit <- fit_resamples(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
-  kfolds = 5,
+  resamples = 5,
   return_edges = "sum"
 )
 

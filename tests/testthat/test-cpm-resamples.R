@@ -1,9 +1,14 @@
-example_resample_result <- function(kfolds = 5L) {
+example_resample_result <- function(resamples = 5L) {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
 
-  fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = kfolds)
+  fit_resamples(
+    cpm_spec(),
+    conmat = conmat,
+    behav = behav,
+    resamples = resamples
+  )
 }
 
 test_that("print.cpm_resamples reports summary fields", {

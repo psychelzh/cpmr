@@ -45,7 +45,7 @@ undefined for some resampling schemes, such as leave-one-out resampling.
 withr::local_seed(123)
 conmat <- matrix(rnorm(200), nrow = 20)
 behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
-res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 4)
+res <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, resamples = 4)
 
 summary(res)
 }

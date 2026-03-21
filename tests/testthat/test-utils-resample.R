@@ -1,16 +1,16 @@
-test_that("validate_resamples rejects malformed assessment sets", {
+test_that("validate_manual_resamples rejects malformed assessment sets", {
   expect_error(
-    validate_resamples(list(), include_cases = 1:4),
+    validate_manual_resamples(list(), include_cases = 1:4),
     "non-empty list",
     fixed = FALSE
   )
   expect_error(
-    validate_resamples(list(c(1, Inf), 2:3), include_cases = 1:4),
+    validate_manual_resamples(list(c(1, Inf), 2:3), include_cases = 1:4),
     "finite numeric indices",
     fixed = FALSE
   )
   expect_error(
-    validate_resamples(list(1:2, 5:6), include_cases = 1:4),
+    validate_manual_resamples(list(1:2, 5:6), include_cases = 1:4),
     "contained in complete-case rows",
     fixed = FALSE
   )
@@ -29,11 +29,10 @@ test_that("resolve_resample_folds generates and validates public folds", {
   include_cases <- c(1L, 2L, 3L, 4L, 5L)
 
   resolved <- resolve_resample_folds(
-    resamples = NULL,
-    kfolds = 5,
+    resamples = 5,
     include_cases = include_cases
   )
-  expect_identical(resolved$kfolds, 5L)
+  expect_identical(resolved$n_folds, 5L)
   expect_identical(
     sort(unlist(resolved$folds, use.names = FALSE)),
     include_cases
@@ -41,18 +40,41 @@ test_that("resolve_resample_folds generates and validates public folds", {
 
   explicit <- resolve_resample_folds(
     resamples = list(1L, 2L, 3L, 4L, 5L),
-    kfolds = NULL,
     include_cases = include_cases
   )
-  expect_identical(explicit$kfolds, 5L)
+  expect_identical(explicit$n_folds, 5L)
   expect_identical(explicit$folds, list(1L, 2L, 3L, 4L, 5L))
+
+  loo <- resolve_resample_folds(
+    resamples = NULL,
+    include_cases = include_cases
+  )
+  expect_identical(loo$n_folds, 5L)
+  expect_identical(
+    sort(unlist(loo$folds, use.names = FALSE)),
+    include_cases
+  )
+})
+
+test_that("validate_resample_count rejects malformed fold counts", {
+  expect_error(
+    validate_resample_count(1),
+    "`resamples` must be NULL, a single integer greater than or equal to 2, or a non-empty list of assessment indices.",
+    fixed = TRUE
+  )
+  expect_error(
+    validate_resample_count(2.5),
+    "`resamples` must be NULL, a single integer greater than or equal to 2, or a non-empty list of assessment indices.",
+    fixed = TRUE
+  )
+  expect_identical(validate_resample_count(4), 4L)
 })
 
 test_that("warn_large_edge_storage signals large fold-wise storage", {
   expect_warning(
     warn_large_edge_storage(
       n_edges = 200000,
-      kfolds = 10,
+      n_folds = 10,
       return_edges = "all"
     ),
     "may consume large memory",

@@ -96,16 +96,16 @@ run_resample_fit <- function(
   include_cases <- fit_context$include_cases
   na_action <- fit_context$na_action
 
-  folds <- validate_resamples(folds, include_cases)
-  kfolds <- length(folds)
+  folds <- validate_manual_resamples(folds, include_cases)
+  n_folds <- length(folds)
 
-  warn_large_edge_storage(ncol(conmat), kfolds, return_edges)
+  warn_large_edge_storage(ncol(conmat), n_folds, return_edges)
 
   pred <- init_pred(behav, prediction_streams)
-  edges <- init_edges(return_edges, conmat, kfolds)
+  edges <- init_edges(return_edges, conmat, n_folds)
   observed <- behav
 
-  for (fold in seq_len(kfolds)) {
+  for (fold in seq_len(n_folds)) {
     rows_test <- folds[[fold]]
     rows_train <- setdiff(include_cases, rows_test)
 
@@ -158,7 +158,6 @@ run_resample_fit <- function(
       covariates = covariates,
       na_action = na_action,
       extras = list(
-        kfolds = kfolds,
         return_edges = return_edges
       )
     ),
@@ -194,11 +193,11 @@ init_pred <- function(behav, prediction_streams) {
   )
 }
 
-init_edges <- function(return_edges, conmat, kfolds) {
+init_edges <- function(return_edges, conmat, n_folds) {
   switch(
     return_edges,
     all = array(
-      dim = c(dim(conmat)[2], length(edge_signs), kfolds),
+      dim = c(dim(conmat)[2], length(edge_signs), n_folds),
       dimnames = list(NULL, edge_signs, NULL)
     ),
     sum = array(

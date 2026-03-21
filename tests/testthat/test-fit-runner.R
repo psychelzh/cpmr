@@ -48,14 +48,14 @@ test_that("init_pred preserves prediction matrix structure", {
 test_that("init_edges allocates expected structures", {
   conmat <- matrix(rnorm(40), ncol = 4)
 
-  edges_sum <- init_edges("sum", conmat, kfolds = 5)
+  edges_sum <- init_edges("sum", conmat, n_folds = 5)
   expect_equal(dim(edges_sum), c(ncol(conmat), 2))
   expect_identical(colnames(edges_sum), c("positive", "negative"))
 
-  edges_all <- init_edges("all", conmat, kfolds = 5)
+  edges_all <- init_edges("all", conmat, n_folds = 5)
   expect_equal(dim(edges_all), c(ncol(conmat), 2, 5))
 
-  expect_null(init_edges("none", conmat, kfolds = 5))
+  expect_null(init_edges("none", conmat, n_folds = 5))
 })
 
 test_that("run_resample_fit matches fit_resamples() outputs", {
