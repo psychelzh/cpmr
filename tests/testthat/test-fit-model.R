@@ -153,7 +153,7 @@ test_that("train_model and predict_model compose correctly", {
     edge_selection = edge_selection,
     construction_spec = list(
       polarity = "separate",
-      weighting = list(method = "binary", scale = 0.05),
+      weight_scale = 0,
       standardize_edges = TRUE
     ),
     model_spec = cpm_model_lm()
@@ -187,7 +187,7 @@ test_that("net polarity with lm model produces a single stream", {
     edge_selection = edge_selection,
     construction_spec = list(
       polarity = "net",
-      weighting = list(method = "binary", scale = 0.05),
+      weight_scale = 0,
       standardize_edges = FALSE
     ),
     model_spec = cpm_model_lm()
@@ -200,26 +200,26 @@ test_that("net polarity with lm model produces a single stream", {
 })
 
 test_that("joint stream handles aliased empty-sign features", {
-  network_strengths <- cbind(
-    positive = rep(0, 5),
-    negative = 1:5
+  network_summaries <- cbind(
+    positive_summary = rep(0, 5),
+    negative_summary = 1:5
   )
   behav <- 1:5
 
   fitted <- fit_stream_model(
-    network_strengths = network_strengths,
+    network_summaries = network_summaries,
     behav = behav,
     construction_polarity = "separate",
     prediction_stream = "joint",
     model_spec = cpm_model_lm()
   )
 
-  expect_true(is.na(fitted$coefficients[["positive"]]))
-  expect_identical(fitted$prediction_coefficients[["positive"]], 0)
+  expect_true(is.na(fitted$coefficients[["positive_summary"]]))
+  expect_identical(fitted$prediction_coefficients[["positive_summary"]], 0)
   expect_equal(
     predict_stream_model(
       fitted_model = fitted,
-      network_strengths = network_strengths,
+      network_summaries = network_summaries,
       construction_polarity = "separate",
       prediction_stream = "joint"
     ),
@@ -246,8 +246,7 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
     associations = edge_selection$associations,
     cutoffs = edge_selection$thresholds,
     mask = edge_selection$mask,
-    edge_weighting = "sigmoid",
-    weighting_scale = 0.05
+    weight_scale = 0.05
   )
 
   expect_true(is.double(edge_weights))
@@ -256,7 +255,7 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
   expect_true(all(edge_weights[!edge_selection$mask] <= 0.5))
 })
 
-test_that("compute_edge_weights validates weighting mode", {
+test_that("compute_edge_weights validates weight scale", {
   expect_error(
     compute_edge_weights(
       associations = c(0.2, -0.3),
@@ -266,30 +265,29 @@ test_that("compute_edge_weights validates weighting mode", {
         ncol = 2,
         dimnames = list(NULL, c("positive", "negative"))
       ),
-      edge_weighting = "bogus",
-      weighting_scale = 0.05
+      weight_scale = -0.01
     ),
-    "`edge_weighting` must be either \"binary\" or \"sigmoid\".",
+    "`weight_scale` must be a single non-negative number.",
     fixed = TRUE
   )
 })
 
-test_that("smooth_threshold_weights returns zeros for infinite cutoffs", {
+test_that("sigmoid_edge_weights returns zeros for infinite cutoffs", {
   expect_equal(
-    smooth_threshold_weights(c(0.1, 0.2, NA_real_), cutoff = Inf, scale = 0.05),
+    sigmoid_edge_weights(c(0.1, 0.2, NA_real_), cutoff = Inf, scale = 0.05),
     c(0, 0, 0)
   )
 })
 
 test_that("prediction helpers validate unsupported modes", {
-  network_strengths <- cbind(
-    positive = c(1, 2),
-    negative = c(3, 4)
+  network_summaries <- cbind(
+    positive_summary = c(1, 2),
+    negative_summary = c(3, 4)
   )
 
   expect_error(
     stream_features(
-      network_strengths = network_strengths,
+      network_summaries = network_summaries,
       construction_polarity = "separate",
       prediction_stream = "bogus"
     ),
@@ -302,7 +300,7 @@ test_that("prediction helpers validate unsupported modes", {
   )
   expect_error(
     stream_features(
-      network_strengths = network_strengths,
+      network_summaries = network_summaries,
       construction_polarity = "bogus",
       prediction_stream = "joint"
     ),

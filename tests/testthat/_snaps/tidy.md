@@ -16,7 +16,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "na_action", "selection_type", "selection_method", "selection_criterion", "selection_level", "construction_type", "construction_polarity", "edge_weighting", "weighting_scale", "standardize_edges", "model_type", "method", "joint", "positive", "negative"]
+          "value": ["covariates", "na_action", "selection_type", "selection_method", "selection_criterion", "selection_level", "construction_type", "construction_polarity", "weight_scale", "standardize_edges", "model_type", "method", "joint", "positive", "negative"]
         }
       },
       "value": [
@@ -53,7 +53,7 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["strength"]
+          "value": ["summary"]
         },
         {
           "type": "character",
@@ -61,14 +61,9 @@
           "value": ["separate"]
         },
         {
-          "type": "character",
-          "attributes": {},
-          "value": ["binary"]
-        },
-        {
           "type": "double",
           "attributes": {},
-          "value": [0.05]
+          "value": [0]
         },
         {
           "type": "logical",
@@ -121,7 +116,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "na_action", "selection_type", "selection_method", "selection_criterion", "selection_level", "construction_type", "construction_polarity", "edge_weighting", "weighting_scale", "standardize_edges", "model_type", "positive", "negative"]
+          "value": ["covariates", "na_action", "selection_type", "selection_method", "selection_criterion", "selection_level", "construction_type", "construction_polarity", "weight_scale", "standardize_edges", "model_type", "positive", "negative"]
         }
       },
       "value": [
@@ -158,7 +153,7 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["strength"]
+          "value": ["summary"]
         },
         {
           "type": "character",
@@ -166,14 +161,9 @@
           "value": ["separate"]
         },
         {
-          "type": "character",
-          "attributes": {},
-          "value": ["binary"]
-        },
-        {
           "type": "double",
           "attributes": {},
-          "value": [0.05]
+          "value": [0]
         },
         {
           "type": "logical",

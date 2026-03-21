@@ -18,19 +18,20 @@
 
 * Added `cpm_spec()` as the native interface for `fit()` and `fit_resamples()`,
   and made single-fit and resample result objects more consistent.
-* Added `cpm_selection_cor()`, `cpm_construction_strength()`,
-  `cpm_weighting()`, and `cpm_model_lm()` to make native CPM specifications
-  more readable and reusable.
+* Added `cpm_selection_cor()`, `cpm_construction_summary()`, and
+  `cpm_model_lm()` to make native CPM specifications more readable and
+  reusable.
 * Expanded correlation-based CPM selection beyond the previous flat defaults:
   `cpm_selection_cor()` now exposes `method`, `criterion`, and `level`, where
   `criterion` can be `"p_value"`, `"absolute"`, or `"proportion"`.
-* Added explicit strength-based CPM construction choices with
+* Added explicit summary-based CPM construction choices with
   `polarity = "separate"` and `polarity = "net"`.
-* Added weighted CPM feature construction with `cpm_weighting("binary")` and
-  `cpm_weighting("sigmoid")`.
+* Added optional edge weighting during summary construction via
+  `weight_scale`, where `0` keeps the classic hard-threshold CPM summary and
+  values greater than `0` apply sigmoid-weighted edge contributions.
 * Renamed `bias_correct` to `standardize_edges`, moved it into
-  `cpm_construction_strength()`, and defaulted it to `FALSE` so the default
-  native workflow stays closer to classic CPM network-strength construction.
+  `cpm_construction_summary()`, and defaulted it to `FALSE` so the default
+  native workflow stays closer to classic CPM summary construction.
 * Added `summary.cpm_resamples()`, which now reports pooled out-of-fold error
   metrics by default and keeps pooled / fold-wise correlations as supplementary
   statistics.
@@ -47,7 +48,7 @@
   complete-case training observations.
 * Applied proportion-based screening per sign, rather than reusing one absolute
   cutoff across both tails.
-* Fixed the `joint` linear-model path when one CPM strength is aliased or
+* Fixed the `joint` linear-model path when one CPM summary feature is aliased or
   empty.
 
 # cpmr 0.1.1

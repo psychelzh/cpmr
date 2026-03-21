@@ -50,55 +50,55 @@ print.cpm_selection_spec <- function(x, ...) {
   invisible(x)
 }
 
-#' Define CPM network-strength construction settings
+#' Define CPM summary-construction settings
 #'
 #' Build the feature-construction portion of a `cpm_spec()`. This helper
-#' configures the current network-strength construction path by deciding how
-#' positive and negative screened edge sets are represented, how screened edges
-#' are weighted, and whether edge standardization is applied before constructing
-#' subject-level predictors.
+#' configures the current summary-construction path by deciding how positive and
+#' negative screened edge sets are represented, whether screened edges are
+#' additionally weighted before summary construction, and whether edge
+#' standardization is applied before constructing subject-level predictors.
 #'
 #' @param polarity How positive and negative screened information is represented.
-#'   `"separate"` constructs `positive_strength` and `negative_strength`, fits a
+#'   `"separate"` constructs `positive_summary` and `negative_summary`, fits a
 #'   `joint` stream from both together, and also returns `positive` and
-#'   `negative` single-strength diagnostic streams. `"net"` constructs one
-#'   `net_strength = positive_strength - negative_strength` feature and returns
+#'   `negative` single-summary diagnostic streams. `"net"` constructs one
+#'   `net_summary = positive_summary - negative_summary` feature and returns
 #'   a single `net` stream.
-#' @param weighting Edge-weighting helper created by [cpm_weighting()].
-#' @param standardize_edges Logical value indicating if edge strengths should be
+#' @param weight_scale Non-negative scale controlling optional sigmoid-style
+#'   edge weighting before summary construction. `0` disables additional
+#'   weighting and keeps the classic hard-threshold CPM summary. Values greater
+#'   than `0` apply the current sigmoid weighting scheme, with larger values
+#'   producing a smoother transition around the selection cutoff.
+#' @param standardize_edges Logical value indicating if edge values should be
 #'   standardized within each training set before CPM feature construction. If
 #'   `TRUE`, each edge is centered and scaled to unit variance using the
 #'   training data, and the same transformation is applied again at prediction
 #'   time. This follows the fold-local edge z-scoring approach described by
 #'   Rapuano et al. (2020). Defaults to `FALSE` so the default construction
-#'   stays close to the classic CPM network-strength workflow; set it to `TRUE`
+#'   stays close to the classic CPM summary workflow; set it to `TRUE`
 #'   when you want this additional preprocessing step explicitly.
 #'
 #' @examples
-#' cpm_construction_strength()
-#' cpm_construction_strength(
+#' cpm_construction_summary()
+#' cpm_construction_summary(
 #'   polarity = "net",
-#'   weighting = cpm_weighting("sigmoid", scale = 0.03)
+#'   weight_scale = 0.03
 #' )
 #' @export
-cpm_construction_strength <- function(
+cpm_construction_summary <- function(
   polarity = c("separate", "net"),
-  weighting = cpm_weighting(),
+  weight_scale = 0,
   standardize_edges = FALSE
 ) {
   polarity <- match.arg(polarity)
-  validate_cpm_component(
-    weighting,
-    class = "cpm_weighting_spec",
-    message = "`weighting` must be created by `cpm_weighting()`."
-  )
+  validate_weight_scale(weight_scale)
   validate_standardize_edges(standardize_edges)
 
   structure(
     list(
-      type = "strength",
+      type = "summary",
       polarity = polarity,
-      weighting = weighting,
+      weight_scale = weight_scale,
       standardize_edges = standardize_edges
     ),
     class = "cpm_construction_spec"
@@ -107,49 +107,21 @@ cpm_construction_strength <- function(
 
 #' @export
 print.cpm_construction_spec <- function(x, ...) {
-  cat("CPM construction (network strength):\n")
+  cat("CPM construction (summary):\n")
   cat(sprintf("  Polarity:             %s\n", x$polarity))
-  cat(sprintf("  Edge weighting:       %s\n", x$weighting$method))
   cat(sprintf(
-    "  Weighting scale:      %s\n",
-    format_threshold_level(x$weighting$scale)
+    "  Edge weighting:       %s\n",
+    format_weighting_label(x$weight_scale)
+  ))
+  cat(sprintf(
+    "  Weight scale:         %s\n",
+    format_weight_scale(x$weight_scale)
   ))
   cat(sprintf(
     "  Edge standardization: %s\n",
     format_edge_standardization(x$standardize_edges)
   ))
   invisible(x)
-}
-
-#' Define CPM edge-weight settings
-#'
-#' Build the edge-weighting rule used during CPM feature construction.
-#'
-#' @param method How edge-level statistics are converted into weights before
-#'   CPM feature construction. `"binary"` uses the hard thresholded edge mask.
-#'   `"sigmoid"` uses a smooth sigmoid weight centered on the threshold, so
-#'   edges closer to or beyond the cutoff contribute more strongly.
-#' @param scale Positive scale parameter used when `method = "sigmoid"`.
-#'   Smaller values make the weighting curve sharper around the threshold.
-#'
-#' @examples
-#' cpm_weighting("binary")
-#' cpm_weighting("sigmoid", scale = 0.03)
-#' @export
-cpm_weighting <- function(
-  method = c("binary", "sigmoid"),
-  scale = 0.05
-) {
-  method <- match.arg(method)
-  validate_weighting_scale(scale)
-
-  structure(
-    list(
-      method = method,
-      scale = scale
-    ),
-    class = "cpm_weighting_spec"
-  )
 }
 
 #' Define the outcome model used after CPM feature construction
@@ -165,65 +137,6 @@ cpm_model_lm <- function() {
   structure(
     list(type = "lm"),
     class = "cpm_model_spec"
-  )
-}
-
-selection_to_params <- function(selection) {
-  unclass(selection)
-}
-
-construction_to_params <- function(construction) {
-  utils::modifyList(
-    unclass(construction),
-    list(weighting = unclass(construction$weighting))
-  )
-}
-
-model_to_params <- function(model) {
-  unclass(model)
-}
-
-selection_from_params <- function(type, method, criterion, level) {
-  switch(
-    type,
-    cor = cpm_selection_cor(
-      method = method,
-      criterion = criterion,
-      level = level
-    ),
-    stop("`selection` must be a supported CPM selection type.", call. = FALSE)
-  )
-}
-
-construction_from_params <- function(
-  type,
-  polarity,
-  edge_weighting,
-  weighting_scale,
-  standardize_edges
-) {
-  switch(
-    type,
-    strength = cpm_construction_strength(
-      polarity = polarity,
-      weighting = cpm_weighting(
-        method = edge_weighting,
-        scale = weighting_scale
-      ),
-      standardize_edges = standardize_edges
-    ),
-    stop(
-      "`construction` must be a supported CPM construction type.",
-      call. = FALSE
-    )
-  )
-}
-
-cpm_model_from_params <- function(model_type) {
-  switch(
-    model_type,
-    lm = cpm_model_lm(),
-    stop("`model` must be a supported CPM outcome model.", call. = FALSE)
   )
 }
 
@@ -250,15 +163,18 @@ validate_selection_level <- function(level) {
   invisible(level)
 }
 
-validate_weighting_scale <- function(scale) {
+validate_weight_scale <- function(scale) {
   if (
     !is.numeric(scale) ||
       length(scale) != 1L ||
       is.na(scale) ||
       !is.finite(scale) ||
-      scale <= 0
+      scale < 0
   ) {
-    stop("`scale` must be a single positive number.", call. = FALSE)
+    stop(
+      "`weight_scale` must be a single non-negative number.",
+      call. = FALSE
+    )
   }
 
   invisible(scale)
@@ -284,6 +200,14 @@ format_model_type <- function(model_type) {
   )
 }
 
+format_weighting_label <- function(weight_scale) {
+  ifelse(weight_scale == 0, "none", "sigmoid")
+}
+
+format_weight_scale <- function(weight_scale) {
+  ifelse(weight_scale == 0, "none", format_threshold_level(weight_scale))
+}
+
 flatten_cpm_params <- function(params) {
   extras <- params[setdiff(
     names(params),
@@ -299,8 +223,7 @@ flatten_cpm_params <- function(params) {
       selection_level = params$selection$level,
       construction_type = params$construction$type,
       construction_polarity = params$construction$polarity,
-      edge_weighting = params$construction$weighting$method,
-      weighting_scale = params$construction$weighting$scale,
+      weight_scale = params$construction$weight_scale,
       standardize_edges = params$construction$standardize_edges,
       model_type = params$model$type
     )

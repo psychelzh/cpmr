@@ -43,7 +43,7 @@ run_single_fit <- function(
     behav = training$behav,
     edge_selection = edge_selection,
     construction_spec = params$construction,
-    model_spec = object$helpers$model
+    model_spec = params$model
   )
   pred[include_cases, ] <- predict_model(model, training$conmat)
 
@@ -127,7 +127,7 @@ run_resample_fit <- function(
       behav = training$behav,
       edge_selection = edge_selection,
       construction_spec = params$construction,
-      model_spec = object$helpers$model
+      model_spec = params$model
     )
     assessment <- prepare_assessment_data(
       conmat = conmat,

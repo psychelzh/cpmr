@@ -76,11 +76,11 @@ print.cpm <- function(x, ...) {
   ))
   cat(sprintf(
     "    Edge weighting:   %s\n",
-    x$params$construction$weighting$method
+    format_weighting_label(x$params$construction$weight_scale)
   ))
   cat(sprintf(
-    "    Weighting scale:  %s\n",
-    format_threshold_level(x$params$construction$weighting$scale)
+    "    Weight scale:     %s\n",
+    format_weight_scale(x$params$construction$weight_scale)
   ))
   cat(sprintf(
     "    Outcome model:    %s\n",

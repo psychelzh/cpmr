@@ -88,24 +88,24 @@ two words:
 - `negative` edges are the screened edges whose association with the outcome is
   negative and passes the chosen threshold.
 - For each subject, CPM then collapses each screened edge set into a
-  subject-level network strength, using either a hard mask or smooth edge
-  weights.
+  subject-level summary feature, with optional edge weighting around the
+  selection cutoff.
 
 That gives a simple mental model:
 
-- `positive_strength`: how strongly a subject expresses the screened
+- `positive_summary`: how strongly a subject expresses the screened
   outcome-positive edge set;
-- `negative_strength`: how strongly a subject expresses the screened
+- `negative_summary`: how strongly a subject expresses the screened
   outcome-negative edge set.
 
-In the current strength-based construction, `polarity` only decides how those
-CPM-derived strengths are exposed to the second-stage outcome model:
+In the current summary-based construction, `polarity` only decides how those
+CPM-derived summaries are exposed to the second-stage outcome model:
 
-- `polarity = "separate"` keeps both strengths. The `joint` stream fits a
-  model with `positive_strength` and `negative_strength` together, while the
-  `positive` and `negative` streams are single-strength diagnostics.
+- `polarity = "separate"` keeps both summaries. The `joint` stream fits a
+  model with `positive_summary` and `negative_summary` together, while the
+  `positive` and `negative` streams are single-summary diagnostics.
 - `polarity = "net"` uses one
-  `net_strength = positive_strength - negative_strength` feature and returns a
+  `net_summary = positive_summary - negative_summary` feature and returns a
   single `net` stream.
 
 ## Build a Readable `cpm_spec()`
@@ -117,19 +117,19 @@ A practical way to read a spec is:
 
 - `selection = cpm_selection_cor(...)`: which correlation method is used to
   screen edges, how `level` is interpreted, and where the cutoff is set;
-- `construction = cpm_construction_strength(...)`: how positive and negative
+- `construction = cpm_construction_summary(...)`: how positive and negative
   screened edges become subject-level CPM predictors;
 - `model = cpm_model_lm()`: how those CPM-derived predictors map to the final
   prediction.
 
-Within `cpm_construction_strength(...)`:
+Within `cpm_construction_summary(...)`:
 
-- `polarity` decides whether positive and negative strengths stay separate or
-  collapse to one net-strength feature;
-- `weighting = cpm_weighting(...)` decides whether edges contribute as a hard
-  mask or with smooth weights;
+- `polarity` decides whether positive and negative summaries stay separate or
+  collapse to one net-summary feature;
+- `weight_scale` decides whether edges contribute as a hard mask (`0`) or with
+  sigmoid-style weights (`> 0`);
 - `standardize_edges` decides whether each edge is fold-locally centered and
-  scaled using the training data before the CPM strengths are computed.
+  scaled using the training data before the CPM summaries are computed.
 
 This matches the edge-standardization step described by Rapuano et al. (2020):
 edge strengths are z-scored within each training set and the corresponding
@@ -144,9 +144,9 @@ readable_spec <- cpm_spec(
     criterion = "absolute",
     level = 0.1
   ),
-  construction = cpm_construction_strength(
+  construction = cpm_construction_summary(
     polarity = "net",
-    weighting = cpm_weighting("sigmoid", scale = 0.03)
+    weight_scale = 0.03
   ),
   model = cpm_model_lm()
 )
@@ -157,14 +157,15 @@ readable_spec
 That means:
 
 - rank-based screening with a direct absolute-correlation threshold;
-- one `net_strength = positive_strength - negative_strength` feature;
-- smooth edge weights around the fold-local threshold;
+- one `net_summary = positive_summary - negative_summary` feature;
+- sigmoid-style edge weighting around the fold-local threshold;
 - an explicit linear outcome model on the final network feature.
 
 ## Customize the CPM Strategy
 
 `cpm_spec()` keeps the main CPM choices visible while using helpers for the
-parts that naturally come in pairs, such as screening and edge weighting.
+stages that naturally group settings together, such as selection and summary
+construction.
 In practice, most customization starts with just two questions:
 
 - do you want a different edge-screening rule?
@@ -177,9 +178,9 @@ rich_spec <- cpm_spec(
     criterion = "absolute",
     level = 0.1
   ),
-  construction = cpm_construction_strength(
+  construction = cpm_construction_summary(
     polarity = "net",
-    weighting = cpm_weighting("sigmoid", scale = 0.03)
+    weight_scale = 0.03
   ),
   model = cpm_model_lm()
 )
@@ -201,7 +202,7 @@ Compared with the default spec, the example above changes four things:
   p-value
   screening;
 - the construction polarity is exposed as one `net` stream from
-  `net_strength = positive_strength - negative_strength` instead of the
+  `net_summary = positive_summary - negative_summary` instead of the
   classic `joint` / `positive` / `negative` trio;
 - the second-stage model is made explicit, even though it still uses the
   default linear regression helper.
@@ -209,9 +210,9 @@ Compared with the default spec, the example above changes four things:
 Prediction columns depend on `construction` polarity:
 
 - `polarity = "separate"` yields `joint`, `positive`, and `negative`
-  streams built from the positive and negative strengths;
+  streams built from the positive and negative summaries;
 - `polarity = "net"` yields a single `net` stream built from
-  `net_strength = positive_strength - negative_strength`.
+  `net_summary = positive_summary - negative_summary`.
 
 ## Cross-Validated Resampling with `fit_resamples()`
 

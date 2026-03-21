@@ -5,26 +5,22 @@ test_that("cpm_spec stores staged model parameters", {
       criterion = "proportion",
       level = 0.05
     ),
-    construction = cpm_construction_strength(
+    construction = cpm_construction_summary(
       polarity = "net",
-      weighting = cpm_weighting("sigmoid", scale = 0.02),
+      weight_scale = 0.02,
       standardize_edges = FALSE
     ),
     model = cpm_model_lm()
   )
 
   expect_s3_class(spec, "cpm_spec")
-  expect_s3_class(spec$helpers$selection, "cpm_selection_spec")
-  expect_s3_class(spec$helpers$construction, "cpm_construction_spec")
-  expect_s3_class(spec$helpers$model, "cpm_model_spec")
   expect_identical(spec$params$selection$type, "cor")
   expect_identical(spec$params$selection$method, "spearman")
   expect_identical(spec$params$selection$criterion, "proportion")
   expect_identical(spec$params$selection$level, 0.05)
-  expect_identical(spec$params$construction$type, "strength")
+  expect_identical(spec$params$construction$type, "summary")
   expect_identical(spec$params$construction$polarity, "net")
-  expect_identical(spec$params$construction$weighting$method, "sigmoid")
-  expect_identical(spec$params$construction$weighting$scale, 0.02)
+  expect_identical(spec$params$construction$weight_scale, 0.02)
   expect_false(spec$params$construction$standardize_edges)
   expect_identical(spec$params$model$type, "lm")
 })
@@ -38,9 +34,9 @@ test_that("new_cpm_spec builds cpm_spec objects", {
       level = 0.05
     ),
     construction = list(
-      type = "strength",
+      type = "summary",
       polarity = "separate",
-      weighting = list(method = "binary", scale = 0.05),
+      weight_scale = 0,
       standardize_edges = TRUE
     ),
     model = list(type = "lm")
@@ -50,9 +46,6 @@ test_that("new_cpm_spec builds cpm_spec objects", {
 
   expect_s3_class(spec, "cpm_spec")
   expect_identical(spec$params, params)
-  expect_s3_class(spec$helpers$selection, "cpm_selection_spec")
-  expect_s3_class(spec$helpers$construction, "cpm_construction_spec")
-  expect_s3_class(spec$helpers$model, "cpm_model_spec")
 })
 
 test_that("fit.cpm_spec returns a cpm object with correct call", {
@@ -73,9 +66,9 @@ test_that("cpm_spec defaults to classic CPM edge handling", {
   expect_identical(spec$params$selection$method, "pearson")
   expect_identical(spec$params$selection$criterion, "p_value")
   expect_identical(spec$params$selection$level, 0.01)
-  expect_identical(spec$params$construction$type, "strength")
+  expect_identical(spec$params$construction$type, "summary")
   expect_identical(spec$params$construction$polarity, "separate")
-  expect_identical(spec$params$construction$weighting$method, "binary")
+  expect_identical(spec$params$construction$weight_scale, 0)
   expect_false(spec$params$construction$standardize_edges)
 })
 
@@ -91,17 +84,17 @@ test_that("helper constructors validate scalar parameter values", {
     fixed = TRUE
   )
   expect_error(
-    cpm_construction_strength(standardize_edges = NA),
+    cpm_construction_summary(standardize_edges = NA),
     "`standardize_edges` must be either TRUE or FALSE.",
     fixed = TRUE
   )
   expect_error(
-    cpm_weighting(scale = 0),
-    "`scale` must be a single positive number.",
+    cpm_construction_summary(weight_scale = -0.1),
+    "`weight_scale` must be a single non-negative number.",
     fixed = TRUE
   )
   expect_error(
-    cpm_construction_strength(standardize_edges = c(TRUE, FALSE)),
+    cpm_construction_summary(standardize_edges = c(TRUE, FALSE)),
     "`standardize_edges` must be either TRUE or FALSE.",
     fixed = TRUE
   )
@@ -114,7 +107,7 @@ test_that("helper constructors validate scalar parameter values", {
     cpm_spec(construction = list()),
     paste(
       "`construction` must be created by",
-      "`cpm_construction_strength()`."
+      "`cpm_construction_summary()`."
     ),
     fixed = TRUE
   )
@@ -129,32 +122,6 @@ test_that("helper constructors round-trip through params", {
   expect_s3_class(cpm_model_lm(), "cpm_model_spec")
   expect_identical(cpm_model_lm()$type, "lm")
   expect_identical(format_model_type("custom"), "custom")
-  expect_error(
-    cpm_model_from_params("bogus"),
-    "`model` must be a supported CPM outcome model.",
-    fixed = TRUE
-  )
-  expect_error(
-    selection_from_params(
-      "bogus",
-      method = "pearson",
-      criterion = "p_value",
-      level = 0.1
-    ),
-    "`selection` must be a supported CPM selection type.",
-    fixed = TRUE
-  )
-  expect_error(
-    construction_from_params(
-      "bogus",
-      polarity = "separate",
-      edge_weighting = "binary",
-      weighting_scale = 0.05,
-      standardize_edges = FALSE
-    ),
-    "`construction` must be a supported CPM construction type.",
-    fixed = TRUE
-  )
 })
 
 test_that("print methods show readable staged settings", {
@@ -164,9 +131,9 @@ test_that("print methods show readable staged settings", {
       criterion = "absolute",
       level = 0.1
     ),
-    construction = cpm_construction_strength(
+    construction = cpm_construction_summary(
       polarity = "net",
-      weighting = cpm_weighting("sigmoid", scale = 0.03),
+      weight_scale = 0.03,
       standardize_edges = TRUE
     )
   )
@@ -187,12 +154,12 @@ test_that("print methods show readable staged settings", {
   expect_output(print(selection), "CPM selection \\(correlation\\)")
   expect_output(print(selection), "Criterion:\\s+absolute")
 
-  construction <- cpm_construction_strength(
+  construction <- cpm_construction_summary(
     polarity = "net",
-    weighting = cpm_weighting("sigmoid", scale = 0.03),
+    weight_scale = 0.03,
     standardize_edges = TRUE
   )
-  expect_output(print(construction), "CPM construction \\(network strength\\)")
+  expect_output(print(construction), "CPM construction \\(summary\\)")
   expect_output(print(construction), "Polarity:\\s+net")
   expect_output(print(construction), "Edge standardization:\\s+z-score")
 })
@@ -202,7 +169,7 @@ test_that("net construction yields a single prediction stream", {
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(
-    construction = cpm_construction_strength(polarity = "net")
+    construction = cpm_construction_summary(polarity = "net")
   )
 
   result <- fit(spec, conmat = conmat, behav = behav)
@@ -220,8 +187,8 @@ test_that("sigmoid edge weighting stores smooth edge weights in the model", {
       criterion = "absolute",
       level = 0.1
     ),
-    construction = cpm_construction_strength(
-      weighting = cpm_weighting("sigmoid", scale = 0.03)
+    construction = cpm_construction_summary(
+      weight_scale = 0.03
     )
   )
 
@@ -532,7 +499,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
       selection_level = spec$params$selection$level
     ),
     construction_spec = spec$params$construction,
-    model_spec = spec$helpers$model
+    model_spec = spec$params$model
   )
   resampled <- fit_resamples(
     spec,

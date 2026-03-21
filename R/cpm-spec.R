@@ -9,13 +9,13 @@
 #'
 #' - [cpm_selection_cor()] configures the current correlation-based edge
 #'   selection path.
-#' - [cpm_construction_strength()] configures the current network-strength
-#'   construction path.
+#' - [cpm_construction_summary()] configures the current summary-construction
+#'   path.
 #' - [cpm_model_lm()] defines the outcome model fitted on CPM-derived features.
 #'
 #' @param selection Selection helper created by [cpm_selection_cor()].
 #' @param construction Construction helper created by
-#'   [cpm_construction_strength()].
+#'   [cpm_construction_summary()].
 #' @param model Outcome-model helper created by [cpm_model_lm()]. This stage
 #'   maps CPM-derived subject-level features to the behavioral outcome.
 #'
@@ -26,9 +26,9 @@
 #'     criterion = "absolute",
 #'     level = 0.1
 #'   ),
-#'   construction = cpm_construction_strength(
+#'   construction = cpm_construction_summary(
 #'     polarity = "net",
-#'     weighting = cpm_weighting("sigmoid", scale = 0.03)
+#'     weight_scale = 0.03
 #'   ),
 #'   model = cpm_model_lm()
 #' )
@@ -44,7 +44,7 @@
 #' @export
 cpm_spec <- function(
   selection = cpm_selection_cor(),
-  construction = cpm_construction_strength(),
+  construction = cpm_construction_summary(),
   model = cpm_model_lm()
 ) {
   validate_cpm_component(
@@ -57,7 +57,7 @@ cpm_spec <- function(
     class = "cpm_construction_spec",
     message = paste(
       "`construction` must be created by",
-      "`cpm_construction_strength()`."
+      "`cpm_construction_summary()`."
     )
   )
   validate_cpm_component(
@@ -68,14 +68,9 @@ cpm_spec <- function(
 
   new_cpm_spec(
     params = list(
-      selection = selection_to_params(selection),
-      construction = construction_to_params(construction),
-      model = model_to_params(model)
-    ),
-    helpers = list(
-      selection = selection,
-      construction = construction,
-      model = model
+      selection = unclass(selection),
+      construction = unclass(construction),
+      model = unclass(model)
     )
   )
 }
@@ -103,11 +98,11 @@ print.cpm_spec <- function(x, ...) {
   ))
   cat(sprintf(
     "    Edge weighting:   %s\n",
-    x$params$construction$weighting$method
+    format_weighting_label(x$params$construction$weight_scale)
   ))
   cat(sprintf(
-    "    Weighting scale:  %s\n",
-    format_threshold_level(x$params$construction$weighting$scale)
+    "    Weight scale:     %s\n",
+    format_weight_scale(x$params$construction$weight_scale)
   ))
   cat(sprintf(
     "    Edge standardization: %s\n",
@@ -236,31 +231,11 @@ fit_resamples.cpm_spec <- function(
   )
 }
 
-new_cpm_spec <- function(params, helpers = cpm_helpers_from_params(params)) {
+new_cpm_spec <- function(params) {
   structure(
     list(
-      params = params,
-      helpers = helpers
+      params = params
     ),
     class = "cpm_spec"
-  )
-}
-
-cpm_helpers_from_params <- function(params) {
-  list(
-    selection = selection_from_params(
-      type = params$selection$type,
-      method = params$selection$method,
-      criterion = params$selection$criterion,
-      level = params$selection$level
-    ),
-    construction = construction_from_params(
-      type = params$construction$type,
-      polarity = params$construction$polarity,
-      edge_weighting = params$construction$weighting$method,
-      weighting_scale = params$construction$weighting$scale,
-      standardize_edges = params$construction$standardize_edges
-    ),
-    model = cpm_model_from_params(params$model$type)
   )
 }

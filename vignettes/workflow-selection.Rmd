@@ -53,22 +53,22 @@ If you are new to the helper-based spec, the easiest mental model is:
 - `selection = cpm_selection_cor(...)` decides which correlation-based edge
   screening rule gets edges into the model. Most of the time this is just
   `method + criterion + level`;
-- `construction = cpm_construction_strength(...)` decides how CPM-derived
-  network strengths are exposed to the outcome model and whether edges are
-  weighted or standardized before strength construction;
+- `construction = cpm_construction_summary(...)` decides how CPM-derived
+  summary features are exposed to the outcome model and whether edges are
+  weighted or standardized before summary construction;
 - `model = cpm_model_lm()` finishes the modeling pipeline.
 
 In the current native workflow:
 
-- screened positive-association edges define a `positive_strength`;
-- screened negative-association edges define a `negative_strength`;
-- `polarity = "separate"` keeps those strengths available directly;
+- screened positive-association edges define a `positive_summary`;
+- screened negative-association edges define a `negative_summary`;
+- `polarity = "separate"` keeps those summaries available directly;
 - `polarity = "net"` uses one
-  `net_strength = positive_strength - negative_strength` feature.
+  `net_summary = positive_summary - negative_summary` feature.
 
-That means the classic `joint` stream is not a third strength. It is the
-prediction stream that fits one model with both `positive_strength` and
-`negative_strength` together.
+That means the classic `joint` stream is not a third summary. It is the
+prediction stream that fits one model with both `positive_summary` and
+`negative_summary` together.
 
 That means you can usually start from `cpm_spec()` and only open up the part
 you actually want to change, rather than rewriting the whole spec every time.

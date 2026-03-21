@@ -104,14 +104,14 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["type", "polarity", "weighting", "standardize_edges"]
+              "value": ["type", "polarity", "weight_scale", "standardize_edges"]
             }
           },
           "value": [
             {
               "type": "character",
               "attributes": {},
-              "value": ["strength"]
+              "value": ["summary"]
             },
             {
               "type": "character",
@@ -119,31 +119,9 @@
               "value": ["separate"]
             },
             {
-              "type": "list",
-              "attributes": {
-                "names": {
-                  "type": "character",
-                  "attributes": {},
-                  "value": ["method", "scale"]
-                },
-                "class": {
-                  "type": "character",
-                  "attributes": {},
-                  "value": ["cpm_weighting_spec"]
-                }
-              },
-              "value": [
-                {
-                  "type": "character",
-                  "attributes": {},
-                  "value": ["binary"]
-                },
-                {
-                  "type": "double",
-                  "attributes": {},
-                  "value": [0.05]
-                }
-              ]
+              "type": "double",
+              "attributes": {},
+              "value": [0]
             },
             {
               "type": "logical",
@@ -198,8 +176,8 @@
           Selection criterion: p_value
           Selection level:  0.01
           Construction polarity: separate
-          Edge weighting:   binary
-          Weighting scale:  0.05
+          Edge weighting:   none
+          Weight scale:     none
           Outcome model:    linear regression
           Streams:          joint, positive, negative
           Edge standardization: none
@@ -310,14 +288,14 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["type", "polarity", "weighting", "standardize_edges"]
+              "value": ["type", "polarity", "weight_scale", "standardize_edges"]
             }
           },
           "value": [
             {
               "type": "character",
               "attributes": {},
-              "value": ["strength"]
+              "value": ["summary"]
             },
             {
               "type": "character",
@@ -325,31 +303,9 @@
               "value": ["separate"]
             },
             {
-              "type": "list",
-              "attributes": {
-                "names": {
-                  "type": "character",
-                  "attributes": {},
-                  "value": ["method", "scale"]
-                },
-                "class": {
-                  "type": "character",
-                  "attributes": {},
-                  "value": ["cpm_weighting_spec"]
-                }
-              },
-              "value": [
-                {
-                  "type": "character",
-                  "attributes": {},
-                  "value": ["binary"]
-                },
-                {
-                  "type": "double",
-                  "attributes": {},
-                  "value": [0.05]
-                }
-              ]
+              "type": "double",
+              "attributes": {},
+              "value": [0]
             },
             {
               "type": "logical",
@@ -405,8 +361,8 @@
           Selection criterion: p_value
           Selection level:  0.1
           Construction polarity: separate
-          Edge weighting:   binary
-          Weighting scale:  0.05
+          Edge weighting:   none
+          Weight scale:     none
           Outcome model:    linear regression
           Streams:          joint, positive, negative
           Edge standardization: none
@@ -427,8 +383,8 @@
           Selection criterion: p_value
           Selection level:  0.01
           Construction polarity: separate
-          Edge weighting:   binary
-          Weighting scale:  0.05
+          Edge weighting:   none
+          Weight scale:     none
           Outcome model:    linear regression
           Streams:          joint, positive, negative
           Edge standardization: none
@@ -450,8 +406,8 @@
           Selection criterion: p_value
           Selection level:  0.01
           Construction polarity: separate
-          Edge weighting:   binary
-          Weighting scale:  0.05
+          Edge weighting:   none
+          Weight scale:     none
           Outcome model:    linear regression
           Streams:          joint, positive, negative
           Edge standardization: none
@@ -473,8 +429,8 @@
           Selection criterion: p_value
           Selection level:  0.01
           Construction polarity: separate
-          Edge weighting:   binary
-          Weighting scale:  0.05
+          Edge weighting:   none
+          Weight scale:     none
           Outcome model:    linear regression
           Streams:          joint, positive, negative
           Edge standardization: none

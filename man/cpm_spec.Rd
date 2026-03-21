@@ -8,7 +8,7 @@
 \usage{
 cpm_spec(
   selection = cpm_selection_cor(),
-  construction = cpm_construction_strength(),
+  construction = cpm_construction_summary(),
   model = cpm_model_lm()
 )
 
@@ -37,7 +37,7 @@ cpm_spec(
 \item{selection}{Selection helper created by \code{\link[=cpm_selection_cor]{cpm_selection_cor()}}.}
 
 \item{construction}{Construction helper created by
-\code{\link[=cpm_construction_strength]{cpm_construction_strength()}}.}
+\code{\link[=cpm_construction_summary]{cpm_construction_summary()}}.}
 
 \item{model}{Outcome-model helper created by \code{\link[=cpm_model_lm]{cpm_model_lm()}}. This stage
 maps CPM-derived subject-level features to the behavioral outcome.}
@@ -96,8 +96,8 @@ grouping stage-specific settings into helpers:
 \itemize{
 \item \code{\link[=cpm_selection_cor]{cpm_selection_cor()}} configures the current correlation-based edge
 selection path.
-\item \code{\link[=cpm_construction_strength]{cpm_construction_strength()}} configures the current network-strength
-construction path.
+\item \code{\link[=cpm_construction_summary]{cpm_construction_summary()}} configures the current summary-construction
+path.
 \item \code{\link[=cpm_model_lm]{cpm_model_lm()}} defines the outcome model fitted on CPM-derived features.
 }
 }
@@ -108,9 +108,9 @@ spec <- cpm_spec(
     criterion = "absolute",
     level = 0.1
   ),
-  construction = cpm_construction_strength(
+  construction = cpm_construction_summary(
     polarity = "net",
-    weighting = cpm_weighting("sigmoid", scale = 0.03)
+    weight_scale = 0.03
   ),
   model = cpm_model_lm()
 )
