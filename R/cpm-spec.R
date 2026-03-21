@@ -47,24 +47,9 @@ cpm_spec <- function(
   construction = cpm_construction_summary(),
   model = cpm_model_lm()
 ) {
-  validate_cpm_component(
-    selection,
-    class = "cpm_selection_spec",
-    message = "`selection` must be created by `cpm_selection_cor()`."
-  )
-  validate_cpm_component(
-    construction,
-    class = "cpm_construction_spec",
-    message = paste(
-      "`construction` must be created by",
-      "`cpm_construction_summary()`."
-    )
-  )
-  validate_cpm_component(
-    model,
-    class = "cpm_model_spec",
-    message = "`model` must be created by `cpm_model_lm()`."
-  )
+  selection <- validate_selection_spec(selection)
+  construction <- validate_construction_spec(construction)
+  model <- validate_model_spec(model)
 
   new_cpm_spec(
     params = list(
@@ -79,46 +64,16 @@ cpm_spec <- function(
 print.cpm_spec <- function(x, ...) {
   cat("CPM specification:\n")
   cat("  Selection:\n")
-  cat(sprintf(
-    "    Method:           %s\n",
-    x$params$selection$method
-  ))
-  cat(sprintf(
-    "    Criterion:        %s\n",
-    x$params$selection$criterion
-  ))
-  cat(sprintf(
-    "    Level:            %s\n",
-    format_threshold_level(x$params$selection$level)
-  ))
+  print_selection_settings(x$params$selection)
   cat("  Construction:\n")
-  cat(sprintf(
-    "    Polarity:         %s\n",
-    x$params$construction$polarity
-  ))
-  cat(sprintf(
-    "    Edge weighting:   %s\n",
-    format_weighting_label(x$params$construction$weight_scale)
-  ))
-  cat(sprintf(
-    "    Weight scale:     %s\n",
-    format_weight_scale(x$params$construction$weight_scale)
-  ))
-  cat(sprintf(
-    "    Edge standardization: %s\n",
-    format_edge_standardization(x$params$construction$standardize_edges)
-  ))
-  cat(sprintf(
-    "    Streams:          %s\n",
-    format_prediction_streams(
-      prediction_streams_for_polarity(x$params$construction$polarity)
+  print_construction_settings(
+    x$params$construction,
+    prediction_streams = prediction_streams_for_polarity(
+      x$params$construction$polarity
     )
-  ))
+  )
   cat("  Model:\n")
-  cat(sprintf(
-    "    Outcome model:    %s\n",
-    format_model_type(x$params$model$type)
-  ))
+  print_model_settings(x$params$model)
   invisible(x)
 }
 

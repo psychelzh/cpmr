@@ -54,46 +54,22 @@ print.cpm <- function(x, ...) {
     NA
   }
   cat("  Parameters:\n")
-  cat(sprintf(
-    "    Covariates:       %s\n",
+  print_setting_line(
+    "Covariates",
     format_covariates(covariates_param)
-  ))
-  cat(sprintf(
-    "    Selection method: %s\n",
-    x$params$selection$method
-  ))
-  cat(sprintf(
-    "    Selection criterion: %s\n",
-    x$params$selection$criterion
-  ))
-  cat(sprintf(
-    "    Selection level:  %s\n",
-    format_threshold_level(x$params$selection$level)
-  ))
-  cat(sprintf(
-    "    Construction polarity: %s\n",
-    x$params$construction$polarity
-  ))
-  cat(sprintf(
-    "    Edge weighting:   %s\n",
-    format_weighting_label(x$params$construction$weight_scale)
-  ))
-  cat(sprintf(
-    "    Weight scale:     %s\n",
-    format_weight_scale(x$params$construction$weight_scale)
-  ))
-  cat(sprintf(
-    "    Outcome model:    %s\n",
-    format_model_type(x$params$model$type)
-  ))
-  cat(sprintf(
-    "    Streams:          %s\n",
-    format_prediction_streams(prediction_columns(x$predictions))
-  ))
-  cat(sprintf(
-    "    Edge standardization: %s\n",
-    format_edge_standardization(x$params$construction$standardize_edges)
-  ))
+  )
+  print_selection_settings(
+    x$params$selection,
+    method_label = "Selection method",
+    criterion_label = "Selection criterion",
+    level_label = "Selection level"
+  )
+  print_construction_settings(
+    x$params$construction,
+    prediction_streams = prediction_columns(x$predictions),
+    polarity_label = "Construction polarity"
+  )
+  print_model_settings(x$params$model)
   invisible(x)
 }
 
@@ -198,7 +174,7 @@ print.cpm_summary <- function(x, ...) {
 #' @export
 tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
   component <- match.arg(component)
-  params <- tibble::as_tibble(flatten_cpm_params(x$params))
+  params <- flatten_tidy_cpm_params(x$params)
   sum_x <- summary(x, ...)
   switch(
     component,
@@ -221,4 +197,26 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
       tibble::as_tibble(apply(sum_x$edges, 2, list))
     )
   )
+}
+
+flatten_tidy_cpm_params <- function(params) {
+  extras <- params[setdiff(
+    names(params),
+    c("selection", "construction", "model")
+  )]
+
+  tibble::as_tibble(c(
+    extras,
+    list(
+      selection_type = params$selection$type,
+      selection_method = params$selection$method,
+      selection_criterion = params$selection$criterion,
+      selection_level = params$selection$level,
+      construction_type = params$construction$type,
+      construction_polarity = params$construction$polarity,
+      weight_scale = params$construction$weight_scale,
+      standardize_edges = params$construction$standardize_edges,
+      model_type = params$model$type
+    )
+  ))
 }

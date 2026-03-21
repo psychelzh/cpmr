@@ -171,16 +171,16 @@
           Complete cases: 10
         Candidate edges: 10
         Parameters:
-          Covariates:       none
-          Selection method: pearson
-          Selection criterion: p_value
-          Selection level:  0.01
+          Covariates:            none
+          Selection method:      pearson
+          Selection criterion:   p_value
+          Selection level:       0.01
           Construction polarity: separate
-          Edge weighting:   none
-          Weight scale:     none
-          Outcome model:    linear regression
-          Streams:          joint, positive, negative
-          Edge standardization: none
+          Edge weighting:        none
+          Weight scale:          none
+          Edge standardization:  none
+          Streams:               joint, positive, negative
+          Outcome model:         linear regression
 
 # Different threshold levels works
 
@@ -356,16 +356,16 @@
           Complete cases: 10
         Candidate edges: 10
         Parameters:
-          Covariates:       none
-          Selection method: pearson
-          Selection criterion: p_value
-          Selection level:  0.1
+          Covariates:            none
+          Selection method:      pearson
+          Selection criterion:   p_value
+          Selection level:       0.1
           Construction polarity: separate
-          Edge weighting:   none
-          Weight scale:     none
-          Outcome model:    linear regression
-          Streams:          joint, positive, negative
-          Edge standardization: none
+          Edge weighting:        none
+          Weight scale:          none
+          Edge standardization:  none
+          Streams:               joint, positive, negative
+          Outcome model:         linear regression
 
 # `na_action` argument works
 
@@ -378,16 +378,16 @@
           Complete cases: 9
         Candidate edges: 10
         Parameters:
-          Covariates:       none
-          Selection method: pearson
-          Selection criterion: p_value
-          Selection level:  0.01
+          Covariates:            none
+          Selection method:      pearson
+          Selection criterion:   p_value
+          Selection level:       0.01
           Construction polarity: separate
-          Edge weighting:   none
-          Weight scale:     none
-          Outcome model:    linear regression
-          Streams:          joint, positive, negative
-          Edge standardization: none
+          Edge weighting:        none
+          Weight scale:          none
+          Edge standardization:  none
+          Streams:               joint, positive, negative
+          Outcome model:         linear regression
 
 ---
 
@@ -401,16 +401,16 @@
           Complete cases: 8
         Candidate edges: 10
         Parameters:
-          Covariates:       included
-          Selection method: pearson
-          Selection criterion: p_value
-          Selection level:  0.01
+          Covariates:            included
+          Selection method:      pearson
+          Selection criterion:   p_value
+          Selection level:       0.01
           Construction polarity: separate
-          Edge weighting:   none
-          Weight scale:     none
-          Outcome model:    linear regression
-          Streams:          joint, positive, negative
-          Edge standardization: none
+          Edge weighting:        none
+          Weight scale:          none
+          Edge standardization:  none
+          Streams:               joint, positive, negative
+          Outcome model:         linear regression
 
 ---
 
@@ -424,14 +424,14 @@
           Complete cases: 8
         Candidate edges: 10
         Parameters:
-          Covariates:       included
-          Selection method: pearson
-          Selection criterion: p_value
-          Selection level:  0.01
+          Covariates:            included
+          Selection method:      pearson
+          Selection criterion:   p_value
+          Selection level:       0.01
           Construction polarity: separate
-          Edge weighting:   none
-          Weight scale:     none
-          Outcome model:    linear regression
-          Streams:          joint, positive, negative
-          Edge standardization: none
+          Edge weighting:        none
+          Weight scale:          none
+          Edge standardization:  none
+          Streams:               joint, positive, negative
+          Outcome model:         linear regression
 

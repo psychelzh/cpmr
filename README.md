@@ -58,16 +58,16 @@ fit_obj
 #>     Complete cases: 100
 #>   Candidate edges: 1000
 #>   Parameters:
-#>     Covariates:       none
-#>     Selection method: pearson
-#>     Selection criterion: p_value
-#>     Selection level:  0.01
+#>     Covariates:            none
+#>     Selection method:      pearson
+#>     Selection criterion:   p_value
+#>     Selection level:       0.01
 #>     Construction polarity: separate
-#>     Edge weighting:   none
-#>     Weight scale:     none
-#>     Outcome model:    linear regression
-#>     Streams:          joint, positive, negative
-#>     Edge standardization: none
+#>     Edge weighting:        none
+#>     Weight scale:          none
+#>     Edge standardization:  none
+#>     Streams:               joint, positive, negative
+#>     Outcome model:         linear regression
 summary(fit_obj)
 #> CPM summary:
 #>   Performance (Pearson):

@@ -8,6 +8,14 @@ test_that("critical_r matches the t-statistic conversion", {
   )
 })
 
+test_that("critical_r validates alpha bounds", {
+  expect_error(
+    critical_r(20, 0),
+    "`alpha` must be a single number in (0, 1].",
+    fixed = TRUE
+  )
+})
+
 test_that("select_edge_mask returns a logical positive/negative mask", {
   withr::local_seed(1)
   conmat <- matrix(rnorm(60), nrow = 10, ncol = 6)
@@ -81,6 +89,11 @@ test_that("select_edge_mask validates selection criterion", {
     ),
     "'arg' should be one of",
     fixed = FALSE
+  )
+  expect_error(
+    validate_selection_level(0.1, criterion = "bogus"),
+    "`criterion` must be a supported selection criterion.",
+    fixed = TRUE
   )
 })
 

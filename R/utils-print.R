@@ -82,6 +82,22 @@ format_method_name <- function(x) {
   ifelse(is.na(x), "NA", sub("^(.)", "\\U\\1", x, perl = TRUE))
 }
 
+format_model_type <- function(model_type) {
+  switch(
+    model_type,
+    lm = "linear regression",
+    model_type
+  )
+}
+
+format_weighting_label <- function(weight_scale) {
+  ifelse(weight_scale == 0, "none", "sigmoid")
+}
+
+format_weight_scale <- function(weight_scale) {
+  ifelse(weight_scale == 0, "none", format_threshold_level(weight_scale))
+}
+
 edge_storage_labels <- c(
   none = "not stored",
   sum = "summed across folds",
@@ -105,4 +121,81 @@ prediction_label <- function(prediction_stream) {
 
 format_prediction_streams <- function(prediction_streams) {
   paste(prediction_streams, collapse = ", ")
+}
+
+print_setting_line <- function(label, value, indent = "    ", width = 22L) {
+  cat(sprintf(
+    "%s%-*s %s\n",
+    indent,
+    width,
+    paste0(label, ":"),
+    value
+  ))
+}
+
+print_selection_settings <- function(
+  selection,
+  indent = "    ",
+  method_label = "Method",
+  criterion_label = "Criterion",
+  level_label = "Level"
+) {
+  print_setting_line(method_label, selection$method, indent = indent)
+  print_setting_line(criterion_label, selection$criterion, indent = indent)
+  print_setting_line(
+    level_label,
+    format_threshold_level(selection$level),
+    indent = indent
+  )
+
+  invisible(NULL)
+}
+
+print_construction_settings <- function(
+  construction,
+  prediction_streams,
+  indent = "    ",
+  polarity_label = "Polarity"
+) {
+  print_setting_line(
+    polarity_label,
+    construction$polarity,
+    indent = indent
+  )
+  print_setting_line(
+    "Edge weighting",
+    format_weighting_label(construction$weight_scale),
+    indent = indent
+  )
+  print_setting_line(
+    "Weight scale",
+    format_weight_scale(construction$weight_scale),
+    indent = indent
+  )
+  print_setting_line(
+    "Edge standardization",
+    format_edge_standardization(construction$standardize_edges),
+    indent = indent
+  )
+  print_setting_line(
+    "Streams",
+    format_prediction_streams(prediction_streams),
+    indent = indent
+  )
+
+  invisible(NULL)
+}
+
+print_model_settings <- function(
+  model,
+  indent = "    ",
+  model_label = "Outcome model"
+) {
+  print_setting_line(
+    model_label,
+    format_model_type(model$type),
+    indent = indent
+  )
+
+  invisible(NULL)
 }

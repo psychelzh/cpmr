@@ -152,12 +152,8 @@ test_that("print.cpm reports stored edge count", {
   output <- capture.output(print(result))
 
   expect_true(any(grepl("Candidate edges: 10", output, fixed = TRUE)))
-  expect_true(any(grepl("Covariates:       none", output, fixed = TRUE)))
-  expect_true(any(grepl(
-    "Edge standardization: none",
-    output,
-    fixed = TRUE
-  )))
+  expect_true(any(grepl("Covariates:\\s+none", output)))
+  expect_true(any(grepl("Edge standardization:\\s+none", output)))
 })
 
 test_that("Support row/column matrix input of `behav` and `covariates`", {

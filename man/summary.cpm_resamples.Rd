@@ -5,7 +5,7 @@
 \alias{print.cpm_resamples_summary}
 \title{Summarize a \code{cpm_resamples} object}
 \usage{
-\method{summary}{cpm_resamples}(object, ...)
+\method{summary}{cpm_resamples}(object, ..., method = c("pearson", "spearman"))
 
 \method{print}{cpm_resamples_summary}(x, ...)
 }
@@ -13,6 +13,9 @@
 \item{object}{An object of class \code{cpm_resamples}.}
 
 \item{...}{For future extension. Currently ignored.}
+
+\item{method}{Correlation method used for pooled and fold-wise correlation
+summaries.}
 
 \item{x}{An object of class \code{cpm_resamples_summary}.}
 }

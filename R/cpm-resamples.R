@@ -71,6 +71,8 @@ print.cpm_resamples <- function(x, ...) {
 #' @rdname summary.cpm_resamples
 #' @param object An object of class `cpm_resamples`.
 #' @param ... For future extension. Currently ignored.
+#' @param method Correlation method used for pooled and fold-wise correlation
+#'   summaries.
 #'
 #' @details
 #' `summary.cpm_resamples()` is designed to give a compact default report.
@@ -98,8 +100,12 @@ print.cpm_resamples <- function(x, ...) {
 #'
 #' summary(res)
 #' @export
-summary.cpm_resamples <- function(object, ...) {
-  correlation_method <- "pearson"
+summary.cpm_resamples <- function(
+  object,
+  ...,
+  method = c("pearson", "spearman")
+) {
+  correlation_method <- match.arg(method)
 
   structure(
     list(

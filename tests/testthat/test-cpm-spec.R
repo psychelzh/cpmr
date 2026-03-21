@@ -75,12 +75,67 @@ test_that("cpm_spec defaults to classic CPM edge handling", {
 test_that("helper constructors validate scalar parameter values", {
   expect_error(
     cpm_selection_cor(level = -0.1),
-    "`level` must be a single number between 0 and 1.",
+    "`level` must be in (0, 1] when `criterion = \"p_value\"`.",
     fixed = TRUE
   )
   expect_error(
     cpm_selection_cor(level = c(0.1, 0.2)),
-    "`level` must be a single number between 0 and 1.",
+    "`level` must be a single finite number.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_selection_cor(criterion = "absolute", level = -0.1),
+    "`level` must be between 0 and 1 when `criterion = \"absolute\"`.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_selection_cor(criterion = "proportion", level = 1.1),
+    "`level` must be between 0 and 1 when `criterion = \"proportion\"`.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm_selection_cor(level = 0),
+    "`level` must be in (0, 1] when `criterion = \"p_value\"`.",
+    fixed = TRUE
+  )
+  expect_warning(
+    cpm_selection_cor(level = 1),
+    paste(
+      "`level = 1` with `criterion = \"p_value\"` effectively",
+      "disables p-value filtering."
+    ),
+    fixed = TRUE
+  )
+  expect_warning(
+    cpm_selection_cor(criterion = "absolute", level = 0),
+    paste(
+      "`level = 0` with `criterion = \"absolute\"` effectively",
+      "disables absolute-correlation filtering."
+    ),
+    fixed = TRUE
+  )
+  expect_warning(
+    cpm_selection_cor(criterion = "absolute", level = 1),
+    paste(
+      "`level = 1` with `criterion = \"absolute\"` retains only",
+      "perfect absolute-correlation edges."
+    ),
+    fixed = TRUE
+  )
+  expect_warning(
+    cpm_selection_cor(criterion = "proportion", level = 0),
+    paste(
+      "`level = 0` with `criterion = \"proportion\"` retains no",
+      "edges by design."
+    ),
+    fixed = TRUE
+  )
+  expect_warning(
+    cpm_selection_cor(criterion = "proportion", level = 1),
+    paste(
+      "`level = 1` with `criterion = \"proportion\"` retains all",
+      "eligible edges."
+    ),
     fixed = TRUE
   )
   expect_error(
@@ -114,6 +169,61 @@ test_that("helper constructors validate scalar parameter values", {
   expect_error(
     cpm_spec(model = list()),
     "`model` must be created by `cpm_model_lm()`.",
+    fixed = TRUE
+  )
+})
+
+test_that("cpm_spec validates helper schema instead of class alone", {
+  bad_selection <- structure(
+    list(type = "cor"),
+    class = "cpm_selection_spec"
+  )
+  expect_error(
+    cpm_spec(selection = bad_selection),
+    "`selection$method` must be one of \"pearson\", \"spearman\".",
+    fixed = TRUE
+  )
+
+  bad_construction <- structure(
+    list(type = "summary", polarity = "sideways", weight_scale = 0),
+    class = "cpm_construction_spec"
+  )
+  expect_error(
+    cpm_spec(construction = bad_construction),
+    "`construction$polarity` must be one of \"separate\", \"net\".",
+    fixed = TRUE
+  )
+
+  bad_model <- structure(
+    list(type = "glm"),
+    class = "cpm_model_spec"
+  )
+  expect_error(
+    cpm_spec(model = bad_model),
+    "`model$type` must be one of \"lm\".",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_cpm_component checks message-builder inputs", {
+  valid_selection <- cpm_selection_cor()
+
+  expect_error(
+    validate_cpm_component(
+      valid_selection,
+      component = c("selection", "construction"),
+      constructor = "cpm_selection_cor"
+    ),
+    "`component` must be a single string.",
+    fixed = TRUE
+  )
+  expect_error(
+    validate_cpm_component(
+      valid_selection,
+      component = "selection",
+      constructor = NA_character_
+    ),
+    "`constructor` must be a single string.",
     fixed = TRUE
   )
 })

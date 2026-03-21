@@ -28,7 +28,11 @@ cpm_selection_cor <- function(
 ) {
   method <- match.arg(method)
   criterion <- match.arg(criterion)
-  validate_selection_level(level)
+  validate_selection_level(
+    level,
+    criterion = criterion,
+    warn_boundary = TRUE
+  )
 
   structure(
     list(
@@ -109,95 +113,5 @@ cpm_model_lm <- function() {
   structure(
     list(type = "lm"),
     class = "cpm_model_spec"
-  )
-}
-
-validate_cpm_component <- function(x, class, message) {
-  if (!inherits(x, class)) {
-    stop(message, call. = FALSE)
-  }
-
-  invisible(x)
-}
-
-validate_selection_level <- function(level) {
-  if (
-    !is.numeric(level) ||
-      length(level) != 1L ||
-      is.na(level) ||
-      !is.finite(level) ||
-      level < 0 ||
-      level > 1
-  ) {
-    stop("`level` must be a single number between 0 and 1.", call. = FALSE)
-  }
-
-  invisible(level)
-}
-
-validate_weight_scale <- function(scale) {
-  if (
-    !is.numeric(scale) ||
-      length(scale) != 1L ||
-      is.na(scale) ||
-      !is.finite(scale) ||
-      scale < 0
-  ) {
-    stop(
-      "`weight_scale` must be a single non-negative number.",
-      call. = FALSE
-    )
-  }
-
-  invisible(scale)
-}
-
-validate_standardize_edges <- function(standardize_edges) {
-  if (
-    !is.logical(standardize_edges) ||
-      length(standardize_edges) != 1L ||
-      is.na(standardize_edges)
-  ) {
-    stop("`standardize_edges` must be either TRUE or FALSE.", call. = FALSE)
-  }
-
-  invisible(standardize_edges)
-}
-
-format_model_type <- function(model_type) {
-  switch(
-    model_type,
-    lm = "linear regression",
-    model_type
-  )
-}
-
-format_weighting_label <- function(weight_scale) {
-  ifelse(weight_scale == 0, "none", "sigmoid")
-}
-
-format_weight_scale <- function(weight_scale) {
-  ifelse(weight_scale == 0, "none", format_threshold_level(weight_scale))
-}
-
-flatten_cpm_params <- function(params) {
-  extras <- params[setdiff(
-    names(params),
-    c("selection", "construction", "model")
-  )]
-
-  c(
-    extras,
-    list(
-      selection_type = params$selection$type,
-      selection_method = params$selection$method,
-      selection_criterion = params$selection$criterion,
-      selection_level = params$selection$level,
-      construction_type = params$construction$type,
-      construction_polarity = params$construction$polarity,
-      weight_scale = params$construction$weight_scale,
-      standardize_edges = params$construction$standardize_edges,
-      model_type = params$model$type
-    )
   )
 }

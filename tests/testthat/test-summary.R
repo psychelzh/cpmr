@@ -312,6 +312,44 @@ test_that("summary.cpm_resamples supports single-stream net summaries", {
   expect_true(any(grepl("Net strength:", output, fixed = TRUE)))
 })
 
+test_that("summary.cpm_resamples supports configurable correlation methods", {
+  predictions <- data.frame(
+    row = 1:6,
+    fold = c(1L, 1L, 1L, 2L, 2L, 2L),
+    observed = c(1, 2, 3, 4, 5, 6),
+    joint = c(1, 3, 2, 6, 4, 5),
+    positive = c(1, 3, 2, 4, 6, 5),
+    negative = c(3, 1, 2, 6, 4, 5)
+  )
+  folds <- list(1:3, 4:6)
+
+  summary_result <- summary(
+    new_cpm_resamples(
+      call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
+      spec = cpm_spec(),
+      params = list(kfolds = 2L, return_edges = "none"),
+      predictions = predictions,
+      edges = NULL,
+      folds = folds
+    ),
+    method = "spearman"
+  )
+
+  output <- capture.output(print(summary_result))
+
+  expect_identical(summary_result$params$correlation_method, "spearman")
+  expect_true(all(
+    summary_result$metrics$method[
+      summary_result$metrics$metric == "correlation"
+    ] ==
+      "spearman"
+  ))
+  expect_true(any(grepl(
+    "Pooled correlations \\(Spearman\\):",
+    output
+  )))
+})
+
 test_that("summary.cpm_resamples averages fold-wise edges when all edges are stored", {
   stored_edges <- array(
     c(

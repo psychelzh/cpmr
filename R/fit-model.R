@@ -7,6 +7,11 @@ run_edge_selection <- function(
 ) {
   selection_method <- match.arg(selection_method)
   selection_criterion <- match.arg(selection_criterion)
+  selection_level <- validate_selection_level(
+    selection_level,
+    criterion = selection_criterion,
+    arg = "`selection_level`"
+  )
   associations <- drop(stats::cor(
     conmat,
     behav,
@@ -201,15 +206,7 @@ compute_edge_weights <- function(
   mask,
   weight_scale = 0
 ) {
-  if (
-    !is.numeric(weight_scale) ||
-      length(weight_scale) != 1L ||
-      is.na(weight_scale) ||
-      !is.finite(weight_scale) ||
-      weight_scale < 0
-  ) {
-    stop("`weight_scale` must be a single non-negative number.", call. = FALSE)
-  }
+  weight_scale <- validate_weight_scale(weight_scale)
 
   if (weight_scale == 0) {
     return(matrix(
@@ -419,6 +416,17 @@ summary_column_names <- stats::setNames(
 summary_columns <- unname(summary_column_names)
 
 critical_r <- function(n, alpha) {
+  if (
+    !is.numeric(alpha) ||
+      length(alpha) != 1L ||
+      is.na(alpha) ||
+      !is.finite(alpha) ||
+      alpha <= 0 ||
+      alpha > 1
+  ) {
+    stop("`alpha` must be a single number in (0, 1].", call. = FALSE)
+  }
+
   df <- n - 2
   ct <- stats::qt(alpha / 2, df, lower.tail = FALSE)
   sqrt((ct^2) / ((ct^2) + df))
