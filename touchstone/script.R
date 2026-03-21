@@ -1,0 +1,82 @@
+# See `help(run_script, package = "touchstone")` for interactive use.
+
+benchmark_setup <- rlang::expr({
+  set.seed(20260321)
+  conmat_fit <- matrix(rnorm(300 * 20000), nrow = 300)
+  behav_fit <- rowMeans(conmat_fit[, 1:100, drop = FALSE]) +
+    rnorm(300, sd = 0.5)
+
+  set.seed(20260322)
+  conmat_res <- matrix(rnorm(240 * 12000), nrow = 240)
+  behav_res <- rowMeans(conmat_res[, 1:80, drop = FALSE]) + rnorm(240, sd = 0.5)
+
+  build_spec <- function() {
+    if ("cpm_selection_cor" %in% getNamespaceExports("cpmr")) {
+      cpmr::cpm_spec(
+        selection = cpmr::cpm_selection_cor(
+          method = "pearson",
+          criterion = "p_value",
+          level = 0.01
+        ),
+        construction = cpmr::cpm_construction_summary(
+          polarity = "separate",
+          weight_scale = 0,
+          standardize_edges = FALSE
+        ),
+        model = cpmr::cpm_model_lm()
+      )
+    } else {
+      cpmr::cpm_spec(
+        thresh_method = "alpha",
+        thresh_level = 0.01,
+        bias_correct = FALSE
+      )
+    }
+  }
+
+  fit_spec <- build_spec()
+
+  fit_resamples_default <- function(spec) {
+    if ("cpm_selection_cor" %in% getNamespaceExports("cpmr")) {
+      cpmr::fit_resamples(
+        spec,
+        conmat = conmat_res,
+        behav = behav_res,
+        resamples = 8L,
+        return_edges = "none"
+      )
+    } else {
+      cpmr::fit_resamples(
+        spec,
+        conmat = conmat_res,
+        behav = behav_res,
+        kfolds = 8L,
+        return_edges = "none"
+      )
+    }
+  }
+})
+
+touchstone::branch_install(install_dependencies = TRUE)
+
+touchstone::benchmark_run(
+  expr_before_benchmark = !!benchmark_setup,
+  build_spec = build_spec(),
+  n = 20
+)
+
+touchstone::benchmark_run(
+  expr_before_benchmark = !!benchmark_setup,
+  fit_default = {
+    cpmr::fit(fit_spec, conmat = conmat_fit, behav = behav_fit)
+  },
+  n = 5
+)
+
+touchstone::benchmark_run(
+  expr_before_benchmark = !!benchmark_setup,
+  fit_resamples_default = fit_resamples_default(fit_spec),
+  n = 3
+)
+
+touchstone::benchmark_analyze()
