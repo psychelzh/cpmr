@@ -15,28 +15,24 @@ run_single_fit <- function(
     action = "fitting",
     min_cases = 3L
   )
-  behav <- fit_context$behav
-  covariates <- fit_context$covariates
-  include_cases <- fit_context$include_cases
-  na_action <- fit_context$na_action
 
   pred_matrix <- init_pred(
-    behav,
+    fit_context$behav,
     construction_prediction_streams(params$construction)
   )
   split_fit <- run_fit_split(
     conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    rows_train = include_cases,
+    behav = fit_context$behav,
+    covariates = fit_context$covariates,
+    rows_train = fit_context$include_cases,
     selection_spec = params$selection,
     construction_spec = params$construction,
     model_spec = params$model
   )
-  pred_matrix[include_cases, ] <- split_fit$predictions
+  pred_matrix[fit_context$include_cases, ] <- split_fit$predictions
 
-  observed <- behav
-  observed[include_cases] <- split_fit$observed
+  observed <- fit_context$behav
+  observed[fit_context$include_cases] <- split_fit$observed
   predictions <- compute_single_predictions(observed, pred_matrix)
 
   new_cpm(
@@ -44,8 +40,8 @@ run_single_fit <- function(
     spec = object,
     params = new_fit_params(
       spec_params = params,
-      covariates = covariates,
-      na_action = na_action
+      covariates = fit_context$covariates,
+      na_action = fit_context$na_action
     ),
     predictions = predictions,
     edges = split_fit$edge_selection$mask,
@@ -73,14 +69,10 @@ run_resample_fit <- function(
     action = "resampling",
     min_cases = 2L
   )
-  behav <- fit_context$behav
-  covariates <- fit_context$covariates
-  include_cases <- fit_context$include_cases
-  na_action <- fit_context$na_action
 
   folds <- resolve_resample_folds(
     resamples = resamples,
-    include_cases = include_cases
+    include_cases = fit_context$include_cases
   )$folds
   folds <- assert_normalized_resample_folds(folds)
   n_folds <- length(folds)
@@ -88,20 +80,20 @@ run_resample_fit <- function(
   warn_large_edge_storage(ncol(conmat), n_folds, return_edges)
 
   pred_matrix <- init_pred(
-    behav,
+    fit_context$behav,
     construction_prediction_streams(params$construction)
   )
   edges <- init_edges(return_edges, conmat, n_folds)
-  observed <- behav
+  observed <- fit_context$behav
 
   for (fold in seq_len(n_folds)) {
     rows_test <- folds[[fold]]
-    rows_train <- setdiff(include_cases, rows_test)
+    rows_train <- setdiff(fit_context$include_cases, rows_test)
 
     split_fit <- run_fit_split(
       conmat = conmat,
-      behav = behav,
-      covariates = covariates,
+      behav = fit_context$behav,
+      covariates = fit_context$covariates,
       rows_train = rows_train,
       rows_test = rows_test,
       selection_spec = params$selection,
@@ -126,8 +118,8 @@ run_resample_fit <- function(
     spec = object,
     params = new_fit_params(
       spec_params = params,
-      covariates = covariates,
-      na_action = na_action,
+      covariates = fit_context$covariates,
+      na_action = fit_context$na_action,
       extras = list(
         return_edges = return_edges
       )
