@@ -81,14 +81,10 @@ fit_split_model <- function(
     construction_state$construction$prediction_streams
   )
 
-  c(
-    construction_state,
-    list(
-      edges = edge_selection$mask,
-      selection_thresholds = edge_selection$thresholds,
-      outcome_models = outcome_models
-    )
-  )
+  construction_state$edges <- edge_selection$mask
+  construction_state$selection_thresholds <- edge_selection$thresholds
+  construction_state$outcome_models <- outcome_models
+  construction_state
 }
 
 predict_split_model <- function(model, conmat_new) {

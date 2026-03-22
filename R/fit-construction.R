@@ -10,10 +10,6 @@ build_construction_state <- function(
   edge_selection,
   construction_spec
 ) {
-  if (is.null(construction_spec$prediction_streams)) {
-    construction_spec <- validate_construction_spec(construction_spec)
-  }
-
   switch(
     construction_spec$type,
     summary = build_construction_state_summary(
@@ -73,7 +69,7 @@ build_construction_state_summary <- function(
     conmat <- fscale(conmat, center, scale)
   }
 
-  edge_weights <- edge_weights_summary(
+  edge_weights <- edge_weights_summary_impl(
     associations = edge_selection$associations,
     cutoffs = edge_selection$thresholds,
     mask = edge_selection$mask,
@@ -103,13 +99,14 @@ stream_features_summary <- function(
     )
   }
 
-  prediction_stream <- validate_choice(
-    prediction_stream,
-    construction_state$construction$prediction_streams,
-    arg = "`prediction_stream`"
-  )
-
   if (construction_state$construction$polarity == "net") {
+    if (prediction_stream != "net") {
+      stop(
+        "`prediction_stream` must be one of \"net\".",
+        call. = FALSE
+      )
+    }
+
     return(matrix(
       features[, "positive_summary"] -
         features[, "negative_summary"],
@@ -122,7 +119,14 @@ stream_features_summary <- function(
     return(features)
   }
 
-  features[, summary_column_names[[prediction_stream]], drop = FALSE]
+  if (prediction_stream %in% edge_signs) {
+    return(features[, summary_column_names[[prediction_stream]], drop = FALSE])
+  }
+
+  stop(
+    "`prediction_stream` must be one of \"joint\", \"positive\", \"negative\".",
+    call. = FALSE
+  )
 }
 
 features_summary <- function(construction_state, conmat = NULL) {
@@ -150,8 +154,22 @@ edge_weights_summary <- function(
   mask,
   weight_scale = 0
 ) {
-  weight_scale <- validate_weight_scale(weight_scale)
+  weight_scale <- normalize_weight_scale(weight_scale)
 
+  edge_weights_summary_impl(
+    associations = associations,
+    cutoffs = cutoffs,
+    mask = mask,
+    weight_scale = weight_scale
+  )
+}
+
+edge_weights_summary_impl <- function(
+  associations,
+  cutoffs,
+  mask,
+  weight_scale
+) {
   if (weight_scale == 0) {
     return(matrix(
       as.numeric(mask),

@@ -3,10 +3,10 @@ resolve_resample_folds <- function(resamples, include_cases) {
     n_folds <- length(include_cases)
     folds <- crossv_kfold(include_cases, n_folds)
   } else if (is.list(resamples)) {
-    folds <- validate_manual_resamples(resamples, include_cases)
+    folds <- normalize_manual_resamples(resamples, include_cases)
     n_folds <- length(folds)
   } else {
-    n_folds <- validate_resample_count(resamples)
+    n_folds <- normalize_resample_count(resamples)
     if (n_folds > length(include_cases)) {
       stop(
         paste0(
@@ -58,7 +58,7 @@ warn_large_edge_storage <- function(n_edges, n_folds, return_edges) {
   invisible()
 }
 
-validate_manual_resamples <- function(resamples, include_cases) {
+normalize_manual_resamples <- function(resamples, include_cases) {
   if (!is.list(resamples) || length(resamples) == 0L) {
     stop("`resamples` must be a non-empty list of assessment indices.")
   }
@@ -134,7 +134,7 @@ assert_normalized_resample_folds <- function(folds) {
   invisible(folds)
 }
 
-validate_resample_count <- function(resamples) {
+normalize_resample_count <- function(resamples) {
   if (
     !is.numeric(resamples) ||
       length(resamples) != 1L ||

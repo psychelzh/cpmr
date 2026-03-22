@@ -5,7 +5,7 @@ run_edge_selection <- function(
 ) {
   switch(
     selection_spec$type,
-    cor = run_correlation_edge_selection(
+    cor = run_correlation_edge_selection_impl(
       conmat = conmat,
       behav = behav,
       method = selection_spec$method,
@@ -24,11 +24,28 @@ run_correlation_edge_selection <- function(
 ) {
   method <- match.arg(method)
   criterion <- match.arg(criterion)
-  level <- validate_selection_level(
+  level <- normalize_selection_level(
     level,
     criterion = criterion,
     arg = "`level`"
   )
+
+  run_correlation_edge_selection_impl(
+    conmat = conmat,
+    behav = behav,
+    method = method,
+    criterion = criterion,
+    level = level
+  )
+}
+
+run_correlation_edge_selection_impl <- function(
+  conmat,
+  behav,
+  method,
+  criterion,
+  level
+) {
   associations <- drop(stats::cor(
     conmat,
     behav,

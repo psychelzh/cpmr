@@ -220,11 +220,11 @@ test_that("cpm_spec validates helper schema instead of class alone", {
   )
 })
 
-test_that("validate_cpm_component checks message-builder inputs", {
+test_that("assert_cpm_component checks message-builder inputs", {
   valid_selection <- cpm_selection_cor()
 
   expect_error(
-    validate_cpm_component(
+    assert_cpm_component(
       valid_selection,
       component = c("selection", "construction"),
       constructor = "cpm_selection_cor"
@@ -233,7 +233,7 @@ test_that("validate_cpm_component checks message-builder inputs", {
     fixed = TRUE
   )
   expect_error(
-    validate_cpm_component(
+    assert_cpm_component(
       valid_selection,
       component = "selection",
       constructor = NA_character_
@@ -249,11 +249,11 @@ test_that("helper constructors round-trip through params", {
   expect_identical(format_model_type("custom"), "custom")
 })
 
-test_that("validate_construction_spec derives prediction streams", {
-  separate <- validate_construction_spec(cpm_construction_summary())
-  net <- validate_construction_spec(
-    cpm_construction_summary(polarity = "net")
-  )
+test_that("cpm_spec derives prediction streams on finalized construction specs", {
+  separate <- cpm_spec()$construction
+  net <- cpm_spec(
+    construction = cpm_construction_summary(polarity = "net")
+  )$construction
 
   expect_identical(
     separate$prediction_streams,

@@ -28,7 +28,7 @@ cpm_selection_cor <- function(
 ) {
   method <- match.arg(method)
   criterion <- match.arg(criterion)
-  validate_selection_level(
+  normalize_selection_level(
     level,
     criterion = criterion,
     warn_boundary = TRUE
@@ -86,8 +86,8 @@ cpm_construction_summary <- function(
   standardize_edges = FALSE
 ) {
   polarity <- match.arg(polarity)
-  validate_weight_scale(weight_scale)
-  validate_standardize_edges(standardize_edges)
+  normalize_weight_scale(weight_scale)
+  normalize_standardize_edges(standardize_edges)
 
   structure(
     list(

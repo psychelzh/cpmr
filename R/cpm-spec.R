@@ -47,9 +47,11 @@ cpm_spec <- function(
   construction = cpm_construction_summary(),
   model = cpm_model_lm()
 ) {
-  selection <- validate_selection_spec(selection)
-  construction <- validate_construction_spec(construction)
-  model <- validate_model_spec(model)
+  assert_selection_spec(selection)
+  assert_construction_spec(construction)
+  assert_model_spec(model)
+
+  construction$prediction_streams <- derive_prediction_streams(construction)
 
   new_cpm_spec(
     selection = selection,
@@ -174,5 +176,18 @@ new_cpm_spec <- function(selection, construction, model) {
       model = model
     ),
     class = "cpm_spec"
+  )
+}
+
+derive_prediction_streams <- function(construction) {
+  switch(
+    construction$type,
+    summary = switch(
+      construction$polarity,
+      separate = c("joint", edge_signs),
+      net = "net",
+      stop("`polarity` must be either \"separate\" or \"net\".", call. = FALSE)
+    ),
+    stop("`type` must be a supported construction type.", call. = FALSE)
   )
 }

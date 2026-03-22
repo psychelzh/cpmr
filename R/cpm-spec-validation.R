@@ -1,4 +1,4 @@
-validate_cpm_component <- function(x, component, constructor) {
+assert_cpm_component <- function(x, component, constructor) {
   if (!is.character(component) || length(component) != 1L || is.na(component)) {
     stop("`component` must be a single string.", call. = FALSE)
   }
@@ -26,7 +26,7 @@ validate_cpm_component <- function(x, component, constructor) {
   invisible(x)
 }
 
-validate_choice <- function(x, choices, arg) {
+normalize_choice <- function(x, choices, arg) {
   if (!is.character(x) || length(x) != 1L || is.na(x) || !(x %in% choices)) {
     stop(
       sprintf(
@@ -41,106 +41,76 @@ validate_choice <- function(x, choices, arg) {
   x
 }
 
-validate_selection_spec <- function(x) {
-  validate_cpm_component(
+assert_selection_spec <- function(x) {
+  assert_cpm_component(
     x,
     component = "selection",
     constructor = "cpm_selection_cor"
   )
 
-  type <- validate_choice(x$type, choices = "cor", arg = "`selection$type`")
-  method <- validate_choice(
+  normalize_choice(x$type, choices = "cor", arg = "`selection$type`")
+  normalize_choice(
     x$method,
     choices = c("pearson", "spearman"),
     arg = "`selection$method`"
   )
-  criterion <- validate_choice(
+  normalize_choice(
     x$criterion,
     choices = c("p_value", "absolute", "proportion"),
     arg = "`selection$criterion`"
   )
-  level <- validate_selection_level(
+  normalize_selection_level(
     x$level,
-    criterion = criterion,
+    criterion = x$criterion,
     arg = "`selection$level`",
     warn_boundary = FALSE
   )
 
-  structure(
-    list(
-      type = type,
-      method = method,
-      criterion = criterion,
-      level = level
-    ),
-    class = "cpm_selection_spec"
-  )
+  invisible(x)
 }
 
-validate_construction_spec <- function(x) {
-  validate_cpm_component(
+assert_construction_spec <- function(x) {
+  assert_cpm_component(
     x,
     component = "construction",
     constructor = "cpm_construction_summary"
   )
 
-  type <- validate_choice(
+  normalize_choice(
     x$type,
     choices = "summary",
     arg = "`construction$type`"
   )
-  polarity <- validate_choice(
+  normalize_choice(
     x$polarity,
     choices = c("separate", "net"),
     arg = "`construction$polarity`"
   )
-  weight_scale <- validate_weight_scale(
+  normalize_weight_scale(
     x$weight_scale,
     arg = "`construction$weight_scale`"
   )
-  standardize_edges <- validate_standardize_edges(
+  normalize_standardize_edges(
     x$standardize_edges,
     arg = "`construction$standardize_edges`"
   )
-  prediction_streams <- switch(
-    type,
-    summary = switch(
-      polarity,
-      separate = c("joint", edge_signs),
-      net = "net",
-      stop("`polarity` must be either \"separate\" or \"net\".", call. = FALSE)
-    ),
-    stop("`type` must be a supported construction type.", call. = FALSE)
-  )
 
-  structure(
-    list(
-      type = type,
-      polarity = polarity,
-      prediction_streams = prediction_streams,
-      weight_scale = weight_scale,
-      standardize_edges = standardize_edges
-    ),
-    class = "cpm_construction_spec"
-  )
+  invisible(x)
 }
 
-validate_model_spec <- function(x) {
-  validate_cpm_component(
+assert_model_spec <- function(x) {
+  assert_cpm_component(
     x,
     component = "model",
     constructor = "cpm_model_lm"
   )
 
-  type <- validate_choice(x$type, choices = "lm", arg = "`model$type`")
+  normalize_choice(x$type, choices = "lm", arg = "`model$type`")
 
-  structure(
-    list(type = type),
-    class = "cpm_model_spec"
-  )
+  invisible(x)
 }
 
-validate_selection_level <- function(
+normalize_selection_level <- function(
   level,
   criterion,
   arg = "`level`",
@@ -234,7 +204,7 @@ validate_selection_level <- function(
   level
 }
 
-validate_weight_scale <- function(scale, arg = "`weight_scale`") {
+normalize_weight_scale <- function(scale, arg = "`weight_scale`") {
   if (
     !is.numeric(scale) ||
       length(scale) != 1L ||
@@ -251,7 +221,7 @@ validate_weight_scale <- function(scale, arg = "`weight_scale`") {
   scale
 }
 
-validate_standardize_edges <- function(
+normalize_standardize_edges <- function(
   standardize_edges,
   arg = "`standardize_edges`"
 ) {

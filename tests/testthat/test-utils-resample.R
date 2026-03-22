@@ -1,16 +1,16 @@
-test_that("validate_manual_resamples rejects malformed assessment sets", {
+test_that("normalize_manual_resamples rejects malformed assessment sets", {
   expect_error(
-    validate_manual_resamples(list(), include_cases = 1:4),
+    normalize_manual_resamples(list(), include_cases = 1:4),
     "non-empty list",
     fixed = FALSE
   )
   expect_error(
-    validate_manual_resamples(list(c(1, Inf), 2:3), include_cases = 1:4),
+    normalize_manual_resamples(list(c(1, Inf), 2:3), include_cases = 1:4),
     "finite numeric indices",
     fixed = FALSE
   )
   expect_error(
-    validate_manual_resamples(list(1:2, 5:6), include_cases = 1:4),
+    normalize_manual_resamples(list(1:2, 5:6), include_cases = 1:4),
     "contained in complete-case rows",
     fixed = FALSE
   )
@@ -71,18 +71,18 @@ test_that("resolve_resample_folds generates and validates public folds", {
   )
 })
 
-test_that("validate_resample_count rejects malformed fold counts", {
+test_that("normalize_resample_count rejects malformed fold counts", {
   expect_error(
-    validate_resample_count(1),
+    normalize_resample_count(1),
     "`resamples` must be NULL, a single integer greater than or equal to 2, or a non-empty list of assessment indices.",
     fixed = TRUE
   )
   expect_error(
-    validate_resample_count(2.5),
+    normalize_resample_count(2.5),
     "`resamples` must be NULL, a single integer greater than or equal to 2, or a non-empty list of assessment indices.",
     fixed = TRUE
   )
-  expect_identical(validate_resample_count(4), 4L)
+  expect_identical(normalize_resample_count(4), 4L)
 })
 
 test_that("warn_large_edge_storage signals large fold-wise storage", {
