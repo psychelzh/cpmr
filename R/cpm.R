@@ -209,16 +209,32 @@ tidy_cpm_params <- function(params) {
 
   tibble::as_tibble(c(
     extras,
-    list(
-      selection_type = params$selection$type,
-      selection_method = params$selection$method,
-      selection_criterion = params$selection$criterion,
-      selection_level = params$selection$level,
-      construction_type = params$construction$type,
-      construction_polarity = params$construction$polarity,
-      weight_scale = params$construction$weight_scale,
-      standardize_edges = params$construction$standardize_edges,
-      model_type = params$model$type
-    )
+    tidy_selection_params(params$selection),
+    tidy_construction_params(params$construction),
+    tidy_model_params(params$model)
   ))
+}
+
+tidy_selection_params <- function(selection) {
+  list(
+    selection_type = selection$type,
+    selection_method = selection$method,
+    selection_criterion = selection$criterion,
+    selection_level = selection$level
+  )
+}
+
+tidy_construction_params <- function(construction) {
+  list(
+    construction_type = construction$type,
+    construction_polarity = construction$polarity,
+    weight_scale = construction$weight_scale,
+    standardize_edges = construction$standardize_edges
+  )
+}
+
+tidy_model_params <- function(model) {
+  list(
+    model_type = model$type
+  )
 }

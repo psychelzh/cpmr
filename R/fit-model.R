@@ -123,11 +123,6 @@ train_model <- function(
     list(
       edges = edge_selection$mask,
       selection_thresholds = edge_selection$thresholds,
-      construction_polarity = construction_spec$polarity,
-      weight_scale = construction_spec$weight_scale,
-      standardize_edges = construction_spec$standardize_edges,
-      edge_weights = construction_model$edge_weights,
-      prediction_streams = construction_model$prediction_streams,
       outcome_models = outcome_models
     )
   )
@@ -351,14 +346,13 @@ build_summary_construction_model <- function(
 
   list(
     type = "summary",
-    standardize_edges = construction_spec$standardize_edges,
+    construction = construction_spec,
     center = center,
     scale = scale,
     edge_weights = edge_weights,
     prediction_streams = prediction_streams_for_polarity(
       construction_spec$polarity
     ),
-    construction_polarity = construction_spec$polarity,
     constructed_features = compute_network_summaries(conmat, edge_weights)
   )
 }
@@ -394,13 +388,13 @@ summary_construction_stream_features <- function(
 
   stream_features(
     network_summaries = network_summaries,
-    construction_polarity = construction_model$construction_polarity,
+    construction_polarity = construction_model$construction$polarity,
     prediction_stream = prediction_stream
   )
 }
 
 summary_construction_features <- function(construction_model, conmat_new) {
-  if (construction_model$standardize_edges) {
+  if (construction_model$construction$standardize_edges) {
     conmat_new <- fscale(
       conmat_new,
       construction_model$center,

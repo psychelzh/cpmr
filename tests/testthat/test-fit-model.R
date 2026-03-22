@@ -250,9 +250,12 @@ test_that("joint stream handles aliased empty-sign features", {
   behav <- 1:5
   construction_model <- list(
     type = "summary",
-    construction_polarity = "separate",
+    construction = cpm_construction_summary(
+      polarity = "separate",
+      weight_scale = 0,
+      standardize_edges = FALSE
+    ),
     prediction_streams = c("joint", "positive", "negative"),
-    standardize_edges = FALSE,
     center = NULL,
     scale = NULL,
     edge_weights = NULL,
