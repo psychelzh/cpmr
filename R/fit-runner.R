@@ -6,7 +6,7 @@ run_single_fit <- function(
   na_action = c("fail", "exclude"),
   call = NULL
 ) {
-  runner_state <- resolve_runner_state(
+  fit_state <- resolve_fit_state(
     object = object,
     conmat = conmat,
     behav = behav,
@@ -15,20 +15,20 @@ run_single_fit <- function(
     action = "fitting",
     min_cases = 3L
   )
-  params <- runner_state$params
-  behav <- runner_state$behav
-  covariates <- runner_state$covariates
-  include_cases <- runner_state$include_cases
-  na_action <- runner_state$na_action
+  params <- fit_state$params
+  behav <- fit_state$behav
+  covariates <- fit_state$covariates
+  include_cases <- fit_state$include_cases
+  na_action <- fit_state$na_action
 
-  pred_matrix <- init_pred(behav, runner_state$prediction_streams)
+  pred_matrix <- init_pred(behav, fit_state$prediction_streams)
   split_fit <- run_fit_split(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
     rows_train = include_cases,
     selection_spec = params$selection,
-    construction_spec = runner_state$construction_spec,
+    construction_spec = params$construction,
     model_spec = params$model
   )
   pred_matrix[include_cases, ] <- split_fit$predictions
@@ -62,7 +62,7 @@ run_resample_fit <- function(
   call = NULL
 ) {
   return_edges <- match.arg(return_edges)
-  runner_state <- resolve_runner_state(
+  fit_state <- resolve_fit_state(
     object = object,
     conmat = conmat,
     behav = behav,
@@ -71,11 +71,11 @@ run_resample_fit <- function(
     action = "resampling",
     min_cases = 2L
   )
-  params <- runner_state$params
-  behav <- runner_state$behav
-  covariates <- runner_state$covariates
-  include_cases <- runner_state$include_cases
-  na_action <- runner_state$na_action
+  params <- fit_state$params
+  behav <- fit_state$behav
+  covariates <- fit_state$covariates
+  include_cases <- fit_state$include_cases
+  na_action <- fit_state$na_action
 
   folds <- resolve_resample_folds(
     resamples = resamples,
@@ -86,7 +86,7 @@ run_resample_fit <- function(
 
   warn_large_edge_storage(ncol(conmat), n_folds, return_edges)
 
-  pred_matrix <- init_pred(behav, runner_state$prediction_streams)
+  pred_matrix <- init_pred(behav, fit_state$prediction_streams)
   edges <- init_edges(return_edges, conmat, n_folds)
   observed <- behav
 
@@ -101,7 +101,7 @@ run_resample_fit <- function(
       rows_train = rows_train,
       rows_test = rows_test,
       selection_spec = params$selection,
-      construction_spec = runner_state$construction_spec,
+      construction_spec = params$construction,
       model_spec = params$model
     )
 
@@ -152,7 +152,7 @@ new_fit_params <- function(
   )
 }
 
-resolve_runner_state <- function(
+resolve_fit_state <- function(
   object,
   conmat,
   behav,
@@ -162,7 +162,6 @@ resolve_runner_state <- function(
   min_cases
 ) {
   params <- object$params
-  construction_spec <- params$construction
 
   fit_context <- resolve_fit_context(
     conmat = conmat,
@@ -175,8 +174,7 @@ resolve_runner_state <- function(
 
   list(
     params = params,
-    construction_spec = construction_spec,
-    prediction_streams = construction_prediction_streams(construction_spec),
+    prediction_streams = construction_prediction_streams(params$construction),
     behav = fit_context$behav,
     covariates = fit_context$covariates,
     include_cases = fit_context$include_cases,
