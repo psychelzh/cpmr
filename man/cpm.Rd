@@ -13,7 +13,8 @@ A \code{cpm} object is a list with the following elements:
 \describe{
 \item{\code{call}}{Matched call used for fitting.}
 \item{\code{spec}}{The originating \code{cpm_spec} object.}
-\item{\code{params}}{Parameter list used at fit time.}
+\item{\code{settings}}{Runtime settings used at fit time, such as whether
+covariates were supplied and the missing-data policy.}
 \item{\code{predictions}}{Data frame of observation-level outputs with columns
 \code{row}, \code{observed}, and one column per configured prediction stream.}
 \item{\code{edges}}{Stored single-fit edge mask as a \verb{p x 2} logical matrix
