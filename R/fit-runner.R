@@ -23,29 +23,19 @@ run_single_fit <- function(
   na_action <- fit_context$na_action
 
   pred <- init_pred(behav, prediction_streams)
-  training <- prepare_training_data(
+  split_fit <- run_fit_split(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    rows_train = include_cases
-  )
-
-  edge_selection <- run_edge_selection(
-    conmat = training$conmat,
-    behav = training$behav,
-    selection_spec = params$selection
-  )
-  model <- train_model(
-    conmat = training$conmat,
-    behav = training$behav,
-    edge_selection = edge_selection,
+    rows_train = include_cases,
+    selection_spec = params$selection,
     construction_spec = construction_spec,
     model_spec = params$model
   )
-  pred[include_cases, ] <- predict_model(model, training$conmat)
+  pred[include_cases, ] <- split_fit$pred
 
   observed <- behav
-  observed[include_cases] <- training$behav
+  observed[include_cases] <- split_fit$observed
   predictions <- compute_single_predictions(observed, pred)
 
   new_cpm(
@@ -57,8 +47,8 @@ run_single_fit <- function(
       na_action = na_action
     ),
     predictions = predictions,
-    edges = edge_selection$mask,
-    model = model
+    edges = split_fit$edge_selection$mask,
+    model = split_fit$model
   )
 }
 
@@ -105,40 +95,24 @@ run_resample_fit <- function(
     rows_test <- folds[[fold]]
     rows_train <- setdiff(include_cases, rows_test)
 
-    training <- prepare_training_data(
-      conmat = conmat,
-      behav = behav,
-      covariates = covariates,
-      rows_train = rows_train
-    )
-    edge_selection <- run_edge_selection(
-      conmat = training$conmat,
-      behav = training$behav,
-      selection_spec = params$selection
-    )
-    fold_model <- train_model(
-      conmat = training$conmat,
-      behav = training$behav,
-      edge_selection = edge_selection,
-      construction_spec = construction_spec,
-      model_spec = params$model
-    )
-    assessment <- prepare_assessment_data(
+    split_fit <- run_fit_split(
       conmat = conmat,
       behav = behav,
       covariates = covariates,
       rows_train = rows_train,
       rows_test = rows_test,
-      covariates_train = training$covariates
+      selection_spec = params$selection,
+      construction_spec = construction_spec,
+      model_spec = params$model
     )
 
-    pred[rows_test, ] <- predict_model(fold_model, assessment$conmat)
-    observed[rows_test] <- assessment$behav
+    pred[rows_test, ] <- split_fit$pred
+    observed[rows_test] <- split_fit$observed
 
     if (return_edges == "all") {
-      edges[,, fold] <- edge_selection$mask
+      edges[,, fold] <- split_fit$edge_selection$mask
     } else if (return_edges == "sum") {
-      edges <- edges + edge_selection$mask
+      edges <- edges + split_fit$edge_selection$mask
     }
   }
 

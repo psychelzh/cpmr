@@ -2,6 +2,61 @@
 # This file bridges validated selection, construction, and outcome-model
 # components into train/predict entry points used by the runners.
 
+run_fit_split <- function(
+  conmat,
+  behav,
+  covariates,
+  rows_train,
+  selection_spec,
+  construction_spec,
+  model_spec,
+  rows_test = NULL
+) {
+  training <- prepare_training_data(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    rows_train = rows_train
+  )
+  edge_selection <- run_edge_selection(
+    conmat = training$conmat,
+    behav = training$behav,
+    selection_spec = selection_spec
+  )
+  model <- train_model(
+    conmat = training$conmat,
+    behav = training$behav,
+    edge_selection = edge_selection,
+    construction_spec = construction_spec,
+    model_spec = model_spec
+  )
+
+  if (is.null(rows_test)) {
+    return(list(
+      edge_selection = edge_selection,
+      model = model,
+      observed = training$behav,
+      pred = predict_model(model, training$conmat)
+    ))
+  }
+
+  assessment <- prepare_assessment_data(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    rows_train = rows_train,
+    rows_test = rows_test,
+    covariates_train = training$covariates
+  )
+
+  list(
+    edge_selection = edge_selection,
+    model = model,
+    observed = assessment$behav,
+    pred = predict_model(model, assessment$conmat)
+  )
+}
+
 train_model <- function(
   conmat,
   behav,
