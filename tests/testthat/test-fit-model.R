@@ -237,7 +237,7 @@ test_that("joint stream handles aliased empty-sign features", {
     negative_summary = 1:5
   )
   behav <- 1:5
-  construction_model <- list(
+  construction_state <- list(
     type = "summary",
     construction = validate_construction_spec(cpm_construction_summary(
       polarity = "separate",
@@ -251,7 +251,7 @@ test_that("joint stream handles aliased empty-sign features", {
   )
 
   fitted <- fit_stream_model(
-    construction_model = construction_model,
+    construction_state = construction_state,
     behav = behav,
     prediction_stream = "joint",
     model_spec = cpm_model_lm()
@@ -263,7 +263,7 @@ test_that("joint stream handles aliased empty-sign features", {
   expect_equal(
     predict_stream_model(
       fitted_model = fitted,
-      construction_model = construction_model,
+      construction_state = construction_state,
       conmat_new = NULL
     ),
     behav
@@ -340,7 +340,7 @@ test_that("edge_weights_summary returns zeros for infinite cutoffs", {
 })
 
 test_that("prediction helpers validate unsupported modes", {
-  construction_model <- list(
+  construction_state <- list(
     type = "summary",
     construction = validate_construction_spec(cpm_construction_summary(
       polarity = "separate",
@@ -372,8 +372,8 @@ test_that("prediction helpers validate unsupported modes", {
     fixed = TRUE
   )
 
-  construction_model_net <- utils::modifyList(
-    construction_model,
+  construction_state_net <- utils::modifyList(
+    construction_state,
     list(
       construction = validate_construction_spec(cpm_construction_summary(
         polarity = "net",
@@ -385,7 +385,7 @@ test_that("prediction helpers validate unsupported modes", {
 
   expect_error(
     stream_features_summary(
-      construction_model = construction_model,
+      construction_state = construction_state,
       prediction_stream = "bogus"
     ),
     "`prediction_stream` must be one of \"joint\", \"positive\", \"negative\".",
@@ -393,7 +393,7 @@ test_that("prediction helpers validate unsupported modes", {
   )
   expect_equal(
     stream_features_summary(
-      construction_model = construction_model_net,
+      construction_state = construction_state_net,
       prediction_stream = "net"
     ),
     matrix(c(-2, -2), ncol = 1, dimnames = list(NULL, "net_summary"))
@@ -401,7 +401,7 @@ test_that("prediction helpers validate unsupported modes", {
 
   expect_error(
     stream_features_summary(
-      construction_model = construction_model_net,
+      construction_state = construction_state_net,
       prediction_stream = "joint"
     ),
     "`prediction_stream` must be one of \"net\".",
@@ -419,7 +419,7 @@ test_that("prediction helpers validate unsupported modes", {
 })
 
 test_that("stream_features_summary can recompute summaries for new conmat", {
-  construction_model <- list(
+  construction_state <- list(
     type = "summary",
     construction = validate_construction_spec(cpm_construction_summary(
       polarity = "separate",
@@ -441,7 +441,7 @@ test_that("stream_features_summary can recompute summaries for new conmat", {
 
   expect_equal(
     stream_features_summary(
-      construction_model = construction_model,
+      construction_state = construction_state,
       prediction_stream = "joint",
       conmat = conmat_new
     ),

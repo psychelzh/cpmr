@@ -5,7 +5,7 @@ summary_column_names <- stats::setNames(
 )
 summary_columns <- unname(summary_column_names)
 
-build_construction_model <- function(
+build_construction_state <- function(
   conmat,
   edge_selection,
   construction_spec
@@ -14,7 +14,7 @@ build_construction_model <- function(
 
   switch(
     construction_spec$type,
-    summary = build_construction_model_summary(
+    summary = build_construction_state_summary(
       conmat = conmat,
       edge_selection = edge_selection,
       construction_spec = construction_spec
@@ -23,42 +23,42 @@ build_construction_model <- function(
 }
 
 construction_features <- function(
-  construction_model,
+  construction_state,
   conmat_new = NULL
 ) {
   switch(
-    construction_model$type,
+    construction_state$type,
     summary = features_summary(
-      construction_model = construction_model,
+      construction_state = construction_state,
       conmat = conmat_new
     )
   )
 }
 
 construction_stream_features <- function(
-  construction_model,
+  construction_state,
   prediction_stream,
   conmat_new = NULL,
   features = NULL
 ) {
   if (is.null(features)) {
     features <- construction_features(
-      construction_model = construction_model,
+      construction_state = construction_state,
       conmat_new = conmat_new
     )
   }
 
   switch(
-    construction_model$type,
+    construction_state$type,
     summary = stream_features_summary(
-      construction_model = construction_model,
+      construction_state = construction_state,
       prediction_stream = prediction_stream,
       features = features
     )
   )
 }
 
-build_construction_model_summary <- function(
+build_construction_state_summary <- function(
   conmat,
   edge_selection,
   construction_spec
@@ -89,25 +89,25 @@ build_construction_model_summary <- function(
 }
 
 stream_features_summary <- function(
-  construction_model,
+  construction_state,
   prediction_stream,
   conmat = NULL,
   features = NULL
 ) {
   if (is.null(features)) {
     features <- features_summary(
-      construction_model = construction_model,
+      construction_state = construction_state,
       conmat = conmat
     )
   }
 
   prediction_stream <- validate_choice(
     prediction_stream,
-    construction_model$construction$prediction_streams,
+    construction_state$construction$prediction_streams,
     arg = "`prediction_stream`"
   )
 
-  if (construction_model$construction$polarity == "net") {
+  if (construction_state$construction$polarity == "net") {
     return(matrix(
       features[, "positive_summary"] -
         features[, "negative_summary"],
@@ -123,22 +123,22 @@ stream_features_summary <- function(
   features[, summary_column_names[[prediction_stream]], drop = FALSE]
 }
 
-features_summary <- function(construction_model, conmat = NULL) {
+features_summary <- function(construction_state, conmat = NULL) {
   if (is.null(conmat)) {
-    return(construction_model$constructed_features)
+    return(construction_state$constructed_features)
   }
 
-  if (construction_model$construction$standardize_edges) {
+  if (construction_state$construction$standardize_edges) {
     conmat <- fscale(
       conmat,
-      construction_model$center,
-      construction_model$scale
+      construction_state$center,
+      construction_state$scale
     )
   }
 
   feature_matrix_summary(
     conmat,
-    construction_model$edge_weights
+    construction_state$edge_weights
   )
 }
 
