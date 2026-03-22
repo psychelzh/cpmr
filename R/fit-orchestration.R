@@ -30,9 +30,9 @@ run_fit_split <- function(
   if (is.null(rows_test)) {
     return(list(
       edge_selection = edge_selection,
-      model = model,
+      fitted_model = model,
       observed = training$behav,
-      pred = predict_model(model, training$conmat)
+      predictions = predict_model(model, training$conmat)
     ))
   }
 
@@ -47,9 +47,9 @@ run_fit_split <- function(
 
   list(
     edge_selection = edge_selection,
-    model = model,
+    fitted_model = model,
     observed = assessment$behav,
-    pred = predict_model(model, assessment$conmat)
+    predictions = predict_model(model, assessment$conmat)
   )
 }
 
