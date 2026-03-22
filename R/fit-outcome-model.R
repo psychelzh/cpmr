@@ -9,15 +9,13 @@ fit_stream_model <- function(
     prediction_stream = prediction_stream
   )
 
-  utils::modifyList(
+  c(
     fit_outcome_model(
       features = features,
       behav = behav,
       model_spec = model_spec
     ),
-    list(
-      prediction_stream = prediction_stream
-    )
+    list(prediction_stream = prediction_stream)
   )
 }
 

@@ -8,7 +8,7 @@ build_summary_construction_model <- function(
   if (construction_spec$standardize_edges) {
     center <- Rfast::colmeans(conmat)
     scale <- Rfast::colVars(conmat, std = TRUE)
-    conmat <- sweep(sweep(conmat, 2, center, "-"), 2, scale, "/")
+    conmat <- fscale(conmat, center, scale)
   }
 
   edge_weights <- summary_edge_weights(
@@ -24,48 +24,8 @@ build_summary_construction_model <- function(
     center = center,
     scale = scale,
     edge_weights = edge_weights,
-    prediction_streams = construction_spec$prediction_streams,
     constructed_features = summary_feature_matrix(conmat, edge_weights)
   )
-}
-
-summary_stream_spec <- function(polarity, prediction_stream = NULL) {
-  stream_specs <- switch(
-    polarity,
-    separate = list(
-      joint = list(type = "columns", columns = summary_columns),
-      positive = list(type = "columns", columns = "positive_summary"),
-      negative = list(type = "columns", columns = "negative_summary")
-    ),
-    net = list(
-      net = list(
-        type = "difference",
-        positive = "positive_summary",
-        negative = "negative_summary",
-        output = "net_summary"
-      )
-    ),
-    stop("`polarity` must be either \"separate\" or \"net\".", call. = FALSE)
-  )
-
-  if (is.null(prediction_stream)) {
-    return(stream_specs)
-  }
-
-  stream_spec <- stream_specs[[prediction_stream]]
-  if (is.null(stream_spec)) {
-    valid <- paste(sprintf("\"%s\"", names(stream_specs)), collapse = ", ")
-    stop(
-      sprintf(
-        "`prediction_stream` must be one of %s for `polarity = \"%s\"`.",
-        valid,
-        polarity
-      ),
-      call. = FALSE
-    )
-  }
-
-  stream_spec
 }
 
 summary_stream_features <- function(
@@ -76,11 +36,10 @@ summary_stream_features <- function(
   summary_features <- construction_model$constructed_features
   if (!is.null(conmat)) {
     if (construction_model$construction$standardize_edges) {
-      conmat <- sweep(
-        sweep(conmat, 2, construction_model$center, "-"),
-        2,
-        construction_model$scale,
-        "/"
+      conmat <- fscale(
+        conmat,
+        construction_model$center,
+        construction_model$scale
       )
     }
 
@@ -90,21 +49,26 @@ summary_stream_features <- function(
     )
   }
 
-  stream_spec <- summary_stream_spec(
-    polarity = construction_model$construction$polarity,
-    prediction_stream = prediction_stream
+  prediction_stream <- validate_choice(
+    prediction_stream,
+    construction_model$construction$prediction_streams,
+    arg = "`prediction_stream`"
   )
 
-  switch(
-    stream_spec$type,
-    columns = summary_features[, stream_spec$columns, drop = FALSE],
-    difference = matrix(
-      summary_features[, stream_spec$positive] -
-        summary_features[, stream_spec$negative],
+  if (construction_model$construction$polarity == "net") {
+    return(matrix(
+      summary_features[, "positive_summary"] -
+        summary_features[, "negative_summary"],
       ncol = 1,
-      dimnames = list(NULL, stream_spec$output)
-    )
-  )
+      dimnames = list(NULL, "net_summary")
+    ))
+  }
+
+  if (prediction_stream == "joint") {
+    return(summary_features)
+  }
+
+  summary_features[, summary_column_names[[prediction_stream]], drop = FALSE]
 }
 
 summary_edge_weights <- function(
@@ -161,4 +125,8 @@ summary_feature_matrix <- function(conmat, edge_weights) {
   }
 
   summaries
+}
+
+fscale <- function(conmat, center, scale) {
+  Rfast::eachrow(Rfast::eachrow(conmat, center, "-"), scale, "/")
 }

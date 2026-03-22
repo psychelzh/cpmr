@@ -19,7 +19,7 @@ run_fit_split <- function(
     behav = training$behav,
     selection_spec = selection_spec
   )
-  model <- train_model(
+  fitted_model <- fit_split_model(
     conmat = training$conmat,
     behav = training$behav,
     edge_selection = edge_selection,
@@ -30,9 +30,9 @@ run_fit_split <- function(
   if (is.null(rows_test)) {
     return(list(
       edge_selection = edge_selection,
-      fitted_model = model,
+      fitted_model = fitted_model,
       observed = training$behav,
-      predictions = predict_model(model, training$conmat)
+      predictions = predict_split_model(fitted_model, training$conmat)
     ))
   }
 
@@ -47,13 +47,13 @@ run_fit_split <- function(
 
   list(
     edge_selection = edge_selection,
-    fitted_model = model,
+    fitted_model = fitted_model,
     observed = assessment$behav,
-    predictions = predict_model(model, assessment$conmat)
+    predictions = predict_split_model(fitted_model, assessment$conmat)
   )
 }
 
-train_model <- function(
+fit_split_model <- function(
   conmat,
   behav,
   edge_selection,
@@ -68,22 +68,22 @@ train_model <- function(
     construction_spec = construction_spec
   )
 
-  outcome_models <- lapply(
-    construction_model$prediction_streams,
-    function(
-      prediction_stream
-    ) {
-      fit_stream_model(
-        construction_model = construction_model,
-        behav = behav,
-        prediction_stream = prediction_stream,
-        model_spec = model_spec
-      )
-    }
+  outcome_models <- stats::setNames(
+    lapply(
+      construction_model$construction$prediction_streams,
+      function(prediction_stream) {
+        fit_stream_model(
+          construction_model = construction_model,
+          behav = behav,
+          prediction_stream = prediction_stream,
+          model_spec = model_spec
+        )
+      }
+    ),
+    construction_model$construction$prediction_streams
   )
-  names(outcome_models) <- construction_model$prediction_streams
 
-  utils::modifyList(
+  c(
     construction_model,
     list(
       edges = edge_selection$mask,
@@ -93,13 +93,13 @@ train_model <- function(
   )
 }
 
-predict_model <- function(model, conmat_new) {
+predict_split_model <- function(model, conmat_new) {
   pred <- matrix(
     nrow = dim(conmat_new)[1],
-    ncol = length(model$prediction_streams),
-    dimnames = list(NULL, model$prediction_streams)
+    ncol = length(model$construction$prediction_streams),
+    dimnames = list(NULL, model$construction$prediction_streams)
   )
-  for (prediction_stream in model$prediction_streams) {
+  for (prediction_stream in model$construction$prediction_streams) {
     pred[, prediction_stream] <- predict_stream_model(
       fitted_model = model$outcome_models[[prediction_stream]],
       construction_model = model,

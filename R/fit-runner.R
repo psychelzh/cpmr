@@ -14,7 +14,7 @@ run_single_fit <- function(
   )
   require_single_fit_cases(context$include_cases)
 
-  pred_matrix <- init_pred(
+  pred_matrix <- init_prediction_matrix(
     context$behav,
     object$construction$prediction_streams
   )
@@ -74,11 +74,11 @@ run_resample_fit <- function(
 
   warn_large_edge_storage(ncol(conmat), n_folds, return_edges)
 
-  pred_matrix <- init_pred(
+  pred_matrix <- init_prediction_matrix(
     context$behav,
     object$construction$prediction_streams
   )
-  edges <- init_edges(return_edges, conmat, n_folds)
+  edges <- init_edge_storage(return_edges, conmat, n_folds)
   observed <- context$behav
 
   for (fold in seq_len(n_folds)) {
@@ -153,7 +153,7 @@ require_complete_cases_for <- function(include_cases, min_cases, action) {
   invisible(include_cases)
 }
 
-init_pred <- function(behav, prediction_streams) {
+init_prediction_matrix <- function(behav, prediction_streams) {
   matrix(
     nrow = length(behav),
     ncol = length(prediction_streams),
@@ -161,7 +161,7 @@ init_pred <- function(behav, prediction_streams) {
   )
 }
 
-init_edges <- function(return_edges, conmat, n_folds) {
+init_edge_storage <- function(return_edges, conmat, n_folds) {
   switch(
     return_edges,
     all = array(

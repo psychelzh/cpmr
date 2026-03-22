@@ -598,7 +598,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     criterion = spec$selection$criterion,
     level = spec$selection$level
   )
-  fold_model <- train_model(
+  fold_model <- fit_split_model(
     conmat = training$conmat,
     behav = training$behav,
     edge_selection = run_edge_selection(
@@ -618,7 +618,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     return_edges = "sum",
     na_action = "fail"
   )
-  fold_pred <- predict_model(fold_model, assessment$conmat)
+  fold_pred <- predict_split_model(fold_model, assessment$conmat)
   collected <- resampled$predictions
 
   expect_equal(single_fit$edges, fold_edges)
@@ -626,7 +626,10 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   expect_equal(single_fit$model$outcome_models, fold_model$outcome_models)
   expect_equal(single_fit$model$center, fold_model$center)
   expect_equal(single_fit$model$scale, fold_model$scale)
-  expect_equal(predict_model(single_fit$model, assessment$conmat), fold_pred)
+  expect_equal(
+    predict_split_model(single_fit$model, assessment$conmat),
+    fold_pred
+  )
   expect_equal(
     as.matrix(collected[rows_test, c("joint", "positive", "negative")]),
     fold_pred,

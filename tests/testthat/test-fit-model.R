@@ -146,7 +146,7 @@ test_that("run_edge_selection accepts staged selection specs directly", {
   expect_equal(from_spec, from_scalars)
 })
 
-test_that("train_model and predict_model compose correctly", {
+test_that("fit_split_model and predict_split_model compose correctly", {
   withr::local_seed(1)
   n <- 12
   p <- 6
@@ -179,7 +179,7 @@ test_that("train_model and predict_model compose correctly", {
       level = 0.1
     )
   )
-  model <- train_model(
+  model <- fit_split_model(
     conmat = training$conmat,
     behav = training$behav,
     edge_selection = edge_selection,
@@ -194,7 +194,7 @@ test_that("train_model and predict_model compose correctly", {
   expect_equal(dim(edge_selection$mask), c(p, 2))
   expect_named(model$outcome_models, c("joint", "positive", "negative"))
   expect_equal(
-    dim(predict_model(model, assessment$conmat)),
+    dim(predict_split_model(model, assessment$conmat)),
     c(length(rows_test), 3)
   )
 })
@@ -213,7 +213,7 @@ test_that("net polarity with lm model produces a single stream", {
     thresholds = c(positive = 0.1, negative = 0.1)
   )
 
-  model <- train_model(
+  model <- fit_split_model(
     conmat = conmat,
     behav = behav,
     edge_selection = edge_selection,
@@ -224,7 +224,7 @@ test_that("net polarity with lm model produces a single stream", {
     ),
     model_spec = cpm_model_lm()
   )
-  pred <- predict_model(model, conmat)
+  pred <- predict_split_model(model, conmat)
 
   expect_named(model$outcome_models, "net")
   expect_identical(colnames(pred), "net")
@@ -239,12 +239,11 @@ test_that("joint stream handles aliased empty-sign features", {
   behav <- 1:5
   construction_model <- list(
     type = "summary",
-    construction = cpm_construction_summary(
+    construction = validate_construction_spec(cpm_construction_summary(
       polarity = "separate",
       weight_scale = 0,
       standardize_edges = FALSE
-    ),
-    prediction_streams = c("joint", "positive", "negative"),
+    )),
     center = NULL,
     scale = NULL,
     edge_weights = NULL,
@@ -343,11 +342,11 @@ test_that("summary_edge_weights returns zeros for infinite cutoffs", {
 test_that("prediction helpers validate unsupported modes", {
   construction_model <- list(
     type = "summary",
-    construction = cpm_construction_summary(
+    construction = validate_construction_spec(cpm_construction_summary(
       polarity = "separate",
       weight_scale = 0,
       standardize_edges = FALSE
-    ),
+    )),
     center = NULL,
     scale = NULL,
     edge_weights = NULL,
@@ -358,28 +357,29 @@ test_that("prediction helpers validate unsupported modes", {
   )
 
   expect_error(
-    summary_stream_spec("bogus"),
-    "`polarity` must be either \"separate\" or \"net\".",
-    fixed = TRUE
-  )
-  expect_error(
-    summary_stream_spec("separate", "bogus"),
-    paste0(
-      "`prediction_stream` must be one of ",
-      "\"joint\", \"positive\", \"negative\" for ",
-      "`polarity = \"separate\"`."
+    validate_construction_spec(
+      structure(
+        list(
+          type = "summary",
+          polarity = "bogus",
+          weight_scale = 0,
+          standardize_edges = FALSE
+        ),
+        class = "cpm_construction_spec"
+      )
     ),
+    "`construction$polarity` must be one of \"separate\", \"net\".",
     fixed = TRUE
   )
 
   construction_model_net <- utils::modifyList(
     construction_model,
     list(
-      construction = cpm_construction_summary(
+      construction = validate_construction_spec(cpm_construction_summary(
         polarity = "net",
         weight_scale = 0,
         standardize_edges = FALSE
-      )
+      ))
     )
   )
 
@@ -388,11 +388,7 @@ test_that("prediction helpers validate unsupported modes", {
       construction_model = construction_model,
       prediction_stream = "bogus"
     ),
-    paste0(
-      "`prediction_stream` must be one of ",
-      "\"joint\", \"positive\", \"negative\" for ",
-      "`polarity = \"separate\"`."
-    ),
+    "`prediction_stream` must be one of \"joint\", \"positive\", \"negative\".",
     fixed = TRUE
   )
   expect_equal(
@@ -408,7 +404,7 @@ test_that("prediction helpers validate unsupported modes", {
       construction_model = construction_model_net,
       prediction_stream = "joint"
     ),
-    "`prediction_stream` must be one of \"net\" for `polarity = \"net\"`.",
+    "`prediction_stream` must be one of \"net\".",
     fixed = TRUE
   )
   expect_error(
@@ -425,11 +421,11 @@ test_that("prediction helpers validate unsupported modes", {
 test_that("summary_stream_features can recompute summaries for new conmat", {
   construction_model <- list(
     type = "summary",
-    construction = cpm_construction_summary(
+    construction = validate_construction_spec(cpm_construction_summary(
       polarity = "separate",
       weight_scale = 0,
       standardize_edges = FALSE
-    ),
+    )),
     center = NULL,
     scale = NULL,
     edge_weights = cbind(
