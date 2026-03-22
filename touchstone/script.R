@@ -144,7 +144,7 @@ touchstone::benchmark_run(
   fit_default = {
     cpmr::fit(fit_spec, conmat = conmat_fit, behav = behav_fit)
   },
-  n = 5
+  n = 10
 )
 
 touchstone::benchmark_run(
@@ -152,19 +152,19 @@ touchstone::benchmark_run(
   fit_standardize_edges = {
     cpmr::fit(fit_spec, conmat = conmat_fit, behav = behav_fit)
   },
-  n = 5
+  n = 10
 )
 
 touchstone::benchmark_run(
   expr_before_benchmark = !!fit_resamples_setup,
   fit_resamples_default = fit_resamples_default(fit_spec),
-  n = 3
+  n = 5
 )
 
 touchstone::benchmark_run(
   expr_before_benchmark = !!fit_resamples_standardize_edges_setup,
   fit_resamples_standardize_edges = fit_resamples_default(fit_spec),
-  n = 3
+  n = 5
 )
 
 touchstone::benchmark_analyze()
