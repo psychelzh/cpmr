@@ -350,9 +350,7 @@ build_summary_construction_model <- function(
     center = center,
     scale = scale,
     edge_weights = edge_weights,
-    prediction_streams = prediction_streams_for_polarity(
-      construction_spec$polarity
-    ),
+    prediction_streams = summary_prediction_streams(construction_spec$polarity),
     constructed_features = compute_network_summaries(conmat, edge_weights)
   )
 }
@@ -386,9 +384,9 @@ summary_construction_stream_features <- function(
     )
   }
 
-  stream_features(
+  summary_stream_features(
     network_summaries = network_summaries,
-    construction_polarity = construction_model$construction$polarity,
+    polarity = construction_model$construction$polarity,
     prediction_stream = prediction_stream
   )
 }
@@ -405,14 +403,14 @@ summary_construction_features <- function(construction_model, conmat_new) {
   compute_network_summaries(conmat_new, construction_model$edge_weights)
 }
 
-stream_features <- function(
+summary_stream_features <- function(
   network_summaries,
-  construction_polarity,
+  polarity,
   prediction_stream
 ) {
   switch(
-    construction_polarity,
-    separate = separate_stream_features(
+    polarity,
+    separate = summary_separate_stream_features(
       network_summaries = network_summaries,
       prediction_stream = prediction_stream
     ),
@@ -424,13 +422,16 @@ stream_features <- function(
     ),
     stop(
       paste(
-        "`construction_polarity` must be either \"separate\" or \"net\"."
+        "`polarity` must be either \"separate\" or \"net\"."
       )
     )
   )
 }
 
-separate_stream_features <- function(network_summaries, prediction_stream) {
+summary_separate_stream_features <- function(
+  network_summaries,
+  prediction_stream
+) {
   feature_sets <- list(
     joint = summary_columns,
     positive = "positive_summary",
@@ -443,7 +444,7 @@ separate_stream_features <- function(network_summaries, prediction_stream) {
       paste0(
         "`prediction_stream` must be one of ",
         "\"joint\", \"positive\", or \"negative\" for ",
-        "`construction_polarity = \"separate\"`."
+        "`polarity = \"separate\"`."
       ),
       call. = FALSE
     )
@@ -494,14 +495,14 @@ predict_lm_outcome_model <- function(fitted_model, features) {
   drop(design %*% fitted_model$prediction_coefficients)
 }
 
-prediction_streams_for_polarity <- function(construction_polarity) {
+summary_prediction_streams <- function(polarity) {
   switch(
-    construction_polarity,
+    polarity,
     separate = c("joint", edge_signs),
     net = "net",
     stop(
       paste(
-        "`construction_polarity` must be either \"separate\" or \"net\"."
+        "`polarity` must be either \"separate\" or \"net\"."
       )
     )
   )
@@ -512,7 +513,7 @@ construction_prediction_streams <- function(construction_spec) {
 
   switch(
     construction_spec$type,
-    summary = prediction_streams_for_polarity(construction_spec$polarity)
+    summary = summary_prediction_streams(construction_spec$polarity)
   )
 }
 

@@ -343,25 +343,25 @@ test_that("prediction helpers validate unsupported modes", {
   )
 
   expect_error(
-    stream_features(
+    summary_stream_features(
       network_summaries = network_summaries,
-      construction_polarity = "separate",
+      polarity = "separate",
       prediction_stream = "bogus"
     ),
     paste0(
       "`prediction_stream` must be one of ",
       "\"joint\", \"positive\", or \"negative\" for ",
-      "`construction_polarity = \"separate\"`."
+      "`polarity = \"separate\"`."
     ),
     fixed = TRUE
   )
   expect_error(
-    stream_features(
+    summary_stream_features(
       network_summaries = network_summaries,
-      construction_polarity = "bogus",
+      polarity = "bogus",
       prediction_stream = "joint"
     ),
-    "`construction_polarity` must be either \"separate\" or \"net\".",
+    "`polarity` must be either \"separate\" or \"net\".",
     fixed = TRUE
   )
   expect_error(
@@ -374,8 +374,8 @@ test_that("prediction helpers validate unsupported modes", {
     fixed = TRUE
   )
   expect_error(
-    prediction_streams_for_polarity("bogus"),
-    "`construction_polarity` must be either \"separate\" or \"net\".",
+    summary_prediction_streams("bogus"),
+    "`polarity` must be either \"separate\" or \"net\".",
     fixed = TRUE
   )
 })
