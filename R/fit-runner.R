@@ -7,14 +7,13 @@ run_single_fit <- function(
   call = NULL
 ) {
   params <- object$params
-  context <- resolve_fit_context(
+  context <- resolve_data_context(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    na_action = na_action,
-    action = "fitting",
-    min_cases = 3L
+    na_action = na_action
   )
+  require_single_fit_cases(context$include_cases)
 
   pred_matrix <- init_pred(
     context$behav,
@@ -61,14 +60,13 @@ run_resample_fit <- function(
 ) {
   return_edges <- match.arg(return_edges)
   params <- object$params
-  context <- resolve_fit_context(
+  context <- resolve_data_context(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    na_action = na_action,
-    action = "resampling",
-    min_cases = 2L
+    na_action = na_action
   )
+  require_resample_cases(context$include_cases)
 
   folds <- resolve_resample_folds(
     resamples = resamples,
@@ -128,6 +126,37 @@ run_resample_fit <- function(
     edges = edges,
     folds = folds
   )
+}
+
+require_single_fit_cases <- function(include_cases) {
+  require_complete_cases_for(
+    include_cases = include_cases,
+    min_cases = 3L,
+    action = "fitting"
+  )
+}
+
+require_resample_cases <- function(include_cases) {
+  require_complete_cases_for(
+    include_cases = include_cases,
+    min_cases = 2L,
+    action = "resampling"
+  )
+}
+
+require_complete_cases_for <- function(include_cases, min_cases, action) {
+  if (length(include_cases) == 0L) {
+    stop(sprintf("No complete-case observations available for %s.", action))
+  }
+  if (length(include_cases) < min_cases) {
+    stop(sprintf(
+      "At least %d complete-case observations are required for %s.",
+      min_cases,
+      action
+    ))
+  }
+
+  invisible(include_cases)
 }
 
 new_fit_params <- function(

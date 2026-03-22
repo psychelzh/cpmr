@@ -1,10 +1,8 @@
-resolve_fit_context <- function(
+resolve_data_context <- function(
   conmat,
   behav,
   covariates,
-  na_action,
-  action,
-  min_cases
+  na_action
 ) {
   na_action <- match.arg(na_action, c("fail", "exclude"))
 
@@ -18,17 +16,6 @@ resolve_fit_context <- function(
     covariates,
     na_action
   )
-
-  if (length(include_cases) == 0L) {
-    stop(sprintf("No complete-case observations available for %s.", action))
-  }
-  if (length(include_cases) < min_cases) {
-    stop(sprintf(
-      "At least %d complete-case observations are required for %s.",
-      min_cases,
-      action
-    ))
-  }
 
   list(
     behav = behav,
