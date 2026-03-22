@@ -94,14 +94,12 @@ train_model <- function(
 }
 
 predict_model <- function(model, conmat_new) {
-  prediction_streams <- model$prediction_streams
-
   pred <- matrix(
     nrow = dim(conmat_new)[1],
-    ncol = length(prediction_streams),
-    dimnames = list(NULL, prediction_streams)
+    ncol = length(model$prediction_streams),
+    dimnames = list(NULL, model$prediction_streams)
   )
-  for (prediction_stream in prediction_streams) {
+  for (prediction_stream in model$prediction_streams) {
     pred[, prediction_stream] <- predict_stream_model(
       fitted_model = model$outcome_models[[prediction_stream]],
       construction_model = model,

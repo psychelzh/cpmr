@@ -134,7 +134,6 @@ summary.cpm_resamples <- function(
 #' @param x An object of class `cpm_resamples_summary`.
 #' @export
 print.cpm_resamples_summary <- function(x, ...) {
-  prediction_streams <- x$params$prediction_streams
   correlation_method <- summary_metric_method(
     x$metrics,
     level = c("pooled", "foldwise"),
@@ -147,14 +146,14 @@ print.cpm_resamples_summary <- function(x, ...) {
     x$metrics,
     level = "pooled",
     metric = c("rmse", "mae"),
-    prediction_streams = prediction_streams
+    prediction_streams = x$params$prediction_streams
   ))
   print_performance_block(
     values = summary_metric_values(
       x$metrics,
       level = "pooled",
       metric = "correlation",
-      prediction_streams = prediction_streams
+      prediction_streams = x$params$prediction_streams
     ),
     header = sprintf(
       "  Pooled correlations (%s):\n",
@@ -165,7 +164,7 @@ print.cpm_resamples_summary <- function(x, ...) {
     x$metrics,
     level = "foldwise",
     metric = "correlation",
-    prediction_streams = prediction_streams
+    prediction_streams = x$params$prediction_streams
   )
   if (any(!is.na(foldwise_values))) {
     print_performance_block(
@@ -174,7 +173,7 @@ print.cpm_resamples_summary <- function(x, ...) {
         x$metrics,
         level = "foldwise",
         metric = "correlation",
-        prediction_streams = prediction_streams,
+        prediction_streams = x$params$prediction_streams,
         field = "std_error"
       ),
       header = sprintf(

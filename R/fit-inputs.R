@@ -6,20 +6,18 @@ resolve_data_context <- function(
 ) {
   na_action <- match.arg(na_action, c("fail", "exclude"))
 
-  normalized <- normalize_inputs(conmat, behav, covariates)
-  behav <- normalized$behav
-  covariates <- normalized$covariates
+  context <- normalize_inputs(conmat, behav, covariates)
 
   include_cases <- resolve_include_cases(
     conmat,
-    behav,
-    covariates,
+    context$behav,
+    context$covariates,
     na_action
   )
 
   list(
-    behav = behav,
-    covariates = covariates,
+    behav = context$behav,
+    covariates = context$covariates,
     include_cases = include_cases,
     na_action = na_action
   )

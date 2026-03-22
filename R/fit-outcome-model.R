@@ -58,14 +58,13 @@ lm_design_matrix <- function(features) {
 fit_lm_outcome_model <- function(features, behav) {
   design <- lm_design_matrix(features)
   fit <- stats::lm.fit(design, behav)
-  coefficients <- fit$coefficients
-  prediction_coefficients <- coefficients
+  prediction_coefficients <- fit$coefficients
   prediction_coefficients[is.na(prediction_coefficients)] <- 0
 
   list(
     type = "lm",
     feature_names = colnames(features),
-    coefficients = coefficients,
+    coefficients = fit$coefficients,
     prediction_coefficients = prediction_coefficients,
     rank = fit$rank
   )

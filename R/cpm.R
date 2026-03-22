@@ -133,14 +133,13 @@ print.cpm_summary <- function(x, ...) {
     level = "single",
     metric = "correlation"
   )
-  prediction_streams <- x$params$prediction_streams
   cat("CPM summary:\n")
   print_performance_block(
     values = summary_metric_values(
       x$metrics,
       level = "single",
       metric = "correlation",
-      prediction_streams = prediction_streams
+      prediction_streams = x$params$prediction_streams
     ),
     header = sprintf("  Performance (%s):\n", format_method_name(method))
   )
