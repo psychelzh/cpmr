@@ -287,7 +287,7 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
       level = 0.4
     )
   )
-  edge_weights <- summary_edge_weights(
+  edge_weights <- edge_weights_summary(
     associations = edge_selection$associations,
     cutoffs = edge_selection$thresholds,
     mask = edge_selection$mask,
@@ -300,9 +300,9 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
   expect_true(all(edge_weights[!edge_selection$mask] <= 0.5))
 })
 
-test_that("summary_edge_weights validates weight scale", {
+test_that("edge_weights_summary validates weight scale", {
   expect_error(
-    summary_edge_weights(
+    edge_weights_summary(
       associations = c(0.2, -0.3),
       cutoffs = c(positive = 0.1, negative = 0.1),
       mask = matrix(
@@ -317,9 +317,9 @@ test_that("summary_edge_weights validates weight scale", {
   )
 })
 
-test_that("summary_edge_weights returns zeros for infinite cutoffs", {
+test_that("edge_weights_summary returns zeros for infinite cutoffs", {
   expect_equal(
-    summary_edge_weights(
+    edge_weights_summary(
       associations = c(0.1, 0.2, NA_real_),
       cutoffs = c(positive = Inf, negative = Inf),
       mask = matrix(
@@ -384,7 +384,7 @@ test_that("prediction helpers validate unsupported modes", {
   )
 
   expect_error(
-    summary_stream_features(
+    stream_features_summary(
       construction_model = construction_model,
       prediction_stream = "bogus"
     ),
@@ -392,7 +392,7 @@ test_that("prediction helpers validate unsupported modes", {
     fixed = TRUE
   )
   expect_equal(
-    summary_stream_features(
+    stream_features_summary(
       construction_model = construction_model_net,
       prediction_stream = "net"
     ),
@@ -400,7 +400,7 @@ test_that("prediction helpers validate unsupported modes", {
   )
 
   expect_error(
-    summary_stream_features(
+    stream_features_summary(
       construction_model = construction_model_net,
       prediction_stream = "joint"
     ),
@@ -418,7 +418,7 @@ test_that("prediction helpers validate unsupported modes", {
   )
 })
 
-test_that("summary_stream_features can recompute summaries for new conmat", {
+test_that("stream_features_summary can recompute summaries for new conmat", {
   construction_model <- list(
     type = "summary",
     construction = validate_construction_spec(cpm_construction_summary(
@@ -440,7 +440,7 @@ test_that("summary_stream_features can recompute summaries for new conmat", {
   conmat_new <- cbind(c(10, 20), c(1, 2), c(5, 6))
 
   expect_equal(
-    summary_stream_features(
+    stream_features_summary(
       construction_model = construction_model,
       prediction_stream = "joint",
       conmat = conmat_new
