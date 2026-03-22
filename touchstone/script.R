@@ -1,37 +1,58 @@
 # See `help(run_script, package = "touchstone")` for interactive use.
 
-benchmark_setup <- rlang::expr({
+build_spec_expr <- rlang::expr({
+  if ("cpm_selection_cor" %in% getNamespaceExports("cpmr")) {
+    cpmr::cpm_spec(
+      selection = cpmr::cpm_selection_cor(
+        method = "pearson",
+        criterion = "p_value",
+        level = 0.01
+      ),
+      construction = cpmr::cpm_construction_summary(
+        polarity = "separate",
+        weight_scale = 0,
+        standardize_edges = FALSE
+      ),
+      model = cpmr::cpm_model_lm()
+    )
+  } else {
+    cpmr::cpm_spec(
+      thresh_method = "alpha",
+      thresh_level = 0.01,
+      bias_correct = FALSE
+    )
+  }
+})
+
+build_spec_setup <- rlang::expr({
+  build_spec <- function() {
+    !!build_spec_expr
+  }
+})
+
+fit_default_setup <- rlang::expr({
   set.seed(20260321)
   conmat_fit <- matrix(rnorm(300 * 20000), nrow = 300)
   behav_fit <- rowMeans(conmat_fit[, 1:100, drop = FALSE]) +
     rnorm(300, sd = 0.5)
 
+  build_spec <- function() {
+    !!build_spec_expr
+  }
+
+  fit_spec <- build_spec()
+
+  # Warm up the first fit so the measured benchmark is closer to steady-state.
+  invisible(cpmr::fit(fit_spec, conmat = conmat_fit, behav = behav_fit))
+})
+
+fit_resamples_setup <- rlang::expr({
   set.seed(20260322)
   conmat_res <- matrix(rnorm(240 * 12000), nrow = 240)
   behav_res <- rowMeans(conmat_res[, 1:80, drop = FALSE]) + rnorm(240, sd = 0.5)
 
   build_spec <- function() {
-    if ("cpm_selection_cor" %in% getNamespaceExports("cpmr")) {
-      cpmr::cpm_spec(
-        selection = cpmr::cpm_selection_cor(
-          method = "pearson",
-          criterion = "p_value",
-          level = 0.01
-        ),
-        construction = cpmr::cpm_construction_summary(
-          polarity = "separate",
-          weight_scale = 0,
-          standardize_edges = FALSE
-        ),
-        model = cpmr::cpm_model_lm()
-      )
-    } else {
-      cpmr::cpm_spec(
-        thresh_method = "alpha",
-        thresh_level = 0.01,
-        bias_correct = FALSE
-      )
-    }
+    !!build_spec_expr
   }
 
   fit_spec <- build_spec()
@@ -60,13 +81,13 @@ benchmark_setup <- rlang::expr({
 touchstone::branch_install(install_dependencies = TRUE)
 
 touchstone::benchmark_run(
-  expr_before_benchmark = !!benchmark_setup,
+  expr_before_benchmark = !!build_spec_setup,
   build_spec = build_spec(),
   n = 20
 )
 
 touchstone::benchmark_run(
-  expr_before_benchmark = !!benchmark_setup,
+  expr_before_benchmark = !!fit_default_setup,
   fit_default = {
     cpmr::fit(fit_spec, conmat = conmat_fit, behav = behav_fit)
   },
@@ -74,7 +95,7 @@ touchstone::benchmark_run(
 )
 
 touchstone::benchmark_run(
-  expr_before_benchmark = !!benchmark_setup,
+  expr_before_benchmark = !!fit_resamples_setup,
   fit_resamples_default = fit_resamples_default(fit_spec),
   n = 3
 )
