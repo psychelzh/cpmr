@@ -14,41 +14,45 @@ test_that("cpm_spec stores staged model parameters", {
   )
 
   expect_s3_class(spec, "cpm_spec")
-  expect_s3_class(spec$params$selection, "cpm_selection_spec")
-  expect_s3_class(spec$params$construction, "cpm_construction_spec")
-  expect_s3_class(spec$params$model, "cpm_model_spec")
-  expect_identical(spec$params$selection$type, "cor")
-  expect_identical(spec$params$selection$method, "spearman")
-  expect_identical(spec$params$selection$criterion, "proportion")
-  expect_identical(spec$params$selection$level, 0.05)
-  expect_identical(spec$params$construction$type, "summary")
-  expect_identical(spec$params$construction$polarity, "net")
-  expect_identical(spec$params$construction$weight_scale, 0.02)
-  expect_false(spec$params$construction$standardize_edges)
-  expect_identical(spec$params$model$type, "lm")
+  expect_s3_class(spec$selection, "cpm_selection_spec")
+  expect_s3_class(spec$construction, "cpm_construction_spec")
+  expect_s3_class(spec$model, "cpm_model_spec")
+  expect_identical(spec$selection$type, "cor")
+  expect_identical(spec$selection$method, "spearman")
+  expect_identical(spec$selection$criterion, "proportion")
+  expect_identical(spec$selection$level, 0.05)
+  expect_identical(spec$construction$type, "summary")
+  expect_identical(spec$construction$polarity, "net")
+  expect_identical(spec$construction$weight_scale, 0.02)
+  expect_false(spec$construction$standardize_edges)
+  expect_identical(spec$model$type, "lm")
 })
 
 test_that("new_cpm_spec builds cpm_spec objects", {
-  params <- list(
-    selection = list(
-      type = "cor",
-      method = "pearson",
-      criterion = "p_value",
-      level = 0.05
-    ),
-    construction = list(
-      type = "summary",
-      polarity = "separate",
-      weight_scale = 0,
-      standardize_edges = TRUE
-    ),
-    model = list(type = "lm")
+  selection <- list(
+    type = "cor",
+    method = "pearson",
+    criterion = "p_value",
+    level = 0.05
+  )
+  construction <- list(
+    type = "summary",
+    polarity = "separate",
+    weight_scale = 0,
+    standardize_edges = TRUE
+  )
+  model <- list(type = "lm")
+
+  spec <- new_cpm_spec(
+    selection = selection,
+    construction = construction,
+    model = model
   )
 
-  spec <- new_cpm_spec(params = params)
-
   expect_s3_class(spec, "cpm_spec")
-  expect_identical(spec$params, params)
+  expect_identical(spec$selection, selection)
+  expect_identical(spec$construction, construction)
+  expect_identical(spec$model, model)
 })
 
 test_that("fit.cpm_spec returns a cpm object with correct call", {
@@ -65,17 +69,17 @@ test_that("fit.cpm_spec returns a cpm object with correct call", {
 test_that("cpm_spec defaults to classic CPM edge handling", {
   spec <- cpm_spec()
 
-  expect_identical(spec$params$selection$type, "cor")
-  expect_s3_class(spec$params$selection, "cpm_selection_spec")
-  expect_identical(spec$params$selection$method, "pearson")
-  expect_identical(spec$params$selection$criterion, "p_value")
-  expect_identical(spec$params$selection$level, 0.01)
-  expect_identical(spec$params$construction$type, "summary")
-  expect_s3_class(spec$params$construction, "cpm_construction_spec")
-  expect_identical(spec$params$construction$polarity, "separate")
-  expect_identical(spec$params$construction$weight_scale, 0)
-  expect_false(spec$params$construction$standardize_edges)
-  expect_s3_class(spec$params$model, "cpm_model_spec")
+  expect_identical(spec$selection$type, "cor")
+  expect_s3_class(spec$selection, "cpm_selection_spec")
+  expect_identical(spec$selection$method, "pearson")
+  expect_identical(spec$selection$criterion, "p_value")
+  expect_identical(spec$selection$level, 0.01)
+  expect_identical(spec$construction$type, "summary")
+  expect_s3_class(spec$construction, "cpm_construction_spec")
+  expect_identical(spec$construction$polarity, "separate")
+  expect_identical(spec$construction$weight_scale, 0)
+  expect_false(spec$construction$standardize_edges)
+  expect_s3_class(spec$model, "cpm_model_spec")
 })
 
 test_that("helper constructors validate scalar parameter values", {
@@ -572,9 +576,9 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   fold_edges <- select_edge_mask(
     conmat = training$conmat,
     behav = training$behav,
-    method = spec$params$selection$method,
-    criterion = spec$params$selection$criterion,
-    level = spec$params$selection$level
+    method = spec$selection$method,
+    criterion = spec$selection$criterion,
+    level = spec$selection$level
   )
   fold_model <- train_model(
     conmat = training$conmat,
@@ -582,10 +586,10 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     edge_selection = run_edge_selection(
       conmat = training$conmat,
       behav = training$behav,
-      selection_spec = spec$params$selection
+      selection_spec = spec$selection
     ),
-    construction_spec = spec$params$construction,
-    model_spec = spec$params$model
+    construction_spec = spec$construction,
+    model_spec = spec$model
   )
   resampled <- fit_resamples(
     spec,

@@ -52,11 +52,9 @@ cpm_spec <- function(
   model <- validate_model_spec(model)
 
   new_cpm_spec(
-    params = list(
-      selection = selection,
-      construction = construction,
-      model = model
-    )
+    selection = selection,
+    construction = construction,
+    model = model
   )
 }
 
@@ -64,10 +62,10 @@ cpm_spec <- function(
 print.cpm_spec <- function(x, ...) {
   cat("CPM specification:\n")
   print_staged_settings(
-    selection = x$params$selection,
-    construction = x$params$construction,
-    model = x$params$model,
-    prediction_streams = construction_prediction_streams(x$params$construction),
+    selection = x$selection,
+    construction = x$construction,
+    model = x$model,
+    prediction_streams = construction_prediction_streams(x$construction),
     headers = list(
       selection = "  Selection:\n",
       construction = "  Construction:\n",
@@ -168,10 +166,12 @@ fit_resamples.cpm_spec <- function(
   )
 }
 
-new_cpm_spec <- function(params) {
+new_cpm_spec <- function(selection, construction, model) {
   structure(
     list(
-      params = params
+      selection = selection,
+      construction = construction,
+      model = model
     ),
     class = "cpm_spec"
   )

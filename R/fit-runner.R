@@ -6,7 +6,9 @@ run_single_fit <- function(
   na_action = c("fail", "exclude"),
   call = NULL
 ) {
-  params <- object$params
+  selection <- object$selection
+  construction <- object$construction
+  model_spec <- object$model
   context <- resolve_data_context(
     conmat = conmat,
     behav = behav,
@@ -17,16 +19,16 @@ run_single_fit <- function(
 
   pred_matrix <- init_pred(
     context$behav,
-    construction_prediction_streams(params$construction)
+    construction_prediction_streams(construction)
   )
   split_fit <- run_fit_split(
     conmat = conmat,
     behav = context$behav,
     covariates = context$covariates,
     rows_train = context$include_cases,
-    selection_spec = params$selection,
-    construction_spec = params$construction,
-    model_spec = params$model
+    selection_spec = selection,
+    construction_spec = construction,
+    model_spec = model_spec
   )
   pred_matrix[context$include_cases, ] <- split_fit$predictions
 
@@ -38,7 +40,11 @@ run_single_fit <- function(
     call = call,
     spec = object,
     params = new_fit_params(
-      spec_params = params,
+      spec_params = list(
+        selection = selection,
+        construction = construction,
+        model = model_spec
+      ),
       covariates = context$covariates,
       na_action = context$na_action
     ),
@@ -59,7 +65,9 @@ run_resample_fit <- function(
   call = NULL
 ) {
   return_edges <- match.arg(return_edges)
-  params <- object$params
+  selection <- object$selection
+  construction <- object$construction
+  model_spec <- object$model
   context <- resolve_data_context(
     conmat = conmat,
     behav = behav,
@@ -79,7 +87,7 @@ run_resample_fit <- function(
 
   pred_matrix <- init_pred(
     context$behav,
-    construction_prediction_streams(params$construction)
+    construction_prediction_streams(construction)
   )
   edges <- init_edges(return_edges, conmat, n_folds)
   observed <- context$behav
@@ -94,9 +102,9 @@ run_resample_fit <- function(
       covariates = context$covariates,
       rows_train = rows_train,
       rows_test = rows_test,
-      selection_spec = params$selection,
-      construction_spec = params$construction,
-      model_spec = params$model
+      selection_spec = selection,
+      construction_spec = construction,
+      model_spec = model_spec
     )
 
     pred_matrix[rows_test, ] <- split_fit$predictions
@@ -115,7 +123,11 @@ run_resample_fit <- function(
     call = call,
     spec = object,
     params = new_fit_params(
-      spec_params = params,
+      spec_params = list(
+        selection = selection,
+        construction = construction,
+        model = model_spec
+      ),
       covariates = context$covariates,
       na_action = context$na_action,
       extras = list(
