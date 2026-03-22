@@ -1,7 +1,3 @@
-# Internal CPM outcome-model helpers.
-# These functions fit and apply the second-stage outcome models for each
-# prediction stream.
-
 fit_stream_model <- function(
   construction_model,
   behav,

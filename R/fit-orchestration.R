@@ -1,7 +1,3 @@
-# Internal CPM model orchestration.
-# This file bridges validated selection, construction, and outcome-model
-# components into train/predict entry points used by the runners.
-
 run_fit_split <- function(
   conmat,
   behav,
