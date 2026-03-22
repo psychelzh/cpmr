@@ -190,9 +190,14 @@ feature_matrix_summary <- function(conmat, edge_weights) {
       next
     }
 
-    summaries[, summary_column_names[[edge_sign]]] <- drop(
-      conmat[, idx, drop = FALSE] %*% weights[idx]
-    )
+    active_weights <- weights[idx]
+    summaries[, summary_column_names[[edge_sign]]] <- if (
+      all(active_weights == 1)
+    ) {
+      Rfast::rowsums(conmat[, idx, drop = FALSE])
+    } else {
+      drop(conmat[, idx, drop = FALSE] %*% active_weights)
+    }
   }
 
   summaries
