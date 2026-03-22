@@ -62,106 +62,10 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["selection", "construction", "model", "covariates", "na_action"]
+          "value": ["covariates", "na_action"]
         }
       },
       "value": [
-        {
-          "type": "list",
-          "attributes": {
-            "names": {
-              "type": "character",
-              "attributes": {},
-              "value": ["type", "method", "criterion", "level"]
-            },
-            "class": {
-              "type": "character",
-              "attributes": {},
-              "value": ["cpm_selection_spec"]
-            }
-          },
-          "value": [
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["cor"]
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pearson"]
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["p_value"]
-            },
-            {
-              "type": "double",
-              "attributes": {},
-              "value": [0.01]
-            }
-          ]
-        },
-        {
-          "type": "list",
-          "attributes": {
-            "names": {
-              "type": "character",
-              "attributes": {},
-              "value": ["type", "polarity", "weight_scale", "standardize_edges"]
-            },
-            "class": {
-              "type": "character",
-              "attributes": {},
-              "value": ["cpm_construction_spec"]
-            }
-          },
-          "value": [
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["summary"]
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["separate"]
-            },
-            {
-              "type": "double",
-              "attributes": {},
-              "value": [0]
-            },
-            {
-              "type": "logical",
-              "attributes": {},
-              "value": [false]
-            }
-          ]
-        },
-        {
-          "type": "list",
-          "attributes": {
-            "names": {
-              "type": "character",
-              "attributes": {},
-              "value": ["type"]
-            },
-            "class": {
-              "type": "character",
-              "attributes": {},
-              "value": ["cpm_model_spec"]
-            }
-          },
-          "value": [
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["lm"]
-            }
-          ]
-        },
         {
           "type": "logical",
           "attributes": {},
@@ -261,106 +165,10 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["selection", "construction", "model", "covariates", "na_action"]
+          "value": ["covariates", "na_action"]
         }
       },
       "value": [
-        {
-          "type": "list",
-          "attributes": {
-            "names": {
-              "type": "character",
-              "attributes": {},
-              "value": ["type", "method", "criterion", "level"]
-            },
-            "class": {
-              "type": "character",
-              "attributes": {},
-              "value": ["cpm_selection_spec"]
-            }
-          },
-          "value": [
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["cor"]
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["pearson"]
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["p_value"]
-            },
-            {
-              "type": "double",
-              "attributes": {},
-              "value": [0.1]
-            }
-          ]
-        },
-        {
-          "type": "list",
-          "attributes": {
-            "names": {
-              "type": "character",
-              "attributes": {},
-              "value": ["type", "polarity", "weight_scale", "standardize_edges"]
-            },
-            "class": {
-              "type": "character",
-              "attributes": {},
-              "value": ["cpm_construction_spec"]
-            }
-          },
-          "value": [
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["summary"]
-            },
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["separate"]
-            },
-            {
-              "type": "double",
-              "attributes": {},
-              "value": [0]
-            },
-            {
-              "type": "logical",
-              "attributes": {},
-              "value": [false]
-            }
-          ]
-        },
-        {
-          "type": "list",
-          "attributes": {
-            "names": {
-              "type": "character",
-              "attributes": {},
-              "value": ["type"]
-            },
-            "class": {
-              "type": "character",
-              "attributes": {},
-              "value": ["cpm_model_spec"]
-            }
-          },
-          "value": [
-            {
-              "type": "character",
-              "attributes": {},
-              "value": ["lm"]
-            }
-          ]
-        },
         {
           "type": "logical",
           "attributes": {},

@@ -8,7 +8,8 @@
 #' \describe{
 #'   \item{`call`}{Matched call used for fitting.}
 #'   \item{`spec`}{The originating `cpm_spec` object.}
-#'   \item{`params`}{Parameter list used at fit time.}
+#'   \item{`settings`}{Runtime settings used at fit time, such as whether
+#'     covariates were supplied and the missing-data policy.}
 #'   \item{`predictions`}{Data frame of observation-level outputs with columns
 #'     `row`, `observed`, and one column per configured prediction stream.}
 #'   \item{`edges`}{Stored single-fit edge mask as a `p x 2` logical matrix
@@ -20,12 +21,12 @@
 #' @name cpm
 NULL
 
-new_cpm <- function(call, spec, params, predictions, edges, model) {
+new_cpm <- function(call, spec, settings, predictions, edges, model) {
   structure(
     list(
       call = call,
       spec = spec,
-      params = params,
+      settings = settings,
       predictions = predictions,
       edges = edges,
       model = model
@@ -48,8 +49,8 @@ print.cpm <- function(x, ...) {
     ]))
   ))
   cat(sprintf("  Candidate edges: %d\n", dim(x$edges)[1]))
-  covariates_param <- if (!is.null(x$params$covariates)) {
-    x$params$covariates
+  covariates_param <- if (!is.null(x$settings$covariates)) {
+    x$settings$covariates
   } else {
     NA
   }
@@ -59,9 +60,9 @@ print.cpm <- function(x, ...) {
     format_covariates(covariates_param)
   )
   print_staged_settings(
-    selection = x$params$selection,
-    construction = x$params$construction,
-    model = x$params$model,
+    selection = x$spec$selection,
+    construction = x$spec$construction,
+    model = x$spec$model,
     prediction_streams = prediction_columns(x$predictions),
     selection_labels = list(
       method = "Selection method",
@@ -175,7 +176,7 @@ print.cpm_summary <- function(x, ...) {
 #' @export
 tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
   component <- match.arg(component)
-  params <- tidy_cpm_params(x$params)
+  params <- tidy_cpm_fields(x$spec, x$settings)
   sum_x <- summary(x, ...)
   switch(
     component,
@@ -200,17 +201,12 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
   )
 }
 
-tidy_cpm_params <- function(params) {
-  extras <- params[setdiff(
-    names(params),
-    c("selection", "construction", "model")
-  )]
-
+tidy_cpm_fields <- function(spec, settings) {
   tibble::as_tibble(c(
-    extras,
-    tidy_selection_params(params$selection),
-    tidy_construction_params(params$construction),
-    tidy_model_params(params$model)
+    settings,
+    tidy_selection_params(spec$selection),
+    tidy_construction_params(spec$construction),
+    tidy_model_params(spec$model)
   ))
 }
 

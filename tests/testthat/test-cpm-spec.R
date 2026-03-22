@@ -531,7 +531,7 @@ test_that("fit_resamples handles covariates in assessment pipeline", {
 
   pred <- res$predictions
   expect_true(isTRUE(all(stats::complete.cases(pred$joint))))
-  expect_true(isTRUE(res$params$covariates))
+  expect_true(isTRUE(res$settings$covariates))
   expect_equal(length(res$folds), 6L)
 })
 

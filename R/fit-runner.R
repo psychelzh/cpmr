@@ -36,13 +36,8 @@ run_single_fit <- function(
   new_cpm(
     call = call,
     spec = object,
-    params = new_fit_params(
-      spec_params = list(
-        selection = object$selection,
-        construction = object$construction,
-        model = object$model
-      ),
-      covariates = context$covariates,
+    settings = list(
+      covariates = !is.null(context$covariates),
       na_action = context$na_action
     ),
     predictions = predictions,
@@ -116,17 +111,10 @@ run_resample_fit <- function(
   new_cpm_resamples(
     call = call,
     spec = object,
-    params = new_fit_params(
-      spec_params = list(
-        selection = object$selection,
-        construction = object$construction,
-        model = object$model
-      ),
-      covariates = context$covariates,
+    settings = list(
+      covariates = !is.null(context$covariates),
       na_action = context$na_action,
-      extras = list(
-        return_edges = return_edges
-      )
+      return_edges = return_edges
     ),
     predictions = predictions,
     edges = edges,
@@ -163,24 +151,6 @@ require_complete_cases_for <- function(include_cases, min_cases, action) {
   }
 
   invisible(include_cases)
-}
-
-new_fit_params <- function(
-  spec_params,
-  covariates,
-  na_action,
-  extras = list()
-) {
-  utils::modifyList(
-    spec_params,
-    c(
-      list(
-        covariates = !is.null(covariates),
-        na_action = na_action
-      ),
-      extras
-    )
-  )
 }
 
 init_pred <- function(behav, prediction_streams) {

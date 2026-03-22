@@ -9,7 +9,8 @@
 #' \describe{
 #'   \item{`call`}{Matched call used for resampling.}
 #'   \item{`spec`}{The originating `cpm_spec` object.}
-#'   \item{`params`}{Parameter list used for the resampling run.}
+#'   \item{`settings`}{Runtime settings used for the resampling run, including
+#'     missing-data handling and edge-storage preferences.}
 #'   \item{`predictions`}{Data frame of observation-level predictions with
 #'     fold IDs and one column per configured prediction stream.}
 #'   \item{`edges`}{Stored edge output based on `return_edges`
@@ -24,7 +25,7 @@ NULL
 new_cpm_resamples <- function(
   call,
   spec,
-  params,
+  settings,
   predictions,
   edges,
   folds
@@ -33,7 +34,7 @@ new_cpm_resamples <- function(
     list(
       call = call,
       spec = spec,
-      params = params,
+      settings = settings,
       predictions = predictions,
       edges = edges,
       folds = folds
@@ -60,7 +61,7 @@ print.cpm_resamples <- function(x, ...) {
   ))
   cat(sprintf(
     "  Edge storage: %s\n",
-    edge_storage_label(x$params$return_edges)
+    edge_storage_label(x$settings$return_edges)
   ))
   cat("  Use summary() for aggregate metrics.\n")
   invisible(x)
@@ -116,12 +117,12 @@ summary.cpm_resamples <- function(
       ),
       edges = summarize_resample_edges(
         object$edges,
-        return_edges = object$params$return_edges,
+        return_edges = object$settings$return_edges,
         n_folds = length(object$folds)
       ),
       params = list(
         n_folds = length(object$folds),
-        return_edges = object$params$return_edges,
+        return_edges = object$settings$return_edges,
         correlation_method = correlation_method,
         prediction_streams = prediction_columns(object$predictions)
       )

@@ -39,7 +39,7 @@ test_that("new_cpm_resamples builds resampling objects", {
   resamples_object <- new_cpm_resamples(
     call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
     spec = spec,
-    params = list(return_edges = "sum"),
+    settings = list(return_edges = "sum"),
     predictions = predictions,
     edges = edges,
     folds = list(1:2)
@@ -63,7 +63,7 @@ test_that("print.cpm_resamples uses human-readable edge storage labels", {
         positive = c(1, 2, 3, 4, 5, 6),
         negative = c(3, 2, 1, 6, 5, 4)
       ),
-      params = list(return_edges = "sum")
+      settings = list(return_edges = "sum")
     ),
     class = "cpm_resamples"
   )

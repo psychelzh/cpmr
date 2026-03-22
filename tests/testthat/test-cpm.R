@@ -17,7 +17,7 @@ test_that("Default threshold method works", {
   expect_false("folds" %in% names(result))
   expect_snapshot_value(prediction_matrix(result), style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
-  expect_snapshot_value(result$params, style = "json2")
+  expect_snapshot_value(result$settings, style = "json2")
   expect_snapshot(result)
 })
 
@@ -45,7 +45,7 @@ test_that("new_cpm builds single-fit CPM objects", {
   cpm_object <- new_cpm(
     call = call,
     spec = spec,
-    params = fit_result$params,
+    settings = fit_result$settings,
     predictions = fit_result$predictions,
     edges = fit_result$edges,
     model = fit_result$model
@@ -74,13 +74,13 @@ test_that("Alternative threshold method works", {
   expect_equal(dim(result$edges), c(ncol(conmat), 2))
   expect_identical(colnames(result$edges), c("positive", "negative"))
   expect_true(any(result$edges))
-  expect_identical(result$params$selection$type, "cor")
-  expect_identical(result$params$selection$criterion, "proportion")
-  expect_identical(result$params$selection$level, 0.01)
-  expect_identical(result$params$construction$type, "summary")
-  expect_identical(result$params$construction$polarity, "separate")
-  expect_identical(result$params$construction$weight_scale, 0)
-  expect_identical(result$params$model$type, "lm")
+  expect_identical(result$spec$selection$type, "cor")
+  expect_identical(result$spec$selection$criterion, "proportion")
+  expect_identical(result$spec$selection$level, 0.01)
+  expect_identical(result$spec$construction$type, "summary")
+  expect_identical(result$spec$construction$polarity, "separate")
+  expect_identical(result$spec$construction$weight_scale, 0)
+  expect_identical(result$spec$model$type, "lm")
 })
 
 test_that("Different threshold levels works", {
@@ -95,7 +95,7 @@ test_that("Different threshold levels works", {
   expect_s3_class(result, "cpm")
   expect_snapshot_value(prediction_matrix(result), style = "json2")
   expect_snapshot_value(result$edges, style = "json2")
-  expect_snapshot_value(result$params, style = "json2")
+  expect_snapshot_value(result$settings, style = "json2")
   expect_snapshot(result)
 })
 
@@ -108,7 +108,7 @@ test_that("Works with covariates", {
   expect_s3_class(result, "cpm")
   expect_equal(sum(prediction_complete_cases(result)), 10)
   expect_equal(nrow(result$predictions), 10)
-  expect_true(isTRUE(result$params$covariates))
+  expect_true(isTRUE(result$settings$covariates))
 })
 
 test_that("fit with covariates uses in-sample residualized target scale", {
@@ -144,7 +144,7 @@ test_that("single-fit CPM always stores selected edges", {
   behav <- rnorm(10)
   result <- fit(cpm_spec(), conmat, behav)
   expect_equal(dim(result$edges), c(10, 2))
-  expect_false("return_edges" %in% names(result$params))
+  expect_false("return_edges" %in% names(result$settings))
 })
 
 test_that("print.cpm reports stored edge count", {

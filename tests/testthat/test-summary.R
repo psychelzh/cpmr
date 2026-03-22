@@ -136,7 +136,7 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
     new_cpm_resamples(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       spec = cpm_spec(),
-      params = list(return_edges = "sum"),
+      settings = list(return_edges = "sum"),
       predictions = predictions,
       edges = matrix(
         c(2, 0, 1, 2),
@@ -230,7 +230,7 @@ test_that("summary.cpm_resamples returns NULL edges when resamples did not store
     new_cpm_resamples(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       spec = cpm_spec(),
-      params = list(return_edges = "none"),
+      settings = list(return_edges = "none"),
       predictions = data.frame(
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
@@ -327,7 +327,7 @@ test_that("summary.cpm_resamples supports configurable correlation methods", {
     new_cpm_resamples(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       spec = cpm_spec(),
-      params = list(return_edges = "none"),
+      settings = list(return_edges = "none"),
       predictions = predictions,
       edges = NULL,
       folds = folds
@@ -370,7 +370,7 @@ test_that("summary.cpm_resamples averages fold-wise edges when all edges are sto
     new_cpm_resamples(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
       spec = cpm_spec(),
-      params = list(return_edges = "all"),
+      settings = list(return_edges = "all"),
       predictions = data.frame(
         row = 1:4,
         fold = c(1L, 1L, 2L, 2L),
