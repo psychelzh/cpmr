@@ -6,8 +6,8 @@ run_single_fit <- function(
   na_action = c("fail", "exclude"),
   call = NULL
 ) {
-  fit_state <- resolve_fit_state(
-    object = object,
+  params <- object$params
+  fit_context <- resolve_fit_context(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
@@ -15,13 +15,15 @@ run_single_fit <- function(
     action = "fitting",
     min_cases = 3L
   )
-  params <- fit_state$params
-  behav <- fit_state$behav
-  covariates <- fit_state$covariates
-  include_cases <- fit_state$include_cases
-  na_action <- fit_state$na_action
+  behav <- fit_context$behav
+  covariates <- fit_context$covariates
+  include_cases <- fit_context$include_cases
+  na_action <- fit_context$na_action
 
-  pred_matrix <- init_pred(behav, fit_state$prediction_streams)
+  pred_matrix <- init_pred(
+    behav,
+    construction_prediction_streams(params$construction)
+  )
   split_fit <- run_fit_split(
     conmat = conmat,
     behav = behav,
@@ -62,8 +64,8 @@ run_resample_fit <- function(
   call = NULL
 ) {
   return_edges <- match.arg(return_edges)
-  fit_state <- resolve_fit_state(
-    object = object,
+  params <- object$params
+  fit_context <- resolve_fit_context(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
@@ -71,11 +73,10 @@ run_resample_fit <- function(
     action = "resampling",
     min_cases = 2L
   )
-  params <- fit_state$params
-  behav <- fit_state$behav
-  covariates <- fit_state$covariates
-  include_cases <- fit_state$include_cases
-  na_action <- fit_state$na_action
+  behav <- fit_context$behav
+  covariates <- fit_context$covariates
+  include_cases <- fit_context$include_cases
+  na_action <- fit_context$na_action
 
   folds <- resolve_resample_folds(
     resamples = resamples,
@@ -86,7 +87,10 @@ run_resample_fit <- function(
 
   warn_large_edge_storage(ncol(conmat), n_folds, return_edges)
 
-  pred_matrix <- init_pred(behav, fit_state$prediction_streams)
+  pred_matrix <- init_pred(
+    behav,
+    construction_prediction_streams(params$construction)
+  )
   edges <- init_edges(return_edges, conmat, n_folds)
   observed <- behav
 
@@ -149,36 +153,6 @@ new_fit_params <- function(
       ),
       extras
     )
-  )
-}
-
-resolve_fit_state <- function(
-  object,
-  conmat,
-  behav,
-  covariates,
-  na_action,
-  action,
-  min_cases
-) {
-  params <- object$params
-
-  fit_context <- resolve_fit_context(
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    na_action = na_action,
-    action = action,
-    min_cases = min_cases
-  )
-
-  list(
-    params = params,
-    prediction_streams = construction_prediction_streams(params$construction),
-    behav = fit_context$behav,
-    covariates = fit_context$covariates,
-    include_cases = fit_context$include_cases,
-    na_action = fit_context$na_action
   )
 }
 
