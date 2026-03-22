@@ -79,7 +79,7 @@ test_that("run_resample_fit matches fit_resamples() outputs", {
     conmat = conmat,
     behav = behav,
     covariates = NULL,
-    folds = folds,
+    resamples = folds,
     return_edges = "sum",
     na_action = "fail",
     call = call
@@ -145,7 +145,7 @@ test_that("run_resample_fit errors clearly on insufficient complete cases", {
       conmat = conmat,
       behav = behav,
       covariates = NULL,
-      folds = folds,
+      resamples = folds,
       return_edges = "sum",
       na_action = "exclude"
     ),
@@ -161,7 +161,7 @@ test_that("run_resample_fit errors clearly on insufficient complete cases", {
       conmat = conmat,
       behav = behav,
       covariates = NULL,
-      folds = list(1L),
+      resamples = list(1L),
       return_edges = "sum",
       na_action = "exclude"
     ),

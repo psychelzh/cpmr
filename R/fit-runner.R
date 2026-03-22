@@ -56,10 +56,9 @@ run_resample_fit <- function(
   conmat,
   behav,
   covariates = NULL,
-  folds,
+  resamples = NULL,
   return_edges = c("none", "sum", "all"),
   na_action = c("fail", "exclude"),
-  fit_context = NULL,
   call = NULL
 ) {
   return_edges <- match.arg(return_edges)
@@ -70,8 +69,7 @@ run_resample_fit <- function(
     covariates = covariates,
     na_action = na_action,
     action = "resampling",
-    min_cases = 2L,
-    fit_context = fit_context
+    min_cases = 2L
   )
   params <- runner_state$params
   behav <- runner_state$behav
@@ -79,6 +77,10 @@ run_resample_fit <- function(
   include_cases <- runner_state$include_cases
   na_action <- runner_state$na_action
 
+  folds <- resolve_resample_folds(
+    resamples = resamples,
+    include_cases = include_cases
+  )$folds
   folds <- assert_normalized_resample_folds(folds)
   n_folds <- length(folds)
 
@@ -157,22 +159,19 @@ resolve_runner_state <- function(
   covariates,
   na_action,
   action,
-  min_cases,
-  fit_context = NULL
+  min_cases
 ) {
   params <- object$params
   construction_spec <- params$construction
 
-  if (is.null(fit_context)) {
-    fit_context <- resolve_fit_context(
-      conmat = conmat,
-      behav = behav,
-      covariates = covariates,
-      na_action = na_action,
-      action = action,
-      min_cases = min_cases
-    )
-  }
+  fit_context <- resolve_fit_context(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    na_action = na_action,
+    action = action,
+    min_cases = min_cases
+  )
 
   list(
     params = params,

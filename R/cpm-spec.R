@@ -155,30 +155,15 @@ fit_resamples.cpm_spec <- function(
 ) {
   call <- match.call()
   call[[1]] <- quote(fit_resamples)
-  return_edges <- match.arg(return_edges)
-  fit_context <- resolve_fit_context(
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    na_action = na_action,
-    action = "resampling",
-    min_cases = 2L
-  )
-
-  resolved <- resolve_resample_folds(
-    resamples = resamples,
-    include_cases = fit_context$include_cases
-  )
 
   run_resample_fit(
     object = object,
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    folds = resolved$folds,
+    resamples = resamples,
     return_edges = return_edges,
-    na_action = fit_context$na_action,
-    fit_context = fit_context,
+    na_action = na_action,
     call = call
   )
 }
