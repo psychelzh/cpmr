@@ -1,25 +1,4 @@
-# Internal CPM summary-construction helpers.
-# These functions turn selected edge sets into subject-level summary features
-# for the current summary construction type.
-
-build_construction_model <- function(
-  conmat,
-  edge_selection,
-  construction_spec
-) {
-  construction_spec <- validate_construction_spec(construction_spec)
-
-  switch(
-    construction_spec$type,
-    summary = build_summary_construction_model(
-      conmat = conmat,
-      edge_selection = edge_selection,
-      construction_spec = construction_spec
-    )
-  )
-}
-
-build_summary_construction_model <- function(
+summary_construction_model <- function(
   conmat,
   edge_selection,
   construction_spec
@@ -29,10 +8,10 @@ build_summary_construction_model <- function(
   if (construction_spec$standardize_edges) {
     center <- Rfast::colmeans(conmat)
     scale <- Rfast::colVars(conmat, std = TRUE)
-    conmat <- fscale(conmat, center, scale)
+    conmat <- sweep(sweep(conmat, 2, center, "-"), 2, scale, "/")
   }
 
-  edge_weights <- compute_edge_weights(
+  edge_weights <- summary_edge_weights(
     associations = edge_selection$associations,
     cutoffs = edge_selection$thresholds,
     mask = edge_selection$mask,
@@ -46,106 +25,28 @@ build_summary_construction_model <- function(
     scale = scale,
     edge_weights = edge_weights,
     prediction_streams = summary_prediction_streams(construction_spec$polarity),
-    constructed_features = compute_network_summaries(conmat, edge_weights)
+    constructed_features = summary_feature_matrix(conmat, edge_weights)
   )
 }
 
-construction_stream_features <- function(
+summary_construction_features <- function(
   construction_model,
-  prediction_stream,
-  conmat_new = NULL
+  conmat = NULL
 ) {
-  switch(
-    construction_model$type,
-    summary = summary_construction_stream_features(
-      construction_model = construction_model,
-      prediction_stream = prediction_stream,
-      conmat_new = conmat_new
-    )
-  )
-}
-
-summary_construction_stream_features <- function(
-  construction_model,
-  prediction_stream,
-  conmat_new = NULL
-) {
-  network_summaries <- if (is.null(conmat_new)) {
-    construction_model$constructed_features
-  } else {
-    summary_construction_features(
-      construction_model = construction_model,
-      conmat_new = conmat_new
-    )
+  if (is.null(conmat)) {
+    return(construction_model$constructed_features)
   }
 
-  summary_stream_features(
-    network_summaries = network_summaries,
-    polarity = construction_model$construction$polarity,
-    prediction_stream = prediction_stream
-  )
-}
-
-summary_construction_features <- function(construction_model, conmat_new) {
   if (construction_model$construction$standardize_edges) {
-    conmat_new <- fscale(
-      conmat_new,
-      construction_model$center,
-      construction_model$scale
+    conmat <- sweep(
+      sweep(conmat, 2, construction_model$center, "-"),
+      2,
+      construction_model$scale,
+      "/"
     )
   }
 
-  compute_network_summaries(conmat_new, construction_model$edge_weights)
-}
-
-summary_stream_features <- function(
-  network_summaries,
-  polarity,
-  prediction_stream
-) {
-  switch(
-    polarity,
-    separate = summary_separate_stream_features(
-      network_summaries = network_summaries,
-      prediction_stream = prediction_stream
-    ),
-    net = matrix(
-      network_summaries[, "positive_summary"] -
-        network_summaries[, "negative_summary"],
-      ncol = 1,
-      dimnames = list(NULL, "net_summary")
-    ),
-    stop(
-      paste(
-        "`polarity` must be either \"separate\" or \"net\"."
-      )
-    )
-  )
-}
-
-summary_separate_stream_features <- function(
-  network_summaries,
-  prediction_stream
-) {
-  feature_sets <- list(
-    joint = summary_columns,
-    positive = "positive_summary",
-    negative = "negative_summary"
-  )
-  columns <- feature_sets[[prediction_stream]]
-
-  if (is.null(columns)) {
-    stop(
-      paste0(
-        "`prediction_stream` must be one of ",
-        "\"joint\", \"positive\", or \"negative\" for ",
-        "`polarity = \"separate\"`."
-      ),
-      call. = FALSE
-    )
-  }
-
-  network_summaries[, columns, drop = FALSE]
+  summary_feature_matrix(conmat, construction_model$edge_weights)
 }
 
 summary_prediction_streams <- function(polarity) {
@@ -161,16 +62,58 @@ summary_prediction_streams <- function(polarity) {
   )
 }
 
-construction_prediction_streams <- function(construction_spec) {
-  construction_spec <- validate_construction_spec(construction_spec)
-
+summary_stream_features <- function(
+  summary_features,
+  polarity,
+  prediction_stream
+) {
   switch(
-    construction_spec$type,
-    summary = summary_prediction_streams(construction_spec$polarity)
+    polarity,
+    separate = {
+      feature_sets <- list(
+        joint = summary_columns,
+        positive = "positive_summary",
+        negative = "negative_summary"
+      )
+      columns <- feature_sets[[prediction_stream]]
+
+      if (is.null(columns)) {
+        stop(
+          paste0(
+            "`prediction_stream` must be one of ",
+            "\"joint\", \"positive\", or \"negative\" for ",
+            "`polarity = \"separate\"`."
+          ),
+          call. = FALSE
+        )
+      }
+
+      summary_features[, columns, drop = FALSE]
+    },
+    net = {
+      if (!identical(prediction_stream, "net")) {
+        stop(
+          "`prediction_stream` must be \"net\" for `polarity = \"net\"`.",
+          call. = FALSE
+        )
+      }
+
+      matrix(
+        summary_features[, "positive_summary"] -
+          summary_features[, "negative_summary"],
+        ncol = 1,
+        dimnames = list(NULL, "net_summary")
+      )
+    },
+    stop(
+      paste(
+        "`polarity` must be either \"separate\" or \"net\"."
+      )
+    )
   )
 }
 
-compute_edge_weights <- function(
+summary_edge_weights <- function(
   associations,
   cutoffs,
   mask,
@@ -186,32 +129,24 @@ compute_edge_weights <- function(
     ))
   }
 
+  sigmoid_weights <- function(scores, cutoff) {
+    if (!is.finite(cutoff)) {
+      return(rep(0, length(scores)))
+    }
+
+    weights <- rep(0, length(scores))
+    valid <- !is.na(scores) & scores > 0
+    weights[valid] <- stats::plogis((scores[valid] - cutoff) / weight_scale)
+    weights
+  }
+
   cbind(
-    positive = sigmoid_edge_weights(
-      scores = associations,
-      cutoff = cutoffs[["positive"]],
-      scale = weight_scale
-    ),
-    negative = sigmoid_edge_weights(
-      scores = -associations,
-      cutoff = cutoffs[["negative"]],
-      scale = weight_scale
-    )
+    positive = sigmoid_weights(associations, cutoffs[["positive"]]),
+    negative = sigmoid_weights(-associations, cutoffs[["negative"]])
   )
 }
 
-sigmoid_edge_weights <- function(scores, cutoff, scale) {
-  if (!is.finite(cutoff)) {
-    return(rep(0, length(scores)))
-  }
-
-  weights <- rep(0, length(scores))
-  valid <- !is.na(scores) & scores > 0
-  weights[valid] <- stats::plogis((scores[valid] - cutoff) / scale)
-  weights
-}
-
-compute_network_summaries <- function(conmat, edge_weights) {
+summary_feature_matrix <- function(conmat, edge_weights) {
   summaries <- matrix(
     0,
     nrow = nrow(conmat),
@@ -220,24 +155,16 @@ compute_network_summaries <- function(conmat, edge_weights) {
   )
 
   for (edge_sign in edge_signs) {
-    summaries[, summary_column_names[[edge_sign]]] <- weighted_row_sums_or_zero(
-      conmat = conmat,
-      weights = edge_weights[, edge_sign]
+    weights <- edge_weights[, edge_sign]
+    idx <- which(weights != 0)
+    if (!length(idx)) {
+      next
+    }
+
+    summaries[, summary_column_names[[edge_sign]]] <- drop(
+      conmat[, idx, drop = FALSE] %*% weights[idx]
     )
   }
 
   summaries
-}
-
-weighted_row_sums_or_zero <- function(conmat, weights) {
-  idx <- which(weights != 0)
-  if (!length(idx)) {
-    return(rep(0, nrow(conmat)))
-  }
-
-  drop(conmat[, idx, drop = FALSE] %*% weights[idx])
-}
-
-fscale <- function(x, center, scale) {
-  Rfast::eachrow(Rfast::eachrow(x, center, "-"), scale, "/")
 }

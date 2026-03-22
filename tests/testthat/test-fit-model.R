@@ -146,17 +146,6 @@ test_that("run_edge_selection accepts staged selection specs directly", {
   expect_equal(from_spec, from_scalars)
 })
 
-test_that("fscale centers and scales columns", {
-  x <- matrix(as.numeric(1:6), nrow = 3)
-  center <- c(2, 5)
-  scale <- c(1, 2)
-
-  expect_equal(
-    fscale(x, center, scale),
-    sweep(sweep(x, 2, center, "-"), 2, scale, "/")
-  )
-})
-
 test_that("train_model and predict_model compose correctly", {
   withr::local_seed(1)
   n <- 12
@@ -299,7 +288,7 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
       level = 0.4
     )
   )
-  edge_weights <- compute_edge_weights(
+  edge_weights <- summary_edge_weights(
     associations = edge_selection$associations,
     cutoffs = edge_selection$thresholds,
     mask = edge_selection$mask,
@@ -312,9 +301,9 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
   expect_true(all(edge_weights[!edge_selection$mask] <= 0.5))
 })
 
-test_that("compute_edge_weights validates weight scale", {
+test_that("summary_edge_weights validates weight scale", {
   expect_error(
-    compute_edge_weights(
+    summary_edge_weights(
       associations = c(0.2, -0.3),
       cutoffs = c(positive = 0.1, negative = 0.1),
       mask = matrix(
@@ -329,10 +318,25 @@ test_that("compute_edge_weights validates weight scale", {
   )
 })
 
-test_that("sigmoid_edge_weights returns zeros for infinite cutoffs", {
+test_that("summary_edge_weights returns zeros for infinite cutoffs", {
   expect_equal(
-    sigmoid_edge_weights(c(0.1, 0.2, NA_real_), cutoff = Inf, scale = 0.05),
-    c(0, 0, 0)
+    summary_edge_weights(
+      associations = c(0.1, 0.2, NA_real_),
+      cutoffs = c(positive = Inf, negative = Inf),
+      mask = matrix(
+        FALSE,
+        nrow = 3,
+        ncol = 2,
+        dimnames = list(NULL, c("positive", "negative"))
+      ),
+      weight_scale = 0.05
+    ),
+    matrix(
+      0,
+      nrow = 3,
+      ncol = 2,
+      dimnames = list(NULL, c("positive", "negative"))
+    )
   )
 })
 
@@ -344,7 +348,7 @@ test_that("prediction helpers validate unsupported modes", {
 
   expect_error(
     summary_stream_features(
-      network_summaries = network_summaries,
+      summary_features = network_summaries,
       polarity = "separate",
       prediction_stream = "bogus"
     ),
@@ -357,11 +361,20 @@ test_that("prediction helpers validate unsupported modes", {
   )
   expect_error(
     summary_stream_features(
-      network_summaries = network_summaries,
+      summary_features = network_summaries,
       polarity = "bogus",
       prediction_stream = "joint"
     ),
     "`polarity` must be either \"separate\" or \"net\".",
+    fixed = TRUE
+  )
+  expect_error(
+    summary_stream_features(
+      summary_features = network_summaries,
+      polarity = "net",
+      prediction_stream = "joint"
+    ),
+    "`prediction_stream` must be \"net\" for `polarity = \"net\"`.",
     fixed = TRUE
   )
   expect_error(
