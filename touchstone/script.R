@@ -38,6 +38,38 @@ workflow_standardize_edges_setup <- rlang::expr({
   ))
 })
 
+fit_resamples_standardize_edges_setup <- rlang::expr({
+  set.seed(20260322)
+  conmat_res <- matrix(rnorm(240 * 12000), nrow = 240)
+  behav_res <- rowMeans(conmat_res[, 1:80, drop = FALSE]) + rnorm(240, sd = 0.5)
+
+  build_spec <- function() {
+    !!build_spec_standardized_expr
+  }
+
+  fit_spec <- build_spec()
+
+  fit_resamples_default <- function(spec) {
+    if ("cpm_selection_cor" %in% getNamespaceExports("cpmr")) {
+      cpmr::fit_resamples(
+        spec,
+        conmat = conmat_res,
+        behav = behav_res,
+        resamples = 8L,
+        return_edges = "none"
+      )
+    } else {
+      cpmr::fit_resamples(
+        spec,
+        conmat = conmat_res,
+        behav = behav_res,
+        kfolds = 8L,
+        return_edges = "none"
+      )
+    }
+  }
+})
+
 touchstone::branch_install(install_dependencies = TRUE)
 
 touchstone::benchmark_run(
@@ -66,6 +98,12 @@ touchstone::benchmark_run(
     return_edges = "none"
   ),
   n = 10
+)
+
+touchstone::benchmark_run(
+  expr_before_benchmark = !!fit_resamples_standardize_edges_setup,
+  fit_resamples_standardize_edges = fit_resamples_default(fit_spec),
+  n = 3
 )
 
 touchstone::benchmark_analyze()
