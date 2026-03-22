@@ -10,7 +10,9 @@ build_construction_state <- function(
   edge_selection,
   construction_spec
 ) {
-  construction_spec <- validate_construction_spec(construction_spec)
+  if (is.null(construction_spec$prediction_streams)) {
+    construction_spec <- validate_construction_spec(construction_spec)
+  }
 
   switch(
     construction_spec$type,

@@ -3,8 +3,6 @@ run_edge_selection <- function(
   behav,
   selection_spec
 ) {
-  selection_spec <- validate_selection_spec(selection_spec)
-
   switch(
     selection_spec$type,
     cor = run_correlation_edge_selection(

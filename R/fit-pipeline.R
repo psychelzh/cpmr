@@ -60,8 +60,6 @@ fit_split_model <- function(
   construction_spec,
   model_spec
 ) {
-  construction_spec <- validate_construction_spec(construction_spec)
-  model_spec <- validate_model_spec(model_spec)
   construction_state <- build_construction_state(
     conmat = conmat,
     edge_selection = edge_selection,
