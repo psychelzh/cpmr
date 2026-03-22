@@ -1,4 +1,4 @@
-summary_construction_model <- function(
+build_summary_construction_model <- function(
   conmat,
   edge_selection,
   construction_spec
@@ -24,91 +24,85 @@ summary_construction_model <- function(
     center = center,
     scale = scale,
     edge_weights = edge_weights,
-    prediction_streams = summary_prediction_streams(construction_spec$polarity),
+    prediction_streams = names(summary_stream_spec(construction_spec$polarity)),
     constructed_features = summary_feature_matrix(conmat, edge_weights)
   )
 }
 
-summary_construction_features <- function(
-  construction_model,
-  conmat = NULL
-) {
-  if (is.null(conmat)) {
-    return(construction_model$constructed_features)
-  }
-
-  if (construction_model$construction$standardize_edges) {
-    conmat <- sweep(
-      sweep(conmat, 2, construction_model$center, "-"),
-      2,
-      construction_model$scale,
-      "/"
-    )
-  }
-
-  summary_feature_matrix(conmat, construction_model$edge_weights)
-}
-
-summary_prediction_streams <- function(polarity) {
-  switch(
+summary_stream_spec <- function(polarity, prediction_stream = NULL) {
+  stream_specs <- switch(
     polarity,
-    separate = c("joint", edge_signs),
-    net = "net",
-    stop(
-      paste(
-        "`polarity` must be either \"separate\" or \"net\"."
+    separate = list(
+      joint = list(type = "columns", columns = summary_columns),
+      positive = list(type = "columns", columns = "positive_summary"),
+      negative = list(type = "columns", columns = "negative_summary")
+    ),
+    net = list(
+      net = list(
+        type = "difference",
+        positive = "positive_summary",
+        negative = "negative_summary",
+        output = "net_summary"
       )
-    )
+    ),
+    stop("`polarity` must be either \"separate\" or \"net\".", call. = FALSE)
   )
+
+  if (is.null(prediction_stream)) {
+    return(stream_specs)
+  }
+
+  stream_spec <- stream_specs[[prediction_stream]]
+  if (is.null(stream_spec)) {
+    valid <- paste(sprintf("\"%s\"", names(stream_specs)), collapse = ", ")
+    stop(
+      sprintf(
+        "`prediction_stream` must be one of %s for `polarity = \"%s\"`.",
+        valid,
+        polarity
+      ),
+      call. = FALSE
+    )
+  }
+
+  stream_spec
 }
 
 summary_stream_features <- function(
-  summary_features,
-  polarity,
-  prediction_stream
+  construction_model,
+  prediction_stream,
+  conmat = NULL
 ) {
+  summary_features <- construction_model$constructed_features
+  if (!is.null(conmat)) {
+    if (construction_model$construction$standardize_edges) {
+      conmat <- sweep(
+        sweep(conmat, 2, construction_model$center, "-"),
+        2,
+        construction_model$scale,
+        "/"
+      )
+    }
+
+    summary_features <- summary_feature_matrix(
+      conmat,
+      construction_model$edge_weights
+    )
+  }
+
+  stream_spec <- summary_stream_spec(
+    polarity = construction_model$construction$polarity,
+    prediction_stream = prediction_stream
+  )
+
   switch(
-    polarity,
-    separate = {
-      feature_sets <- list(
-        joint = summary_columns,
-        positive = "positive_summary",
-        negative = "negative_summary"
-      )
-      columns <- feature_sets[[prediction_stream]]
-
-      if (is.null(columns)) {
-        stop(
-          paste0(
-            "`prediction_stream` must be one of ",
-            "\"joint\", \"positive\", or \"negative\" for ",
-            "`polarity = \"separate\"`."
-          ),
-          call. = FALSE
-        )
-      }
-
-      summary_features[, columns, drop = FALSE]
-    },
-    net = {
-      if (!identical(prediction_stream, "net")) {
-        stop(
-          "`prediction_stream` must be \"net\" for `polarity = \"net\"`.",
-          call. = FALSE
-        )
-      }
-
-      matrix(
-        summary_features[, "positive_summary"] -
-          summary_features[, "negative_summary"],
-        ncol = 1,
-        dimnames = list(NULL, "net_summary")
-      )
-    },
-    stop(
-      paste(
-        "`polarity` must be either \"separate\" or \"net\"."
-      )
+    stream_spec$type,
+    columns = summary_features[, stream_spec$columns, drop = FALSE],
+    difference = matrix(
+      summary_features[, stream_spec$positive] -
+        summary_features[, stream_spec$negative],
+      ncol = 1,
+      dimnames = list(NULL, stream_spec$output)
     )
   )
 }

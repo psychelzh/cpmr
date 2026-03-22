@@ -341,40 +341,74 @@ test_that("summary_edge_weights returns zeros for infinite cutoffs", {
 })
 
 test_that("prediction helpers validate unsupported modes", {
-  network_summaries <- cbind(
-    positive_summary = c(1, 2),
-    negative_summary = c(3, 4)
+  construction_model <- list(
+    type = "summary",
+    construction = cpm_construction_summary(
+      polarity = "separate",
+      weight_scale = 0,
+      standardize_edges = FALSE
+    ),
+    center = NULL,
+    scale = NULL,
+    edge_weights = NULL,
+    constructed_features = cbind(
+      positive_summary = c(1, 2),
+      negative_summary = c(3, 4)
+    )
   )
 
   expect_error(
-    summary_stream_features(
-      summary_features = network_summaries,
-      polarity = "separate",
-      prediction_stream = "bogus"
-    ),
-    paste0(
-      "`prediction_stream` must be one of ",
-      "\"joint\", \"positive\", or \"negative\" for ",
-      "`polarity = \"separate\"`."
-    ),
-    fixed = TRUE
-  )
-  expect_error(
-    summary_stream_features(
-      summary_features = network_summaries,
-      polarity = "bogus",
-      prediction_stream = "joint"
-    ),
+    summary_stream_spec("bogus"),
     "`polarity` must be either \"separate\" or \"net\".",
     fixed = TRUE
   )
   expect_error(
+    summary_stream_spec("separate", "bogus"),
+    paste0(
+      "`prediction_stream` must be one of ",
+      "\"joint\", \"positive\", \"negative\" for ",
+      "`polarity = \"separate\"`."
+    ),
+    fixed = TRUE
+  )
+
+  construction_model_net <- utils::modifyList(
+    construction_model,
+    list(
+      construction = cpm_construction_summary(
+        polarity = "net",
+        weight_scale = 0,
+        standardize_edges = FALSE
+      )
+    )
+  )
+
+  expect_error(
     summary_stream_features(
-      summary_features = network_summaries,
-      polarity = "net",
+      construction_model = construction_model,
+      prediction_stream = "bogus"
+    ),
+    paste0(
+      "`prediction_stream` must be one of ",
+      "\"joint\", \"positive\", \"negative\" for ",
+      "`polarity = \"separate\"`."
+    ),
+    fixed = TRUE
+  )
+  expect_equal(
+    summary_stream_features(
+      construction_model = construction_model_net,
+      prediction_stream = "net"
+    ),
+    matrix(c(-2, -2), ncol = 1, dimnames = list(NULL, "net_summary"))
+  )
+
+  expect_error(
+    summary_stream_features(
+      construction_model = construction_model_net,
       prediction_stream = "joint"
     ),
-    "`prediction_stream` must be \"net\" for `polarity = \"net\"`.",
+    "`prediction_stream` must be one of \"net\" for `polarity = \"net\"`.",
     fixed = TRUE
   )
   expect_error(
@@ -386,10 +420,39 @@ test_that("prediction helpers validate unsupported modes", {
     "`model` must be a supported CPM outcome model.",
     fixed = TRUE
   )
-  expect_error(
-    summary_prediction_streams("bogus"),
-    "`polarity` must be either \"separate\" or \"net\".",
-    fixed = TRUE
+})
+
+test_that("summary_stream_features can recompute summaries for new conmat", {
+  construction_model <- list(
+    type = "summary",
+    construction = cpm_construction_summary(
+      polarity = "separate",
+      weight_scale = 0,
+      standardize_edges = FALSE
+    ),
+    center = NULL,
+    scale = NULL,
+    edge_weights = cbind(
+      positive = c(1, 0, 0),
+      negative = c(0, 1, 0)
+    ),
+    constructed_features = cbind(
+      positive_summary = c(1, 2),
+      negative_summary = c(3, 4)
+    )
+  )
+  conmat_new <- cbind(c(10, 20), c(1, 2), c(5, 6))
+
+  expect_equal(
+    summary_stream_features(
+      construction_model = construction_model,
+      prediction_stream = "joint",
+      conmat = conmat_new
+    ),
+    cbind(
+      positive_summary = c(10, 20),
+      negative_summary = c(1, 2)
+    )
   )
 })
 
