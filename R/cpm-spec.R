@@ -178,16 +178,3 @@ new_cpm_spec <- function(selection, construction, model) {
     class = "cpm_spec"
   )
 }
-
-derive_prediction_streams <- function(construction) {
-  switch(
-    construction$type,
-    summary = switch(
-      construction$polarity,
-      separate = c("joint", edge_signs),
-      net = "net",
-      stop("`polarity` must be either \"separate\" or \"net\".", call. = FALSE)
-    ),
-    stop("`type` must be a supported construction type.", call. = FALSE)
-  )
-}
