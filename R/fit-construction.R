@@ -22,17 +22,38 @@ build_construction_model <- function(
   )
 }
 
+construction_features <- function(
+  construction_model,
+  conmat_new = NULL
+) {
+  switch(
+    construction_model$type,
+    summary = features_summary(
+      construction_model = construction_model,
+      conmat = conmat_new
+    )
+  )
+}
+
 construction_stream_features <- function(
   construction_model,
   prediction_stream,
-  conmat_new = NULL
+  conmat_new = NULL,
+  features = NULL
 ) {
+  if (is.null(features)) {
+    features <- construction_features(
+      construction_model = construction_model,
+      conmat_new = conmat_new
+    )
+  }
+
   switch(
     construction_model$type,
     summary = stream_features_summary(
       construction_model = construction_model,
       prediction_stream = prediction_stream,
-      conmat = conmat_new
+      features = features
     )
   )
 }
@@ -70,21 +91,13 @@ build_construction_model_summary <- function(
 stream_features_summary <- function(
   construction_model,
   prediction_stream,
-  conmat = NULL
+  conmat = NULL,
+  features = NULL
 ) {
-  summary_features <- construction_model$constructed_features
-  if (!is.null(conmat)) {
-    if (construction_model$construction$standardize_edges) {
-      conmat <- fscale(
-        conmat,
-        construction_model$center,
-        construction_model$scale
-      )
-    }
-
-    summary_features <- feature_matrix_summary(
-      conmat,
-      construction_model$edge_weights
+  if (is.null(features)) {
+    features <- features_summary(
+      construction_model = construction_model,
+      conmat = conmat
     )
   }
 
@@ -96,18 +109,37 @@ stream_features_summary <- function(
 
   if (construction_model$construction$polarity == "net") {
     return(matrix(
-      summary_features[, "positive_summary"] -
-        summary_features[, "negative_summary"],
+      features[, "positive_summary"] -
+        features[, "negative_summary"],
       ncol = 1,
       dimnames = list(NULL, "net_summary")
     ))
   }
 
   if (prediction_stream == "joint") {
-    return(summary_features)
+    return(features)
   }
 
-  summary_features[, summary_column_names[[prediction_stream]], drop = FALSE]
+  features[, summary_column_names[[prediction_stream]], drop = FALSE]
+}
+
+features_summary <- function(construction_model, conmat = NULL) {
+  if (is.null(conmat)) {
+    return(construction_model$constructed_features)
+  }
+
+  if (construction_model$construction$standardize_edges) {
+    conmat <- fscale(
+      conmat,
+      construction_model$center,
+      construction_model$scale
+    )
+  }
+
+  feature_matrix_summary(
+    conmat,
+    construction_model$edge_weights
+  )
 }
 
 edge_weights_summary <- function(
