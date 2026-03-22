@@ -16,7 +16,11 @@ test_that("print.cpm_resamples reports summary fields", {
 
   expect_output(print(res), "CPM resamples")
   expect_output(print(res), "Complete cases")
-  expect_output(print(res), "Edge storage: not stored")
+  expect_output(print(res), "Covariates:\\s+none")
+  expect_output(print(res), "Missing data:\\s+fail")
+  expect_output(print(res), "Edge storage:\\s+not stored")
+  expect_output(print(res), "Selection method:\\s+pearson")
+  expect_output(print(res), "Construction polarity:\\s+separate")
   expect_output(print(res), "Use summary\\(\\) for aggregate metrics")
 })
 
@@ -54,6 +58,7 @@ test_that("print.cpm_resamples uses human-readable edge storage labels", {
   x <- structure(
     list(
       call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
+      spec = cpm_spec(),
       folds = list(1:3, 4:6),
       predictions = data.frame(
         row = 1:6,
@@ -63,16 +68,19 @@ test_that("print.cpm_resamples uses human-readable edge storage labels", {
         positive = c(1, 2, 3, 4, 5, 6),
         negative = c(3, 2, 1, 6, 5, 4)
       ),
-      settings = list(return_edges = "sum")
+      settings = list(
+        covariates = FALSE,
+        na_action = "fail",
+        return_edges = "sum"
+      )
     ),
     class = "cpm_resamples"
   )
 
   out <- capture.output(print(x))
   expect_true(any(grepl(
-    "Edge storage: summed across folds",
-    out,
-    fixed = TRUE
+    "Edge storage:\\s+summed across folds",
+    out
   )))
 })
 

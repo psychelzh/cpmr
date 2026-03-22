@@ -28,7 +28,7 @@ correlation metrics at \code{level = "single"}.}
 \item{edges}{A logical matrix indicating which edges are selected by the
 fitted CPM model.}
 
-\item{params}{A list of parameters used in the summary.}
+\item{settings}{A list of settings used in the summary.}
 }
 \description{
 This function provides a summary of a \code{cpm} object, including the

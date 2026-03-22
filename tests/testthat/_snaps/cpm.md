@@ -91,6 +91,7 @@
         Candidate edges: 10
         Parameters:
           Covariates:            none
+          Missing data:          fail
           Selection method:      pearson
           Selection criterion:   p_value
           Selection level:       0.01
@@ -195,6 +196,7 @@
         Candidate edges: 10
         Parameters:
           Covariates:            none
+          Missing data:          fail
           Selection method:      pearson
           Selection criterion:   p_value
           Selection level:       0.1
@@ -217,6 +219,7 @@
         Candidate edges: 10
         Parameters:
           Covariates:            none
+          Missing data:          exclude
           Selection method:      pearson
           Selection criterion:   p_value
           Selection level:       0.01
@@ -240,6 +243,7 @@
         Candidate edges: 10
         Parameters:
           Covariates:            included
+          Missing data:          exclude
           Selection method:      pearson
           Selection criterion:   p_value
           Selection level:       0.01
@@ -263,6 +267,7 @@
         Candidate edges: 10
         Parameters:
           Covariates:            included
+          Missing data:          exclude
           Selection method:      pearson
           Selection criterion:   p_value
           Selection level:       0.01

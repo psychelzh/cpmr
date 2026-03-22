@@ -49,21 +49,19 @@ print.cpm <- function(x, ...) {
     ]))
   ))
   cat(sprintf("  Candidate edges: %d\n", dim(x$edges)[1]))
-  covariates_param <- if (!is.null(x$settings$covariates)) {
-    x$settings$covariates
-  } else {
-    NA
-  }
   cat("  Parameters:\n")
   print_setting_line(
     "Covariates",
-    format_covariates(covariates_param)
+    format_covariates(x$settings$covariates)
+  )
+  print_setting_line(
+    "Missing data",
+    x$settings$na_action
   )
   print_staged_settings(
     selection = x$spec$selection,
     construction = x$spec$construction,
     model = x$spec$model,
-    prediction_streams = prediction_columns(x$predictions),
     selection_labels = list(
       method = "Selection method",
       criterion = "Selection criterion",
@@ -94,7 +92,7 @@ print.cpm <- function(x, ...) {
 #'   \item{edges}{A logical matrix indicating which edges are selected by the
 #'     fitted CPM model.}
 #'
-#'   \item{params}{A list of parameters used in the summary.}
+#'   \item{settings}{A list of settings used in the summary.}
 #' @export
 summary.cpm <- function(
   object,
@@ -116,9 +114,9 @@ summary.cpm <- function(
     list(
       metrics = metrics,
       edges = object$edges,
-      params = list(
+      settings = list(
         method = method,
-        prediction_streams = prediction_columns(object$predictions)
+        prediction_streams = object$spec$construction$prediction_streams
       )
     ),
     class = "cpm_summary"
@@ -140,7 +138,7 @@ print.cpm_summary <- function(x, ...) {
       x$metrics,
       level = "single",
       metric = "correlation",
-      prediction_streams = x$params$prediction_streams
+      prediction_streams = x$settings$prediction_streams
     ),
     header = sprintf("  Performance (%s):\n", format_method_name(method))
   )
@@ -191,7 +189,7 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
         sum_x$metrics,
         level = "single",
         metric = "correlation",
-        prediction_streams = sum_x$params$prediction_streams
+        prediction_streams = sum_x$settings$prediction_streams
       )))
     ),
     edges = tibble::tibble(

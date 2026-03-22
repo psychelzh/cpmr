@@ -46,10 +46,8 @@ new_cpm_resamples <- function(
 #' @export
 print.cpm_resamples <- function(x, ...) {
   cat("CPM resamples:\n")
-  if (!is.null(x$call)) {
-    cat("  Call: ")
-    print(x$call)
-  }
+  cat("  Call: ")
+  print(x$call)
   cat(sprintf("  Number of folds: %d\n", length(x$folds)))
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
   cat(sprintf(
@@ -59,10 +57,32 @@ print.cpm_resamples <- function(x, ...) {
       drop = FALSE
     ]))
   ))
-  cat(sprintf(
-    "  Edge storage: %s\n",
+  cat("  Parameters:\n")
+  print_setting_line(
+    "Covariates",
+    format_covariates(x$settings$covariates)
+  )
+  print_setting_line(
+    "Missing data",
+    x$settings$na_action
+  )
+  print_setting_line(
+    "Edge storage",
     edge_storage_label(x$settings$return_edges)
-  ))
+  )
+  print_staged_settings(
+    selection = x$spec$selection,
+    construction = x$spec$construction,
+    model = x$spec$model,
+    selection_labels = list(
+      method = "Selection method",
+      criterion = "Selection criterion",
+      level = "Selection level"
+    ),
+    construction_labels = list(
+      polarity = "Construction polarity"
+    )
+  )
   cat("  Use summary() for aggregate metrics.\n")
   invisible(x)
 }
@@ -90,7 +110,7 @@ print.cpm_resamples <- function(x, ...) {
 #'     fold-wise correlation summaries at `level = "foldwise"`.}
 #'   \item{`edges`}{Aggregated edge-selection rates, or `NULL` when edges were
 #'     not stored.}
-#'   \item{`params`}{A list containing summary-relevant resampling settings.}
+#'   \item{`settings`}{A list containing summary-relevant resampling settings.}
 #' }
 #'
 #' @examples
@@ -120,11 +140,11 @@ summary.cpm_resamples <- function(
         return_edges = object$settings$return_edges,
         n_folds = length(object$folds)
       ),
-      params = list(
+      settings = list(
         n_folds = length(object$folds),
         return_edges = object$settings$return_edges,
         correlation_method = correlation_method,
-        prediction_streams = prediction_columns(object$predictions)
+        prediction_streams = object$spec$construction$prediction_streams
       )
     ),
     class = "cpm_resamples_summary"
@@ -142,19 +162,19 @@ print.cpm_resamples_summary <- function(x, ...) {
   )
 
   cat("CPM resample summary:\n")
-  cat(sprintf("  Number of folds: %d\n", x$params$n_folds))
+  cat(sprintf("  Number of folds: %d\n", x$settings$n_folds))
   print_error_block(summary_metric_matrix(
     x$metrics,
     level = "pooled",
     metric = c("rmse", "mae"),
-    prediction_streams = x$params$prediction_streams
+    prediction_streams = x$settings$prediction_streams
   ))
   print_performance_block(
     values = summary_metric_values(
       x$metrics,
       level = "pooled",
       metric = "correlation",
-      prediction_streams = x$params$prediction_streams
+      prediction_streams = x$settings$prediction_streams
     ),
     header = sprintf(
       "  Pooled correlations (%s):\n",
@@ -165,7 +185,7 @@ print.cpm_resamples_summary <- function(x, ...) {
     x$metrics,
     level = "foldwise",
     metric = "correlation",
-    prediction_streams = x$params$prediction_streams
+    prediction_streams = x$settings$prediction_streams
   )
   if (any(!is.na(foldwise_values))) {
     print_performance_block(
@@ -174,7 +194,7 @@ print.cpm_resamples_summary <- function(x, ...) {
         x$metrics,
         level = "foldwise",
         metric = "correlation",
-        prediction_streams = x$params$prediction_streams,
+        prediction_streams = x$settings$prediction_streams,
         field = "std_error"
       ),
       header = sprintf(

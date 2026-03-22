@@ -63,23 +63,19 @@ format_rate <- function(x) {
 }
 
 format_threshold_level <- function(x) {
-  ifelse(is.na(x), "NA", trimws(formatC(x, format = "fg", digits = 3)))
-}
-
-format_yes_no <- function(x) {
-  ifelse(is.na(x), "NA", ifelse(isTRUE(x), "yes", "no"))
+  trimws(formatC(x, format = "fg", digits = 3))
 }
 
 format_edge_standardization <- function(x) {
-  ifelse(is.na(x), "NA", ifelse(isTRUE(x), "z-score", "none"))
+  if (isTRUE(x)) "z-score" else "none"
 }
 
 format_covariates <- function(x) {
-  ifelse(is.na(x), "NA", ifelse(isTRUE(x), "included", "none"))
+  if (isTRUE(x)) "included" else "none"
 }
 
 format_method_name <- function(x) {
-  ifelse(is.na(x), "NA", sub("^(.)", "\\U\\1", x, perl = TRUE))
+  sub("^(.)", "\\U\\1", x, perl = TRUE)
 }
 
 format_model_type <- function(model_type) {
@@ -110,7 +106,7 @@ edge_storage_label <- function(x) {
 
 prediction_labels <- c(
   joint = "Joint",
-  net = "Net strength",
+  net = "Net",
   positive = "Positive",
   negative = "Negative"
 )
@@ -153,7 +149,6 @@ print_selection_settings <- function(
 
 print_construction_settings <- function(
   construction,
-  prediction_streams,
   indent = "    ",
   polarity_label = "Polarity"
 ) {
@@ -179,7 +174,7 @@ print_construction_settings <- function(
   )
   print_setting_line(
     "Streams",
-    format_prediction_streams(prediction_streams),
+    format_prediction_streams(construction$prediction_streams),
     indent = indent
   )
 
@@ -204,7 +199,6 @@ print_staged_settings <- function(
   selection,
   construction,
   model,
-  prediction_streams,
   indent = "    ",
   headers = NULL,
   selection_labels = list(
@@ -232,7 +226,6 @@ print_staged_settings <- function(
   }
   print_construction_settings(
     construction,
-    prediction_streams = prediction_streams,
     indent = indent,
     polarity_label = construction_labels$polarity
   )

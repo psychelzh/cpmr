@@ -35,7 +35,7 @@ example_resample_summary <- function(
     )
   ),
   edges = NULL,
-  params = list(
+  settings = list(
     n_folds = 5L,
     return_edges = "none",
     correlation_method = "pearson",
@@ -46,7 +46,7 @@ example_resample_summary <- function(
     list(
       metrics = metrics,
       edges = edges,
-      params = params
+      settings = settings
     ),
     class = "cpm_resamples_summary"
   )
@@ -64,6 +64,8 @@ test_that("Works for basic summary", {
 test_that("summary.cpm returns NA when fewer than two valid pairs", {
   sparse_object <- structure(
     list(
+      spec = cpm_spec(),
+      settings = list(covariates = FALSE, na_action = "fail"),
       predictions = data.frame(
         row = 1:3,
         observed = c(NA_real_, 2, NA_real_),
@@ -75,8 +77,7 @@ test_that("summary.cpm returns NA when fewer than two valid pairs", {
         c(TRUE, FALSE, FALSE, TRUE),
         ncol = 2,
         dimnames = list(NULL, c("positive", "negative"))
-      ),
-      params = list()
+      )
     ),
     class = "cpm"
   )
@@ -108,7 +109,7 @@ test_that("print.cpm_summary reports NA edge rates when stored edges are all mis
         ncol = 2,
         dimnames = list(NULL, c("positive", "negative"))
       ),
-      params = list(
+      settings = list(
         method = "pearson",
         prediction_streams = prediction_streams
       )
@@ -299,7 +300,7 @@ test_that("summary.cpm_resamples supports single-stream net summaries", {
   summary_result <- summary(result)
   output <- capture.output(print(summary_result))
 
-  expect_identical(summary_result$params$prediction_streams, "net")
+  expect_identical(summary_result$settings$prediction_streams, "net")
   expect_equal(
     dim(summary_metric_matrix(
       summary_result$metrics,
@@ -309,7 +310,7 @@ test_that("summary.cpm_resamples supports single-stream net summaries", {
     )),
     c(2L, 1L)
   )
-  expect_true(any(grepl("Net strength:", output, fixed = TRUE)))
+  expect_true(any(grepl("Net:", output, fixed = TRUE)))
 })
 
 test_that("summary.cpm_resamples supports configurable correlation methods", {
@@ -337,7 +338,7 @@ test_that("summary.cpm_resamples supports configurable correlation methods", {
 
   output <- capture.output(print(summary_result))
 
-  expect_identical(summary_result$params$correlation_method, "spearman")
+  expect_identical(summary_result$settings$correlation_method, "spearman")
   expect_true(all(
     summary_result$metrics$method[
       summary_result$metrics$metric == "correlation"
@@ -394,7 +395,7 @@ test_that("print.cpm_resamples_summary reports fold count and rates", {
       ncol = 2,
       dimnames = list(NULL, c("positive", "negative"))
     ),
-    params = list(
+    settings = list(
       n_folds = 5L,
       return_edges = "sum",
       correlation_method = "pearson",

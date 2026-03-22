@@ -28,7 +28,7 @@ store pooled errors and pooled correlations at \code{level = "pooled"}, and
 fold-wise correlation summaries at \code{level = "foldwise"}.}
 \item{\code{edges}}{Aggregated edge-selection rates, or \code{NULL} when edges were
 not stored.}
-\item{\code{params}}{A list containing summary-relevant resampling settings.}
+\item{\code{settings}}{A list containing summary-relevant resampling settings.}
 }
 }
 \description{
