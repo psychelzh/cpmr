@@ -157,13 +157,13 @@ touchstone::benchmark_run(
 
 touchstone::benchmark_run(
   expr_before_benchmark = !!fit_resamples_setup,
-  fit_resamples_default = fit_resamples_default(fit_spec),
+  resamples_default = fit_resamples_default(fit_spec),
   n = 5
 )
 
 touchstone::benchmark_run(
   expr_before_benchmark = !!fit_resamples_standardize_edges_setup,
-  fit_resamples_standardize_edges = fit_resamples_default(fit_spec),
+  resamples_standardize_edges = fit_resamples_default(fit_spec),
   n = 5
 )
 
