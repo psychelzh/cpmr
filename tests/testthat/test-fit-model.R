@@ -258,14 +258,14 @@ test_that("joint stream handles aliased empty-sign features", {
     model_spec = cpm_model_lm()
   )
 
+  expect_identical(fitted$prediction_stream, "joint")
   expect_true(is.na(fitted$coefficients[["positive_summary"]]))
   expect_identical(fitted$prediction_coefficients[["positive_summary"]], 0)
   expect_equal(
     predict_stream_model(
       fitted_model = fitted,
       construction_model = construction_model,
-      conmat_new = NULL,
-      prediction_stream = "joint"
+      conmat_new = NULL
     ),
     behav
   )

@@ -103,8 +103,7 @@ predict_model <- function(model, conmat_new) {
     pred[, prediction_stream] <- predict_stream_model(
       fitted_model = model$outcome_models[[prediction_stream]],
       construction_model = model,
-      conmat_new = conmat_new,
-      prediction_stream = prediction_stream
+      conmat_new = conmat_new
     )
   }
 

@@ -9,23 +9,27 @@ fit_stream_model <- function(
     prediction_stream = prediction_stream
   )
 
-  fit_outcome_model(
-    features = features,
-    behav = behav,
-    model_spec = model_spec
+  utils::modifyList(
+    fit_outcome_model(
+      features = features,
+      behav = behav,
+      model_spec = model_spec
+    ),
+    list(
+      prediction_stream = prediction_stream
+    )
   )
 }
 
 predict_stream_model <- function(
   fitted_model,
   construction_model,
-  conmat_new,
-  prediction_stream
+  conmat_new
 ) {
   features <- construction_stream_features(
     construction_model = construction_model,
     conmat_new = conmat_new,
-    prediction_stream = prediction_stream
+    prediction_stream = fitted_model$prediction_stream
   )
 
   predict_outcome_model(
