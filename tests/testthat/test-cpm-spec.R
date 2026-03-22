@@ -14,6 +14,9 @@ test_that("cpm_spec stores staged model parameters", {
   )
 
   expect_s3_class(spec, "cpm_spec")
+  expect_s3_class(spec$params$selection, "cpm_selection_spec")
+  expect_s3_class(spec$params$construction, "cpm_construction_spec")
+  expect_s3_class(spec$params$model, "cpm_model_spec")
   expect_identical(spec$params$selection$type, "cor")
   expect_identical(spec$params$selection$method, "spearman")
   expect_identical(spec$params$selection$criterion, "proportion")
@@ -63,13 +66,16 @@ test_that("cpm_spec defaults to classic CPM edge handling", {
   spec <- cpm_spec()
 
   expect_identical(spec$params$selection$type, "cor")
+  expect_s3_class(spec$params$selection, "cpm_selection_spec")
   expect_identical(spec$params$selection$method, "pearson")
   expect_identical(spec$params$selection$criterion, "p_value")
   expect_identical(spec$params$selection$level, 0.01)
   expect_identical(spec$params$construction$type, "summary")
+  expect_s3_class(spec$params$construction, "cpm_construction_spec")
   expect_identical(spec$params$construction$polarity, "separate")
   expect_identical(spec$params$construction$weight_scale, 0)
   expect_false(spec$params$construction$standardize_edges)
+  expect_s3_class(spec$params$model, "cpm_model_spec")
 })
 
 test_that("helper constructors validate scalar parameter values", {
@@ -566,9 +572,9 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   fold_edges <- select_edge_mask(
     conmat = training$conmat,
     behav = training$behav,
-    selection_method = spec$params$selection$method,
-    selection_criterion = spec$params$selection$criterion,
-    selection_level = spec$params$selection$level
+    method = spec$params$selection$method,
+    criterion = spec$params$selection$criterion,
+    level = spec$params$selection$level
   )
   fold_model <- train_model(
     conmat = training$conmat,
@@ -576,9 +582,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     edge_selection = run_edge_selection(
       conmat = training$conmat,
       behav = training$behav,
-      selection_method = spec$params$selection$method,
-      selection_criterion = spec$params$selection$criterion,
-      selection_level = spec$params$selection$level
+      selection_spec = spec$params$selection
     ),
     construction_spec = spec$params$construction,
     model_spec = spec$params$model

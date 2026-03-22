@@ -53,9 +53,9 @@ cpm_spec <- function(
 
   new_cpm_spec(
     params = list(
-      selection = unclass(selection),
-      construction = unclass(construction),
-      model = unclass(model)
+      selection = selection,
+      construction = construction,
+      model = model
     )
   )
 }
@@ -63,17 +63,17 @@ cpm_spec <- function(
 #' @export
 print.cpm_spec <- function(x, ...) {
   cat("CPM specification:\n")
-  cat("  Selection:\n")
-  print_selection_settings(x$params$selection)
-  cat("  Construction:\n")
-  print_construction_settings(
-    x$params$construction,
-    prediction_streams = prediction_streams_for_polarity(
-      x$params$construction$polarity
+  print_staged_settings(
+    selection = x$params$selection,
+    construction = x$params$construction,
+    model = x$params$model,
+    prediction_streams = construction_prediction_streams(x$params$construction),
+    headers = list(
+      selection = "  Selection:\n",
+      construction = "  Construction:\n",
+      model = "  Model:\n"
     )
   )
-  cat("  Model:\n")
-  print_model_settings(x$params$model)
   invisible(x)
 }
 

@@ -73,6 +73,11 @@
               "type": "character",
               "attributes": {},
               "value": ["type", "method", "criterion", "level"]
+            },
+            "class": {
+              "type": "character",
+              "attributes": {},
+              "value": ["cpm_selection_spec"]
             }
           },
           "value": [
@@ -105,6 +110,11 @@
               "type": "character",
               "attributes": {},
               "value": ["type", "polarity", "weight_scale", "standardize_edges"]
+            },
+            "class": {
+              "type": "character",
+              "attributes": {},
+              "value": ["cpm_construction_spec"]
             }
           },
           "value": [
@@ -137,6 +147,11 @@
               "type": "character",
               "attributes": {},
               "value": ["type"]
+            },
+            "class": {
+              "type": "character",
+              "attributes": {},
+              "value": ["cpm_model_spec"]
             }
           },
           "value": [
@@ -257,6 +272,11 @@
               "type": "character",
               "attributes": {},
               "value": ["type", "method", "criterion", "level"]
+            },
+            "class": {
+              "type": "character",
+              "attributes": {},
+              "value": ["cpm_selection_spec"]
             }
           },
           "value": [
@@ -289,6 +309,11 @@
               "type": "character",
               "attributes": {},
               "value": ["type", "polarity", "weight_scale", "standardize_edges"]
+            },
+            "class": {
+              "type": "character",
+              "attributes": {},
+              "value": ["cpm_construction_spec"]
             }
           },
           "value": [
@@ -321,6 +346,11 @@
               "type": "character",
               "attributes": {},
               "value": ["type"]
+            },
+            "class": {
+              "type": "character",
+              "attributes": {},
+              "value": ["cpm_model_spec"]
             }
           },
           "value": [

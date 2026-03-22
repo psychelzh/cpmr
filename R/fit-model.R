@@ -1,41 +1,60 @@
 run_edge_selection <- function(
   conmat,
   behav,
-  selection_method = c("pearson", "spearman"),
-  selection_criterion = c("p_value", "absolute", "proportion"),
-  selection_level = 0.01
+  selection_spec
 ) {
-  selection_method <- match.arg(selection_method)
-  selection_criterion <- match.arg(selection_criterion)
-  selection_level <- validate_selection_level(
-    selection_level,
-    criterion = selection_criterion,
-    arg = "`selection_level`"
+  selection_spec <- validate_selection_spec(selection_spec)
+
+  switch(
+    selection_spec$type,
+    cor = run_correlation_edge_selection(
+      conmat = conmat,
+      behav = behav,
+      method = selection_spec$method,
+      criterion = selection_spec$criterion,
+      level = selection_spec$level
+    )
+  )
+}
+
+run_correlation_edge_selection <- function(
+  conmat,
+  behav,
+  method = c("pearson", "spearman"),
+  criterion = c("p_value", "absolute", "proportion"),
+  level = 0.01
+) {
+  method <- match.arg(method)
+  criterion <- match.arg(criterion)
+  level <- validate_selection_level(
+    level,
+    criterion = criterion,
+    arg = "`level`"
   )
   associations <- drop(stats::cor(
     conmat,
     behav,
-    method = selection_method
+    method = method
   ))
   associations[!is.finite(associations)] <- NA_real_
 
   thresholds <- switch(
-    selection_criterion,
+    criterion,
     p_value = stats::setNames(
-      rep(critical_r(nrow(conmat), selection_level), length(edge_signs)),
+      rep(critical_r(nrow(conmat), level), length(edge_signs)),
       edge_signs
     ),
     absolute = stats::setNames(
-      rep(selection_level, length(edge_signs)),
+      rep(level, length(edge_signs)),
       edge_signs
     ),
     proportion = select_sparsity_thresholds(
       associations = associations,
-      proportion = selection_level
+      proportion = level
     ),
     stop(
       paste(
-        "`selection_criterion` must be one of",
+        "`criterion` must be one of",
         "\"p_value\", \"absolute\", or \"proportion\"."
       )
     )
@@ -56,16 +75,16 @@ run_edge_selection <- function(
 select_edge_mask <- function(
   conmat,
   behav,
-  selection_method = c("pearson", "spearman"),
-  selection_criterion = c("p_value", "absolute", "proportion"),
-  selection_level = 0.01
+  method = c("pearson", "spearman"),
+  criterion = c("p_value", "absolute", "proportion"),
+  level = 0.01
 ) {
-  run_edge_selection(
+  run_correlation_edge_selection(
     conmat = conmat,
     behav = behav,
-    selection_method = selection_method,
-    selection_criterion = selection_criterion,
-    selection_level = selection_level
+    method = method,
+    criterion = criterion,
+    level = level
   )$mask
 }
 
@@ -76,56 +95,45 @@ train_model <- function(
   construction_spec,
   model_spec
 ) {
-  center <- NULL
-  scale <- NULL
-  if (construction_spec$standardize_edges) {
-    center <- Rfast::colmeans(conmat)
-    scale <- Rfast::colVars(conmat, std = TRUE)
-    conmat <- fscale(conmat, center, scale)
-  }
-
-  edge_weights <- compute_edge_weights(
-    associations = edge_selection$associations,
-    cutoffs = edge_selection$thresholds,
-    mask = edge_selection$mask,
-    weight_scale = construction_spec$weight_scale
-  )
-  network_summaries <- compute_network_summaries(conmat, edge_weights)
-  prediction_streams <- prediction_streams_for_polarity(
-    construction_spec$polarity
+  construction_spec <- validate_construction_spec(construction_spec)
+  model_spec <- validate_model_spec(model_spec)
+  construction_model <- build_construction_model(
+    conmat = conmat,
+    edge_selection = edge_selection,
+    construction_spec = construction_spec
   )
 
-  outcome_models <- lapply(prediction_streams, function(prediction_stream) {
-    fit_stream_model(
-      network_summaries = network_summaries,
-      behav = behav,
+  outcome_models <- lapply(
+    construction_model$prediction_streams,
+    function(
+      prediction_stream
+    ) {
+      fit_stream_model(
+        construction_model = construction_model,
+        behav = behav,
+        prediction_stream = prediction_stream,
+        model_spec = model_spec
+      )
+    }
+  )
+  names(outcome_models) <- construction_model$prediction_streams
+
+  utils::modifyList(
+    construction_model,
+    list(
+      edges = edge_selection$mask,
+      selection_thresholds = edge_selection$thresholds,
       construction_polarity = construction_spec$polarity,
-      prediction_stream = prediction_stream,
-      model_spec = model_spec
+      weight_scale = construction_spec$weight_scale,
+      standardize_edges = construction_spec$standardize_edges,
+      edge_weights = construction_model$edge_weights,
+      prediction_streams = construction_model$prediction_streams,
+      outcome_models = outcome_models
     )
-  })
-  names(outcome_models) <- prediction_streams
-
-  list(
-    standardize_edges = construction_spec$standardize_edges,
-    center = center,
-    scale = scale,
-    edges = edge_selection$mask,
-    edge_weights = edge_weights,
-    weight_scale = construction_spec$weight_scale,
-    selection_thresholds = edge_selection$thresholds,
-    construction_polarity = construction_spec$polarity,
-    prediction_streams = prediction_streams,
-    outcome_models = outcome_models
   )
 }
 
 predict_model <- function(model, conmat_new) {
-  if (model$standardize_edges) {
-    conmat_new <- fscale(conmat_new, model$center, model$scale)
-  }
-
-  network_summaries <- compute_network_summaries(conmat_new, model$edge_weights)
   prediction_streams <- model$prediction_streams
 
   pred <- matrix(
@@ -136,8 +144,8 @@ predict_model <- function(model, conmat_new) {
   for (prediction_stream in prediction_streams) {
     pred[, prediction_stream] <- predict_stream_model(
       fitted_model = model$outcome_models[[prediction_stream]],
-      network_summaries = network_summaries,
-      construction_polarity = model$construction_polarity,
+      construction_model = model,
+      conmat_new = conmat_new,
       prediction_stream = prediction_stream
     )
   }
@@ -269,15 +277,13 @@ weighted_row_sums_or_zero <- function(conmat, weights) {
 }
 
 fit_stream_model <- function(
-  network_summaries,
+  construction_model,
   behav,
-  construction_polarity,
   prediction_stream,
   model_spec
 ) {
-  features <- stream_features(
-    network_summaries = network_summaries,
-    construction_polarity = construction_polarity,
+  features <- construction_stream_features(
+    construction_model = construction_model,
     prediction_stream = prediction_stream
   )
 
@@ -290,13 +296,13 @@ fit_stream_model <- function(
 
 predict_stream_model <- function(
   fitted_model,
-  network_summaries,
-  construction_polarity,
+  construction_model,
+  conmat_new,
   prediction_stream
 ) {
-  features <- stream_features(
-    network_summaries = network_summaries,
-    construction_polarity = construction_polarity,
+  features <- construction_stream_features(
+    construction_model = construction_model,
+    conmat_new = conmat_new,
     prediction_stream = prediction_stream
   )
 
@@ -304,6 +310,105 @@ predict_stream_model <- function(
     fitted_model = fitted_model,
     features = features
   )
+}
+
+build_construction_model <- function(
+  conmat,
+  edge_selection,
+  construction_spec
+) {
+  construction_spec <- validate_construction_spec(construction_spec)
+
+  switch(
+    construction_spec$type,
+    summary = build_summary_construction_model(
+      conmat = conmat,
+      edge_selection = edge_selection,
+      construction_spec = construction_spec
+    )
+  )
+}
+
+build_summary_construction_model <- function(
+  conmat,
+  edge_selection,
+  construction_spec
+) {
+  center <- NULL
+  scale <- NULL
+  if (construction_spec$standardize_edges) {
+    center <- Rfast::colmeans(conmat)
+    scale <- Rfast::colVars(conmat, std = TRUE)
+    conmat <- fscale(conmat, center, scale)
+  }
+
+  edge_weights <- compute_edge_weights(
+    associations = edge_selection$associations,
+    cutoffs = edge_selection$thresholds,
+    mask = edge_selection$mask,
+    weight_scale = construction_spec$weight_scale
+  )
+
+  list(
+    type = "summary",
+    standardize_edges = construction_spec$standardize_edges,
+    center = center,
+    scale = scale,
+    edge_weights = edge_weights,
+    prediction_streams = prediction_streams_for_polarity(
+      construction_spec$polarity
+    ),
+    construction_polarity = construction_spec$polarity,
+    constructed_features = compute_network_summaries(conmat, edge_weights)
+  )
+}
+
+construction_stream_features <- function(
+  construction_model,
+  prediction_stream,
+  conmat_new = NULL
+) {
+  switch(
+    construction_model$type,
+    summary = summary_construction_stream_features(
+      construction_model = construction_model,
+      prediction_stream = prediction_stream,
+      conmat_new = conmat_new
+    )
+  )
+}
+
+summary_construction_stream_features <- function(
+  construction_model,
+  prediction_stream,
+  conmat_new = NULL
+) {
+  network_summaries <- if (is.null(conmat_new)) {
+    construction_model$constructed_features
+  } else {
+    summary_construction_features(
+      construction_model = construction_model,
+      conmat_new = conmat_new
+    )
+  }
+
+  stream_features(
+    network_summaries = network_summaries,
+    construction_polarity = construction_model$construction_polarity,
+    prediction_stream = prediction_stream
+  )
+}
+
+summary_construction_features <- function(construction_model, conmat_new) {
+  if (construction_model$standardize_edges) {
+    conmat_new <- fscale(
+      conmat_new,
+      construction_model$center,
+      construction_model$scale
+    )
+  }
+
+  compute_network_summaries(conmat_new, construction_model$edge_weights)
 }
 
 stream_features <- function(
@@ -405,6 +510,15 @@ prediction_streams_for_polarity <- function(construction_polarity) {
         "`construction_polarity` must be either \"separate\" or \"net\"."
       )
     )
+  )
+}
+
+construction_prediction_streams <- function(construction_spec) {
+  construction_spec <- validate_construction_spec(construction_spec)
+
+  switch(
+    construction_spec$type,
+    summary = prediction_streams_for_polarity(construction_spec$polarity)
   )
 }
 

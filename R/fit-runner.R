@@ -7,9 +7,8 @@ run_single_fit <- function(
   call = NULL
 ) {
   params <- object$params
-  prediction_streams <- prediction_streams_for_polarity(
-    params$construction$polarity
-  )
+  construction_spec <- params$construction
+  prediction_streams <- construction_prediction_streams(construction_spec)
   fit_context <- resolve_fit_context(
     conmat = conmat,
     behav = behav,
@@ -34,15 +33,13 @@ run_single_fit <- function(
   edge_selection <- run_edge_selection(
     conmat = training$conmat,
     behav = training$behav,
-    selection_method = params$selection$method,
-    selection_criterion = params$selection$criterion,
-    selection_level = params$selection$level
+    selection_spec = params$selection
   )
   model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
     edge_selection = edge_selection,
-    construction_spec = params$construction,
+    construction_spec = construction_spec,
     model_spec = params$model
   )
   pred[include_cases, ] <- predict_model(model, training$conmat)
@@ -77,9 +74,8 @@ run_resample_fit <- function(
   call = NULL
 ) {
   params <- object$params
-  prediction_streams <- prediction_streams_for_polarity(
-    params$construction$polarity
-  )
+  construction_spec <- params$construction
+  prediction_streams <- construction_prediction_streams(construction_spec)
   return_edges <- match.arg(return_edges)
   if (is.null(fit_context)) {
     fit_context <- resolve_fit_context(
@@ -96,7 +92,7 @@ run_resample_fit <- function(
   include_cases <- fit_context$include_cases
   na_action <- fit_context$na_action
 
-  folds <- validate_manual_resamples(folds, include_cases)
+  folds <- assert_normalized_resample_folds(folds)
   n_folds <- length(folds)
 
   warn_large_edge_storage(ncol(conmat), n_folds, return_edges)
@@ -118,15 +114,13 @@ run_resample_fit <- function(
     edge_selection <- run_edge_selection(
       conmat = training$conmat,
       behav = training$behav,
-      selection_method = params$selection$method,
-      selection_criterion = params$selection$criterion,
-      selection_level = params$selection$level
+      selection_spec = params$selection
     )
     fold_model <- train_model(
       conmat = training$conmat,
       behav = training$behav,
       edge_selection = edge_selection,
-      construction_spec = params$construction,
+      construction_spec = construction_spec,
       model_spec = params$model
     )
     assessment <- prepare_assessment_data(

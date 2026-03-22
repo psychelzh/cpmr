@@ -101,6 +101,39 @@ validate_manual_resamples <- function(resamples, include_cases) {
   normalized
 }
 
+assert_normalized_resample_folds <- function(folds) {
+  if (!is.list(folds) || length(folds) < 2L) {
+    stop(
+      paste0(
+        "`folds` must be a normalized list of at least 2 assessment ",
+        "index vectors."
+      )
+    )
+  }
+
+  invalid_fold <- vapply(
+    folds,
+    function(idx) {
+      !is.integer(idx) ||
+        anyNA(idx) ||
+        any(idx <= 0L) ||
+        anyDuplicated(idx)
+    },
+    logical(1)
+  )
+
+  if (any(invalid_fold)) {
+    stop(
+      paste0(
+        "`folds` must contain positive integer assessment indices ",
+        "without duplicates."
+      )
+    )
+  }
+
+  invisible(folds)
+}
+
 validate_resample_count <- function(resamples) {
   if (
     !is.numeric(resamples) ||

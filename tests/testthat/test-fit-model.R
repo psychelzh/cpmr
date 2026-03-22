@@ -24,8 +24,8 @@ test_that("select_edge_mask returns a logical positive/negative mask", {
   edges <- select_edge_mask(
     conmat = conmat,
     behav = behav,
-    selection_criterion = "p_value",
-    selection_level = 0.1
+    criterion = "p_value",
+    level = 0.1
   )
 
   expect_equal(dim(edges), c(ncol(conmat), 2))
@@ -41,8 +41,8 @@ test_that("select_edge_mask warns when proportion selection drops one edge sign"
     select_edge_mask(
       conmat = conmat,
       behav = behav,
-      selection_criterion = "proportion",
-      selection_level = 0.25
+      criterion = "proportion",
+      level = 0.25
     ),
     "The requested sparsity level did not retain both positive and negative edges.",
     fixed = TRUE
@@ -84,8 +84,8 @@ test_that("select_edge_mask validates selection criterion", {
     select_edge_mask(
       conmat = conmat,
       behav = behav,
-      selection_criterion = "bogus",
-      selection_level = 0.1
+      criterion = "bogus",
+      level = 0.1
     ),
     "'arg' should be one of",
     fixed = FALSE
@@ -109,13 +109,41 @@ test_that("select_edge_mask supports spearman and absolute screening", {
   spearman_edges <- select_edge_mask(
     conmat = conmat,
     behav = behav,
-    selection_method = "spearman",
-    selection_criterion = "absolute",
-    selection_level = 0.8
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.8
   )
 
   expect_true(all(spearman_edges[1:2, "positive"]))
   expect_true(isTRUE(spearman_edges[3, "negative"]))
+})
+
+test_that("run_edge_selection accepts staged selection specs directly", {
+  behav <- c(1, 2, 3, 4, 5, 6)
+  conmat <- cbind(
+    behav^2,
+    rev(behav),
+    c(1, 1, 2, 2, 3, 3)
+  )
+
+  from_spec <- run_edge_selection(
+    conmat = conmat,
+    behav = behav,
+    selection_spec = cpm_selection_cor(
+      method = "spearman",
+      criterion = "absolute",
+      level = 0.8
+    )
+  )
+  from_scalars <- run_correlation_edge_selection(
+    conmat = conmat,
+    behav = behav,
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.8
+  )
+
+  expect_equal(from_spec, from_scalars)
 })
 
 test_that("fscale centers and scales columns", {
@@ -157,14 +185,16 @@ test_that("train_model and predict_model compose correctly", {
   edge_selection <- run_edge_selection(
     conmat = training$conmat,
     behav = training$behav,
-    selection_criterion = "p_value",
-    selection_level = 0.1
+    selection_spec = cpm_selection_cor(
+      criterion = "p_value",
+      level = 0.1
+    )
   )
   model <- train_model(
     conmat = training$conmat,
     behav = training$behav,
     edge_selection = edge_selection,
-    construction_spec = list(
+    construction_spec = cpm_construction_summary(
       polarity = "separate",
       weight_scale = 0,
       standardize_edges = TRUE
@@ -198,7 +228,7 @@ test_that("net polarity with lm model produces a single stream", {
     conmat = conmat,
     behav = behav,
     edge_selection = edge_selection,
-    construction_spec = list(
+    construction_spec = cpm_construction_summary(
       polarity = "net",
       weight_scale = 0,
       standardize_edges = FALSE
@@ -213,16 +243,25 @@ test_that("net polarity with lm model produces a single stream", {
 })
 
 test_that("joint stream handles aliased empty-sign features", {
-  network_summaries <- cbind(
+  constructed_features <- cbind(
     positive_summary = rep(0, 5),
     negative_summary = 1:5
   )
   behav <- 1:5
+  construction_model <- list(
+    type = "summary",
+    construction_polarity = "separate",
+    prediction_streams = c("joint", "positive", "negative"),
+    standardize_edges = FALSE,
+    center = NULL,
+    scale = NULL,
+    edge_weights = NULL,
+    constructed_features = constructed_features
+  )
 
   fitted <- fit_stream_model(
-    network_summaries = network_summaries,
+    construction_model = construction_model,
     behav = behav,
-    construction_polarity = "separate",
     prediction_stream = "joint",
     model_spec = cpm_model_lm()
   )
@@ -232,8 +271,8 @@ test_that("joint stream handles aliased empty-sign features", {
   expect_equal(
     predict_stream_model(
       fitted_model = fitted,
-      network_summaries = network_summaries,
-      construction_polarity = "separate",
+      construction_model = construction_model,
+      conmat_new = NULL,
       prediction_stream = "joint"
     ),
     behav
@@ -252,8 +291,10 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
   edge_selection <- run_edge_selection(
     conmat = conmat,
     behav = behav,
-    selection_criterion = "absolute",
-    selection_level = 0.4
+    selection_spec = cpm_selection_cor(
+      criterion = "absolute",
+      level = 0.4
+    )
   )
   edge_weights <- compute_edge_weights(
     associations = edge_selection$associations,

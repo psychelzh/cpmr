@@ -58,18 +58,20 @@ print.cpm <- function(x, ...) {
     "Covariates",
     format_covariates(covariates_param)
   )
-  print_selection_settings(
-    x$params$selection,
-    method_label = "Selection method",
-    criterion_label = "Selection criterion",
-    level_label = "Selection level"
-  )
-  print_construction_settings(
-    x$params$construction,
+  print_staged_settings(
+    selection = x$params$selection,
+    construction = x$params$construction,
+    model = x$params$model,
     prediction_streams = prediction_columns(x$predictions),
-    polarity_label = "Construction polarity"
+    selection_labels = list(
+      method = "Selection method",
+      criterion = "Selection criterion",
+      level = "Selection level"
+    ),
+    construction_labels = list(
+      polarity = "Construction polarity"
+    )
   )
-  print_model_settings(x$params$model)
   invisible(x)
 }
 
@@ -174,7 +176,7 @@ print.cpm_summary <- function(x, ...) {
 #' @export
 tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
   component <- match.arg(component)
-  params <- flatten_tidy_cpm_params(x$params)
+  params <- tidy_cpm_params(x$params)
   sum_x <- summary(x, ...)
   switch(
     component,
@@ -199,7 +201,7 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
   )
 }
 
-flatten_tidy_cpm_params <- function(params) {
+tidy_cpm_params <- function(params) {
   extras <- params[setdiff(
     names(params),
     c("selection", "construction", "model")

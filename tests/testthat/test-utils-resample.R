@@ -16,6 +16,21 @@ test_that("validate_manual_resamples rejects malformed assessment sets", {
   )
 })
 
+test_that("assert_normalized_resample_folds only checks normalized fold contracts", {
+  expect_invisible(assert_normalized_resample_folds(list(1:2, 3:4)))
+
+  expect_error(
+    assert_normalized_resample_folds(list(1:2)),
+    "at least 2 assessment index vectors",
+    fixed = FALSE
+  )
+  expect_error(
+    assert_normalized_resample_folds(list(c(1L, 1L), 2:3)),
+    "without duplicates",
+    fixed = FALSE
+  )
+})
+
 test_that("crossv_kfold partitions inputs into non-overlapping folds", {
   withr::local_seed(123)
   folds <- crossv_kfold(1:6, 3)

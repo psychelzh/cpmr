@@ -199,3 +199,51 @@ print_model_settings <- function(
 
   invisible(NULL)
 }
+
+print_staged_settings <- function(
+  selection,
+  construction,
+  model,
+  prediction_streams,
+  indent = "    ",
+  headers = NULL,
+  selection_labels = list(
+    method = "Method",
+    criterion = "Criterion",
+    level = "Level"
+  ),
+  construction_labels = list(
+    polarity = "Polarity"
+  ),
+  model_label = "Outcome model"
+) {
+  if (!is.null(headers$selection)) {
+    cat(headers$selection)
+  }
+  print_selection_settings(
+    selection,
+    indent = indent,
+    method_label = selection_labels$method,
+    criterion_label = selection_labels$criterion,
+    level_label = selection_labels$level
+  )
+  if (!is.null(headers$construction)) {
+    cat(headers$construction)
+  }
+  print_construction_settings(
+    construction,
+    prediction_streams = prediction_streams,
+    indent = indent,
+    polarity_label = construction_labels$polarity
+  )
+  if (!is.null(headers$model)) {
+    cat(headers$model)
+  }
+  print_model_settings(
+    model,
+    indent = indent,
+    model_label = model_label
+  )
+
+  invisible(NULL)
+}
