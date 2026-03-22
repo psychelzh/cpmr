@@ -102,11 +102,22 @@ validate_construction_spec <- function(x) {
     x$standardize_edges,
     arg = "`construction$standardize_edges`"
   )
+  prediction_streams <- switch(
+    type,
+    summary = switch(
+      polarity,
+      separate = c("joint", edge_signs),
+      net = "net",
+      stop("`polarity` must be either \"separate\" or \"net\".", call. = FALSE)
+    ),
+    stop("`type` must be a supported construction type.", call. = FALSE)
+  )
 
   structure(
     list(
       type = type,
       polarity = polarity,
+      prediction_streams = prediction_streams,
       weight_scale = weight_scale,
       standardize_edges = standardize_edges
     ),

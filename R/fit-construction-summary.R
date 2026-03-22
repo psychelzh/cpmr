@@ -24,7 +24,7 @@ build_summary_construction_model <- function(
     center = center,
     scale = scale,
     edge_weights = edge_weights,
-    prediction_streams = names(summary_stream_spec(construction_spec$polarity)),
+    prediction_streams = construction_spec$prediction_streams,
     constructed_features = summary_feature_matrix(conmat, edge_weights)
   )
 }

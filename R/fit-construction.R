@@ -15,15 +15,6 @@ build_construction_model <- function(
   )
 }
 
-construction_prediction_streams <- function(construction_spec) {
-  construction_spec <- validate_construction_spec(construction_spec)
-
-  switch(
-    construction_spec$type,
-    summary = names(summary_stream_spec(construction_spec$polarity))
-  )
-}
-
 construction_stream_features <- function(
   construction_model,
   prediction_stream,

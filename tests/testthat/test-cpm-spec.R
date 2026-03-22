@@ -23,6 +23,7 @@ test_that("cpm_spec stores staged model parameters", {
   expect_identical(spec$selection$level, 0.05)
   expect_identical(spec$construction$type, "summary")
   expect_identical(spec$construction$polarity, "net")
+  expect_identical(spec$construction$prediction_streams, "net")
   expect_identical(spec$construction$weight_scale, 0.02)
   expect_false(spec$construction$standardize_edges)
   expect_identical(spec$model$type, "lm")
@@ -77,6 +78,10 @@ test_that("cpm_spec defaults to classic CPM edge handling", {
   expect_identical(spec$construction$type, "summary")
   expect_s3_class(spec$construction, "cpm_construction_spec")
   expect_identical(spec$construction$polarity, "separate")
+  expect_identical(
+    spec$construction$prediction_streams,
+    c("joint", "positive", "negative")
+  )
   expect_identical(spec$construction$weight_scale, 0)
   expect_false(spec$construction$standardize_edges)
   expect_s3_class(spec$model, "cpm_model_spec")
@@ -242,6 +247,19 @@ test_that("helper constructors round-trip through params", {
   expect_s3_class(cpm_model_lm(), "cpm_model_spec")
   expect_identical(cpm_model_lm()$type, "lm")
   expect_identical(format_model_type("custom"), "custom")
+})
+
+test_that("validate_construction_spec derives prediction streams", {
+  separate <- validate_construction_spec(cpm_construction_summary())
+  net <- validate_construction_spec(
+    cpm_construction_summary(polarity = "net")
+  )
+
+  expect_identical(
+    separate$prediction_streams,
+    c("joint", "positive", "negative")
+  )
+  expect_identical(net$prediction_streams, "net")
 })
 
 test_that("print.cpm_spec shows readable staged settings", {

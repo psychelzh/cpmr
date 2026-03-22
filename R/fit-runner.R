@@ -16,7 +16,7 @@ run_single_fit <- function(
 
   pred_matrix <- init_pred(
     context$behav,
-    construction_prediction_streams(object$construction)
+    object$construction$prediction_streams
   )
   split_fit <- run_fit_split(
     conmat = conmat,
@@ -76,7 +76,7 @@ run_resample_fit <- function(
 
   pred_matrix <- init_pred(
     context$behav,
-    construction_prediction_streams(object$construction)
+    object$construction$prediction_streams
   )
   edges <- init_edges(return_edges, conmat, n_folds)
   observed <- context$behav

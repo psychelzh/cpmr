@@ -65,7 +65,7 @@ print.cpm_spec <- function(x, ...) {
     selection = x$selection,
     construction = x$construction,
     model = x$model,
-    prediction_streams = construction_prediction_streams(x$construction),
+    prediction_streams = x$construction$prediction_streams,
     headers = list(
       selection = "  Selection:\n",
       construction = "  Construction:\n",
