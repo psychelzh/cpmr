@@ -1,3 +1,7 @@
+# Internal CPM summary-construction helpers.
+# These functions turn selected edge sets into subject-level summary features
+# for the current summary construction type.
+
 build_construction_model <- function(
   conmat,
   edge_selection,

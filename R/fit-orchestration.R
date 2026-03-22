@@ -1,3 +1,7 @@
+# Internal CPM model orchestration.
+# This file bridges validated selection, construction, and outcome-model
+# components into train/predict entry points used by the runners.
+
 train_model <- function(
   conmat,
   behav,

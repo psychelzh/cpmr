@@ -1,3 +1,7 @@
+# Internal CPM edge-selection helpers.
+# These functions implement the current correlation-based selection path and
+# its thresholding rules.
+
 run_edge_selection <- function(
   conmat,
   behav,
