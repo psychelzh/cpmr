@@ -3,69 +3,29 @@ run_edge_selection <- function(
   behav,
   selection_spec
 ) {
-  switch(
-    selection_spec$type,
-    cor = run_correlation_edge_selection_impl(
-      conmat = conmat,
-      behav = behav,
-      method = selection_spec$method,
-      criterion = selection_spec$criterion,
-      level = selection_spec$level
-    )
-  )
-}
-
-run_correlation_edge_selection <- function(
-  conmat,
-  behav,
-  method = c("pearson", "spearman"),
-  criterion = c("p_value", "absolute", "proportion"),
-  level = 0.01
-) {
-  method <- match.arg(method)
-  criterion <- match.arg(criterion)
-  level <- normalize_selection_level(
-    level,
-    criterion = criterion,
-    arg = "`level`"
-  )
-
-  run_correlation_edge_selection_impl(
-    conmat = conmat,
-    behav = behav,
-    method = method,
-    criterion = criterion,
-    level = level
-  )
-}
-
-run_correlation_edge_selection_impl <- function(
-  conmat,
-  behav,
-  method,
-  criterion,
-  level
-) {
   associations <- drop(stats::cor(
     conmat,
     behav,
-    method = method
+    method = selection_spec$method
   ))
   associations[!is.finite(associations)] <- NA_real_
 
   thresholds <- switch(
-    criterion,
+    selection_spec$criterion,
     p_value = stats::setNames(
-      rep(critical_r(nrow(conmat), level), length(edge_signs)),
+      rep(
+        critical_r(nrow(conmat), selection_spec$level),
+        length(edge_signs)
+      ),
       edge_signs
     ),
     absolute = stats::setNames(
-      rep(level, length(edge_signs)),
+      rep(selection_spec$level, length(edge_signs)),
       edge_signs
     ),
     proportion = select_sparsity_thresholds(
       associations = associations,
-      proportion = level
+      proportion = selection_spec$level
     ),
     stop(
       paste(
@@ -75,15 +35,13 @@ run_correlation_edge_selection_impl <- function(
     )
   )
 
-  mask <- edge_mask_from_cutoffs(
-    associations = associations,
-    cutoffs = thresholds
-  )
-
   list(
     associations = associations,
     thresholds = thresholds,
-    mask = mask
+    mask = edge_mask_from_cutoffs(
+      associations = associations,
+      cutoffs = thresholds
+    )
   )
 }
 
@@ -94,12 +52,14 @@ select_edge_mask <- function(
   criterion = c("p_value", "absolute", "proportion"),
   level = 0.01
 ) {
-  run_correlation_edge_selection(
+  run_edge_selection(
     conmat = conmat,
     behav = behav,
-    method = method,
-    criterion = criterion,
-    level = level
+    selection_spec = cpm_selection_cor(
+      method = method,
+      criterion = criterion,
+      level = level
+    )
   )$mask
 }
 
