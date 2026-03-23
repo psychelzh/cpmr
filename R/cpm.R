@@ -68,7 +68,7 @@ print.cpm <- function(x, ...) {
       level = "Selection level"
     ),
     construction_labels = list(
-      polarity = "Construction polarity"
+      sign_mode = "Construction sign mode"
     )
   )
   invisible(x)
@@ -116,7 +116,7 @@ summary.cpm <- function(
       edges = object$edges,
       settings = list(
         method = method,
-        prediction_streams = object$spec$construction$prediction_streams
+        prediction_streams = prediction_columns(object$predictions)
       )
     ),
     class = "cpm_summary"
@@ -161,8 +161,8 @@ print.cpm_summary <- function(x, ...) {
 #'
 #'   \item{prediction columns}{One numeric column per configured prediction
 #'   stream. For example, `joint`, `positive`, and `negative` when
-#'   `construction_polarity = "separate"`, or `net` when
-#'   `construction_polarity = "net"`.}
+#'   `construction_sign_mode = "separate"`, or `net` when
+#'   `construction_sign_mode = "net"`.}
 #'
 #'   For `component = "edges"`:
 #'
@@ -220,7 +220,7 @@ tidy_selection_params <- function(selection) {
 tidy_construction_params <- function(construction) {
   list(
     construction_type = construction$type,
-    construction_polarity = construction$polarity,
+    construction_sign_mode = construction$sign_mode,
     weight_scale = construction$weight_scale,
     standardize_edges = construction$standardize_edges
   )

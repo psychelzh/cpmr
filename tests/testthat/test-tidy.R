@@ -28,7 +28,7 @@ test_that("Support pass arguments of `summary()`", {
       "selection_criterion",
       "selection_level",
       "construction_type",
-      "construction_polarity",
+      "construction_sign_mode",
       "weight_scale",
       "standardize_edges",
       "model_type",

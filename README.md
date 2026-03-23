@@ -59,14 +59,14 @@ fit_obj
 #>   Candidate edges: 1000
 #>   Parameters:
 #>     Covariates:            none
+#>     Missing data:          fail
 #>     Selection method:      pearson
 #>     Selection criterion:   p_value
 #>     Selection level:       0.01
-#>     Construction polarity: separate
+#>     Construction sign mode: separate
 #>     Edge weighting:        none
 #>     Weight scale:          none
 #>     Edge standardization:  none
-#>     Streams:               joint, positive, negative
 #>     Outcome model:         linear regression
 summary(fit_obj)
 #> CPM summary:
@@ -90,7 +90,7 @@ rich_spec <- cpm_spec(
     level = 0.1
   ),
   construction = cpm_construction_summary(
-    polarity = "net",
+    sign_mode = "net",
     weight_scale = 0.03
   ),
   model = cpm_model_lm()
@@ -132,14 +132,14 @@ construction is:
 - CPM then collapses those screened edge sets into subject-level summary
   features before fitting the outcome model.
 
-With `polarity = "separate"`, `cpmr` keeps the positive and negative
+With `sign_mode = "separate"`, `cpmr` keeps the positive and negative
 summaries as separate predictors and reports three prediction streams:
 
 - `joint`, which fits one model with both summaries together;
 - `positive`, a positive-only diagnostic stream;
 - `negative`, a negative-only diagnostic stream.
 
-With `polarity = "net"`, `cpmr` constructs a single
+With `sign_mode = "net"`, `cpmr` constructs a single
 `net_summary = positive_summary - negative_summary` feature and returns
 one `net` prediction stream.
 

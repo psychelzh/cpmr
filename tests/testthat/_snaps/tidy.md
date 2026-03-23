@@ -16,7 +16,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "na_action", "selection_type", "selection_method", "selection_criterion", "selection_level", "construction_type", "construction_polarity", "weight_scale", "standardize_edges", "model_type", "method", "joint", "positive", "negative"]
+          "value": ["covariates", "na_action", "selection_type", "selection_method", "selection_criterion", "selection_level", "construction_type", "construction_sign_mode", "weight_scale", "standardize_edges", "model_type", "method", "joint", "positive", "negative"]
         }
       },
       "value": [
@@ -116,7 +116,7 @@
         "names": {
           "type": "character",
           "attributes": {},
-          "value": ["covariates", "na_action", "selection_type", "selection_method", "selection_criterion", "selection_level", "construction_type", "construction_polarity", "weight_scale", "standardize_edges", "model_type", "positive", "negative"]
+          "value": ["covariates", "na_action", "selection_type", "selection_method", "selection_criterion", "selection_level", "construction_type", "construction_sign_mode", "weight_scale", "standardize_edges", "model_type", "positive", "negative"]
         }
       },
       "value": [

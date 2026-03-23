@@ -53,12 +53,13 @@ cpm_selection_cor <- function(
 #' additionally weighted before summary construction, and whether edge
 #' standardization is applied before constructing subject-level predictors.
 #'
-#' @param polarity How positive and negative screened information is represented.
-#'   `"separate"` constructs `positive_summary` and `negative_summary`, fits a
-#'   `joint` stream from both together, and also returns `positive` and
-#'   `negative` positive-only / negative-only diagnostic streams. `"net"`
-#'   constructs one `net_summary = positive_summary - negative_summary`
-#'   feature and returns a single `net` stream.
+#' @param sign_mode How positive and negative screened information is
+#'   represented. `"separate"` constructs `positive_summary` and
+#'   `negative_summary`, fits a `joint` stream from both together, and also
+#'   returns `positive` and `negative` positive-only / negative-only diagnostic
+#'   streams. `"net"` constructs one
+#'   `net_summary = positive_summary - negative_summary` feature and returns a
+#'   single `net` stream.
 #' @param weight_scale Non-negative scale controlling optional sigmoid-style
 #'   edge weighting before summary construction. `0` disables additional
 #'   weighting and keeps the classic hard-threshold CPM summary. Values greater
@@ -76,23 +77,23 @@ cpm_selection_cor <- function(
 #' @examples
 #' cpm_construction_summary()
 #' cpm_construction_summary(
-#'   polarity = "net",
+#'   sign_mode = "net",
 #'   weight_scale = 0.03
 #' )
 #' @export
 cpm_construction_summary <- function(
-  polarity = c("separate", "net"),
+  sign_mode = c("separate", "net"),
   weight_scale = 0,
   standardize_edges = FALSE
 ) {
-  polarity <- match.arg(polarity)
+  sign_mode <- match.arg(sign_mode)
   normalize_weight_scale(weight_scale)
   normalize_standardize_edges(standardize_edges)
 
   structure(
     list(
       type = "summary",
-      polarity = polarity,
+      sign_mode = sign_mode,
       weight_scale = weight_scale,
       standardize_edges = standardize_edges
     ),
@@ -113,18 +114,5 @@ cpm_model_lm <- function() {
   structure(
     list(type = "lm"),
     class = "cpm_model_spec"
-  )
-}
-
-derive_prediction_streams <- function(construction) {
-  switch(
-    construction$type,
-    summary = switch(
-      construction$polarity,
-      separate = c("joint", edge_signs),
-      net = "net",
-      stop("`polarity` must be either \"separate\" or \"net\".", call. = FALSE)
-    ),
-    stop("`type` must be a supported construction type.", call. = FALSE)
   )
 }

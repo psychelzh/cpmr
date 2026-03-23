@@ -27,7 +27,7 @@
 #'     level = 0.1
 #'   ),
 #'   construction = cpm_construction_summary(
-#'     polarity = "net",
+#'     sign_mode = "net",
 #'     weight_scale = 0.03
 #'   ),
 #'   model = cpm_model_lm()
@@ -50,8 +50,6 @@ cpm_spec <- function(
   assert_selection_spec(selection)
   assert_construction_spec(construction)
   assert_model_spec(model)
-
-  construction$prediction_streams <- derive_prediction_streams(construction)
 
   new_cpm_spec(
     selection = selection,

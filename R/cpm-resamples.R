@@ -80,7 +80,7 @@ print.cpm_resamples <- function(x, ...) {
       level = "Selection level"
     ),
     construction_labels = list(
-      polarity = "Construction polarity"
+      sign_mode = "Construction sign mode"
     )
   )
   cat("  Use summary() for aggregate metrics.\n")
@@ -144,7 +144,7 @@ summary.cpm_resamples <- function(
         n_folds = length(object$folds),
         return_edges = object$settings$return_edges,
         correlation_method = correlation_method,
-        prediction_streams = object$spec$construction$prediction_streams
+        prediction_streams = prediction_columns(object$predictions)
       )
     ),
     class = "cpm_resamples_summary"

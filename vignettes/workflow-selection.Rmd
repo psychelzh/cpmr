@@ -66,8 +66,8 @@ In the current native workflow:
 
 - screened positive-association edges define a `positive_summary`;
 - screened negative-association edges define a `negative_summary`;
-- `polarity = "separate"` keeps those summaries available directly;
-- `polarity = "net"` uses one
+- `sign_mode = "separate"` keeps those summaries available directly;
+- `sign_mode = "net"` uses one
   `net_summary = positive_summary - negative_summary` feature.
 
 That means the classic `joint` stream is not a third summary. It is the

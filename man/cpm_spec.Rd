@@ -106,7 +106,7 @@ spec <- cpm_spec(
     level = 0.1
   ),
   construction = cpm_construction_summary(
-    polarity = "net",
+    sign_mode = "net",
     weight_scale = 0.03
   ),
   model = cpm_model_lm()

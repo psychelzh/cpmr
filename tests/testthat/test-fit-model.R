@@ -185,7 +185,7 @@ test_that("fit_split_model and predict_split_model compose correctly", {
     edge_selection = edge_selection,
     construction_spec = cpm_spec(
       construction = cpm_construction_summary(
-        polarity = "separate",
+        sign_mode = "separate",
         weight_scale = 0,
         standardize_edges = TRUE
       )
@@ -201,7 +201,7 @@ test_that("fit_split_model and predict_split_model compose correctly", {
   )
 })
 
-test_that("net polarity with lm model produces a single stream", {
+test_that("net sign mode with lm model produces a single stream", {
   withr::local_seed(2)
   conmat <- matrix(rnorm(40), nrow = 8, ncol = 5)
   behav <- rnorm(8)
@@ -221,7 +221,7 @@ test_that("net polarity with lm model produces a single stream", {
     edge_selection = edge_selection,
     construction_spec = cpm_spec(
       construction = cpm_construction_summary(
-        polarity = "net",
+        sign_mode = "net",
         weight_scale = 0,
         standardize_edges = FALSE
       )
@@ -246,26 +246,21 @@ test_that("joint stream handles aliased empty-sign features", {
     construction = cpm_spec()$construction,
     center = NULL,
     scale = NULL,
+    edge_mask = NULL,
     edge_weights = NULL,
     constructed_features = constructed_features
   )
-
-  fitted <- fit_stream_model(
-    construction_state = construction_state,
+  feature_sets <- construction_features(construction_state)
+  fitted <- fit_outcome_model(
+    features = feature_sets$joint,
     behav = behav,
-    prediction_stream = "joint",
     model_spec = cpm_model_lm()
   )
 
-  expect_identical(fitted$prediction_stream, "joint")
   expect_true(is.na(fitted$coefficients[["positive_summary"]]))
   expect_identical(fitted$prediction_coefficients[["positive_summary"]], 0)
   expect_equal(
-    predict_stream_model(
-      fitted_model = fitted,
-      construction_state = construction_state,
-      conmat_new = NULL
-    ),
+    predict_outcome_model(fitted_model = fitted, features = feature_sets$joint),
     behav
   )
 })
@@ -339,12 +334,51 @@ test_that("edge_weights_summary returns zeros for infinite cutoffs", {
   )
 })
 
+test_that("edge_weights_summary_impl returns binary weights when scale is zero", {
+  mask <- matrix(
+    c(TRUE, FALSE, FALSE, TRUE),
+    ncol = 2,
+    dimnames = list(NULL, c("positive", "negative"))
+  )
+
+  expect_equal(
+    edge_weights_summary_impl(
+      associations = c(0.2, -0.3),
+      cutoffs = c(positive = 0.1, negative = 0.1),
+      mask = mask,
+      weight_scale = 0
+    ),
+    matrix(
+      c(1, 0, 0, 1),
+      ncol = 2,
+      dimnames = list(NULL, c("positive", "negative"))
+    )
+  )
+})
+
+test_that("feature_matrix_summary_weighted skips empty edge signs", {
+  conmat <- cbind(c(1, 2), c(3, 4))
+  edge_weights <- cbind(
+    positive = c(0.5, 0),
+    negative = c(0, 0)
+  )
+
+  expect_equal(
+    feature_matrix_summary_weighted(conmat, edge_weights),
+    cbind(
+      positive_summary = c(0.5, 1),
+      negative_summary = c(0, 0)
+    )
+  )
+})
+
 test_that("prediction helpers validate unsupported modes", {
   construction_state <- list(
     type = "summary",
     construction = cpm_spec()$construction,
     center = NULL,
     scale = NULL,
+    edge_mask = NULL,
     edge_weights = NULL,
     constructed_features = cbind(
       positive_summary = c(1, 2),
@@ -357,14 +391,14 @@ test_that("prediction helpers validate unsupported modes", {
       structure(
         list(
           type = "summary",
-          polarity = "bogus",
+          sign_mode = "bogus",
           weight_scale = 0,
           standardize_edges = FALSE
         ),
         class = "cpm_construction_spec"
       )
     ),
-    "`construction$polarity` must be one of \"separate\", \"net\".",
+    "`construction$sign_mode` must be one of \"separate\", \"net\".",
     fixed = TRUE
   )
 
@@ -373,7 +407,7 @@ test_that("prediction helpers validate unsupported modes", {
     list(
       construction = cpm_spec(
         construction = cpm_construction_summary(
-          polarity = "net",
+          sign_mode = "net",
           weight_scale = 0,
           standardize_edges = FALSE
         )
@@ -381,29 +415,12 @@ test_that("prediction helpers validate unsupported modes", {
     )
   )
 
-  expect_error(
-    stream_features_summary(
-      construction_state = construction_state,
-      prediction_stream = "bogus"
-    ),
-    "`prediction_stream` must be one of \"joint\", \"positive\", \"negative\".",
-    fixed = TRUE
-  )
+  feature_sets <- construction_features(construction_state)
+  expect_named(feature_sets, c("joint", "positive", "negative"))
+  expect_equal(feature_sets$joint, construction_state$constructed_features)
   expect_equal(
-    stream_features_summary(
-      construction_state = construction_state_net,
-      prediction_stream = "net"
-    ),
+    construction_features(construction_state_net)$net,
     matrix(c(-2, -2), ncol = 1, dimnames = list(NULL, "net_summary"))
-  )
-
-  expect_error(
-    stream_features_summary(
-      construction_state = construction_state_net,
-      prediction_stream = "joint"
-    ),
-    "`prediction_stream` must be one of \"net\".",
-    fixed = TRUE
   )
   expect_error(
     fit_outcome_model(
@@ -416,16 +433,20 @@ test_that("prediction helpers validate unsupported modes", {
   )
 })
 
-test_that("stream_features_summary can recompute summaries for new conmat", {
+test_that("construction_features can recompute summary feature sets for new conmat", {
   construction_state <- list(
     type = "summary",
-    construction = cpm_spec()$construction,
+    construction = cpm_spec(
+      construction = cpm_construction_summary(sign_mode = "separate")
+    )$construction,
     center = NULL,
     scale = NULL,
-    edge_weights = cbind(
-      positive = c(1, 0, 0),
-      negative = c(0, 1, 0)
+    edge_mask = matrix(
+      c(TRUE, FALSE, FALSE, FALSE, TRUE, FALSE),
+      ncol = 2,
+      dimnames = list(NULL, c("positive", "negative"))
     ),
+    edge_weights = NULL,
     constructed_features = cbind(
       positive_summary = c(1, 2),
       negative_summary = c(3, 4)
@@ -434,15 +455,11 @@ test_that("stream_features_summary can recompute summaries for new conmat", {
   conmat_new <- cbind(c(10, 20), c(1, 2), c(5, 6))
 
   expect_equal(
-    stream_features_summary(
+    construction_features(
       construction_state = construction_state,
-      prediction_stream = "joint",
-      conmat = conmat_new
-    ),
-    cbind(
-      positive_summary = c(10, 20),
-      negative_summary = c(1, 2)
-    )
+      conmat_new = conmat_new
+    )$joint,
+    cbind(positive_summary = c(10, 20), negative_summary = c(1, 2))
   )
 })
 

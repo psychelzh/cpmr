@@ -14,10 +14,6 @@ run_single_fit <- function(
   )
   require_single_fit_cases(context$include_cases)
 
-  pred_matrix <- init_prediction_matrix(
-    context$behav,
-    object$construction$prediction_streams
-  )
   split_fit <- run_fit_split(
     conmat = conmat,
     behav = context$behav,
@@ -27,11 +23,11 @@ run_single_fit <- function(
     construction_spec = object$construction,
     model_spec = object$model
   )
-  pred_matrix[context$include_cases, ] <- split_fit$predictions
-
-  observed <- context$behav
-  observed[context$include_cases] <- split_fit$observed
-  predictions <- compute_single_predictions(observed, pred_matrix)
+  predictions <- assemble_single_predictions(
+    observed = context$behav,
+    include_cases = context$include_cases,
+    split_fit = split_fit
+  )
 
   new_cpm(
     call = call,
@@ -74,18 +70,14 @@ run_resample_fit <- function(
 
   warn_large_edge_storage(ncol(conmat), n_folds, return_edges)
 
-  pred_matrix <- init_prediction_matrix(
-    context$behav,
-    object$construction$prediction_streams
-  )
   edges <- init_edge_storage(return_edges, conmat, n_folds)
-  observed <- context$behav
+  split_results <- vector("list", n_folds)
 
   for (fold in seq_len(n_folds)) {
     rows_test <- folds[[fold]]
     rows_train <- setdiff(context$include_cases, rows_test)
 
-    split_fit <- run_fit_split(
+    split_results[[fold]] <- run_fit_split(
       conmat = conmat,
       behav = context$behav,
       covariates = context$covariates,
@@ -96,17 +88,19 @@ run_resample_fit <- function(
       model_spec = object$model
     )
 
-    pred_matrix[rows_test, ] <- split_fit$predictions
-    observed[rows_test] <- split_fit$observed
     edges <- update_edge_storage(
       edges = edges,
       return_edges = return_edges,
       fold = fold,
-      edge_mask = split_fit$edge_selection$mask
+      edge_mask = split_results[[fold]]$edge_selection$mask
     )
   }
 
-  predictions <- compute_fold_predictions(observed, pred_matrix, folds)
+  predictions <- assemble_fold_predictions(
+    observed = context$behav,
+    folds = folds,
+    split_results = split_results
+  )
 
   new_cpm_resamples(
     call = call,
@@ -151,14 +145,6 @@ require_complete_cases_for <- function(include_cases, min_cases, action) {
   }
 
   invisible(include_cases)
-}
-
-init_prediction_matrix <- function(behav, prediction_streams) {
-  matrix(
-    nrow = length(behav),
-    ncol = length(prediction_streams),
-    dimnames = list(names(behav), prediction_streams)
-  )
 }
 
 init_edge_storage <- function(return_edges, conmat, n_folds) {

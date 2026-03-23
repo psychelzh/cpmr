@@ -292,7 +292,7 @@ test_that("summary.cpm_resamples supports single-stream net summaries", {
   behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
 
   result <- fit_resamples(
-    cpm_spec(construction = cpm_construction_summary(polarity = "net")),
+    cpm_spec(construction = cpm_construction_summary(sign_mode = "net")),
     conmat = conmat,
     behav = behav,
     resamples = 4

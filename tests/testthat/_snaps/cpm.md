@@ -95,11 +95,10 @@
           Selection method:      pearson
           Selection criterion:   p_value
           Selection level:       0.01
-          Construction polarity: separate
+          Construction sign mode: separate
           Edge weighting:        none
           Weight scale:          none
           Edge standardization:  none
-          Streams:               joint, positive, negative
           Outcome model:         linear regression
 
 # Different threshold levels works
@@ -200,11 +199,10 @@
           Selection method:      pearson
           Selection criterion:   p_value
           Selection level:       0.1
-          Construction polarity: separate
+          Construction sign mode: separate
           Edge weighting:        none
           Weight scale:          none
           Edge standardization:  none
-          Streams:               joint, positive, negative
           Outcome model:         linear regression
 
 # `na_action` argument works
@@ -223,11 +221,10 @@
           Selection method:      pearson
           Selection criterion:   p_value
           Selection level:       0.01
-          Construction polarity: separate
+          Construction sign mode: separate
           Edge weighting:        none
           Weight scale:          none
           Edge standardization:  none
-          Streams:               joint, positive, negative
           Outcome model:         linear regression
 
 ---
@@ -247,11 +244,10 @@
           Selection method:      pearson
           Selection criterion:   p_value
           Selection level:       0.01
-          Construction polarity: separate
+          Construction sign mode: separate
           Edge weighting:        none
           Weight scale:          none
           Edge standardization:  none
-          Streams:               joint, positive, negative
           Outcome model:         linear regression
 
 ---
@@ -271,10 +267,9 @@
           Selection method:      pearson
           Selection criterion:   p_value
           Selection level:       0.01
-          Construction polarity: separate
+          Construction sign mode: separate
           Edge weighting:        none
           Weight scale:          none
           Edge standardization:  none
-          Streams:               joint, positive, negative
           Outcome model:         linear regression
 

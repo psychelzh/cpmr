@@ -98,14 +98,14 @@ That gives a simple mental model:
 - `negative_summary`: how strongly a subject expresses the screened
   outcome-negative edge set.
 
-In the current summary-based construction, `polarity` only decides how those
+In the current summary-based construction, `sign_mode` only decides how those
 CPM-derived summaries are exposed to the second-stage outcome model:
 
-- `polarity = "separate"` keeps both summaries. The `joint` stream fits a
+- `sign_mode = "separate"` keeps both summaries. The `joint` stream fits a
   model with `positive_summary` and `negative_summary` together, while the
   `positive` and `negative` streams are positive-only / negative-only
   diagnostics.
-- `polarity = "net"` uses one
+- `sign_mode = "net"` uses one
   `net_summary = positive_summary - negative_summary` feature and returns a
   single `net` stream.
 
@@ -125,7 +125,7 @@ A practical way to read a spec is:
 
 Within `cpm_construction_summary(...)`:
 
-- `polarity` decides whether positive and negative summaries stay separate or
+- `sign_mode` decides whether positive and negative summaries stay separate or
   collapse to one net-summary feature;
 - `weight_scale` decides whether edges contribute as a hard mask (`0`) or with
   sigmoid-style weights (`> 0`);
@@ -146,7 +146,7 @@ readable_spec <- cpm_spec(
     level = 0.1
   ),
   construction = cpm_construction_summary(
-    polarity = "net",
+  sign_mode = "net",
     weight_scale = 0.03
   ),
   model = cpm_model_lm()
@@ -180,7 +180,7 @@ rich_spec <- cpm_spec(
     level = 0.1
   ),
   construction = cpm_construction_summary(
-    polarity = "net",
+  sign_mode = "net",
     weight_scale = 0.03
   ),
   model = cpm_model_lm()
@@ -202,18 +202,18 @@ Compared with the default spec, the example above changes four things:
 - screening uses a direct absolute-correlation cutoff instead of correlation
   p-value
   screening;
-- the construction polarity is exposed as one `net` stream from
+- the construction sign mode is exposed as one `net` stream from
   `net_summary = positive_summary - negative_summary` instead of the
   classic `joint` / `positive` / `negative` trio;
 - the second-stage model is made explicit, even though it still uses the
   default linear regression helper.
 
-Prediction columns depend on `construction` polarity:
+Prediction columns depend on `construction` sign mode:
 
-- `polarity = "separate"` yields a `joint` stream plus `positive` and
+- `sign_mode = "separate"` yields a `joint` stream plus `positive` and
   `negative` positive-only / negative-only diagnostic streams built from the
   positive and negative summaries;
-- `polarity = "net"` yields a single `net` stream built from
+- `sign_mode = "net"` yields a single `net` stream built from
   `net_summary = positive_summary - negative_summary`.
 
 ## Cross-Validated Resampling with `fit_resamples()`

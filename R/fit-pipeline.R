@@ -65,20 +65,13 @@ fit_split_model <- function(
     edge_selection = edge_selection,
     construction_spec = construction_spec
   )
+  feature_sets <- construction_features(construction_state)
 
-  outcome_models <- stats::setNames(
-    lapply(
-      construction_state$construction$prediction_streams,
-      function(prediction_stream) {
-        fit_stream_model(
-          construction_state = construction_state,
-          behav = behav,
-          prediction_stream = prediction_stream,
-          model_spec = model_spec
-        )
-      }
-    ),
-    construction_state$construction$prediction_streams
+  outcome_models <- lapply(
+    feature_sets,
+    fit_outcome_model,
+    behav = behav,
+    model_spec = model_spec
   )
 
   construction_state$edges <- edge_selection$mask
@@ -88,70 +81,23 @@ fit_split_model <- function(
 }
 
 predict_split_model <- function(model, conmat_new) {
-  features <- construction_features(
+  feature_sets <- construction_features(
     construction_state = model,
     conmat_new = conmat_new
   )
   pred <- matrix(
     nrow = dim(conmat_new)[1],
-    ncol = length(model$construction$prediction_streams),
-    dimnames = list(NULL, model$construction$prediction_streams)
+    ncol = length(feature_sets),
+    dimnames = list(NULL, names(feature_sets))
   )
-  for (prediction_stream in model$construction$prediction_streams) {
-    pred[, prediction_stream] <- predict_stream_model(
+  for (prediction_stream in names(feature_sets)) {
+    pred[, prediction_stream] <- predict_outcome_model(
       fitted_model = model$outcome_models[[prediction_stream]],
-      construction_state = model,
-      features = features
+      features = feature_sets[[prediction_stream]]
     )
   }
 
   pred
-}
-
-fit_stream_model <- function(
-  construction_state,
-  behav,
-  prediction_stream,
-  model_spec
-) {
-  features <- construction_stream_features(
-    construction_state = construction_state,
-    prediction_stream = prediction_stream
-  )
-
-  c(
-    fit_outcome_model(
-      features = features,
-      behav = behav,
-      model_spec = model_spec
-    ),
-    list(prediction_stream = prediction_stream)
-  )
-}
-
-predict_stream_model <- function(
-  fitted_model,
-  construction_state,
-  conmat_new = NULL,
-  features = NULL
-) {
-  if (is.null(features)) {
-    features <- construction_features(
-      construction_state = construction_state,
-      conmat_new = conmat_new
-    )
-  }
-
-  stream_features <- construction_stream_features(
-    construction_state = construction_state,
-    prediction_stream = fitted_model$prediction_stream,
-    features = features
-  )
-
-  predict_outcome_model(
-    fitted_model = fitted_model,
-    features = stream_features
-  )
 }
 
 fit_outcome_model <- function(features, behav, model_spec) {

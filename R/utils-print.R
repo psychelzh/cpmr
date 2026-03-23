@@ -115,10 +115,6 @@ prediction_label <- function(prediction_stream) {
   unname(prediction_labels[[prediction_stream]])
 }
 
-format_prediction_streams <- function(prediction_streams) {
-  paste(prediction_streams, collapse = ", ")
-}
-
 print_setting_line <- function(label, value, indent = "    ", width = 22L) {
   cat(sprintf(
     "%s%-*s %s\n",
@@ -150,11 +146,11 @@ print_selection_settings <- function(
 print_construction_settings <- function(
   construction,
   indent = "    ",
-  polarity_label = "Polarity"
+  sign_mode_label = "Sign mode"
 ) {
   print_setting_line(
-    polarity_label,
-    construction$polarity,
+    sign_mode_label,
+    construction$sign_mode,
     indent = indent
   )
   print_setting_line(
@@ -170,11 +166,6 @@ print_construction_settings <- function(
   print_setting_line(
     "Edge standardization",
     format_edge_standardization(construction$standardize_edges),
-    indent = indent
-  )
-  print_setting_line(
-    "Streams",
-    format_prediction_streams(construction$prediction_streams),
     indent = indent
   )
 
@@ -207,7 +198,7 @@ print_staged_settings <- function(
     level = "Level"
   ),
   construction_labels = list(
-    polarity = "Polarity"
+    sign_mode = "Sign mode"
   ),
   model_label = "Outcome model"
 ) {
@@ -227,7 +218,7 @@ print_staged_settings <- function(
   print_construction_settings(
     construction,
     indent = indent,
-    polarity_label = construction_labels$polarity
+    sign_mode_label = construction_labels$sign_mode
   )
   if (!is.null(headers$model)) {
     cat(headers$model)

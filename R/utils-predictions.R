@@ -1,12 +1,41 @@
-compute_single_predictions <- function(observed, pred) {
+assemble_single_predictions <- function(
+  observed,
+  include_cases,
+  split_fit
+) {
+  pred <- matrix(
+    NA_real_,
+    nrow = length(observed),
+    ncol = ncol(split_fit$predictions),
+    dimnames = list(
+      prediction_row_names(observed),
+      colnames(split_fit$predictions)
+    )
+  )
+  pred[include_cases, ] <- split_fit$predictions
+
+  observed[include_cases] <- split_fit$observed
   new_predictions(observed, pred)
 }
 
-compute_fold_predictions <- function(observed, pred, folds) {
+assemble_fold_predictions <- function(observed, folds, split_results) {
+  pred <- matrix(
+    NA_real_,
+    nrow = length(observed),
+    ncol = ncol(split_results[[1]]$predictions),
+    dimnames = list(
+      prediction_row_names(observed),
+      colnames(split_results[[1]]$predictions)
+    )
+  )
   fold_id <- rep(NA_integer_, length(observed))
-  for (i in seq_along(folds)) {
-    fold_id[folds[[i]]] <- i
+  for (fold in seq_along(folds)) {
+    rows_test <- folds[[fold]]
+    pred[rows_test, ] <- split_results[[fold]]$predictions
+    observed[rows_test] <- split_results[[fold]]$observed
+    fold_id[rows_test] <- fold
   }
+
   new_predictions(observed, pred, fold = fold_id)
 }
 

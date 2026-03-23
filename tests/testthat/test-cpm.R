@@ -78,7 +78,7 @@ test_that("Alternative threshold method works", {
   expect_identical(result$spec$selection$criterion, "proportion")
   expect_identical(result$spec$selection$level, 0.01)
   expect_identical(result$spec$construction$type, "summary")
-  expect_identical(result$spec$construction$polarity, "separate")
+  expect_identical(result$spec$construction$sign_mode, "separate")
   expect_identical(result$spec$construction$weight_scale, 0)
   expect_identical(result$spec$model$type, "lm")
 })

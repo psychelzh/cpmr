@@ -5,18 +5,19 @@
 \title{Define CPM summary-construction settings}
 \usage{
 cpm_construction_summary(
-  polarity = c("separate", "net"),
+  sign_mode = c("separate", "net"),
   weight_scale = 0,
   standardize_edges = FALSE
 )
 }
 \arguments{
-\item{polarity}{How positive and negative screened information is represented.
-\code{"separate"} constructs \code{positive_summary} and \code{negative_summary}, fits a
-\code{joint} stream from both together, and also returns \code{positive} and
-\code{negative} positive-only / negative-only diagnostic streams. \code{"net"}
-constructs one \code{net_summary = positive_summary - negative_summary}
-feature and returns a single \code{net} stream.}
+\item{sign_mode}{How positive and negative screened information is
+represented. \code{"separate"} constructs \code{positive_summary} and
+\code{negative_summary}, fits a \code{joint} stream from both together, and also
+returns \code{positive} and \code{negative} positive-only / negative-only diagnostic
+streams. \code{"net"} constructs one
+\code{net_summary = positive_summary - negative_summary} feature and returns a
+single \code{net} stream.}
 
 \item{weight_scale}{Non-negative scale controlling optional sigmoid-style
 edge weighting before summary construction. \code{0} disables additional
@@ -43,7 +44,7 @@ standardization is applied before constructing subject-level predictors.
 \examples{
 cpm_construction_summary()
 cpm_construction_summary(
-  polarity = "net",
+  sign_mode = "net",
   weight_scale = 0.03
 )
 }

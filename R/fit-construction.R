@@ -26,32 +26,9 @@ construction_features <- function(
 ) {
   switch(
     construction_state$type,
-    summary = features_summary(
+    summary = feature_sets_summary(
       construction_state = construction_state,
       conmat = conmat_new
-    )
-  )
-}
-
-construction_stream_features <- function(
-  construction_state,
-  prediction_stream,
-  conmat_new = NULL,
-  features = NULL
-) {
-  if (is.null(features)) {
-    features <- construction_features(
-      construction_state = construction_state,
-      conmat_new = conmat_new
-    )
-  }
-
-  switch(
-    construction_state$type,
-    summary = stream_features_summary(
-      construction_state = construction_state,
-      prediction_stream = prediction_stream,
-      features = features
     )
   )
 }
@@ -69,67 +46,60 @@ build_construction_state_summary <- function(
     conmat <- fscale(conmat, center, scale)
   }
 
-  edge_weights <- edge_weights_summary_impl(
-    associations = edge_selection$associations,
-    cutoffs = edge_selection$thresholds,
-    mask = edge_selection$mask,
-    weight_scale = construction_spec$weight_scale
-  )
+  edge_mask <- edge_selection$mask
+  edge_weights <- if (construction_spec$weight_scale == 0) {
+    NULL
+  } else {
+    edge_weights_summary_impl(
+      associations = edge_selection$associations,
+      cutoffs = edge_selection$thresholds,
+      mask = edge_mask,
+      weight_scale = construction_spec$weight_scale
+    )
+  }
 
   list(
     type = "summary",
     construction = construction_spec,
     center = center,
     scale = scale,
+    edge_mask = edge_mask,
     edge_weights = edge_weights,
-    constructed_features = feature_matrix_summary(conmat, edge_weights)
+    constructed_features = summary_matrix_from_state(
+      list(
+        construction = construction_spec,
+        center = center,
+        scale = scale,
+        edge_mask = edge_mask,
+        edge_weights = edge_weights
+      ),
+      conmat = conmat
+    )
   )
 }
 
-stream_features_summary <- function(
-  construction_state,
-  prediction_stream,
-  conmat = NULL,
-  features = NULL
-) {
-  if (is.null(features)) {
-    features <- features_summary(
-      construction_state = construction_state,
-      conmat = conmat
-    )
-  }
+feature_sets_summary <- function(construction_state, conmat = NULL) {
+  summaries <- summary_matrix_from_state(construction_state, conmat)
 
-  if (construction_state$construction$polarity == "net") {
-    if (prediction_stream != "net") {
-      stop(
-        "`prediction_stream` must be one of \"net\".",
-        call. = FALSE
+  if (construction_state$construction$sign_mode == "net") {
+    return(list(
+      net = matrix(
+        summaries[, "positive_summary"] -
+          summaries[, "negative_summary"],
+        ncol = 1,
+        dimnames = list(NULL, "net_summary")
       )
-    }
-
-    return(matrix(
-      features[, "positive_summary"] -
-        features[, "negative_summary"],
-      ncol = 1,
-      dimnames = list(NULL, "net_summary")
     ))
   }
 
-  if (prediction_stream == "joint") {
-    return(features)
-  }
-
-  if (prediction_stream %in% edge_signs) {
-    return(features[, summary_column_names[[prediction_stream]], drop = FALSE])
-  }
-
-  stop(
-    "`prediction_stream` must be one of \"joint\", \"positive\", \"negative\".",
-    call. = FALSE
+  list(
+    joint = summaries,
+    positive = summaries[, "positive_summary", drop = FALSE],
+    negative = summaries[, "negative_summary", drop = FALSE]
   )
 }
 
-features_summary <- function(construction_state, conmat = NULL) {
+summary_matrix_from_state <- function(construction_state, conmat = NULL) {
   if (is.null(conmat)) {
     return(construction_state$constructed_features)
   }
@@ -143,8 +113,10 @@ features_summary <- function(construction_state, conmat = NULL) {
   }
 
   feature_matrix_summary(
-    conmat,
-    construction_state$edge_weights
+    conmat = conmat,
+    edge_mask = construction_state$edge_mask,
+    edge_weights = construction_state$edge_weights,
+    weight_scale = construction_state$construction$weight_scale
   )
 }
 
@@ -195,7 +167,42 @@ edge_weights_summary_impl <- function(
   )
 }
 
-feature_matrix_summary <- function(conmat, edge_weights) {
+feature_matrix_summary <- function(
+  conmat,
+  edge_mask,
+  edge_weights = NULL,
+  weight_scale
+) {
+  if (weight_scale == 0) {
+    return(feature_matrix_summary_binary(conmat, edge_mask))
+  }
+
+  feature_matrix_summary_weighted(conmat, edge_weights)
+}
+
+feature_matrix_summary_binary <- function(conmat, edge_mask) {
+  summaries <- matrix(
+    0,
+    nrow = nrow(conmat),
+    ncol = length(summary_columns),
+    dimnames = list(NULL, summary_columns)
+  )
+
+  for (edge_sign in edge_signs) {
+    idx <- which(edge_mask[, edge_sign])
+    if (!length(idx)) {
+      next
+    }
+
+    summaries[, summary_column_names[[edge_sign]]] <- Rfast::rowsums(
+      conmat[, idx, drop = FALSE]
+    )
+  }
+
+  summaries
+}
+
+feature_matrix_summary_weighted <- function(conmat, edge_weights) {
   summaries <- matrix(
     0,
     nrow = nrow(conmat),
@@ -210,14 +217,9 @@ feature_matrix_summary <- function(conmat, edge_weights) {
       next
     }
 
-    active_weights <- weights[idx]
-    summaries[, summary_column_names[[edge_sign]]] <- if (
-      all(active_weights == 1)
-    ) {
-      Rfast::rowsums(conmat[, idx, drop = FALSE])
-    } else {
-      drop(conmat[, idx, drop = FALSE] %*% active_weights)
-    }
+    summaries[, summary_column_names[[edge_sign]]] <- drop(
+      conmat[, idx, drop = FALSE] %*% weights[idx]
+    )
   }
 
   summaries

@@ -6,7 +6,7 @@ test_that("cpm_spec stores staged model parameters", {
       level = 0.05
     ),
     construction = cpm_construction_summary(
-      polarity = "net",
+      sign_mode = "net",
       weight_scale = 0.02,
       standardize_edges = FALSE
     ),
@@ -22,8 +22,7 @@ test_that("cpm_spec stores staged model parameters", {
   expect_identical(spec$selection$criterion, "proportion")
   expect_identical(spec$selection$level, 0.05)
   expect_identical(spec$construction$type, "summary")
-  expect_identical(spec$construction$polarity, "net")
-  expect_identical(spec$construction$prediction_streams, "net")
+  expect_identical(spec$construction$sign_mode, "net")
   expect_identical(spec$construction$weight_scale, 0.02)
   expect_false(spec$construction$standardize_edges)
   expect_identical(spec$model$type, "lm")
@@ -38,7 +37,7 @@ test_that("new_cpm_spec builds cpm_spec objects", {
   )
   construction <- list(
     type = "summary",
-    polarity = "separate",
+    sign_mode = "separate",
     weight_scale = 0,
     standardize_edges = TRUE
   )
@@ -77,11 +76,7 @@ test_that("cpm_spec defaults to classic CPM edge handling", {
   expect_identical(spec$selection$level, 0.01)
   expect_identical(spec$construction$type, "summary")
   expect_s3_class(spec$construction, "cpm_construction_spec")
-  expect_identical(spec$construction$polarity, "separate")
-  expect_identical(
-    spec$construction$prediction_streams,
-    c("joint", "positive", "negative")
-  )
+  expect_identical(spec$construction$sign_mode, "separate")
   expect_identical(spec$construction$weight_scale, 0)
   expect_false(spec$construction$standardize_edges)
   expect_s3_class(spec$model, "cpm_model_spec")
@@ -200,12 +195,12 @@ test_that("cpm_spec validates helper schema instead of class alone", {
   )
 
   bad_construction <- structure(
-    list(type = "summary", polarity = "sideways", weight_scale = 0),
+    list(type = "summary", sign_mode = "sideways", weight_scale = 0),
     class = "cpm_construction_spec"
   )
   expect_error(
     cpm_spec(construction = bad_construction),
-    "`construction$polarity` must be one of \"separate\", \"net\".",
+    "`construction$sign_mode` must be one of \"separate\", \"net\".",
     fixed = TRUE
   )
 
@@ -249,19 +244,6 @@ test_that("helper constructors round-trip through params", {
   expect_identical(format_model_type("custom"), "custom")
 })
 
-test_that("cpm_spec derives prediction streams on finalized construction specs", {
-  separate <- cpm_spec()$construction
-  net <- cpm_spec(
-    construction = cpm_construction_summary(polarity = "net")
-  )$construction
-
-  expect_identical(
-    separate$prediction_streams,
-    c("joint", "positive", "negative")
-  )
-  expect_identical(net$prediction_streams, "net")
-})
-
 test_that("print.cpm_spec shows readable staged settings", {
   spec <- cpm_spec(
     selection = cpm_selection_cor(
@@ -270,7 +252,7 @@ test_that("print.cpm_spec shows readable staged settings", {
       level = 0.1
     ),
     construction = cpm_construction_summary(
-      polarity = "net",
+      sign_mode = "net",
       weight_scale = 0.03,
       standardize_edges = TRUE
     )
@@ -281,7 +263,7 @@ test_that("print.cpm_spec shows readable staged settings", {
   expect_output(print(spec), "Method:\\s+spearman")
   expect_output(print(spec), "Criterion:\\s+absolute")
   expect_output(print(spec), "Construction")
-  expect_output(print(spec), "Polarity:\\s+net")
+  expect_output(print(spec), "Sign mode:\\s+net")
   expect_output(print(spec), "Outcome model:\\s+linear regression")
 })
 
@@ -290,7 +272,7 @@ test_that("net construction yields a single prediction stream", {
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
   spec <- cpm_spec(
-    construction = cpm_construction_summary(polarity = "net")
+    construction = cpm_construction_summary(sign_mode = "net")
   )
 
   result <- fit(spec, conmat = conmat, behav = behav)

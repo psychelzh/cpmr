@@ -82,9 +82,9 @@ assert_construction_spec <- function(x) {
     arg = "`construction$type`"
   )
   normalize_choice(
-    x$polarity,
+    x$sign_mode,
     choices = c("separate", "net"),
-    arg = "`construction$polarity`"
+    arg = "`construction$sign_mode`"
   )
   normalize_weight_scale(
     x$weight_scale,
