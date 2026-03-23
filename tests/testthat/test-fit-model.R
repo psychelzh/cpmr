@@ -135,7 +135,7 @@ test_that("run_edge_selection accepts staged selection specs directly", {
       level = 0.8
     )
   )
-  from_scalars <- run_correlation_edge_selection(
+  from_scalars <- select_edge_mask(
     conmat = conmat,
     behav = behav,
     method = "spearman",
@@ -143,7 +143,7 @@ test_that("run_edge_selection accepts staged selection specs directly", {
     level = 0.8
   )
 
-  expect_equal(from_spec, from_scalars)
+  expect_equal(from_spec$mask, from_scalars)
 })
 
 test_that("fit_split_model and predict_split_model compose correctly", {
@@ -156,32 +156,34 @@ test_that("fit_split_model and predict_split_model compose correctly", {
   rows_train <- 1:8
   rows_test <- 9:12
 
-  training <- prepare_training_data(
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    rows_train = rows_train
+  covariates_train <- covariates[rows_train, , drop = FALSE]
+  conmat_resid <- regress_covariates_by_train(
+    resp_train = conmat[rows_train, , drop = FALSE],
+    resp_test = conmat[rows_test, , drop = FALSE],
+    cov_train = covariates_train,
+    cov_test = covariates[rows_test, , drop = FALSE]
   )
-  assessment <- prepare_assessment_data(
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    rows_train = rows_train,
-    rows_test = rows_test,
-    covariates_train = training$covariates
+  behav_resid <- regress_covariates_by_train(
+    resp_train = behav[rows_train],
+    resp_test = behav[rows_test],
+    cov_train = covariates_train,
+    cov_test = covariates[rows_test, , drop = FALSE]
   )
+  training_conmat <- conmat_resid$train
+  training_behav <- drop(behav_resid$train)
+  assessment_conmat <- conmat_resid$test
 
   edge_selection <- run_edge_selection(
-    conmat = training$conmat,
-    behav = training$behav,
+    conmat = training_conmat,
+    behav = training_behav,
     selection_spec = cpm_selection_cor(
       criterion = "p_value",
       level = 0.1
     )
   )
   model <- fit_split_model(
-    conmat = training$conmat,
-    behav = training$behav,
+    conmat = training_conmat,
+    behav = training_behav,
     edge_selection = edge_selection,
     construction_spec = cpm_spec(
       construction = cpm_construction_summary(
@@ -196,8 +198,12 @@ test_that("fit_split_model and predict_split_model compose correctly", {
   expect_equal(dim(edge_selection$mask), c(p, 2))
   expect_named(model$outcome_models, c("joint", "positive", "negative"))
   expect_equal(
-    dim(predict_split_model(model, assessment$conmat)),
+    dim(predict_split_model(model, assessment_conmat)),
     c(length(rows_test), 3)
+  )
+  expect_equal(
+    predict_split_model(model),
+    predict_split_model(model, training_conmat)
   )
 })
 
@@ -235,34 +241,34 @@ test_that("net sign mode with lm model produces a single stream", {
   expect_equal(dim(pred), c(nrow(conmat), 1))
 })
 
-test_that("joint stream handles aliased empty-sign features", {
-  constructed_features <- cbind(
-    positive_summary = rep(0, 5),
-    negative_summary = 1:5
+test_that("fit_split_model handles aliased empty-sign features", {
+  conmat <- cbind(
+    rep(0, 5),
+    1:5
   )
   behav <- 1:5
-  construction_state <- list(
-    type = "summary",
-    construction = cpm_spec()$construction,
-    center = NULL,
-    scale = NULL,
-    edge_mask = NULL,
-    edge_weights = NULL,
-    constructed_features = constructed_features
+  edge_selection <- list(
+    associations = c(0.3, -0.3),
+    mask = matrix(
+      c(TRUE, FALSE, FALSE, TRUE),
+      ncol = 2,
+      dimnames = list(NULL, c("positive", "negative"))
+    ),
+    thresholds = c(positive = 0.1, negative = 0.1)
   )
-  feature_sets <- construction_features(construction_state)
-  fitted <- fit_outcome_model(
-    features = feature_sets$joint,
+  model <- fit_split_model(
+    conmat = conmat,
     behav = behav,
+    edge_selection = edge_selection,
+    construction_spec = cpm_spec()$construction,
     model_spec = cpm_model_lm()
   )
+  fitted <- model$outcome_models$joint
+  pred <- predict_split_model(model, conmat)
 
   expect_true(is.na(fitted$coefficients[["positive_summary"]]))
   expect_identical(fitted$prediction_coefficients[["positive_summary"]], 0)
-  expect_equal(
-    predict_outcome_model(fitted_model = fitted, features = feature_sets$joint),
-    behav
-  )
+  expect_equal(drop(pred[, "joint"]), behav)
 })
 
 test_that("sigmoid edge weighting yields smooth edge weights", {
@@ -295,23 +301,6 @@ test_that("sigmoid edge weighting yields smooth edge weights", {
   expect_true(all(edge_weights[!edge_selection$mask] <= 0.5))
 })
 
-test_that("edge_weights_summary validates weight scale", {
-  expect_error(
-    edge_weights_summary(
-      associations = c(0.2, -0.3),
-      cutoffs = c(positive = 0.1, negative = 0.1),
-      mask = matrix(
-        c(TRUE, FALSE, FALSE, TRUE),
-        ncol = 2,
-        dimnames = list(NULL, c("positive", "negative"))
-      ),
-      weight_scale = -0.01
-    ),
-    "`weight_scale` must be a single non-negative number.",
-    fixed = TRUE
-  )
-})
-
 test_that("edge_weights_summary returns zeros for infinite cutoffs", {
   expect_equal(
     edge_weights_summary(
@@ -334,7 +323,7 @@ test_that("edge_weights_summary returns zeros for infinite cutoffs", {
   )
 })
 
-test_that("edge_weights_summary_impl returns binary weights when scale is zero", {
+test_that("edge_weights_summary returns binary weights when scale is zero", {
   mask <- matrix(
     c(TRUE, FALSE, FALSE, TRUE),
     ncol = 2,
@@ -342,7 +331,7 @@ test_that("edge_weights_summary_impl returns binary weights when scale is zero",
   )
 
   expect_equal(
-    edge_weights_summary_impl(
+    edge_weights_summary(
       associations = c(0.2, -0.3),
       cutoffs = c(positive = 0.1, negative = 0.1),
       mask = mask,
@@ -356,7 +345,7 @@ test_that("edge_weights_summary_impl returns binary weights when scale is zero",
   )
 })
 
-test_that("feature_matrix_summary_weighted skips empty edge signs", {
+test_that("feature_matrix_summary skips empty edge signs in weighted mode", {
   conmat <- cbind(c(1, 2), c(3, 4))
   edge_weights <- cbind(
     positive = c(0.5, 0),
@@ -364,7 +353,11 @@ test_that("feature_matrix_summary_weighted skips empty edge signs", {
   )
 
   expect_equal(
-    feature_matrix_summary_weighted(conmat, edge_weights),
+    feature_matrix_summary(
+      conmat = conmat,
+      edge_mask = matrix(FALSE, nrow = 2, ncol = 2),
+      edge_weights = edge_weights
+    ),
     cbind(
       positive_summary = c(0.5, 1),
       negative_summary = c(0, 0)
@@ -374,13 +367,12 @@ test_that("feature_matrix_summary_weighted skips empty edge signs", {
 
 test_that("prediction helpers validate unsupported modes", {
   construction_state <- list(
-    type = "summary",
     construction = cpm_spec()$construction,
     center = NULL,
     scale = NULL,
     edge_mask = NULL,
     edge_weights = NULL,
-    constructed_features = cbind(
+    summaries = cbind(
       positive_summary = c(1, 2),
       negative_summary = c(3, 4)
     )
@@ -417,7 +409,7 @@ test_that("prediction helpers validate unsupported modes", {
 
   feature_sets <- construction_features(construction_state)
   expect_named(feature_sets, c("joint", "positive", "negative"))
-  expect_equal(feature_sets$joint, construction_state$constructed_features)
+  expect_equal(feature_sets$joint, construction_state$summaries)
   expect_equal(
     construction_features(construction_state_net)$net,
     matrix(c(-2, -2), ncol = 1, dimnames = list(NULL, "net_summary"))
@@ -433,9 +425,8 @@ test_that("prediction helpers validate unsupported modes", {
   )
 })
 
-test_that("construction_features can recompute summary feature sets for new conmat", {
+test_that("construction_features returns cached summary feature sets", {
   construction_state <- list(
-    type = "summary",
     construction = cpm_spec(
       construction = cpm_construction_summary(sign_mode = "separate")
     )$construction,
@@ -447,19 +438,15 @@ test_that("construction_features can recompute summary feature sets for new conm
       dimnames = list(NULL, c("positive", "negative"))
     ),
     edge_weights = NULL,
-    constructed_features = cbind(
+    summaries = cbind(
       positive_summary = c(1, 2),
       negative_summary = c(3, 4)
     )
   )
-  conmat_new <- cbind(c(10, 20), c(1, 2), c(5, 6))
 
   expect_equal(
-    construction_features(
-      construction_state = construction_state,
-      conmat_new = conmat_new
-    )$joint,
-    cbind(positive_summary = c(10, 20), negative_summary = c(1, 2))
+    construction_features(construction_state)$joint,
+    construction_state$summaries
   )
 })
 

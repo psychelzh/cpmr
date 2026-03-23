@@ -10,34 +10,6 @@ build_construction_state <- function(
   edge_selection,
   construction_spec
 ) {
-  switch(
-    construction_spec$type,
-    summary = build_construction_state_summary(
-      conmat = conmat,
-      edge_selection = edge_selection,
-      construction_spec = construction_spec
-    )
-  )
-}
-
-construction_features <- function(
-  construction_state,
-  conmat_new = NULL
-) {
-  switch(
-    construction_state$type,
-    summary = feature_sets_summary(
-      construction_state = construction_state,
-      conmat = conmat_new
-    )
-  )
-}
-
-build_construction_state_summary <- function(
-  conmat,
-  edge_selection,
-  construction_spec
-) {
   center <- NULL
   scale <- NULL
   if (construction_spec$standardize_edges) {
@@ -47,39 +19,33 @@ build_construction_state_summary <- function(
   }
 
   edge_mask <- edge_selection$mask
-  edge_weights <- if (construction_spec$weight_scale == 0) {
-    NULL
-  } else {
-    edge_weights_summary_impl(
+  weight_scale <- construction_spec$weight_scale
+  edge_weights <- NULL
+  if (weight_scale != 0) {
+    edge_weights <- edge_weights_summary(
       associations = edge_selection$associations,
       cutoffs = edge_selection$thresholds,
       mask = edge_mask,
-      weight_scale = construction_spec$weight_scale
+      weight_scale = weight_scale
     )
   }
 
   list(
-    type = "summary",
     construction = construction_spec,
     center = center,
     scale = scale,
     edge_mask = edge_mask,
     edge_weights = edge_weights,
-    constructed_features = summary_matrix_from_state(
-      list(
-        construction = construction_spec,
-        center = center,
-        scale = scale,
-        edge_mask = edge_mask,
-        edge_weights = edge_weights
-      ),
-      conmat = conmat
+    summaries = feature_matrix_summary(
+      conmat = conmat,
+      edge_mask = edge_mask,
+      edge_weights = edge_weights
     )
   )
 }
 
-feature_sets_summary <- function(construction_state, conmat = NULL) {
-  summaries <- summary_matrix_from_state(construction_state, conmat)
+construction_features <- function(construction_state) {
+  summaries <- construction_state$summaries
 
   if (construction_state$construction$sign_mode == "net") {
     return(list(
@@ -99,48 +65,11 @@ feature_sets_summary <- function(construction_state, conmat = NULL) {
   )
 }
 
-summary_matrix_from_state <- function(construction_state, conmat = NULL) {
-  if (is.null(conmat)) {
-    return(construction_state$constructed_features)
-  }
-
-  if (construction_state$construction$standardize_edges) {
-    conmat <- fscale(
-      conmat,
-      construction_state$center,
-      construction_state$scale
-    )
-  }
-
-  feature_matrix_summary(
-    conmat = conmat,
-    edge_mask = construction_state$edge_mask,
-    edge_weights = construction_state$edge_weights,
-    weight_scale = construction_state$construction$weight_scale
-  )
-}
-
 edge_weights_summary <- function(
   associations,
   cutoffs,
   mask,
   weight_scale = 0
-) {
-  weight_scale <- normalize_weight_scale(weight_scale)
-
-  edge_weights_summary_impl(
-    associations = associations,
-    cutoffs = cutoffs,
-    mask = mask,
-    weight_scale = weight_scale
-  )
-}
-
-edge_weights_summary_impl <- function(
-  associations,
-  cutoffs,
-  mask,
-  weight_scale
 ) {
   if (weight_scale == 0) {
     return(matrix(
@@ -150,76 +79,56 @@ edge_weights_summary_impl <- function(
     ))
   }
 
-  sigmoid_weights <- function(scores, cutoff) {
-    if (!is.finite(cutoff)) {
-      return(rep(0, length(scores)))
-    }
+  positive <- rep(0, length(associations))
+  negative <- rep(0, length(associations))
 
-    weights <- rep(0, length(scores))
-    valid <- !is.na(scores) & scores > 0
-    weights[valid] <- stats::plogis((scores[valid] - cutoff) / weight_scale)
-    weights
+  if (is.finite(cutoffs[["positive"]])) {
+    valid <- !is.na(associations) & associations > 0
+    positive[valid] <- stats::plogis(
+      (associations[valid] - cutoffs[["positive"]]) / weight_scale
+    )
+  }
+  if (is.finite(cutoffs[["negative"]])) {
+    valid <- !is.na(associations) & associations < 0
+    negative[valid] <- stats::plogis(
+      ((-associations[valid]) - cutoffs[["negative"]]) / weight_scale
+    )
   }
 
   cbind(
-    positive = sigmoid_weights(associations, cutoffs[["positive"]]),
-    negative = sigmoid_weights(-associations, cutoffs[["negative"]])
+    positive = positive,
+    negative = negative
   )
 }
 
 feature_matrix_summary <- function(
   conmat,
   edge_mask,
-  edge_weights = NULL,
-  weight_scale
+  edge_weights = NULL
 ) {
-  if (weight_scale == 0) {
-    return(feature_matrix_summary_binary(conmat, edge_mask))
-  }
-
-  feature_matrix_summary_weighted(conmat, edge_weights)
-}
-
-feature_matrix_summary_binary <- function(conmat, edge_mask) {
   summaries <- matrix(
     0,
     nrow = nrow(conmat),
     ncol = length(summary_columns),
     dimnames = list(NULL, summary_columns)
   )
+  weighted <- !is.null(edge_weights)
 
   for (edge_sign in edge_signs) {
-    idx <- which(edge_mask[, edge_sign])
+    if (!weighted) {
+      idx <- which(edge_mask[, edge_sign])
+    } else {
+      idx <- which(edge_weights[, edge_sign] != 0)
+    }
     if (!length(idx)) {
       next
     }
 
-    summaries[, summary_column_names[[edge_sign]]] <- Rfast::rowsums(
-      conmat[, idx, drop = FALSE]
-    )
-  }
-
-  summaries
-}
-
-feature_matrix_summary_weighted <- function(conmat, edge_weights) {
-  summaries <- matrix(
-    0,
-    nrow = nrow(conmat),
-    ncol = length(summary_columns),
-    dimnames = list(NULL, summary_columns)
-  )
-
-  for (edge_sign in edge_signs) {
-    weights <- edge_weights[, edge_sign]
-    idx <- which(weights != 0)
-    if (!length(idx)) {
-      next
+    summaries[, summary_column_names[[edge_sign]]] <- if (!weighted) {
+      Rfast::rowsums(conmat[, idx, drop = FALSE])
+    } else {
+      drop(conmat[, idx, drop = FALSE] %*% edge_weights[idx, edge_sign])
     }
-
-    summaries[, summary_column_names[[edge_sign]]] <- drop(
-      conmat[, idx, drop = FALSE] %*% weights[idx]
-    )
   }
 
   summaries

@@ -12,7 +12,11 @@ run_single_fit <- function(
     covariates = covariates,
     na_action = na_action
   )
-  require_single_fit_cases(context$include_cases)
+  assert_complete_cases(
+    include_cases = context$include_cases,
+    min_cases = 3L,
+    action = "fitting"
+  )
 
   split_fit <- run_fit_split(
     conmat = conmat,
@@ -59,7 +63,11 @@ run_resample_fit <- function(
     covariates = covariates,
     na_action = na_action
   )
-  require_resample_cases(context$include_cases)
+  assert_complete_cases(
+    include_cases = context$include_cases,
+    min_cases = 2L,
+    action = "resampling"
+  )
 
   folds <- resolve_resample_folds(
     resamples = resamples,
@@ -116,23 +124,7 @@ run_resample_fit <- function(
   )
 }
 
-require_single_fit_cases <- function(include_cases) {
-  require_complete_cases_for(
-    include_cases = include_cases,
-    min_cases = 3L,
-    action = "fitting"
-  )
-}
-
-require_resample_cases <- function(include_cases) {
-  require_complete_cases_for(
-    include_cases = include_cases,
-    min_cases = 2L,
-    action = "resampling"
-  )
-}
-
-require_complete_cases_for <- function(include_cases, min_cases, action) {
+assert_complete_cases <- function(include_cases, min_cases, action) {
   if (length(include_cases) == 0L) {
     stop(sprintf("No complete-case observations available for %s.", action))
   }

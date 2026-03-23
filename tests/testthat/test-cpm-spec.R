@@ -559,33 +559,42 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     covariates = covariates[rows_train, , drop = FALSE],
     na_action = "fail"
   )
-  training <- prepare_training_data(
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    rows_train = rows_train
-  )
-  assessment <- prepare_assessment_data(
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    rows_train = rows_train,
-    rows_test = rows_test,
-    covariates_train = training$covariates
+  covariates_train <- covariates[rows_train, , drop = FALSE]
+  training_conmat <- regress_covariates_by_train(
+    resp_train = conmat[rows_train, , drop = FALSE],
+    cov_train = covariates_train
+  )$train
+  training_behav <- drop(regress_covariates_by_train(
+    resp_train = behav[rows_train],
+    cov_train = covariates_train
+  )$train)
+  assessment_conmat <- regress_covariates_by_train(
+    resp_train = conmat[rows_train, , drop = FALSE],
+    resp_test = conmat[rows_test, , drop = FALSE],
+    cov_train = covariates_train,
+    cov_test = covariates[rows_test, , drop = FALSE]
+  )$test
+  assessment_behav <- drop(
+    regress_covariates_by_train(
+      resp_train = behav[rows_train],
+      resp_test = behav[rows_test],
+      cov_train = covariates_train,
+      cov_test = covariates[rows_test, , drop = FALSE]
+    )$test
   )
   fold_edges <- select_edge_mask(
-    conmat = training$conmat,
-    behav = training$behav,
+    conmat = training_conmat,
+    behav = training_behav,
     method = spec$selection$method,
     criterion = spec$selection$criterion,
     level = spec$selection$level
   )
   fold_model <- fit_split_model(
-    conmat = training$conmat,
-    behav = training$behav,
+    conmat = training_conmat,
+    behav = training_behav,
     edge_selection = run_edge_selection(
-      conmat = training$conmat,
-      behav = training$behav,
+      conmat = training_conmat,
+      behav = training_behav,
       selection_spec = spec$selection
     ),
     construction_spec = spec$construction,
@@ -600,7 +609,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     return_edges = "sum",
     na_action = "fail"
   )
-  fold_pred <- predict_split_model(fold_model, assessment$conmat)
+  fold_pred <- predict_split_model(fold_model, assessment_conmat)
   collected <- resampled$predictions
 
   expect_equal(single_fit$edges, fold_edges)
@@ -609,7 +618,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
   expect_equal(single_fit$model$center, fold_model$center)
   expect_equal(single_fit$model$scale, fold_model$scale)
   expect_equal(
-    predict_split_model(single_fit$model, assessment$conmat),
+    predict_split_model(single_fit$model, assessment_conmat),
     fold_pred
   )
   expect_equal(
@@ -617,7 +626,7 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     fold_pred,
     ignore_attr = TRUE
   )
-  expect_equal(collected$observed[rows_test], assessment$behav)
+  expect_equal(collected$observed[rows_test], assessment_behav)
 })
 
 test_that("fit_resamples excludes incomplete rows consistently with covariates", {
