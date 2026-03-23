@@ -104,9 +104,7 @@ fit_split_model <- function(
 }
 
 predict_split_model <- function(model, conmat_new = NULL) {
-  if (is.null(conmat_new)) {
-    feature_sets <- construction_features(model)
-  } else {
+  if (!is.null(conmat_new)) {
     if (model$construction$standardize_edges) {
       conmat_new <- fscale(
         conmat_new,
@@ -115,28 +113,13 @@ predict_split_model <- function(model, conmat_new = NULL) {
       )
     }
 
-    summaries <- feature_matrix_summary(
+    model$summaries <- feature_matrix_summary(
       conmat = conmat_new,
       edge_mask = model$edge_mask,
       edge_weights = model$edge_weights
     )
-    feature_sets <- if (model$construction$sign_mode == "net") {
-      list(
-        net = matrix(
-          summaries[, "positive_summary"] -
-            summaries[, "negative_summary"],
-          ncol = 1,
-          dimnames = list(NULL, "net_summary")
-        )
-      )
-    } else {
-      list(
-        joint = summaries,
-        positive = summaries[, "positive_summary", drop = FALSE],
-        negative = summaries[, "negative_summary", drop = FALSE]
-      )
-    }
   }
+  feature_sets <- construction_features(model)
 
   pred <- matrix(
     nrow = nrow(feature_sets[[1]]),

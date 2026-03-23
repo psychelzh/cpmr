@@ -564,10 +564,12 @@ test_that("fit_resamples fold path matches fit() on the same training subset", {
     resp_train = conmat[rows_train, , drop = FALSE],
     cov_train = covariates_train
   )$train
-  training_behav <- drop(regress_covariates_by_train(
-    resp_train = behav[rows_train],
-    cov_train = covariates_train
-  )$train)
+  training_behav <- drop(
+    regress_covariates_by_train(
+      resp_train = behav[rows_train],
+      cov_train = covariates_train
+    )$train
+  )
   assessment_conmat <- regress_covariates_by_train(
     resp_train = conmat[rows_train, , drop = FALSE],
     resp_test = conmat[rows_test, , drop = FALSE],

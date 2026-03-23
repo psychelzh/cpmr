@@ -43,10 +43,12 @@ test_that("regress_covariates_by_train uses training fit for held-out rows", {
   )
   expect_equal(
     drop(behav_resid$train),
-    drop(regress_covariates_by_train(
-      resp_train = behav[rows_train],
-      cov_train = covariates[rows_train, , drop = FALSE]
-    )$train)
+    drop(
+      regress_covariates_by_train(
+        resp_train = behav[rows_train],
+        cov_train = covariates[rows_train, , drop = FALSE]
+      )$train
+    )
   )
   expect_equal(dim(conmat_resid$test), c(length(rows_test), ncol(conmat)))
   expect_length(drop(behav_resid$test), length(rows_test))
