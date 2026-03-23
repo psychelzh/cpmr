@@ -1,0 +1,4 @@
+interface:
+  display_name: "CPMR R Development"
+  short_description: "Project R package workflow for cpmr"
+  default_prompt: "Use $cpmr-r-development to work on the cpmr package with AIR, devtools, and testthat."
