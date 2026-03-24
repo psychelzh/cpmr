@@ -47,9 +47,24 @@ cpm_spec <- function(
   construction = cpm_construction_summary(),
   model = cpm_model_lm()
 ) {
-  assert_selection_spec(selection)
-  assert_construction_spec(construction)
-  assert_model_spec(model)
+  if (!inherits(selection, "cpm_selection_spec")) {
+    stop(
+      "`selection` must be a `cpm_selection_spec` object.",
+      call. = FALSE
+    )
+  }
+  if (!inherits(construction, "cpm_construction_spec")) {
+    stop(
+      "`construction` must be a `cpm_construction_spec` object.",
+      call. = FALSE
+    )
+  }
+  if (!inherits(model, "cpm_model_spec")) {
+    stop(
+      "`model` must be a `cpm_model_spec` object.",
+      call. = FALSE
+    )
+  }
 
   new_cpm_spec(
     selection = selection,

@@ -3,45 +3,51 @@ run_edge_selection <- function(
   behav,
   selection_spec
 ) {
-  associations <- drop(stats::cor(
-    conmat,
-    behav,
-    method = selection_spec$method
-  ))
-  associations[!is.finite(associations)] <- NA_real_
+  switch(
+    selection_spec$type,
+    cor = {
+      associations <- drop(stats::cor(
+        conmat,
+        behav,
+        method = selection_spec$method
+      ))
+      associations[!is.finite(associations)] <- NA_real_
 
-  thresholds <- switch(
-    selection_spec$criterion,
-    p_value = stats::setNames(
-      rep(
-        critical_r(nrow(conmat), selection_spec$level),
-        length(edge_signs)
-      ),
-      edge_signs
-    ),
-    absolute = stats::setNames(
-      rep(selection_spec$level, length(edge_signs)),
-      edge_signs
-    ),
-    proportion = select_sparsity_thresholds(
-      associations = associations,
-      proportion = selection_spec$level
-    ),
-    stop(
-      paste(
-        "`criterion` must be one of",
-        "\"p_value\", \"absolute\", or \"proportion\"."
+      thresholds <- switch(
+        selection_spec$criterion,
+        p_value = stats::setNames(
+          rep(
+            critical_r(nrow(conmat), selection_spec$level),
+            length(edge_signs)
+          ),
+          edge_signs
+        ),
+        absolute = stats::setNames(
+          rep(selection_spec$level, length(edge_signs)),
+          edge_signs
+        ),
+        proportion = select_sparsity_thresholds(
+          associations = associations,
+          proportion = selection_spec$level
+        ),
+        stop(
+          paste(
+            "`criterion` must be one of",
+            "\"p_value\", \"absolute\", or \"proportion\"."
+          )
+        )
       )
-    )
-  )
 
-  list(
-    associations = associations,
-    thresholds = thresholds,
-    mask = edge_mask_from_cutoffs(
-      associations = associations,
-      cutoffs = thresholds
-    )
+      list(
+        associations = associations,
+        thresholds = thresholds,
+        mask = edge_mask_from_cutoffs(
+          associations = associations,
+          cutoffs = thresholds
+        )
+      )
+    },
+    stop("`selection` must be a supported CPM selection spec.", call. = FALSE)
   )
 }
 
@@ -124,10 +130,13 @@ critical_r <- function(n, alpha) {
       length(alpha) != 1L ||
       is.na(alpha) ||
       !is.finite(alpha) ||
-      alpha <= 0 ||
+      alpha < 0 ||
       alpha > 1
   ) {
-    stop("`alpha` must be a single number in (0, 1].", call. = FALSE)
+    stop("`alpha` must be a single number between 0 and 1.", call. = FALSE)
+  }
+  if (alpha == 0) {
+    return(Inf)
   }
 
   df <- n - 2

@@ -9,9 +9,10 @@ test_that("critical_r matches the t-statistic conversion", {
 })
 
 test_that("critical_r validates alpha bounds", {
+  expect_identical(critical_r(20, 0), Inf)
   expect_error(
-    critical_r(20, 0),
-    "`alpha` must be a single number in (0, 1].",
+    critical_r(20, -0.1),
+    "`alpha` must be a single number between 0 and 1.",
     fixed = TRUE
   )
 })
@@ -31,6 +32,24 @@ test_that("select_edge_mask returns a logical positive/negative mask", {
   expect_equal(dim(edges), c(ncol(conmat), 2))
   expect_type(edges, "logical")
   expect_identical(colnames(edges), c("positive", "negative"))
+})
+
+test_that("p-value selection at zero retains no edges", {
+  withr::local_seed(1)
+  conmat <- matrix(rnorm(60), nrow = 10, ncol = 6)
+  behav <- rnorm(10)
+
+  expect_warning(
+    edges <- select_edge_mask(
+      conmat = conmat,
+      behav = behav,
+      criterion = "p_value",
+      level = 0
+    ),
+    "`level` is at a boundary value (0 or 1); selection may become degenerate.",
+    fixed = TRUE
+  )
+  expect_false(any(edges))
 })
 
 test_that("select_edge_mask warns when proportion selection drops one edge sign", {
@@ -89,11 +108,6 @@ test_that("select_edge_mask validates selection criterion", {
     ),
     "'arg' should be one of",
     fixed = FALSE
-  )
-  expect_error(
-    normalize_selection_level(0.1, criterion = "bogus"),
-    "`criterion` must be a supported selection criterion.",
-    fixed = TRUE
   )
 })
 
@@ -379,18 +393,57 @@ test_that("prediction helpers validate unsupported modes", {
   )
 
   expect_error(
-    assert_construction_spec(
-      structure(
-        list(
-          type = "summary",
-          sign_mode = "bogus",
-          weight_scale = 0,
-          standardize_edges = FALSE
-        ),
+    run_edge_selection(
+      conmat = matrix(1:6, nrow = 3),
+      behav = 1:3,
+      selection_spec = structure(
+        list(type = "bogus"),
+        class = "cpm_selection_spec"
+      )
+    ),
+    "`selection` must be a supported CPM selection spec.",
+    fixed = TRUE
+  )
+  expect_error(
+    build_construction_state(
+      conmat = matrix(1:6, nrow = 3),
+      edge_selection = list(),
+      construction_spec = structure(
+        list(type = "bogus"),
         class = "cpm_construction_spec"
       )
     ),
-    "`construction$sign_mode` must be one of \"separate\", \"net\".",
+    "`construction` must be a supported CPM construction spec.",
+    fixed = TRUE
+  )
+  expect_error(
+    construction_features(
+      utils::modifyList(
+        construction_state,
+        list(
+          construction = structure(
+            list(type = "bogus"),
+            class = "cpm_construction_spec"
+          )
+        )
+      )
+    ),
+    "`construction` must be a supported CPM construction spec.",
+    fixed = TRUE
+  )
+  expect_error(
+    construction_features(
+      utils::modifyList(
+        construction_state,
+        list(
+          construction = structure(
+            list(type = "summary", sign_mode = "bogus"),
+            class = "cpm_construction_spec"
+          )
+        )
+      )
+    ),
+    "`construction$sign_mode` must be a supported summary construction mode.",
     fixed = TRUE
   )
 

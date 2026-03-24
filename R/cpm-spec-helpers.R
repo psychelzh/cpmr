@@ -28,11 +28,23 @@ cpm_selection_cor <- function(
 ) {
   method <- match.arg(method)
   criterion <- match.arg(criterion)
-  normalize_selection_level(
-    level,
-    criterion = criterion,
-    warn_boundary = TRUE
-  )
+  if (
+    !is.numeric(level) ||
+      length(level) != 1L ||
+      is.na(level) ||
+      !is.finite(level)
+  ) {
+    stop("`level` must be a single finite number.", call. = FALSE)
+  }
+  if (level < 0 || level > 1) {
+    stop("`level` must be between 0 and 1.", call. = FALSE)
+  }
+  if (level %in% c(0, 1)) {
+    warning(
+      "`level` is at a boundary value (0 or 1); selection may become degenerate.",
+      call. = FALSE
+    )
+  }
 
   structure(
     list(
@@ -87,8 +99,28 @@ cpm_construction_summary <- function(
   standardize_edges = FALSE
 ) {
   sign_mode <- match.arg(sign_mode)
-  normalize_weight_scale(weight_scale)
-  normalize_standardize_edges(standardize_edges)
+  if (
+    !is.numeric(weight_scale) ||
+      length(weight_scale) != 1L ||
+      is.na(weight_scale) ||
+      !is.finite(weight_scale) ||
+      weight_scale < 0
+  ) {
+    stop(
+      "`weight_scale` must be a single non-negative number.",
+      call. = FALSE
+    )
+  }
+  if (
+    !is.logical(standardize_edges) ||
+      length(standardize_edges) != 1L ||
+      is.na(standardize_edges)
+  ) {
+    stop(
+      "`standardize_edges` must be either TRUE or FALSE.",
+      call. = FALSE
+    )
+  }
 
   structure(
     list(

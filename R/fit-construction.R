@@ -10,58 +10,80 @@ build_construction_state <- function(
   edge_selection,
   construction_spec
 ) {
-  center <- NULL
-  scale <- NULL
-  if (construction_spec$standardize_edges) {
-    center <- Rfast::colmeans(conmat)
-    scale <- Rfast::colVars(conmat, std = TRUE)
-    conmat <- fscale(conmat, center, scale)
-  }
+  switch(
+    construction_spec$type,
+    summary = {
+      center <- NULL
+      scale <- NULL
+      if (construction_spec$standardize_edges) {
+        center <- Rfast::colmeans(conmat)
+        scale <- Rfast::colVars(conmat, std = TRUE)
+        conmat <- fscale(conmat, center, scale)
+      }
 
-  edge_mask <- edge_selection$mask
-  weight_scale <- construction_spec$weight_scale
-  edge_weights <- NULL
-  if (weight_scale != 0) {
-    edge_weights <- edge_weights_summary(
-      associations = edge_selection$associations,
-      cutoffs = edge_selection$thresholds,
-      mask = edge_mask,
-      weight_scale = weight_scale
-    )
-  }
+      edge_mask <- edge_selection$mask
+      weight_scale <- construction_spec$weight_scale
+      edge_weights <- NULL
+      if (weight_scale != 0) {
+        edge_weights <- edge_weights_summary(
+          associations = edge_selection$associations,
+          cutoffs = edge_selection$thresholds,
+          mask = edge_mask,
+          weight_scale = weight_scale
+        )
+      }
 
-  list(
-    construction = construction_spec,
-    center = center,
-    scale = scale,
-    edge_mask = edge_mask,
-    edge_weights = edge_weights,
-    summaries = feature_matrix_summary(
-      conmat = conmat,
-      edge_mask = edge_mask,
-      edge_weights = edge_weights
+      list(
+        construction = construction_spec,
+        center = center,
+        scale = scale,
+        edge_mask = edge_mask,
+        edge_weights = edge_weights,
+        summaries = feature_matrix_summary(
+          conmat = conmat,
+          edge_mask = edge_mask,
+          edge_weights = edge_weights
+        )
+      )
+    },
+    stop(
+      "`construction` must be a supported CPM construction spec.",
+      call. = FALSE
     )
   )
 }
 
 construction_features <- function(construction_state) {
-  summaries <- construction_state$summaries
+  switch(
+    construction_state$construction$type,
+    summary = {
+      summaries <- construction_state$summaries
 
-  if (construction_state$construction$sign_mode == "net") {
-    return(list(
-      net = matrix(
-        summaries[, "positive_summary"] -
-          summaries[, "negative_summary"],
-        ncol = 1,
-        dimnames = list(NULL, "net_summary")
+      switch(
+        construction_state$construction$sign_mode,
+        net = list(
+          net = matrix(
+            summaries[, "positive_summary"] -
+              summaries[, "negative_summary"],
+            ncol = 1,
+            dimnames = list(NULL, "net_summary")
+          )
+        ),
+        separate = list(
+          joint = summaries,
+          positive = summaries[, "positive_summary", drop = FALSE],
+          negative = summaries[, "negative_summary", drop = FALSE]
+        ),
+        stop(
+          "`construction$sign_mode` must be a supported summary construction mode.",
+          call. = FALSE
+        )
       )
-    ))
-  }
-
-  list(
-    joint = summaries,
-    positive = summaries[, "positive_summary", drop = FALSE],
-    negative = summaries[, "negative_summary", drop = FALSE]
+    },
+    stop(
+      "`construction` must be a supported CPM construction spec.",
+      call. = FALSE
+    )
   )
 }
 

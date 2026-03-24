@@ -85,7 +85,7 @@ test_that("cpm_spec defaults to classic CPM edge handling", {
 test_that("helper constructors validate scalar parameter values", {
   expect_error(
     cpm_selection_cor(level = -0.1),
-    "`level` must be in (0, 1] when `criterion = \"p_value\"`.",
+    "`level` must be between 0 and 1.",
     fixed = TRUE
   )
   expect_error(
@@ -95,57 +95,42 @@ test_that("helper constructors validate scalar parameter values", {
   )
   expect_error(
     cpm_selection_cor(criterion = "absolute", level = -0.1),
-    "`level` must be between 0 and 1 when `criterion = \"absolute\"`.",
+    "`level` must be between 0 and 1.",
     fixed = TRUE
   )
   expect_error(
     cpm_selection_cor(criterion = "proportion", level = 1.1),
-    "`level` must be between 0 and 1 when `criterion = \"proportion\"`.",
+    "`level` must be between 0 and 1.",
     fixed = TRUE
   )
-  expect_error(
+  expect_warning(
     cpm_selection_cor(level = 0),
-    "`level` must be in (0, 1] when `criterion = \"p_value\"`.",
+    "`level` is at a boundary value (0 or 1); selection may become degenerate.",
     fixed = TRUE
   )
   expect_warning(
     cpm_selection_cor(level = 1),
-    paste(
-      "`level = 1` with `criterion = \"p_value\"` effectively",
-      "disables p-value filtering."
-    ),
+    "`level` is at a boundary value (0 or 1); selection may become degenerate.",
     fixed = TRUE
   )
   expect_warning(
     cpm_selection_cor(criterion = "absolute", level = 0),
-    paste(
-      "`level = 0` with `criterion = \"absolute\"` effectively",
-      "disables absolute-correlation filtering."
-    ),
+    "`level` is at a boundary value (0 or 1); selection may become degenerate.",
     fixed = TRUE
   )
   expect_warning(
     cpm_selection_cor(criterion = "absolute", level = 1),
-    paste(
-      "`level = 1` with `criterion = \"absolute\"` retains only",
-      "perfect absolute-correlation edges."
-    ),
+    "`level` is at a boundary value (0 or 1); selection may become degenerate.",
     fixed = TRUE
   )
   expect_warning(
     cpm_selection_cor(criterion = "proportion", level = 0),
-    paste(
-      "`level = 0` with `criterion = \"proportion\"` retains no",
-      "edges by design."
-    ),
+    "`level` is at a boundary value (0 or 1); selection may become degenerate.",
     fixed = TRUE
   )
   expect_warning(
     cpm_selection_cor(criterion = "proportion", level = 1),
-    paste(
-      "`level = 1` with `criterion = \"proportion\"` retains all",
-      "eligible edges."
-    ),
+    "`level` is at a boundary value (0 or 1); selection may become degenerate.",
     fixed = TRUE
   )
   expect_error(
@@ -165,77 +150,44 @@ test_that("helper constructors validate scalar parameter values", {
   )
   expect_error(
     cpm_spec(selection = list()),
-    "`selection` must be created by `cpm_selection_cor()`.",
+    "`selection` must be a `cpm_selection_spec` object.",
     fixed = TRUE
   )
   expect_error(
     cpm_spec(construction = list()),
-    paste(
-      "`construction` must be created by",
-      "`cpm_construction_summary()`."
-    ),
+    "`construction` must be a `cpm_construction_spec` object.",
     fixed = TRUE
   )
   expect_error(
     cpm_spec(model = list()),
-    "`model` must be created by `cpm_model_lm()`.",
+    "`model` must be a `cpm_model_spec` object.",
     fixed = TRUE
   )
 })
 
-test_that("cpm_spec validates helper schema instead of class alone", {
-  bad_selection <- structure(
-    list(type = "cor"),
+test_that("cpm_spec checks stage classes without unpacking stage internals", {
+  custom_selection <- structure(
+    list(type = "custom_selection"),
     class = "cpm_selection_spec"
   )
-  expect_error(
-    cpm_spec(selection = bad_selection),
-    "`selection$method` must be one of \"pearson\", \"spearman\".",
-    fixed = TRUE
-  )
-
-  bad_construction <- structure(
-    list(type = "summary", sign_mode = "sideways", weight_scale = 0),
+  custom_construction <- structure(
+    list(type = "custom_construction"),
     class = "cpm_construction_spec"
   )
-  expect_error(
-    cpm_spec(construction = bad_construction),
-    "`construction$sign_mode` must be one of \"separate\", \"net\".",
-    fixed = TRUE
-  )
-
-  bad_model <- structure(
-    list(type = "glm"),
+  custom_model <- structure(
+    list(type = "custom_model"),
     class = "cpm_model_spec"
   )
-  expect_error(
-    cpm_spec(model = bad_model),
-    "`model$type` must be one of \"lm\".",
-    fixed = TRUE
-  )
-})
 
-test_that("assert_cpm_component checks message-builder inputs", {
-  valid_selection <- cpm_selection_cor()
+  spec <- cpm_spec(
+    selection = custom_selection,
+    construction = custom_construction,
+    model = custom_model
+  )
 
-  expect_error(
-    assert_cpm_component(
-      valid_selection,
-      component = c("selection", "construction"),
-      constructor = "cpm_selection_cor"
-    ),
-    "`component` must be a single string.",
-    fixed = TRUE
-  )
-  expect_error(
-    assert_cpm_component(
-      valid_selection,
-      component = "selection",
-      constructor = NA_character_
-    ),
-    "`constructor` must be a single string.",
-    fixed = TRUE
-  )
+  expect_identical(spec$selection, custom_selection)
+  expect_identical(spec$construction, custom_construction)
+  expect_identical(spec$model, custom_model)
 })
 
 test_that("helper constructors round-trip through params", {
