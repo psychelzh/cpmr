@@ -21,20 +21,6 @@
 #' @name cpm
 NULL
 
-new_cpm <- function(call, spec, settings, predictions, edges, model) {
-  structure(
-    list(
-      call = call,
-      spec = spec,
-      settings = settings,
-      predictions = predictions,
-      edges = edges,
-      model = model
-    ),
-    class = "cpm"
-  )
-}
-
 #' @export
 print.cpm <- function(x, ...) {
   cat("CPM fit:\n")

@@ -24,36 +24,6 @@ test_that("print.cpm_resamples reports summary fields", {
   expect_output(print(res), "Use summary\\(\\) for aggregate metrics")
 })
 
-test_that("new_cpm_resamples builds resampling objects", {
-  spec <- cpm_spec()
-  edges <- matrix(
-    c(TRUE, FALSE, FALSE, TRUE),
-    ncol = 2,
-    dimnames = list(NULL, c("positive", "negative"))
-  )
-  predictions <- data.frame(
-    row = 1:2,
-    fold = 1L,
-    observed = c(1, 2),
-    joint = c(1.1, 1.9),
-    positive = c(1.0, 2.0),
-    negative = c(0.9, 2.1)
-  )
-
-  resamples_object <- new_cpm_resamples(
-    call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
-    spec = spec,
-    settings = list(return_edges = "sum"),
-    predictions = predictions,
-    edges = edges,
-    folds = list(1:2)
-  )
-
-  expect_s3_class(resamples_object, "cpm_resamples")
-  expect_identical(as.character(resamples_object$call[[1]]), "fit_resamples")
-  expect_identical(resamples_object$predictions, predictions)
-})
-
 test_that("print.cpm_resamples uses human-readable edge storage labels", {
   x <- structure(
     list(

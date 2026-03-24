@@ -47,29 +47,17 @@ cpm_spec <- function(
   construction = cpm_construction_summary(),
   model = cpm_model_lm()
 ) {
-  if (!inherits(selection, "cpm_selection_spec")) {
-    stop(
-      "`selection` must be a `cpm_selection_spec` object.",
-      call. = FALSE
-    )
-  }
-  if (!inherits(construction, "cpm_construction_spec")) {
-    stop(
-      "`construction` must be a `cpm_construction_spec` object.",
-      call. = FALSE
-    )
-  }
-  if (!inherits(model, "cpm_model_spec")) {
-    stop(
-      "`model` must be a `cpm_model_spec` object.",
-      call. = FALSE
-    )
-  }
+  assert_spec_class(selection, "selection", "cpm_selection_spec")
+  assert_spec_class(construction, "construction", "cpm_construction_spec")
+  assert_spec_class(model, "model", "cpm_model_spec")
 
-  new_cpm_spec(
-    selection = selection,
-    construction = construction,
-    model = model
+  structure(
+    list(
+      selection = selection,
+      construction = construction,
+      model = model
+    ),
+    class = "cpm_spec"
   )
 }
 
@@ -180,13 +168,11 @@ fit_resamples.cpm_spec <- function(
   )
 }
 
-new_cpm_spec <- function(selection, construction, model) {
-  structure(
-    list(
-      selection = selection,
-      construction = construction,
-      model = model
-    ),
-    class = "cpm_spec"
-  )
+assert_spec_class <- function(x, arg, class) {
+  if (!inherits(x, class)) {
+    stop(
+      sprintf("`%s` must be a `%s` object.", arg, class),
+      call. = FALSE
+    )
+  }
 }

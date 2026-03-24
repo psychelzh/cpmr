@@ -134,17 +134,20 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
   )
   folds <- list(1:3, 4:6)
   summary_result <- summary(
-    new_cpm_resamples(
-      call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
-      spec = cpm_spec(),
-      settings = list(return_edges = "sum"),
-      predictions = predictions,
-      edges = matrix(
-        c(2, 0, 1, 2),
-        ncol = 2,
-        dimnames = list(NULL, c("positive", "negative"))
+    structure(
+      list(
+        call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
+        spec = cpm_spec(),
+        settings = list(return_edges = "sum"),
+        predictions = predictions,
+        edges = matrix(
+          c(2, 0, 1, 2),
+          ncol = 2,
+          dimnames = list(NULL, c("positive", "negative"))
+        ),
+        folds = folds
       ),
-      folds = folds
+      class = "cpm_resamples"
     )
   )
   fold_correlations <- compute_fold_metric_table(
@@ -228,20 +231,23 @@ test_that("summary.cpm_resamples reports pooled errors, correlations, and edge r
 
 test_that("summary.cpm_resamples returns NULL edges when resamples did not store them", {
   summary_result <- summary(
-    new_cpm_resamples(
-      call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
-      spec = cpm_spec(),
-      settings = list(return_edges = "none"),
-      predictions = data.frame(
-        row = 1:4,
-        fold = c(1L, 1L, 2L, 2L),
-        observed = c(NA_real_, NA_real_, NA_real_, NA_real_),
-        joint = c(1, 2, 3, 4),
-        positive = c(1, 2, 3, 4),
-        negative = c(4, 3, 2, 1)
+    structure(
+      list(
+        call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
+        spec = cpm_spec(),
+        settings = list(return_edges = "none"),
+        predictions = data.frame(
+          row = 1:4,
+          fold = c(1L, 1L, 2L, 2L),
+          observed = c(NA_real_, NA_real_, NA_real_, NA_real_),
+          joint = c(1, 2, 3, 4),
+          positive = c(1, 2, 3, 4),
+          negative = c(4, 3, 2, 1)
+        ),
+        edges = NULL,
+        folds = list(1:2, 3:4)
       ),
-      edges = NULL,
-      folds = list(1:2, 3:4)
+      class = "cpm_resamples"
     )
   )
 
@@ -325,13 +331,16 @@ test_that("summary.cpm_resamples supports configurable correlation methods", {
   folds <- list(1:3, 4:6)
 
   summary_result <- summary(
-    new_cpm_resamples(
-      call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
-      spec = cpm_spec(),
-      settings = list(return_edges = "none"),
-      predictions = predictions,
-      edges = NULL,
-      folds = folds
+    structure(
+      list(
+        call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
+        spec = cpm_spec(),
+        settings = list(return_edges = "none"),
+        predictions = predictions,
+        edges = NULL,
+        folds = folds
+      ),
+      class = "cpm_resamples"
     ),
     method = "spearman"
   )
@@ -368,20 +377,23 @@ test_that("summary.cpm_resamples averages fold-wise edges when all edges are sto
   )
 
   summary_result <- summary(
-    new_cpm_resamples(
-      call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
-      spec = cpm_spec(),
-      settings = list(return_edges = "all"),
-      predictions = data.frame(
-        row = 1:4,
-        fold = c(1L, 1L, 2L, 2L),
-        observed = c(1, 2, 3, 4),
-        joint = c(1, 2, 3, 4),
-        positive = c(1, 2, 3, 4),
-        negative = c(4, 3, 2, 1)
+    structure(
+      list(
+        call = quote(fit_resamples(spec, conmat = conmat, behav = behav)),
+        spec = cpm_spec(),
+        settings = list(return_edges = "all"),
+        predictions = data.frame(
+          row = 1:4,
+          fold = c(1L, 1L, 2L, 2L),
+          observed = c(1, 2, 3, 4),
+          joint = c(1, 2, 3, 4),
+          positive = c(1, 2, 3, 4),
+          negative = c(4, 3, 2, 1)
+        ),
+        edges = stored_edges,
+        folds = list(1:2, 3:4)
       ),
-      edges = stored_edges,
-      folds = list(1:2, 3:4)
+      class = "cpm_resamples"
     )
   )
 

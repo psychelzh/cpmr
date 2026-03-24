@@ -28,33 +28,6 @@ test_that("cpm_spec stores staged model parameters", {
   expect_identical(spec$model$type, "lm")
 })
 
-test_that("new_cpm_spec builds cpm_spec objects", {
-  selection <- list(
-    type = "cor",
-    method = "pearson",
-    criterion = "p_value",
-    level = 0.05
-  )
-  construction <- list(
-    type = "summary",
-    sign_mode = "separate",
-    weight_scale = 0,
-    standardize_edges = TRUE
-  )
-  model <- list(type = "lm")
-
-  spec <- new_cpm_spec(
-    selection = selection,
-    construction = construction,
-    model = model
-  )
-
-  expect_s3_class(spec, "cpm_spec")
-  expect_identical(spec$selection, selection)
-  expect_identical(spec$construction, construction)
-  expect_identical(spec$model, model)
-})
-
 test_that("fit.cpm_spec returns a cpm object with correct call", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)

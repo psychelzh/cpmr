@@ -33,16 +33,19 @@ run_single_fit <- function(
     split_fit = split_fit
   )
 
-  new_cpm(
-    call = call,
-    spec = object,
-    settings = list(
-      covariates = !is.null(context$covariates),
-      na_action = context$na_action
+  structure(
+    list(
+      call = call,
+      spec = object,
+      settings = list(
+        covariates = !is.null(context$covariates),
+        na_action = context$na_action
+      ),
+      predictions = predictions,
+      edges = split_fit$edge_selection$mask,
+      model = split_fit$fitted_model
     ),
-    predictions = predictions,
-    edges = split_fit$edge_selection$mask,
-    model = split_fit$fitted_model
+    class = "cpm"
   )
 }
 
@@ -110,17 +113,20 @@ run_resample_fit <- function(
     split_results = split_results
   )
 
-  new_cpm_resamples(
-    call = call,
-    spec = object,
-    settings = list(
-      covariates = !is.null(context$covariates),
-      na_action = context$na_action,
-      return_edges = return_edges
+  structure(
+    list(
+      call = call,
+      spec = object,
+      settings = list(
+        covariates = !is.null(context$covariates),
+        na_action = context$na_action,
+        return_edges = return_edges
+      ),
+      predictions = predictions,
+      edges = edges,
+      folds = folds
     ),
-    predictions = predictions,
-    edges = edges,
-    folds = folds
+    class = "cpm_resamples"
   )
 }
 

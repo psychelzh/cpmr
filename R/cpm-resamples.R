@@ -22,27 +22,6 @@
 #' @name cpm_resamples
 NULL
 
-new_cpm_resamples <- function(
-  call,
-  spec,
-  settings,
-  predictions,
-  edges,
-  folds
-) {
-  structure(
-    list(
-      call = call,
-      spec = spec,
-      settings = settings,
-      predictions = predictions,
-      edges = edges,
-      folds = folds
-    ),
-    class = "cpm_resamples"
-  )
-}
-
 #' @export
 print.cpm_resamples <- function(x, ...) {
   cat("CPM resamples:\n")
