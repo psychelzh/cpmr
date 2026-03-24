@@ -1,4 +1,4 @@
 interface:
-  display_name: "CPMR R Development"
-  short_description: "Project R package workflow for cpmr"
-  default_prompt: "Use $cpmr-r-development to work on the cpmr package with AIR, devtools, and testthat."
+  display_name: "CPMR Package Development"
+  short_description: "cpmr workflow with staged specs and quality gates"
+  default_prompt: "Use $cpmr-r-development to work on the cpmr package with staged CPM specs, AIR formatting, 100% coverage, and a final devtools::check()."

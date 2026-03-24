@@ -1,6 +1,6 @@
 ---
 name: cpmr-r-development
-description: Work on the cpmr R package in this repository. Use when editing cpmr package code, tests, or documentation, especially around the staged selection/construction/model architecture, AIR-based formatting, devtools workflows, and testthat coverage.
+description: Work on the cpmr R package in this repository. Use when editing package code, tests, documentation, or repo-managed package workflow guidance, especially for the staged selection/construction/model architecture, AIR formatting, devtools::document()/devtools::test(), restoring package coverage to 100%, and finishing with devtools::check().
 ---
 
 # CPMR R Development
@@ -64,7 +64,26 @@ After R code changes, run:
 ```r
 devtools::document()
 devtools::test()
+cov <- covr::package_coverage()
+print(cov)
+if (covr::percent_coverage(cov) < 100) {
+  stop(
+    sprintf(
+      "Coverage must remain at 100%% (current: %.3f%%).",
+      covr::percent_coverage(cov)
+    )
+  )
+}
+devtools::check()
 ```
+
+Do not stop at green tests alone. This repo expects package coverage to remain
+at `100%`; if coverage drops below `100%`, add or adjust tests before
+finishing, or report the blocker explicitly. Once coverage is back to `100%`,
+run `devtools::check()` as the final package gate, because it catches build,
+install, documentation, and example issues that unit tests alone can miss.
+When coverage is below `100%`, inspect `covr::zero_coverage(cov)` to locate the
+uncovered lines before adding tests.
 
 For narrower iteration loops, use:
 
