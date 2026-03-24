@@ -44,6 +44,9 @@ When simplifying code in this repo:
 - Put validation and normalization at public constructors or convenience
   wrappers, not deep in internal runtime helpers that already receive parsed
   specs.
+- When a private helper is still worth keeping, place it after the main
+  function(s) it supports so the file reads top-down from public flow to
+  implementation detail.
 - Preserve training-time caches when prediction reuses training data.
 - Keep names literal and stage-based instead of introducing abstract temporary
   state.
