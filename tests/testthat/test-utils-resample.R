@@ -31,9 +31,9 @@ test_that("assert_normalized_resample_folds only checks normalized fold contract
   )
 })
 
-test_that("crossv_kfold partitions inputs into non-overlapping folds", {
+test_that("make_kfold_assessment_folds partitions inputs into non-overlapping folds", {
   withr::local_seed(123)
-  folds <- crossv_kfold(1:6, 3)
+  folds <- make_kfold_assessment_folds(1:6, 3)
 
   expect_length(folds, 3)
   expect_identical(sort(unlist(folds, use.names = FALSE)), 1:6)

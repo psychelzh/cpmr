@@ -30,10 +30,10 @@ test_that("resolve_include_cases returns intersection in exclude mode", {
   expect_identical(include_cases, 4:10)
 })
 
-test_that("check_names errors when names do not match", {
+test_that("check_case_names_match errors when names do not match", {
   x <- matrix(1:10, nrow = 2, dimnames = list(c("a", "b"), NULL))
   y <- stats::setNames(1:2, c("a", "c"))
 
-  expect_error(check_names(x, y), "must match")
-  expect_silent(check_names(x, 1:2))
+  expect_error(check_case_names_match(x, y), "must match")
+  expect_silent(check_case_names_match(x, 1:2))
 })

@@ -15,7 +15,7 @@ assemble_single_predictions <- function(
   pred[include_cases, ] <- split_fit$predictions
 
   observed[include_cases] <- split_fit$observed
-  new_predictions(observed, pred)
+  prediction_frame(observed, pred)
 }
 
 assemble_fold_predictions <- function(observed, folds, split_results) {
@@ -36,10 +36,10 @@ assemble_fold_predictions <- function(observed, folds, split_results) {
     fold_id[rows_test] <- fold
   }
 
-  new_predictions(observed, pred, fold = fold_id)
+  prediction_frame(observed, pred, fold = fold_id)
 }
 
-new_predictions <- function(observed, pred, fold = NULL) {
+prediction_frame <- function(observed, pred, fold = NULL) {
   prediction_streams <- colnames(pred)
   predictions <- data.frame(
     row = seq_along(observed),

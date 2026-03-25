@@ -61,7 +61,7 @@ test_that("run_resample_fit matches fit_resamples() outputs", {
   call <- quote(fit_resamples(object = spec, conmat = conmat, behav = behav))
 
   withr::local_seed(999)
-  folds <- crossv_kfold(seq_along(behav), 5)
+  folds <- make_kfold_assessment_folds(seq_along(behav), 5)
 
   withr::local_seed(999)
   internal_result <- run_resample_fit(

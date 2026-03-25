@@ -1,4 +1,4 @@
-run_fit_split <- function(
+fit_split <- function(
   conmat,
   behav,
   covariates,

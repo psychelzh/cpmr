@@ -18,7 +18,7 @@ run_single_fit <- function(
     action = "fitting"
   )
 
-  split_fit <- run_fit_split(
+  split_fit <- fit_split(
     conmat = conmat,
     behav = context$behav,
     covariates = context$covariates,
@@ -88,7 +88,7 @@ run_resample_fit <- function(
     rows_test <- folds[[fold]]
     rows_train <- setdiff(context$include_cases, rows_test)
 
-    split_results[[fold]] <- run_fit_split(
+    split_results[[fold]] <- fit_split(
       conmat = conmat,
       behav = context$behav,
       covariates = context$covariates,

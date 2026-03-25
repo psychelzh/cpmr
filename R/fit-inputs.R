@@ -31,7 +31,7 @@ normalize_inputs <- function(conmat, behav, covariates = NULL) {
   if (nrow(conmat) != length(behav)) {
     stop("The number of observations in `conmat` and `behav` must match.")
   }
-  check_names(conmat, behav)
+  check_case_names_match(conmat, behav)
 
   if (!is.null(covariates)) {
     if (is.vector(covariates)) {
@@ -40,7 +40,7 @@ normalize_inputs <- function(conmat, behav, covariates = NULL) {
     if (nrow(covariates) != length(behav)) {
       stop("The number of observations in `covariates` and `behav` must match.")
     }
-    check_names(covariates, behav)
+    check_case_names_match(covariates, behav)
   }
 
   list(
@@ -76,7 +76,7 @@ resolve_include_cases <- function(conmat, behav, covariates, na_action) {
   )
 }
 
-check_names <- function(data, behav) {
+check_case_names_match <- function(data, behav) {
   if (!is.null(rownames(data)) && !is.null(names(behav))) {
     if (!identical(rownames(data), names(behav))) {
       stop(

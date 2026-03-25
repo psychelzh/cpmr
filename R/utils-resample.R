@@ -1,7 +1,7 @@
 resolve_resample_folds <- function(resamples, include_cases) {
   if (is.null(resamples)) {
     n_folds <- length(include_cases)
-    folds <- crossv_kfold(include_cases, n_folds)
+    folds <- make_kfold_assessment_folds(include_cases, n_folds)
   } else if (is.list(resamples)) {
     folds <- normalize_manual_resamples(resamples, include_cases)
     n_folds <- length(folds)
@@ -15,7 +15,7 @@ resolve_resample_folds <- function(resamples, include_cases) {
         )
       )
     }
-    folds <- crossv_kfold(include_cases, n_folds)
+    folds <- make_kfold_assessment_folds(include_cases, n_folds)
   }
 
   train_sizes <- length(include_cases) - lengths(folds)
@@ -31,7 +31,7 @@ resolve_resample_folds <- function(resamples, include_cases) {
   )
 }
 
-crossv_kfold <- function(x, k) {
+make_kfold_assessment_folds <- function(x, k) {
   split(sample(x), cut(seq_along(x), breaks = k, labels = FALSE))
 }
 
