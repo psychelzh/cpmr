@@ -1,0 +1,4 @@
+interface:
+  display_name: "R API Design"
+  short_description: "Tidyverse-inspired R API and function design guidance"
+  default_prompt: "Use $r-api-design to refine R function names, arguments, defaults, helper layers, outputs, side effects, and errors with tidyverse-inspired design principles."

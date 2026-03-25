@@ -12,3 +12,5 @@ docs
 .agents/skills/*
 !.agents/skills/cpmr-r-development/
 !.agents/skills/cpmr-r-development/**
+!.agents/skills/r-api-design/
+!.agents/skills/r-api-design/**
