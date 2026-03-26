@@ -6,30 +6,26 @@ run_single_fit <- function(
   na_action = c("fail", "exclude"),
   call = NULL
 ) {
-  context <- resolve_data_context(
+  inputs <- prepare_runner_inputs(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    na_action = na_action
-  )
-  assert_complete_cases(
-    include_cases = context$include_cases,
-    min_cases = 3L,
+    na_action = na_action,
     action = "fitting"
   )
 
   split_fit <- fit_split(
     conmat = conmat,
-    behav = context$behav,
-    covariates = context$covariates,
-    rows_train = context$include_cases,
+    behav = inputs$behav,
+    covariates = inputs$covariates,
+    rows_train = inputs$include_cases,
     selection_spec = object$selection,
     construction_spec = object$construction,
     model_spec = object$model
   )
   predictions <- assemble_single_predictions(
-    observed = context$behav,
-    include_cases = context$include_cases,
+    observed = inputs$behav,
+    include_cases = inputs$include_cases,
     split_fit = split_fit
   )
 
@@ -38,8 +34,8 @@ run_single_fit <- function(
       call = call,
       spec = object,
       settings = list(
-        covariates = !is.null(context$covariates),
-        na_action = context$na_action
+        covariates = !is.null(inputs$covariates),
+        na_action = inputs$na_action
       ),
       predictions = predictions,
       edges = split_fit$edge_selection$mask,
@@ -60,23 +56,18 @@ run_resample_fit <- function(
   call = NULL
 ) {
   return_edges <- match.arg(return_edges)
-  context <- resolve_data_context(
+  inputs <- prepare_runner_inputs(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    na_action = na_action
-  )
-  assert_complete_cases(
-    include_cases = context$include_cases,
-    min_cases = 2L,
+    na_action = na_action,
     action = "resampling"
   )
 
   folds <- resolve_resample_folds(
     resamples = resamples,
-    include_cases = context$include_cases
-  )$folds
-  folds <- assert_normalized_resample_folds(folds)
+    include_cases = inputs$include_cases
+  )
   n_folds <- length(folds)
 
   warn_large_edge_storage(ncol(conmat), n_folds, return_edges)
@@ -86,12 +77,12 @@ run_resample_fit <- function(
 
   for (fold in seq_len(n_folds)) {
     rows_test <- folds[[fold]]
-    rows_train <- setdiff(context$include_cases, rows_test)
+    rows_train <- setdiff(inputs$include_cases, rows_test)
 
     split_results[[fold]] <- fit_split(
       conmat = conmat,
-      behav = context$behav,
-      covariates = context$covariates,
+      behav = inputs$behav,
+      covariates = inputs$covariates,
       rows_train = rows_train,
       rows_test = rows_test,
       selection_spec = object$selection,
@@ -108,7 +99,7 @@ run_resample_fit <- function(
   }
 
   predictions <- assemble_fold_predictions(
-    observed = context$behav,
+    observed = inputs$behav,
     folds = folds,
     split_results = split_results
   )
@@ -118,8 +109,8 @@ run_resample_fit <- function(
       call = call,
       spec = object,
       settings = list(
-        covariates = !is.null(context$covariates),
-        na_action = context$na_action,
+        covariates = !is.null(inputs$covariates),
+        na_action = inputs$na_action,
         return_edges = return_edges
       ),
       predictions = predictions,
@@ -128,21 +119,6 @@ run_resample_fit <- function(
     ),
     class = "cpm_resamples"
   )
-}
-
-assert_complete_cases <- function(include_cases, min_cases, action) {
-  if (length(include_cases) == 0L) {
-    stop(sprintf("No complete-case observations available for %s.", action))
-  }
-  if (length(include_cases) < min_cases) {
-    stop(sprintf(
-      "At least %d complete-case observations are required for %s.",
-      min_cases,
-      action
-    ))
-  }
-
-  invisible(include_cases)
 }
 
 init_edge_storage <- function(return_edges, conmat, n_folds) {
@@ -170,5 +146,36 @@ update_edge_storage <- function(edges, return_edges, fold, edge_mask) {
     },
     sum = edges + edge_mask,
     none = edges
+  )
+}
+
+prepare_runner_inputs <- function(
+  conmat,
+  behav,
+  covariates,
+  na_action,
+  action
+) {
+  na_action <- match.arg(na_action, c("fail", "exclude"))
+  inputs <- normalize_inputs(conmat, behav, covariates)
+  include_cases <- complete_case_rows(
+    conmat = conmat,
+    behav = inputs$behav,
+    covariates = inputs$covariates,
+    na_action = na_action
+  )
+
+  if (length(include_cases) == 0L) {
+    stop(
+      sprintf("No complete-case observations available for %s.", action),
+      call. = FALSE
+    )
+  }
+
+  list(
+    behav = inputs$behav,
+    covariates = inputs$covariates,
+    include_cases = include_cases,
+    na_action = na_action
   )
 }

@@ -8,6 +8,13 @@ fit_split <- function(
   model_spec,
   rows_test = NULL
 ) {
+  if (length(rows_train) < 3L) {
+    stop(
+      "CPM fitting requires at least 3 training observations.",
+      call. = FALSE
+    )
+  }
+
   conmat_train <- conmat[rows_train, , drop = FALSE]
   behav_train <- behav[rows_train]
   conmat_test <- NULL

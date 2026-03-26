@@ -16,21 +16,6 @@ test_that("normalize_manual_resamples rejects malformed assessment sets", {
   )
 })
 
-test_that("assert_normalized_resample_folds only checks normalized fold contracts", {
-  expect_invisible(assert_normalized_resample_folds(list(1:2, 3:4)))
-
-  expect_error(
-    assert_normalized_resample_folds(list(1:2)),
-    "at least 2 assessment index vectors",
-    fixed = FALSE
-  )
-  expect_error(
-    assert_normalized_resample_folds(list(c(1L, 1L), 2:3)),
-    "without duplicates",
-    fixed = FALSE
-  )
-})
-
 test_that("make_kfold_assessment_folds partitions inputs into non-overlapping folds", {
   withr::local_seed(123)
   folds <- make_kfold_assessment_folds(1:6, 3)
@@ -47,9 +32,8 @@ test_that("resolve_resample_folds generates and validates public folds", {
     resamples = 5,
     include_cases = include_cases
   )
-  expect_identical(resolved$n_folds, 5L)
   expect_identical(
-    sort(unlist(resolved$folds, use.names = FALSE)),
+    sort(unlist(resolved, use.names = FALSE)),
     include_cases
   )
 
@@ -57,17 +41,26 @@ test_that("resolve_resample_folds generates and validates public folds", {
     resamples = list(1L, 2L, 3L, 4L, 5L),
     include_cases = include_cases
   )
-  expect_identical(explicit$n_folds, 5L)
-  expect_identical(explicit$folds, list(1L, 2L, 3L, 4L, 5L))
+  expect_identical(explicit, list(1L, 2L, 3L, 4L, 5L))
 
   loo <- resolve_resample_folds(
     resamples = NULL,
     include_cases = include_cases
   )
-  expect_identical(loo$n_folds, 5L)
   expect_identical(
-    sort(unlist(loo$folds, use.names = FALSE)),
+    sort(unlist(loo, use.names = FALSE)),
     include_cases
+  )
+})
+
+test_that("resolve_resample_folds requires enough complete cases to resample", {
+  expect_error(
+    resolve_resample_folds(
+      resamples = NULL,
+      include_cases = 1L
+    ),
+    "At least 2 complete-case observations are required for resampling.",
+    fixed = TRUE
   )
 })
 

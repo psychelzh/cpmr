@@ -1,46 +1,41 @@
-resolve_data_context <- function(
-  conmat,
-  behav,
-  covariates,
-  na_action
-) {
-  na_action <- match.arg(na_action, c("fail", "exclude"))
-
-  context <- normalize_inputs(conmat, behav, covariates)
-
-  include_cases <- resolve_include_cases(
-    conmat,
-    context$behav,
-    context$covariates,
-    na_action
-  )
-
-  list(
-    behav = context$behav,
-    covariates = context$covariates,
-    include_cases = include_cases,
-    na_action = na_action
-  )
-}
-
 normalize_inputs <- function(conmat, behav, covariates = NULL) {
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {
-    stop("Behavior data must be a numeric vector.")
+    stop("Behavior data must be a numeric vector.", call. = FALSE)
   }
   if (nrow(conmat) != length(behav)) {
-    stop("The number of observations in `conmat` and `behav` must match.")
+    stop(
+      "The number of observations in `conmat` and `behav` must match.",
+      call. = FALSE
+    )
   }
-  check_case_names_match(conmat, behav)
+  if (!is.null(rownames(conmat)) && !is.null(names(behav))) {
+    if (!identical(rownames(conmat), names(behav))) {
+      stop(
+        "Case names of `conmat` must match those of behavior data.",
+        call. = FALSE
+      )
+    }
+  }
 
   if (!is.null(covariates)) {
     if (is.vector(covariates)) {
       covariates <- as.matrix(covariates)
     }
     if (nrow(covariates) != length(behav)) {
-      stop("The number of observations in `covariates` and `behav` must match.")
+      stop(
+        "The number of observations in `covariates` and `behav` must match.",
+        call. = FALSE
+      )
     }
-    check_case_names_match(covariates, behav)
+    if (!is.null(rownames(covariates)) && !is.null(names(behav))) {
+      if (!identical(rownames(covariates), names(behav))) {
+        stop(
+          "Case names of `covariates` must match those of behavior data.",
+          call. = FALSE
+        )
+      }
+    }
   }
 
   list(
@@ -49,16 +44,19 @@ normalize_inputs <- function(conmat, behav, covariates = NULL) {
   )
 }
 
-resolve_include_cases <- function(conmat, behav, covariates, na_action) {
+complete_case_rows <- function(conmat, behav, covariates, na_action) {
   switch(
     na_action,
     fail = {
-      stopifnot(
-        "Missing values found in `conmat`" = !anyNA(conmat),
-        "Missing values found in `behav`" = !anyNA(behav),
-        "Missing values found in `covariates`" = is.null(covariates) ||
-          !anyNA(covariates)
-      )
+      if (anyNA(conmat)) {
+        stop("Missing values found in `conmat`", call. = FALSE)
+      }
+      if (anyNA(behav)) {
+        stop("Missing values found in `behav`", call. = FALSE)
+      }
+      if (!is.null(covariates) && anyNA(covariates)) {
+        stop("Missing values found in `covariates`", call. = FALSE)
+      }
       seq_along(behav)
     },
     exclude = Reduce(
@@ -74,20 +72,6 @@ resolve_include_cases <- function(conmat, behav, covariates, na_action) {
       )
     )
   )
-}
-
-check_case_names_match <- function(data, behav) {
-  if (!is.null(rownames(data)) && !is.null(names(behav))) {
-    if (!identical(rownames(data), names(behav))) {
-      stop(
-        sprintf(
-          "Case names of `%s` must match those of behavior data.",
-          deparse1(substitute(data))
-        )
-      )
-    }
-  }
-  invisible()
 }
 
 regress_covariates_by_train <- function(

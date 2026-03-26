@@ -118,7 +118,7 @@ test_that("run_single_fit errors clearly on insufficient complete cases", {
       na_action = "exclude",
       call = call
     ),
-    "At least 3 complete-case observations are required for fitting.",
+    "CPM fitting requires at least 3 training observations.",
     fixed = TRUE
   )
 })
@@ -127,15 +127,13 @@ test_that("run_resample_fit errors clearly on insufficient complete cases", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rep(NA_real_, 10)
   spec <- cpm_spec()
-  folds <- list(1:5, 6:10)
-
   expect_error(
     run_resample_fit(
       object = spec,
       conmat = conmat,
       behav = behav,
       covariates = NULL,
-      resamples = folds,
+      resamples = NULL,
       return_edges = "sum",
       na_action = "exclude"
     ),
@@ -151,7 +149,7 @@ test_that("run_resample_fit errors clearly on insufficient complete cases", {
       conmat = conmat,
       behav = behav,
       covariates = NULL,
-      resamples = list(1L),
+      resamples = NULL,
       return_edges = "sum",
       na_action = "exclude"
     ),

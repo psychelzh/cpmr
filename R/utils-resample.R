@@ -1,4 +1,11 @@
 resolve_resample_folds <- function(resamples, include_cases) {
+  if (length(include_cases) < 2L) {
+    stop(
+      "At least 2 complete-case observations are required for resampling.",
+      call. = FALSE
+    )
+  }
+
   if (is.null(resamples)) {
     n_folds <- length(include_cases)
     folds <- make_kfold_assessment_folds(include_cases, n_folds)
@@ -18,17 +25,7 @@ resolve_resample_folds <- function(resamples, include_cases) {
     folds <- make_kfold_assessment_folds(include_cases, n_folds)
   }
 
-  train_sizes <- length(include_cases) - lengths(folds)
-  if (any(train_sizes < 3L)) {
-    stop(
-      "Each resample must leave at least 3 complete-case training observations."
-    )
-  }
-
-  list(
-    folds = folds,
-    n_folds = n_folds
-  )
+  folds
 }
 
 make_kfold_assessment_folds <- function(x, k) {
@@ -99,39 +96,6 @@ normalize_manual_resamples <- function(resamples, include_cases) {
   }
 
   normalized
-}
-
-assert_normalized_resample_folds <- function(folds) {
-  if (!is.list(folds) || length(folds) < 2L) {
-    stop(
-      paste0(
-        "`folds` must be a normalized list of at least 2 assessment ",
-        "index vectors."
-      )
-    )
-  }
-
-  invalid_fold <- vapply(
-    folds,
-    function(idx) {
-      !is.integer(idx) ||
-        anyNA(idx) ||
-        any(idx <= 0L) ||
-        anyDuplicated(idx)
-    },
-    logical(1)
-  )
-
-  if (any(invalid_fold)) {
-    stop(
-      paste0(
-        "`folds` must contain positive integer assessment indices ",
-        "without duplicates."
-      )
-    )
-  }
-
-  invisible(folds)
 }
 
 normalize_resample_count <- function(resamples) {
