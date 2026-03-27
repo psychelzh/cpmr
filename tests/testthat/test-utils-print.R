@@ -5,8 +5,6 @@ test_that("format helpers produce stable display strings", {
   expect_identical(format_rate(NA_real_), "NA")
   expect_identical(format_threshold_level(0.005), "0.005")
   expect_identical(format_threshold_level(0.2), "0.2")
-  expect_identical(format_yes_no(TRUE), "yes")
-  expect_identical(format_yes_no(FALSE), "no")
   expect_identical(format_covariates(TRUE), "included")
   expect_identical(format_covariates(FALSE), "none")
   expect_identical(format_method_name("pearson"), "Pearson")
@@ -16,7 +14,8 @@ test_that("format helpers produce stable display strings", {
 })
 
 test_that("prediction labels use full names", {
-  expect_identical(prediction_label("both"), "Combined")
-  expect_identical(prediction_label("pos"), "Positive")
-  expect_identical(prediction_label("neg"), "Negative")
+  expect_identical(prediction_label("joint"), "Joint")
+  expect_identical(prediction_label("positive"), "Positive")
+  expect_identical(prediction_label("negative"), "Negative")
+  expect_identical(prediction_label("net"), "Net")
 })

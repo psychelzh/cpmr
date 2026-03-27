@@ -46,7 +46,7 @@ install.packages("cpmr", repos = c("https://psychelzh.r-universe.dev", getOption
 
 Shape your connectivity matrix as a subjects-by-edges matrix, where each row
 contains the edge vector for one subject, and pair it with a behavioral vector.
-The native workflow uses `cpm_spec()` together with `fit()`.
+The native workflow uses `spec()` together with `cpm()`.
 
 ```{r example}
 library(cpmr)
@@ -54,18 +54,74 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-fit_obj <- fit(cpm_spec(), conmat = conmat, behav = behav)
+s <- spec()
+resample_obj <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
 
-fit_obj
-summary(fit_obj)
+summary(resample_obj)
+head(resample_obj$predictions)
 ```
 
-Cross-validated resampling uses `fit_resamples()` with the same specification
-object:
+`spec()` can also express richer CPM variants without leaving the native
+API surface:
+
+```{r rich-spec}
+rich_spec <- spec(
+  selection = cpm_selection_cor(
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.1
+  ),
+  construction = cpm_construction_summary(
+    sign_mode = "net",
+    weight_scale = 0.03
+  ),
+  model = cpm_model_lm()
+)
+
+cpm(conmat = conmat, behav = behav, spec = rich_spec, resamples = 5)$predictions |>
+  head()
+```
+
+This keeps the main CPM stages visible while grouping naturally paired options
+into small helpers:
+
+- `selection = cpm_selection_cor(...)` defines how edges are screened;
+- `construction = cpm_construction_summary(...)` defines how screened edges
+  become CPM-derived predictors;
+- `model = cpm_model_lm()` defines the outcome model fitted on those
+  predictors.
+
+By default, `spec()` keeps edge standardization turned off so the native
+workflow stays close to the classic CPM path of screening edges, constructing
+summary features, and fitting the outcome model. If you want fold-local edge
+z-scoring, opt in with
+`cpm_construction_summary(standardize_edges = TRUE)`.
+
+If you are new to CPM, the key idea behind the current summary-based
+construction is:
+
+- `positive` edges are edges whose screening association with the outcome is
+  positive and passes the threshold;
+- `negative` edges are edges whose screening association with the outcome is
+  negative and passes the threshold;
+- CPM then collapses those screened edge sets into subject-level summary
+  features before fitting the outcome model.
+
+With `sign_mode = "separate"`, `cpmr` keeps the positive and negative summaries
+as separate predictors and reports three prediction streams:
+
+- `joint`, which fits one model with both summaries together;
+- `positive`, a positive-only diagnostic stream;
+- `negative`, a negative-only diagnostic stream.
+
+With `sign_mode = "net"`, `cpmr` constructs a single
+`net_summary = positive_summary - negative_summary` feature and returns one
+`net` prediction stream.
+
+`cpm()` is resample-first: it runs CPM under the requested assessment plan and
+returns out-of-fold predictions together with the fold structure.
 
 ```{r resample}
-resample_obj <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
-
 summary(resample_obj)
 head(resample_obj$predictions)
 dim(resample_obj$edges)
@@ -77,13 +133,16 @@ out-of-fold error metrics shown first and correlations reported as
 supplementary statistics. Use `resample_metrics(resample_obj)` when you want
 pooled or fold-wise metric tables directly.
 
+For `cpm()`, `resamples = NULL` means leave-one-out resampling,
+`resamples = 5` means 5-fold resampling, and a list passed to `resamples`
+enforces a manual assessment-fold partition.
+
 ## Choosing a path
 
 `cpmr` treats this native workflow as the primary package path:
 
-- use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` for native
-  CPM analyses;
-- keep the `cpm_spec()` object around when you want an explicit, reusable
+- use `cpm(..., spec = spec())` for native CPM analyses;
+- keep the `spec()` object around when you want an explicit, reusable
   parameter object.
 
 Why this matters: CPM often needs leakage-safe fold-local preprocessing and can

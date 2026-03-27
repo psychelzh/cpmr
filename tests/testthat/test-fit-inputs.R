@@ -11,7 +11,7 @@ test_that("normalize_inputs validates and normalizes data", {
   expect_equal(nrow(normalized$covariates), nrow(conmat))
 })
 
-test_that("resolve_include_cases returns intersection in exclude mode", {
+test_that("complete_case_rows returns intersection in exclude mode", {
   conmat <- matrix(rnorm(30), ncol = 3)
   behav <- rnorm(10)
   covariates <- matrix(rnorm(10), ncol = 1)
@@ -20,7 +20,7 @@ test_that("resolve_include_cases returns intersection in exclude mode", {
   behav[2] <- NA
   covariates[3, 1] <- NA
 
-  include_cases <- resolve_include_cases(
+  include_cases <- complete_case_rows(
     conmat,
     behav,
     covariates,
@@ -30,10 +30,45 @@ test_that("resolve_include_cases returns intersection in exclude mode", {
   expect_identical(include_cases, 4:10)
 })
 
-test_that("check_names errors when names do not match", {
-  x <- matrix(1:10, nrow = 2, dimnames = list(c("a", "b"), NULL))
-  y <- stats::setNames(1:2, c("a", "c"))
+test_that("complete_case_rows fails clearly on missing required inputs", {
+  conmat <- matrix(rnorm(30), ncol = 3)
+  behav <- rnorm(10)
+  covariates <- matrix(rnorm(10), ncol = 1)
 
-  expect_error(check_names(x, y), "must match")
-  expect_silent(check_names(x, 1:2))
+  conmat[1, 1] <- NA
+  expect_error(
+    complete_case_rows(conmat, behav, covariates, na_action = "fail"),
+    "Missing values found in `conmat`",
+    fixed = TRUE
+  )
+
+  conmat[1, 1] <- 0
+  covariates[1, 1] <- NA
+  expect_error(
+    complete_case_rows(conmat, behav, covariates, na_action = "fail"),
+    "Missing values found in `covariates`",
+    fixed = TRUE
+  )
+})
+
+test_that("normalize_inputs checks case-name alignment directly", {
+  conmat <- matrix(1:10, nrow = 2, dimnames = list(c("a", "b"), NULL))
+  behav <- stats::setNames(1:2, c("a", "c"))
+  covariates <- matrix(1:4, nrow = 2, dimnames = list(c("a", "b"), NULL))
+
+  expect_error(
+    normalize_inputs(conmat, behav, covariates),
+    "Case names of `conmat` must match",
+    fixed = TRUE
+  )
+
+  rownames(conmat) <- names(behav)
+  rownames(covariates) <- c("a", "b")
+  expect_error(
+    normalize_inputs(conmat, behav, covariates),
+    "Case names of `covariates` must match",
+    fixed = TRUE
+  )
+
+  expect_silent(normalize_inputs(conmat, unname(behav), covariates))
 })

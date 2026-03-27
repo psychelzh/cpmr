@@ -1,61 +1,41 @@
-resolve_fit_context <- function(
-  conmat,
-  behav,
-  covariates,
-  na_action,
-  action,
-  min_cases
-) {
-  na_action <- match.arg(na_action, c("fail", "exclude"))
-
-  normalized <- normalize_inputs(conmat, behav, covariates)
-  behav <- normalized$behav
-  covariates <- normalized$covariates
-
-  include_cases <- resolve_include_cases(
-    conmat,
-    behav,
-    covariates,
-    na_action
-  )
-
-  if (length(include_cases) == 0L) {
-    stop(sprintf("No complete-case observations available for %s.", action))
-  }
-  if (length(include_cases) < min_cases) {
-    stop(sprintf(
-      "At least %d complete-case observations are required for %s.",
-      min_cases,
-      action
-    ))
-  }
-
-  list(
-    behav = behav,
-    covariates = covariates,
-    include_cases = include_cases,
-    na_action = na_action
-  )
-}
-
 normalize_inputs <- function(conmat, behav, covariates = NULL) {
   behav <- drop(behav)
   if (!is.vector(behav) || !is.numeric(behav)) {
-    stop("Behavior data must be a numeric vector.")
+    stop("Behavior data must be a numeric vector.", call. = FALSE)
   }
   if (nrow(conmat) != length(behav)) {
-    stop("The number of observations in `conmat` and `behav` must match.")
+    stop(
+      "The number of observations in `conmat` and `behav` must match.",
+      call. = FALSE
+    )
   }
-  check_names(conmat, behav)
+  if (!is.null(rownames(conmat)) && !is.null(names(behav))) {
+    if (!identical(rownames(conmat), names(behav))) {
+      stop(
+        "Case names of `conmat` must match those of behavior data.",
+        call. = FALSE
+      )
+    }
+  }
 
   if (!is.null(covariates)) {
     if (is.vector(covariates)) {
       covariates <- as.matrix(covariates)
     }
     if (nrow(covariates) != length(behav)) {
-      stop("The number of observations in `covariates` and `behav` must match.")
+      stop(
+        "The number of observations in `covariates` and `behav` must match.",
+        call. = FALSE
+      )
     }
-    check_names(covariates, behav)
+    if (!is.null(rownames(covariates)) && !is.null(names(behav))) {
+      if (!identical(rownames(covariates), names(behav))) {
+        stop(
+          "Case names of `covariates` must match those of behavior data.",
+          call. = FALSE
+        )
+      }
+    }
   }
 
   list(
@@ -64,43 +44,47 @@ normalize_inputs <- function(conmat, behav, covariates = NULL) {
   )
 }
 
-resolve_include_cases <- function(conmat, behav, covariates, na_action) {
+complete_case_rows <- function(conmat, behav, covariates, na_action) {
   switch(
     na_action,
     fail = {
-      stopifnot(
-        "Missing values found in `conmat`" = !anyNA(conmat),
-        "Missing values found in `behav`" = !anyNA(behav),
-        "Missing values found in `covariates`" = is.null(covariates) ||
-          !anyNA(covariates)
-      )
+      if (anyNA(conmat)) {
+        stop("Missing values found in `conmat`", call. = FALSE)
+      }
+      if (anyNA(behav)) {
+        stop("Missing values found in `behav`", call. = FALSE)
+      }
+      if (!is.null(covariates) && anyNA(covariates)) {
+        stop("Missing values found in `covariates`", call. = FALSE)
+      }
       seq_along(behav)
     },
-    exclude = Reduce(
-      intersect,
-      list(
-        which(stats::complete.cases(conmat)),
-        which(stats::complete.cases(behav)),
-        if (!is.null(covariates)) {
-          which(stats::complete.cases(covariates))
-        } else {
-          seq_along(behav)
-        }
-      )
-    )
+    exclude = {
+      include_mask <- stats::complete.cases(conmat) & !is.na(behav)
+      if (!is.null(covariates)) {
+        include_mask <- include_mask & stats::complete.cases(covariates)
+      }
+      which(include_mask)
+    }
   )
 }
 
-check_names <- function(data, behav) {
-  if (!is.null(rownames(data)) && !is.null(names(behav))) {
-    if (!identical(rownames(data), names(behav))) {
-      stop(
-        sprintf(
-          "Case names of `%s` must match those of behavior data.",
-          deparse1(substitute(data))
-        )
-      )
-    }
+regress_covariates_by_train <- function(
+  resp_train,
+  cov_train,
+  resp_test = NULL,
+  cov_test = NULL
+) {
+  x_train <- cbind(1, cov_train)
+  model <- stats::.lm.fit(x_train, resp_train)
+
+  if (is.null(resp_test)) {
+    return(list(train = model$residuals))
   }
-  invisible()
+
+  x_test <- cbind(1, cov_test)
+  list(
+    train = model$residuals,
+    test = resp_test - x_test %*% model$coefficients
+  )
 }

@@ -1,44 +1,43 @@
-resolve_resample_folds <- function(resamples, kfolds, include_cases) {
-  if (is.null(resamples)) {
-    kfolds <- resolve_kfolds(
-      validate_kfolds(kfolds),
-      include_cases
-    )
-    if (kfolds > length(include_cases)) {
-      stop("`kfolds` must be less than or equal to complete-case observations.")
-    }
-    folds <- crossv_kfold(include_cases, kfolds)
-  } else {
-    if (!is.null(kfolds)) {
-      stop("Specify either `resamples` or `kfolds`, not both.")
-    }
-    folds <- validate_resamples(resamples, include_cases)
-    kfolds <- length(folds)
-  }
-
-  train_sizes <- length(include_cases) - lengths(folds)
-  if (any(train_sizes < 3L)) {
+resolve_resample_folds <- function(resamples, include_cases) {
+  if (length(include_cases) < 2L) {
     stop(
-      "Each resample must leave at least 3 complete-case training observations."
+      "At least 2 complete-case observations are required for resampling.",
+      call. = FALSE
     )
   }
 
-  list(
-    folds = folds,
-    kfolds = kfolds
-  )
+  if (is.null(resamples)) {
+    n_folds <- length(include_cases)
+    folds <- make_kfold_assessment_folds(include_cases, n_folds)
+  } else if (is.list(resamples)) {
+    folds <- normalize_manual_resamples(resamples, include_cases)
+    n_folds <- length(folds)
+  } else {
+    n_folds <- normalize_resample_count(resamples)
+    if (n_folds > length(include_cases)) {
+      stop(
+        paste0(
+          "`resamples` as a fold count must be less than or equal to ",
+          "complete-case observations."
+        )
+      )
+    }
+    folds <- make_kfold_assessment_folds(include_cases, n_folds)
+  }
+
+  folds
 }
 
-crossv_kfold <- function(x, k) {
+make_kfold_assessment_folds <- function(x, k) {
   split(sample(x), cut(seq_along(x), breaks = k, labels = FALSE))
 }
 
-warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
+warn_large_edge_storage <- function(n_edges, n_folds, return_edges) {
   if (return_edges != "all") {
     return(invisible())
   }
 
-  estimated_bytes <- as.double(n_edges) * length(edge_types) * kfolds * 4
+  estimated_bytes <- as.double(n_edges) * length(edge_signs) * n_folds * 4
   threshold_bytes <- 10 * 1024^2
   if (estimated_bytes > threshold_bytes) {
     warning(
@@ -56,7 +55,7 @@ warn_large_edge_storage <- function(n_edges, kfolds, return_edges) {
   invisible()
 }
 
-validate_resamples <- function(resamples, include_cases) {
+normalize_manual_resamples <- function(resamples, include_cases) {
   if (!is.list(resamples) || length(resamples) == 0L) {
     stop("`resamples` must be a non-empty list of assessment indices.")
   }
@@ -99,38 +98,28 @@ validate_resamples <- function(resamples, include_cases) {
   normalized
 }
 
-validate_kfolds <- function(kfolds) {
+normalize_resample_count <- function(resamples) {
   if (
-    !is.null(kfolds) &&
-      (!is.numeric(kfolds) ||
-        length(kfolds) != 1L ||
-        is.na(kfolds) ||
-        !is.finite(kfolds) ||
-        kfolds < 2 ||
-        kfolds %% 1 != 0)
+    !is.numeric(resamples) ||
+      length(resamples) != 1L ||
+      is.na(resamples) ||
+      !is.finite(resamples) ||
+      resamples < 2 ||
+      resamples %% 1 != 0
   ) {
     stop(
-      "`kfolds` must be NULL or a single integer greater than or equal to 2."
+      paste0(
+        "`resamples` must be NULL, a single integer greater than or equal ",
+        "to 2, or a non-empty list of assessment indices."
+      )
     )
   }
 
-  if (is.null(kfolds)) {
-    return(NULL)
-  }
-
-  as.integer(kfolds)
-}
-
-resolve_kfolds <- function(kfolds, include_cases) {
-  if (is.null(kfolds)) {
-    return(length(include_cases))
-  }
-
-  kfolds
+  as.integer(resamples)
 }
 
 compute_resample_metric <- function(
-  real,
+  observed,
   predicted,
   metric = c("rmse", "mae", "correlation"),
   correlation_method = c("pearson", "spearman")
@@ -139,10 +128,10 @@ compute_resample_metric <- function(
 
   switch(
     metric,
-    rmse = safe_rmse(real, predicted),
-    mae = safe_mae(real, predicted),
+    rmse = safe_rmse(observed, predicted),
+    mae = safe_mae(observed, predicted),
     correlation = safe_cor(
-      real,
+      observed,
       predicted,
       method = match.arg(correlation_method)
     )
@@ -154,16 +143,17 @@ compute_pooled_metric_table <- function(
   metrics = c("rmse", "mae", "correlation"),
   correlation_method = c("pearson", "spearman")
 ) {
+  prediction_streams <- prediction_columns(predictions)
   if ("correlation" %in% metrics) {
     correlation_method <- match.arg(correlation_method)
   }
   metric_tables <- lapply(metrics, function(metric) {
     estimates <- vapply(
-      prediction_types,
-      function(prediction_type) {
+      prediction_streams,
+      function(prediction_stream) {
         compute_resample_metric(
-          predictions$real,
-          predictions[[prediction_type]],
+          predictions$observed,
+          predictions[[prediction_stream]],
           metric = metric,
           correlation_method = correlation_method
         )
@@ -173,7 +163,7 @@ compute_pooled_metric_table <- function(
 
     data.frame(
       metric = metric,
-      prediction = prediction_types,
+      prediction = prediction_streams,
       estimate = unname(estimates),
       stringsAsFactors = FALSE
     )
@@ -188,6 +178,7 @@ compute_fold_metric_table <- function(
   metrics = c("rmse", "mae", "correlation"),
   correlation_method = c("pearson", "spearman")
 ) {
+  prediction_streams <- prediction_columns(predictions)
   if ("correlation" %in% metrics) {
     correlation_method <- match.arg(correlation_method)
   }
@@ -195,11 +186,11 @@ compute_fold_metric_table <- function(
     fold_tables <- lapply(seq_along(folds), function(i) {
       rows <- folds[[i]]
       estimates <- vapply(
-        prediction_types,
-        function(prediction_type) {
+        prediction_streams,
+        function(prediction_stream) {
           compute_resample_metric(
-            predictions$real[rows],
-            predictions[[prediction_type]][rows],
+            predictions$observed[rows],
+            predictions[[prediction_stream]][rows],
             metric = metric,
             correlation_method = correlation_method
           )
@@ -211,7 +202,7 @@ compute_fold_metric_table <- function(
         fold = i,
         n_assess = length(rows),
         metric = metric,
-        prediction = prediction_types,
+        prediction = prediction_streams,
         estimate = unname(estimates),
         stringsAsFactors = FALSE
       )
@@ -254,13 +245,13 @@ compute_resample_summary_metrics <- function(
   rbind(pooled_metrics, foldwise_correlations)
 }
 
-summarize_resample_edges <- function(edges, return_edges, kfolds) {
+summarize_resample_edges <- function(edges, return_edges, n_folds) {
   if (is.null(edges) || return_edges == "none") {
     return(NULL)
   }
 
   if (return_edges == "sum") {
-    return(edges / kfolds)
+    return(edges / n_folds)
   }
 
   apply(edges, c(1, 2), mean)

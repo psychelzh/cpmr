@@ -45,46 +45,39 @@ covariates <- matrix(rnorm(n), ncol = 1)
 edge_signal <- rowMeans(conmat[, 1:10, drop = FALSE])
 behav <- 0.7 * edge_signal + 0.6 * covariates[, 1] + rnorm(n, sd = 0.5)
 
-# Leakage-safe CV call: covariates are handled fold-wise inside resampling
-fit <- fit_resamples(
-  cpm_spec(),
+# Leakage-safe CPM call: covariates are handled fold-wise inside resampling
+res <- cpm(
   conmat = conmat,
   behav = behav,
+  spec = spec(),
   covariates = covariates,
-  kfolds = 5
+  resamples = 5
 )
 
-summary(fit)
+summary(res)
 ```
 
 ## Native API
 
 ```{r}
-spec <- cpm_spec()
+model_spec <- spec()
 
-single_fit <- fit(
-  spec,
+res_with_edges <- cpm(
   conmat = conmat,
   behav = behav,
-  covariates = covariates
-)
-
-resamples_fit <- fit_resamples(
-  spec,
-  conmat = conmat,
-  behav = behav,
+  spec = model_spec,
   covariates = covariates,
-  kfolds = 5,
+  resamples = 5,
   return_edges = "sum"
 )
 
-summary(resamples_fit)
-head(resamples_fit$predictions)
-dim(resamples_fit$edges)
+summary(res_with_edges)
+head(res_with_edges$predictions)
+dim(res_with_edges$edges)
 ```
 
-Using a reusable `cpm_spec()` object is helpful when you want the same CPM
-settings to drive both single-fit and resampling analyses.
+Using a reusable `spec()` object is helpful when you want the same CPM
+settings to drive multiple analyses under different resampling plans.
 
 ## Edge Storage Tips
 

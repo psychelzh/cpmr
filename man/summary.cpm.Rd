@@ -3,7 +3,7 @@
 \name{summary.cpm}
 \alias{summary.cpm}
 \alias{print.cpm_summary}
-\title{Summary of a cpm object.}
+\title{Summarize a \code{cpm} object}
 \usage{
 \method{summary}{cpm}(object, ..., method = c("pearson", "spearman"))
 
@@ -12,25 +12,30 @@
 \arguments{
 \item{object}{An object of class \code{cpm}.}
 
-\item{...}{Other parameters passed to the function.}
+\item{...}{For future extension. Currently ignored.}
 
-\item{method}{A character vector indicating the method used to calculate the
-correlation between the real and predicted values.}
+\item{method}{Correlation method used for pooled and fold-wise correlation
+summaries.}
 
 \item{x}{An object of class \code{cpm_summary}.}
 }
 \value{
-A list of class \code{cpm_summary} containing:
-\item{metrics}{A data frame with columns \code{level}, \code{metric}, \code{prediction},
-\code{estimate}, \code{std_error}, and \code{method}. Single-fit CPM summaries store
-correlation metrics at \code{level = "single"}.}
-
-\item{edges}{A logical matrix indicating which edges are selected by the
-fitted CPM model.}
-
-\item{params}{A list of parameters used in the summary.}
+A \code{cpm_summary} object with the following elements:
+\describe{
+\item{\code{metrics}}{A data frame with columns \code{level}, \code{metric},
+\code{prediction}, \code{estimate}, \code{std_error}, and \code{method}. CPM summaries store
+pooled errors and pooled correlations at \code{level = "pooled"}, and
+fold-wise correlation summaries at \code{level = "foldwise"}.}
+\item{\code{edges}}{Aggregated edge-selection rates, or \code{NULL} when edges were
+not stored.}
+\item{\code{settings}}{A list containing summary-relevant CPM settings.}
+}
 }
 \description{
-This function provides a summary of a \code{cpm} object, including the
-prediction performance and the selected edges.
+Summarize a \code{cpm} object
+}
+\details{
+\code{summary.cpm()} is designed to give a compact default report. It leads with
+pooled prediction-error metrics (\code{RMSE} and \code{MAE}), then reports pooled and
+fold-wise correlations as supplementary statistics.
 }

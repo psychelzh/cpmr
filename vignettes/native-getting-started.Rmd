@@ -17,12 +17,11 @@ knitr::opts_chunk$set(
 ## Overview
 
 `cpmr`'s primary workflow is a native, matrix-first API built around
-`cpm_spec()` together with `fit()` and `fit_resamples()`.
+`spec()` together with `cpm()`.
 
 This vignette walks through:
 
 - how to shape CPM inputs;
-- how to fit a single native CPM model;
 - how to run leakage-safe resampling;
 - how to inspect predictions and selected edges;
 - how custom resamples and missing-data handling work.
@@ -49,40 +48,18 @@ behav <- rowMeans(conmat[, 1:12, drop = FALSE]) +
   rnorm(n, sd = 0.5)
 ```
 
-## Single Fit with `fit()`
+## Run CPM with `cpm()`
 
-Use `fit()` on a `cpm_spec()` object when you want a native single fit with
-explicit CPM parameters.
-
-```{r}
-fit_obj <- fit(
-  cpm_spec(thresh_method = "alpha", thresh_level = 0.05),
-  conmat = conmat,
-  behav = behav,
-  covariates = covariates
-)
-
-fit_obj
-summary(fit_obj)
-dim(fit_obj$edges)
-```
-
-For a single fit, `fit()` stores a `p x 2` edge-selection mask with `pos` and
-`neg` columns by default. This is useful for inspecting the selected network,
-but the performance reported by `summary()` is still in-sample.
-
-## Cross-Validated Resampling with `fit_resamples()`
-
-Use `fit_resamples()` on the same `cpm_spec()` object for an out-of-sample
-estimate of predictive performance.
+Use `cpm()` on a `spec()` object for an out-of-sample estimate of predictive
+performance.
 
 ```{r}
-resample_obj <- fit_resamples(
-  cpm_spec(),
+resample_obj <- cpm(
   conmat = conmat,
   behav = behav,
+  spec = spec(),
   covariates = covariates,
-  kfolds = 5
+  resamples = 5
 )
 
 resample_obj
@@ -117,19 +94,19 @@ These three outputs have slightly different jobs:
 - `resample_metrics(resample_obj)` returns the raw pooled or fold-wise metric
   tables for further filtering, plotting, or export.
 
-By default, `fit_resamples()` uses `return_edges = "none"` and skips edge
+By default, `cpm()` uses `return_edges = "none"` and skips edge
 storage. This keeps the resampling object light when you only need predictive
 performance.
 
 If you also want fold-aggregated edge selection rates, request them explicitly:
 
 ```{r}
-edge_resample_obj <- fit_resamples(
-  cpm_spec(),
+edge_resample_obj <- cpm(
   conmat = conmat,
   behav = behav,
+  spec = spec(),
   covariates = covariates,
-  kfolds = 5,
+  resamples = 5,
   return_edges = "sum"
 )
 
@@ -154,10 +131,10 @@ custom_resamples <- split(
   cut(seq_len(n), breaks = 4, labels = FALSE)
 )
 
-custom_obj <- fit_resamples(
-  cpm_spec(),
+custom_obj <- cpm(
   conmat = conmat,
   behav = behav,
+  spec = spec(),
   resamples = custom_resamples,
   return_edges = "none"
 )
@@ -183,11 +160,11 @@ preserving original row positions in the outputs.
 behav_with_na <- behav
 behav_with_na[c(3, 11)] <- NA_real_
 
-na_obj <- fit_resamples(
-  cpm_spec(),
+na_obj <- cpm(
   conmat = conmat,
   behav = behav_with_na,
-  kfolds = 5,
+  spec = spec(),
+  resamples = 5,
   na_action = "exclude"
 )
 
@@ -203,8 +180,8 @@ metadata after resampling.
 After you are comfortable with the native path:
 
 - read the workflow-selection article for guidance on how to use the native
-  `cpm_spec()` workflow in different settings;
+  `spec()` + `cpm()` workflow in different settings;
 - read the leakage-focused article if you need a more detailed covariate
   handling example;
-- keep a `cpm_spec()` object around when you want an explicit reusable
+- keep a `spec()` object around when you want an explicit reusable
   parameter object.

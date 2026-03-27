@@ -14,27 +14,9 @@
 \item{component}{A character vector indicating the component to tidy.}
 }
 \value{
-A \link[tibble:tibble-package]{tibble} with columns storing parameters of the
-\code{cpm} object and further columns depending on the \code{component} argument:
-
-For \code{component = "performance"}:
-
-\item{method}{The method used to calculate the correlation between the real
-and predicted values.}
-
-\item{pos}{The correlation between the real and predicted values for
-positive edges.}
-
-\item{neg}{The correlation between the real and predicted values for
-negative edges.}
-
-For \code{component = "edges"}:
-
-\item{pos}{A logical vector indicating whether each edge is selected by the
-fitted CPM model (positive).}
-
-\item{neg}{A logical vector indicating whether each edge is selected by the
-fitted CPM model (negative).}
+A \link[tibble:tibble-package]{tibble} with columns storing parameters of
+the \code{cpm} object and further columns depending on the \code{component}
+argument.
 }
 \description{
 Tidy a \code{cpm} object

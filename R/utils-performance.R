@@ -112,13 +112,14 @@ summary_metric_values <- function(
   metrics,
   level,
   metric,
+  prediction_streams = unique(metrics$prediction),
   field = c("estimate", "std_error")
 ) {
   field <- match.arg(field)
   rows <- summary_metric_rows(metrics, level = level, metric = metric)
   values <- stats::setNames(
-    rep(NA_real_, length(prediction_types)),
-    prediction_types
+    rep(NA_real_, length(prediction_streams)),
+    prediction_streams
   )
 
   values[rows$prediction] <- rows[[field]]
@@ -129,26 +130,27 @@ summary_metric_matrix <- function(
   metrics,
   level,
   metric,
+  prediction_streams = unique(metrics$prediction),
   field = c("estimate", "std_error")
 ) {
   field <- match.arg(field)
   metric <- as.character(metric)
 
-  values <- t(vapply(
-    metric,
-    function(metric_name) {
-      summary_metric_values(
+  values <- do.call(
+    rbind,
+    lapply(metric, function(metric_name) {
+      unname(summary_metric_values(
         metrics,
         level = level,
         metric = metric_name,
+        prediction_streams = prediction_streams,
         field = field
-      )
-    },
-    numeric(length(prediction_types))
-  ))
+      ))
+    })
+  )
 
   rownames(values) <- metric
-  colnames(values) <- prediction_types
+  colnames(values) <- prediction_streams
   values
 }
 

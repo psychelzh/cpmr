@@ -16,21 +16,20 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-`cpmr` is organized around one native workflow: create a `cpm_spec()` object,
-then use `fit()` or `fit_resamples()` depending on the question you want to
-answer.
+`cpmr` is organized around one native workflow: create a `spec()` object, then
+run `cpm()` under the resampling plan that matches your question.
 
-The main choice is not between different API families. It is between:
+The main choice is not between different API families. It is between different
+assessment plans:
 
-- `fit()` for a single in-sample CPM fit;
-- `fit_resamples()` for out-of-sample resampling;
-- `fit_resamples(..., resamples = ...)` when you already have a partition
-  scheme you want to enforce.
+- `cpm(..., resamples = NULL)` for leave-one-out CPM;
+- `cpm(..., resamples = 5)` for k-fold CPM;
+- `cpm(..., resamples = ...)` when you already have a partition scheme you want
+  to enforce.
 
-## Start with `cpm_spec()`
+## Start with `spec()`
 
-For most analyses, start with `cpm_spec()` and reuse it across single-fit and
-resampling calls.
+For most analyses, start with `spec()` and reuse it across CPM runs.
 
 ```{r}
 library(cpmr)
@@ -38,12 +37,17 @@ library(cpmr)
 set.seed(123)
 conmat <- matrix(rnorm(80 * 200), nrow = 80)
 behav <- rnorm(80)
-spec <- cpm_spec()
+model_spec <- spec()
 
-fit_obj <- fit(spec, conmat = conmat, behav = behav)
-resample_obj <- fit_resamples(spec, conmat = conmat, behav = behav, kfolds = 5)
+loo_obj <- cpm(conmat = conmat, behav = behav, spec = model_spec)
+resample_obj <- cpm(
+  conmat = conmat,
+  behav = behav,
+  spec = model_spec,
+  resamples = 5
+)
 
-summary(fit_obj)
+summary(loo_obj)
 summary(resample_obj)
 head(summary(resample_obj)[["metrics"]])
 ```
@@ -57,13 +61,12 @@ This workflow is the best fit when you care about:
 
 ## Practical Rule of Thumb
 
-Use `fit()` when you want to inspect one fitted CPM model on the current data.
-Use `fit_resamples()` when you want an out-of-sample performance estimate or a
-custom resampling design.
+Use `cpm()` when you want CPM results. Then choose the resampling plan that
+matches your goal.
 
 As a rule of thumb:
 
-- use `summary(fit_obj)` or `tidy(fit_obj)` for single-fit summaries;
-- use `summary(resample_obj)` for the default aggregate resampling report;
+- use `summary(loo_obj)` when you want the default leave-one-out report;
+- use `summary(resample_obj)` for the default aggregate k-fold report;
 - use `summary(resample_obj)[["metrics"]]` or `resample_metrics(resample_obj)`
   when you need structured metric tables instead of printed output.
