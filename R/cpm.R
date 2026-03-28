@@ -213,9 +213,9 @@ print.cpm_summary <- function(x, ...) {
 #'   returns pooled out-of-fold metrics, and `"foldwise"` returns one row per
 #'   fold, metric, and prediction stream.
 #' @param metrics Metrics to keep when `component = "metrics"`.
-#' @return A [tibble][tibble::tibble-package] with columns storing parameters of
-#'   the `cpm` object and further columns depending on the `component`
-#'   argument.
+#' @return A [tibble][tibble::tibble-package] with component-specific columns.
+#'   Use `summary(x)$params` when you need the static CPM settings separately
+#'   from the tidy result table.
 #' @export
 tidy.cpm <- function(
   x,
@@ -228,12 +228,10 @@ tidy.cpm <- function(
   level <- match.arg(level)
   metrics <- match.arg(metrics, several.ok = TRUE)
   sum_x <- summary(x, ...)
-  params <- sum_x$params
 
   switch(
     component,
     performance = tibble::tibble(
-      params,
       method = summary_metric_method(
         sum_x$metrics,
         level = "pooled",
@@ -247,7 +245,6 @@ tidy.cpm <- function(
       )))
     ),
     metrics = tidy_metric_component(
-      params = params,
       tables = sum_x$tables,
       level = level,
       requested_metrics = metrics
@@ -263,10 +260,7 @@ tidy.cpm <- function(
           call. = FALSE
         )
       }
-      tibble::tibble(
-        params,
-        tibble::as_tibble(apply(sum_x$edges, 2, list))
-      )
+      tibble::as_tibble(apply(sum_x$edges, 2, list))
     }
   )
 }
@@ -304,16 +298,14 @@ tidy_model_params <- function(model) {
   )
 }
 
-tidy_metric_component <- function(params, tables, level, requested_metrics) {
+tidy_metric_component <- function(tables, level, requested_metrics) {
   metric_table <- tables[[level]]
   metric_table <- metric_table[
     metric_table$metric %in% requested_metrics,
     ,
     drop = FALSE
   ]
-  params_rows <- params[rep(1, nrow(metric_table)), , drop = FALSE]
-
-  tibble::as_tibble(cbind(params_rows, metric_table))
+  tibble::as_tibble(metric_table)
 }
 
 summarize_cpm_edges <- function(object) {

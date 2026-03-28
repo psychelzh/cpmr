@@ -29,9 +29,9 @@ fold, metric, and prediction stream.}
 \item{metrics}{Metrics to keep when \code{component = "metrics"}.}
 }
 \value{
-A \link[tibble:tibble-package]{tibble} with columns storing parameters of
-the \code{cpm} object and further columns depending on the \code{component}
-argument.
+A \link[tibble:tibble-package]{tibble} with component-specific columns.
+Use \code{summary(x)$params} when you need the static CPM settings separately
+from the tidy result table.
 }
 \description{
 Tidy a \code{cpm} object

@@ -27,17 +27,6 @@ test_that("Basic case works for `tidy()`", {
   expect_named(
     performance,
     c(
-      "covariates",
-      "na_action",
-      "selection_type",
-      "selection_method",
-      "selection_criterion",
-      "selection_level",
-      "construction_type",
-      "construction_sign_mode",
-      "weight_scale",
-      "standardize_edges",
-      "model_type",
       "method",
       "joint",
       "positive",
@@ -47,17 +36,6 @@ test_that("Basic case works for `tidy()`", {
   expect_named(
     edges,
     c(
-      "covariates",
-      "na_action",
-      "selection_type",
-      "selection_method",
-      "selection_criterion",
-      "selection_level",
-      "construction_type",
-      "construction_sign_mode",
-      "weight_scale",
-      "standardize_edges",
-      "model_type",
       "positive",
       "negative"
     )
@@ -75,21 +53,7 @@ test_that("Support pass arguments of `summary()`", {
   )
   expect_named(
     tidy(result, component = "edges"),
-    c(
-      "covariates",
-      "na_action",
-      "selection_type",
-      "selection_method",
-      "selection_criterion",
-      "selection_level",
-      "construction_type",
-      "construction_sign_mode",
-      "weight_scale",
-      "standardize_edges",
-      "model_type",
-      "positive",
-      "negative"
-    )
+    c("positive", "negative")
   )
 })
 

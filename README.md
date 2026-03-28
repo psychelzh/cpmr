@@ -188,33 +188,25 @@ head(resample_obj$predictions)
 dim(resample_obj$edges)
 #> [1] 1000    2
 head(tidy(resample_obj, component = "metrics"))
-#> # A tibble: 6 × 17
-#>   covariates na_action return_edges selection_type selection_method
-#>   <lgl>      <chr>     <chr>        <chr>          <chr>
-#> 1 FALSE      fail      sum          cor            pearson
-#> 2 FALSE      fail      sum          cor            pearson
-#> 3 FALSE      fail      sum          cor            pearson
-#> 4 FALSE      fail      sum          cor            pearson
-#> 5 FALSE      fail      sum          cor            pearson
-#> 6 FALSE      fail      sum          cor            pearson
-#> # ℹ 12 more variables: selection_criterion <chr>, selection_level <dbl>,
-#> #   construction_type <chr>, construction_sign_mode <chr>, weight_scale <dbl>,
-#> #   standardize_edges <lgl>, model_type <chr>, fold <int>, n_assess <int>,
-#> #   metric <chr>, prediction <chr>, estimate <dbl>
+#> # A tibble: 6 × 5
+#>    fold n_assess metric prediction estimate
+#>   <int>    <int> <chr>  <chr>         <dbl>
+#> 1     1       20 rmse   joint         1.12 
+#> 2     1       20 rmse   positive      1.10 
+#> 3     1       20 rmse   negative      1.08 
+#> 4     2       20 rmse   joint         0.962
+#> 5     2       20 rmse   positive      0.989
+#> 6     2       20 rmse   negative      1.04
 head(tidy(resample_obj, component = "metrics", level = "pooled"))
-#> # A tibble: 6 × 15
-#>   covariates na_action return_edges selection_type selection_method
-#>   <lgl>      <chr>     <chr>        <chr>          <chr>
-#> 1 FALSE      fail      sum          cor            pearson
-#> 2 FALSE      fail      sum          cor            pearson
-#> 3 FALSE      fail      sum          cor            pearson
-#> 4 FALSE      fail      sum          cor            pearson
-#> 5 FALSE      fail      sum          cor            pearson
-#> 6 FALSE      fail      sum          cor            pearson
-#> # ℹ 10 more variables: selection_criterion <chr>, selection_level <dbl>,
-#> #   construction_type <chr>, construction_sign_mode <chr>, weight_scale <dbl>,
-#> #   standardize_edges <lgl>, model_type <chr>, metric <chr>, prediction <chr>,
-#> #   estimate <dbl>
+#> # A tibble: 6 × 3
+#>   metric prediction estimate
+#>   <chr>  <chr>         <dbl>
+#> 1 rmse   joint         1.24 
+#> 2 rmse   positive      1.20 
+#> 3 rmse   negative      1.20 
+#> 4 mae    joint         0.951
+#> 5 mae    positive      0.956
+#> 6 mae    negative      0.910
 ```
 
 `summary(resample_obj)` gives the default aggregate report, with pooled

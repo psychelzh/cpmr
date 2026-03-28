@@ -79,18 +79,6 @@ test_that("tidy metrics returns pooled and foldwise metric tables", {
 
   expect_true(all(
     c(
-      "covariates",
-      "na_action",
-      "return_edges",
-      "selection_type",
-      "selection_method",
-      "selection_criterion",
-      "selection_level",
-      "construction_type",
-      "construction_sign_mode",
-      "weight_scale",
-      "standardize_edges",
-      "model_type",
       "fold",
       "n_assess",
       "metric",
@@ -101,18 +89,6 @@ test_that("tidy metrics returns pooled and foldwise metric tables", {
   ))
   expect_true(all(
     c(
-      "covariates",
-      "na_action",
-      "return_edges",
-      "selection_type",
-      "selection_method",
-      "selection_criterion",
-      "selection_level",
-      "construction_type",
-      "construction_sign_mode",
-      "weight_scale",
-      "standardize_edges",
-      "model_type",
       "metric",
       "prediction",
       "estimate"
