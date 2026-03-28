@@ -16,24 +16,29 @@ articles:
       - anti-leakage-covariates
 
 reference:
-  - title: Native Fit API
-    desc: Primary entry points for fitting CPM models natively.
+  - title: Native CPM API
+    desc: Primary entry points for defining CPM analyses and running them.
     contents:
-      - cpm_spec
-      - fit_resamples
+      - spec
+      - cpm
+
+  - title: Stage Helpers
+    desc: Helper constructors for staged CPM specifications.
+    contents:
+      - cpm_selection_cor
+      - cpm_construction_summary
+      - cpm_model_lm
 
   - title: Result Objects
-    desc: S3 result classes returned by single-fit and resampling workflows.
+    desc: Result objects and summaries returned by `cpm()`.
     contents:
-      - cpm
-      - cpm_resamples
+      - cpm_object
 
   - title: Inspect Results
     desc: Summary and tidying helpers for fitted results.
     contents:
       - resample_metrics
       - summary.cpm
-      - summary.cpm_resamples
       - tidy.cpm
 
   - title: Package
