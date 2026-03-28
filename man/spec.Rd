@@ -18,7 +18,7 @@ cpm(
   ...,
   covariates = NULL,
   resamples = NULL,
-  return_edges = c("none", "sum", "all"),
+  return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 )
 }
@@ -52,8 +52,8 @@ k-fold resampling, or a list of assessment indices for manual folds. Manual
 resamples must contain integer vectors indexing rows in \code{conmat}.}
 
 \item{return_edges}{A character string indicating the return value of the
-selected edges. \code{"none"} skips edge storage, \code{"sum"} stores fold counts for
-each selected edge, and \code{"all"} stores the fold-wise edge masks.}
+selected edges. \code{"sum"} stores fold counts for each selected edge,
+\code{"none"} skips edge storage, and \code{"all"} stores the fold-wise edge masks.}
 
 \item{na_action}{A character string indicating the action when missing values
 are found in the inputs. \code{"fail"} stops immediately when any required value

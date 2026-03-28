@@ -101,8 +101,8 @@ print.cpm_spec <- function(x, ...) {
 #'   k-fold resampling, or a list of assessment indices for manual folds. Manual
 #'   resamples must contain integer vectors indexing rows in `conmat`.
 #' @param return_edges A character string indicating the return value of the
-#'   selected edges. `"none"` skips edge storage, `"sum"` stores fold counts for
-#'   each selected edge, and `"all"` stores the fold-wise edge masks.
+#'   selected edges. `"sum"` stores fold counts for each selected edge,
+#'   `"none"` skips edge storage, and `"all"` stores the fold-wise edge masks.
 #' @param na_action A character string indicating the action when missing values
 #'   are found in the inputs. `"fail"` stops immediately when any required value
 #'   is missing. `"exclude"` fits on complete cases and keeps the original row
@@ -124,7 +124,7 @@ cpm <- function(
   ...,
   covariates = NULL,
   resamples = NULL,
-  return_edges = c("none", "sum", "all"),
+  return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 ) {
   call <- match.call()

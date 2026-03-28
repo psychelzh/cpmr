@@ -209,10 +209,22 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
         prediction_streams = sum_x$settings$prediction_streams
       )))
     ),
-    edges = tibble::tibble(
-      params,
-      tibble::as_tibble(apply(sum_x$edges, 2, list))
-    )
+    edges = {
+      if (is.null(sum_x$edges)) {
+        stop(
+          paste0(
+            "Edge output is unavailable because this `cpm` object was fit ",
+            "with `return_edges = \"none\"`. Refit with `return_edges = ",
+            "\"sum\"` or `\"all\"` to tidy edges."
+          ),
+          call. = FALSE
+        )
+      }
+      tibble::tibble(
+        params,
+        tibble::as_tibble(apply(sum_x$edges, 2, list))
+      )
+    }
   )
 }
 

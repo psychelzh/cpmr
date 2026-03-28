@@ -30,7 +30,7 @@ test_that("print.cpm reports summary fields", {
   expect_output(print(res), "Complete cases")
   expect_output(print(res), "Covariates:\\s+none")
   expect_output(print(res), "Missing data:\\s+fail")
-  expect_output(print(res), "Edge storage:\\s+not stored")
+  expect_output(print(res), "Edge storage:\\s+summed across folds")
   expect_output(print(res), "Selection method:\\s+pearson")
   expect_output(print(res), "Construction sign mode:\\s+separate")
   expect_output(print(res), "Use summary\\(\\) for aggregate metrics")

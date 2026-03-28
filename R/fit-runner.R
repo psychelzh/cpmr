@@ -52,7 +52,7 @@ run_resample_fit <- function(
   behav,
   covariates = NULL,
   resamples = NULL,
-  return_edges = c("none", "sum", "all"),
+  return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude"),
   call = NULL
 ) {

@@ -94,11 +94,11 @@ These three outputs have slightly different jobs:
 - `resample_metrics(resample_obj)` returns the raw pooled or fold-wise metric
   tables for further filtering, plotting, or export.
 
-By default, `cpm()` uses `return_edges = "none"` and skips edge
-storage. This keeps the resampling object light when you only need predictive
-performance.
+By default, `cpm()` uses `return_edges = "sum"` and stores fold-aggregated edge
+selection counts. This makes edge summaries immediately available in the common
+resampling workflow.
 
-If you also want fold-aggregated edge selection rates, request them explicitly:
+If you want to control edge storage explicitly:
 
 ```{r}
 edge_resample_obj <- cpm(
@@ -118,7 +118,7 @@ dim(edge_resample_obj$edges)
 present and their `fold` value is `NA`.
 
 When `return_edges = "sum"`, `cpmr` stores fold-summed edge counts for each
-edge. If memory matters, keep the default `return_edges = "none"` or use
+edge. If memory matters, switch to `return_edges = "none"` or use
 `return_edges = "all"` only when fold-wise edge arrays are truly needed.
 
 ## Custom Resamples

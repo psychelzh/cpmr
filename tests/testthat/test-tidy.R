@@ -92,3 +92,26 @@ test_that("Support pass arguments of `summary()`", {
     )
   )
 })
+
+test_that("tidy edges errors clearly when edge storage is disabled", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+  result <- cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = spec(),
+    resamples = 5,
+    return_edges = "none"
+  )
+
+  expect_error(
+    tidy(result, component = "edges"),
+    paste0(
+      "Edge output is unavailable because this `cpm` object was fit ",
+      "with `return_edges = \"none\"`. Refit with `return_edges = ",
+      "\"sum\"` or `\"all\"` to tidy edges."
+    ),
+    fixed = TRUE
+  )
+})

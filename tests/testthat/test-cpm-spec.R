@@ -253,7 +253,7 @@ test_that("cpm returns predictions and folds", {
     res$predictions,
     c("row", "fold", "observed", "joint", "positive", "negative")
   )
-  expect_null(res$edges)
+  expect_equal(dim(res$edges), c(10, 2))
   expect_s3_class(summary(res), "cpm_summary")
 })
 
