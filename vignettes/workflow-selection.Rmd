@@ -68,5 +68,6 @@ As a rule of thumb:
 
 - use `summary(loo_obj)` when you want the default leave-one-out report;
 - use `summary(resample_obj)` for the default aggregate k-fold report;
-- use `summary(resample_obj)[["metrics"]]` or `resample_metrics(resample_obj)`
-  when you need structured metric tables instead of printed output.
+- use `summary(resample_obj)[["metrics"]]` for the compact summary metric
+  table, or `tidy(resample_obj, component = "metrics")` when you need
+  structured fold-wise or pooled metric tables instead of printed output.

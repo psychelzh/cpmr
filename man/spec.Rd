@@ -66,8 +66,8 @@ runs.
 
 \code{cpm()} returns a \code{cpm} object containing observation-level predictions,
 resampling folds, and optional stored edges. Call \code{\link[=summary.cpm]{summary.cpm()}} for the
-default aggregate report, or \code{\link[=resample_metrics]{resample_metrics()}} when you want pooled or
-fold-wise metrics in tabular form.
+default aggregate report, or \code{\link[=tidy.cpm]{tidy.cpm()}} when you want pooled or fold-wise
+metrics in tabular form.
 }
 \description{
 Create a lightweight specification object that stores the staged decisions

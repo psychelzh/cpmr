@@ -4,14 +4,29 @@
 \alias{tidy.cpm}
 \title{Tidy a \code{cpm} object}
 \usage{
-\method{tidy}{cpm}(x, ..., component = c("performance", "edges"))
+\method{tidy}{cpm}(
+  x,
+  ...,
+  component = c("performance", "metrics", "edges"),
+  level = c("foldwise", "pooled"),
+  metrics = c("rmse", "mae", "correlation")
+)
 }
 \arguments{
 \item{x}{A \code{cpm} object.}
 
 \item{...}{Additional arguments passed to \code{summary()}.}
 
-\item{component}{A character vector indicating the component to tidy.}
+\item{component}{A character vector indicating the component to tidy. Use
+\code{"performance"} for the compact pooled-correlation overview, \code{"metrics"}
+for tidy metric tables derived from \code{\link[=summary.cpm]{summary.cpm()}}, or \code{"edges"} for
+stored edge output.}
+
+\item{level}{Metric table to return when \code{component = "metrics"}. \code{"pooled"}
+returns pooled out-of-fold metrics, and \code{"foldwise"} returns one row per
+fold, metric, and prediction stream.}
+
+\item{metrics}{Metrics to keep when \code{component = "metrics"}.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} with columns storing parameters of

@@ -51,7 +51,47 @@ example_resample_summary <- function(
       stringsAsFactors = FALSE
     )
   ),
+  tables = list(
+    pooled = data.frame(
+      metric = rep(c("rmse", "mae", "correlation"), each = 3),
+      prediction = rep(prediction_streams, times = 3),
+      estimate = c(
+        0.8,
+        0.9,
+        1.0,
+        0.6,
+        0.7,
+        0.8,
+        0.4,
+        0.2,
+        -0.1
+      ),
+      stringsAsFactors = FALSE
+    ),
+    foldwise = data.frame(
+      fold = rep(1:5, each = 9),
+      n_assess = rep(4L, 45),
+      metric = rep(c("rmse", "mae", "correlation"), each = 3, times = 5),
+      prediction = rep(prediction_streams, times = 15),
+      estimate = rep(c(0.8, 0.9, 1.0, 0.6, 0.7, 0.8, 0.35, 0.15, -0.05), 5),
+      stringsAsFactors = FALSE
+    )
+  ),
   edges = NULL,
+  params = tibble::tibble(
+    covariates = FALSE,
+    na_action = "fail",
+    return_edges = "none",
+    selection_type = "correlation",
+    selection_method = "pearson",
+    selection_criterion = "p_value",
+    selection_level = 0.01,
+    construction_type = "summary",
+    construction_sign_mode = "separate",
+    weight_scale = "none",
+    standardize_edges = FALSE,
+    model_type = "lm"
+  ),
   settings = list(
     n_folds = 5L,
     return_edges = "none",
@@ -62,7 +102,9 @@ example_resample_summary <- function(
   structure(
     list(
       metrics = metrics,
+      tables = tables,
       edges = edges,
+      params = params,
       settings = settings
     ),
     class = "cpm_summary"
@@ -79,7 +121,7 @@ test_that("Works for basic summary", {
   expect_s3_class(summary_result, "cpm_summary")
   expect_identical(
     names(summary_result),
-    c("metrics", "edges", "settings")
+    c("metrics", "tables", "edges", "params", "settings")
   )
   expect_true(all(
     c(
@@ -92,6 +134,7 @@ test_that("Works for basic summary", {
     ) %in%
       names(summary_result$metrics)
   ))
+  expect_named(summary_result$tables, c("pooled", "foldwise"))
   expect_identical(summary_result$settings$n_folds, 1L)
 
   output <- capture.output(print(summary_result))

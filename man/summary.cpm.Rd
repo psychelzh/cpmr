@@ -22,12 +22,16 @@ summaries.}
 \value{
 A \code{cpm_summary} object with the following elements:
 \describe{
-\item{\code{metrics}}{A data frame with columns \code{level}, \code{metric},
-\code{prediction}, \code{estimate}, \code{std_error}, and \code{method}. CPM summaries store
-pooled errors and pooled correlations at \code{level = "pooled"}, and
-fold-wise correlation summaries at \code{level = "foldwise"}.}
+\item{\code{metrics}}{A compact summary-level data frame with columns \code{level},
+\code{metric}, \code{prediction}, \code{estimate}, \code{std_error}, and \code{method}. CPM
+summaries lead with pooled errors and pooled correlations, then report
+fold-wise correlation summaries as supplementary statistics.}
+\item{\code{tables}}{A list with \code{pooled} and \code{foldwise} raw metric tables for
+downstream tidying.}
 \item{\code{edges}}{Aggregated edge-selection rates, or \code{NULL} when edges were
 not stored.}
+\item{\code{params}}{A one-row tibble of CPM settings used when tidying the
+summary object back into tabular form.}
 \item{\code{settings}}{A list containing summary-relevant CPM settings.}
 }
 }

@@ -37,7 +37,6 @@ reference:
   - title: Inspect Results
     desc: Summary and tidying helpers for fitted results.
     contents:
-      - resample_metrics
       - summary.cpm
       - tidy.cpm
 

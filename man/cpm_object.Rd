@@ -24,5 +24,5 @@ fold IDs and one column per configured prediction stream.}
 }
 
 \seealso{
-\code{\link[=cpm]{cpm()}}, \code{\link[=summary.cpm]{summary.cpm()}}, \code{\link[=resample_metrics]{resample_metrics()}}
+\code{\link[=cpm]{cpm()}}, \code{\link[=summary.cpm]{summary.cpm()}}, \code{\link[=tidy.cpm]{tidy.cpm()}}
 }

@@ -83,7 +83,8 @@ resample_summary <- summary(resample_obj)
 resample_summary
 head(resample_summary[["metrics"]])
 head(predictions)
-head(resample_metrics(resample_obj))
+head(tidy(resample_obj, component = "metrics"))
+head(tidy(resample_obj, component = "metrics", level = "pooled"))
 ```
 
 These three outputs have slightly different jobs:
@@ -91,8 +92,9 @@ These three outputs have slightly different jobs:
 - `summary(resample_obj)` prints the default aggregate report;
 - `summary(resample_obj)[["metrics"]]` exposes the compact summary-level metric
   table stored on the summary object;
-- `resample_metrics(resample_obj)` returns the raw pooled or fold-wise metric
-  tables for further filtering, plotting, or export.
+- `tidy(resample_obj, component = "metrics")` returns the raw fold-wise metric
+  table for further filtering, plotting, or export, while
+  `level = "pooled"` returns pooled metrics.
 
 By default, `cpm()` uses `return_edges = "sum"` and stores fold-aggregated edge
 selection counts. This makes edge summaries immediately available in the common

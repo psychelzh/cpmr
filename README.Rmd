@@ -125,13 +125,16 @@ returns out-of-fold predictions together with the fold structure.
 summary(resample_obj)
 head(resample_obj$predictions)
 dim(resample_obj$edges)
-head(resample_metrics(resample_obj))
+head(tidy(resample_obj, component = "metrics"))
+head(tidy(resample_obj, component = "metrics", level = "pooled"))
 ```
 
 `summary(resample_obj)` gives the default aggregate report, with pooled
 out-of-fold error metrics shown first and correlations reported as
-supplementary statistics. Use `resample_metrics(resample_obj)` when you want
-pooled or fold-wise metric tables directly.
+supplementary statistics. Use `tidy(resample_obj, component = "metrics")` when
+you want fold-wise metric tables directly, or
+`tidy(resample_obj, component = "metrics", level = "pooled")` for pooled
+metric tables.
 
 For `cpm()`, `resamples = NULL` means leave-one-out resampling,
 `resamples = 5` means 5-fold resampling, and a list passed to `resamples`

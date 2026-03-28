@@ -71,56 +71,82 @@ test_that("print.cpm uses human-readable edge storage labels", {
   )))
 })
 
-test_that("resample_metrics returns pooled and foldwise metrics", {
+test_that("tidy metrics returns pooled and foldwise metric tables", {
   res <- example_resample_result()
 
-  foldwise <- resample_metrics(res)
-  pooled <- resample_metrics(res, level = "pooled")
+  foldwise <- tidy(res, component = "metrics")
+  pooled <- tidy(res, component = "metrics", level = "pooled")
 
-  expect_named(
-    foldwise,
-    c("fold", "n_assess", "metric", "prediction", "estimate")
-  )
-  expect_named(pooled, c("metric", "prediction", "estimate"))
+  expect_true(all(
+    c(
+      "covariates",
+      "na_action",
+      "return_edges",
+      "selection_type",
+      "selection_method",
+      "selection_criterion",
+      "selection_level",
+      "construction_type",
+      "construction_sign_mode",
+      "weight_scale",
+      "standardize_edges",
+      "model_type",
+      "fold",
+      "n_assess",
+      "metric",
+      "prediction",
+      "estimate"
+    ) %in%
+      names(foldwise)
+  ))
+  expect_true(all(
+    c(
+      "covariates",
+      "na_action",
+      "return_edges",
+      "selection_type",
+      "selection_method",
+      "selection_criterion",
+      "selection_level",
+      "construction_type",
+      "construction_sign_mode",
+      "weight_scale",
+      "standardize_edges",
+      "model_type",
+      "metric",
+      "prediction",
+      "estimate"
+    ) %in%
+      names(pooled)
+  ))
   expect_true(all(c("rmse", "mae", "correlation") %in% pooled$metric))
   expect_true(all(c("joint", "positive", "negative") %in% pooled$prediction))
 })
 
-test_that("resample_metrics supports metric filtering and spearman correlation", {
+test_that("tidy metrics supports metric filtering and spearman correlation", {
   res <- example_resample_result()
 
-  pooled <- resample_metrics(
+  pooled <- tidy(
     res,
+    component = "metrics",
     level = "pooled",
     metrics = "correlation",
-    correlation_method = "spearman"
+    method = "spearman"
   )
 
   expect_true(all(pooled$metric == "correlation"))
   expect_equal(nrow(pooled), 3)
 })
 
-test_that("resample_metrics ignores correlation_method when correlation is absent", {
+test_that("tidy metrics can return non-correlation metrics only", {
   res <- example_resample_result()
 
-  metrics <- resample_metrics(
+  metrics <- tidy(
     res,
-    metrics = "rmse",
-    correlation_method = "kendall"
+    component = "metrics",
+    metrics = "rmse"
   )
 
   expect_true(all(metrics$metric == "rmse"))
   expect_equal(nrow(metrics), 15)
-})
-
-test_that("resample_metrics validates object type", {
-  expect_error(
-    resample_metrics(summary(single_fit_result(
-      spec(),
-      conmat = matrix(rnorm(100), ncol = 10),
-      behav = rnorm(10)
-    ))),
-    "`resample_metrics()` requires a `cpm` object.",
-    fixed = TRUE
-  )
 })

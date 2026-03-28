@@ -17,7 +17,7 @@
 #'   \item{`model`}{Stored fitted CPM components when available.}
 #' }
 #'
-#' @seealso [cpm()], [summary.cpm()], [resample_metrics()]
+#' @seealso [cpm()], [summary.cpm()], [tidy.cpm()]
 #' @name cpm_object
 NULL
 
@@ -63,7 +63,7 @@ print.cpm <- function(x, ...) {
       sign_mode = "Construction sign mode"
     )
   )
-  cat("  Use summary() for aggregate metrics.\n")
+  cat("  Use summary() for aggregate metrics and tidy() for metric tables.\n")
   invisible(x)
 }
 
@@ -82,12 +82,16 @@ print.cpm <- function(x, ...) {
 #'
 #' @return A `cpm_summary` object with the following elements:
 #' \describe{
-#'   \item{`metrics`}{A data frame with columns `level`, `metric`,
-#'     `prediction`, `estimate`, `std_error`, and `method`. CPM summaries store
-#'     pooled errors and pooled correlations at `level = "pooled"`, and
-#'     fold-wise correlation summaries at `level = "foldwise"`.}
+#'   \item{`metrics`}{A compact summary-level data frame with columns `level`,
+#'     `metric`, `prediction`, `estimate`, `std_error`, and `method`. CPM
+#'     summaries lead with pooled errors and pooled correlations, then report
+#'     fold-wise correlation summaries as supplementary statistics.}
+#'   \item{`tables`}{A list with `pooled` and `foldwise` raw metric tables for
+#'     downstream tidying.}
 #'   \item{`edges`}{Aggregated edge-selection rates, or `NULL` when edges were
 #'     not stored.}
+#'   \item{`params`}{A one-row tibble of CPM settings used when tidying the
+#'     summary object back into tabular form.}
 #'   \item{`settings`}{A list containing summary-relevant CPM settings.}
 #' }
 #' @export
@@ -97,15 +101,32 @@ summary.cpm <- function(
   method = c("pearson", "spearman")
 ) {
   correlation_method <- match.arg(method)
+  overview_metrics <- compute_resample_summary_metrics(
+    object$predictions,
+    object$folds,
+    correlation_method = correlation_method
+  )
+  pooled_metrics <- compute_pooled_metric_table(
+    object$predictions,
+    metrics = c("rmse", "mae", "correlation"),
+    correlation_method = correlation_method
+  )
+  foldwise_metrics <- compute_fold_metric_table(
+    object$predictions,
+    object$folds,
+    metrics = c("rmse", "mae", "correlation"),
+    correlation_method = correlation_method
+  )
 
   structure(
     list(
-      metrics = compute_resample_summary_metrics(
-        object$predictions,
-        object$folds,
-        correlation_method = correlation_method
+      metrics = overview_metrics,
+      tables = list(
+        pooled = pooled_metrics,
+        foldwise = foldwise_metrics
       ),
       edges = summarize_cpm_edges(object),
+      params = tidy_cpm_fields(object$spec, object$settings),
       settings = list(
         n_folds = length(object$folds),
         edge_storage = cpm_edge_storage_label(object),
@@ -184,15 +205,31 @@ print.cpm_summary <- function(x, ...) {
 #'
 #' @param x A `cpm` object.
 #' @param ... Additional arguments passed to `summary()`.
-#' @param component A character vector indicating the component to tidy.
+#' @param component A character vector indicating the component to tidy. Use
+#'   `"performance"` for the compact pooled-correlation overview, `"metrics"`
+#'   for tidy metric tables derived from [summary.cpm()], or `"edges"` for
+#'   stored edge output.
+#' @param level Metric table to return when `component = "metrics"`. `"pooled"`
+#'   returns pooled out-of-fold metrics, and `"foldwise"` returns one row per
+#'   fold, metric, and prediction stream.
+#' @param metrics Metrics to keep when `component = "metrics"`.
 #' @return A [tibble][tibble::tibble-package] with columns storing parameters of
 #'   the `cpm` object and further columns depending on the `component`
 #'   argument.
 #' @export
-tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
+tidy.cpm <- function(
+  x,
+  ...,
+  component = c("performance", "metrics", "edges"),
+  level = c("foldwise", "pooled"),
+  metrics = c("rmse", "mae", "correlation")
+) {
   component <- match.arg(component)
-  params <- tidy_cpm_fields(x$spec, x$settings)
+  level <- match.arg(level)
+  metrics <- match.arg(metrics, several.ok = TRUE)
   sum_x <- summary(x, ...)
+  params <- sum_x$params
+
   switch(
     component,
     performance = tibble::tibble(
@@ -208,6 +245,12 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
         metric = "correlation",
         prediction_streams = sum_x$settings$prediction_streams
       )))
+    ),
+    metrics = tidy_metric_component(
+      params = params,
+      tables = sum_x$tables,
+      level = level,
+      requested_metrics = metrics
     ),
     edges = {
       if (is.null(sum_x$edges)) {
@@ -225,67 +268,6 @@ tidy.cpm <- function(x, ..., component = c("performance", "edges")) {
         tibble::as_tibble(apply(sum_x$edges, 2, list))
       )
     }
-  )
-}
-
-#' Extract metrics from a `cpm` object
-#'
-#' @param x A `cpm` object.
-#' @param level Which level of metric output to return. Use `"foldwise"` for
-#'   one row per fold, metric, and prediction stream, or `"pooled"` for one row
-#'   per metric and prediction stream computed across all out-of-fold
-#'   predictions.
-#' @param metrics Which metrics to include. Supported values are `"rmse"`,
-#'   `"mae"`, and `"correlation"`.
-#' @param correlation_method Correlation method used when `metrics` includes
-#'   `"correlation"`.
-#'
-#' @details
-#' Use `resample_metrics()` when you want CPM metrics in a tabular form for
-#' downstream inspection or plotting. Compared with [summary.cpm()], this
-#' helper is less opinionated: it can return pooled metrics across all
-#' predictions or the raw fold-wise metrics used to build aggregate summaries.
-#'
-#' @return A data frame. For `level = "foldwise"`, the returned columns are
-#'   `fold`, `n_assess`, `metric`, `prediction`, and `estimate`. For
-#'   `level = "pooled"`, the returned columns are `metric`, `prediction`, and
-#'   `estimate`.
-#'
-#' @examples
-#' withr::local_seed(123)
-#' conmat <- matrix(rnorm(200), nrow = 20)
-#' behav <- rowMeans(conmat[, 1:5, drop = FALSE]) + rnorm(20, sd = 0.2)
-#' res <- cpm(conmat = conmat, behav = behav, spec = spec(), resamples = 4)
-#'
-#' head(resample_metrics(res))
-#' resample_metrics(res, level = "pooled", metrics = "correlation")
-#' @export
-resample_metrics <- function(
-  x,
-  level = c("foldwise", "pooled"),
-  metrics = c("rmse", "mae", "correlation"),
-  correlation_method = c("pearson", "spearman")
-) {
-  if (!inherits(x, "cpm")) {
-    stop("`resample_metrics()` requires a `cpm` object.")
-  }
-
-  level <- match.arg(level)
-  metrics <- match.arg(metrics, several.ok = TRUE)
-
-  switch(
-    level,
-    pooled = compute_pooled_metric_table(
-      predictions = x$predictions,
-      metrics = metrics,
-      correlation_method = correlation_method
-    ),
-    foldwise = compute_fold_metric_table(
-      predictions = x$predictions,
-      folds = x$folds,
-      metrics = metrics,
-      correlation_method = correlation_method
-    )
   )
 }
 
@@ -320,6 +302,18 @@ tidy_model_params <- function(model) {
   list(
     model_type = model$type
   )
+}
+
+tidy_metric_component <- function(params, tables, level, requested_metrics) {
+  metric_table <- tables[[level]]
+  metric_table <- metric_table[
+    metric_table$metric %in% requested_metrics,
+    ,
+    drop = FALSE
+  ]
+  params_rows <- params[rep(1, nrow(metric_table)), , drop = FALSE]
+
+  tibble::as_tibble(cbind(params_rows, metric_table))
 }
 
 summarize_cpm_edges <- function(object) {

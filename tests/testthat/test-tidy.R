@@ -93,6 +93,23 @@ test_that("Support pass arguments of `summary()`", {
   )
 })
 
+test_that("tidy supports pooled and foldwise metric tables", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(200), nrow = 20)
+  behav <- rnorm(20)
+  result <- cpm(conmat = conmat, behav = behav, spec = spec(), resamples = 4)
+
+  foldwise <- tidy(result, component = "metrics")
+  pooled <- tidy(result, component = "metrics", level = "pooled")
+
+  expect_true(all(
+    c("fold", "n_assess", "metric", "prediction", "estimate") %in%
+      names(foldwise)
+  ))
+  expect_true(all(c("metric", "prediction", "estimate") %in% names(pooled)))
+  expect_true(all(c("rmse", "mae", "correlation") %in% pooled$metric))
+})
+
 test_that("tidy edges errors clearly when edge storage is disabled", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)

@@ -114,8 +114,8 @@ print.cpm_spec <- function(x, ...) {
 #'
 #' `cpm()` returns a `cpm` object containing observation-level predictions,
 #' resampling folds, and optional stored edges. Call [summary.cpm()] for the
-#' default aggregate report, or [resample_metrics()] when you want pooled or
-#' fold-wise metrics in tabular form.
+#' default aggregate report, or [tidy.cpm()] when you want pooled or fold-wise
+#' metrics in tabular form.
 #' @export
 cpm <- function(
   conmat,

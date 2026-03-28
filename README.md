@@ -40,8 +40,8 @@ install.packages("cpmr", repos = c("https://psychelzh.r-universe.dev", getOption
 
 Shape your connectivity matrix as a subjects-by-edges matrix, where each
 row contains the edge vector for one subject, and pair it with a
-behavioral vector. The native workflow uses `cpm_spec()` together with
-`fit()`.
+behavioral vector. The native workflow uses `spec()` together with
+`cpm()`.
 
 ``` r
 library(cpmr)
@@ -49,89 +49,193 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-fit_obj <- fit(cpm_spec(), conmat = conmat, behav = behav)
-
-fit_obj
-#> CPM fit:
-#>   Call: fit(object = cpm_spec(), conmat = conmat, behav = behav)
-#>   Number of observations: 100
-#>     Complete cases: 100
-#>   Candidate edges: 1000
-#>   Parameters:
-#>     Covariates:       none
-#>     Threshold method: alpha
-#>     Threshold level:  0.01
-#>     Bias correction:  yes
-summary(fit_obj)
-#> CPM summary:
-#>   Performance (Pearson):
-#>     Combined: 0.676
-#>     Positive: 0.595
-#>     Negative: 0.387
-#>   Selected edges:
-#>     Positive: 0.70%
-#>     Negative: 0.20%
-```
-
-Cross-validated resampling uses `fit_resamples()` with the same
-specification object:
-
-``` r
-resample_obj <- fit_resamples(cpm_spec(), conmat = conmat, behav = behav, kfolds = 5)
+s <- spec()
+resample_obj <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
 
 summary(resample_obj)
-#> CPM resample summary:
+#> CPM summary:
 #>   Number of folds: 5
 #>   Prediction error:
 #>     RMSE:
-#>       Combined: 1.243
-#>       Positive: 1.205
-#>       Negative: 1.200
+#>       Joint: 1.242
+#>       Positive: 1.204
+#>       Negative: 1.199
 #>     MAE:
-#>       Combined: 0.947
-#>       Positive: 0.962
-#>       Negative: 0.905
+#>       Joint: 0.951
+#>       Positive: 0.956
+#>       Negative: 0.910
 #>   Pooled correlations (Pearson):
-#>     Combined: -0.104
-#>     Positive: -0.072
-#>     Negative: -0.074
+#>     Joint: -0.108
+#>     Positive: -0.074
+#>     Negative: -0.080
 #>   Fold-wise correlations (Pearson):
-#>     Combined: -0.057 (SE 0.062)
-#>     Positive: 0.008 (SE 0.089)
-#>     Negative: -0.036 (SE 0.077)
+#>     Joint: -0.062 (SE 0.064)
+#>     Positive: 0.007 (SE 0.086)
+#>     Negative: -0.039 (SE 0.078)
+#>   Selected edges:
+#>     Positive: 0.56%
+#>     Negative: 0.32%
 head(resample_obj$predictions)
-#>   row fold        real        both        pos         neg
-#> 1   1    1  0.26499342 0.492748241 -0.2058990  0.76974455
-#> 2   2    5  1.83074748 0.323127546  0.2918329  0.05747766
-#> 3   3    5 -0.05937826 0.901452079  1.1152311 -0.34018567
-#> 4   4    3 -0.05320937 0.659647280  0.5558721  0.26308893
-#> 5   5    1  0.43790418 0.002067539  0.2977574 -0.37106308
-#> 6   6    4  1.33744904 0.659172053  0.5130919  0.37428531
+#>   row fold    observed       joint    positive    negative
+#> 1   1    1  0.26499342 0.591709195 -0.08846823  0.76686948
+#> 2   2    5  1.83074748 0.325440165  0.29380525  0.05747766
+#> 3   3    5 -0.05937826 0.845311244  1.05634560 -0.34018567
+#> 4   4    3 -0.05320937 0.664779940  0.56680746  0.25720238
+#> 5   5    1  0.43790418 0.001660943  0.29376910 -0.36672391
+#> 6   6    4  1.33744904 0.591903346  0.45146065  0.34438321
+```
+
+`spec()` can also express richer CPM variants without leaving the native
+API surface:
+
+``` r
+rich_spec <- spec(
+  selection = cpm_selection_cor(
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.1
+  ),
+  construction = cpm_construction_summary(
+    sign_mode = "net",
+    weight_scale = 0.03
+  ),
+  model = cpm_model_lm()
+)
+
+cpm(conmat = conmat, behav = behav, spec = rich_spec, resamples = 5)$predictions |>
+  head()
+#>   row fold    observed         net
+#> 1   1    1  0.26499342  0.12167754
+#> 2   2    1  1.83074748  0.47750573
+#> 3   3    5 -0.05937826  0.43681670
+#> 4   4    5 -0.05320937 -0.01008645
+#> 5   5    2  0.43790418 -0.06417020
+#> 6   6    3  1.33744904  0.09903232
+```
+
+This keeps the main CPM stages visible while grouping naturally paired
+options into small helpers:
+
+- `selection = cpm_selection_cor(...)` defines how edges are screened;
+- `construction = cpm_construction_summary(...)` defines how screened
+  edges become CPM-derived predictors;
+- `model = cpm_model_lm()` defines the outcome model fitted on those
+  predictors.
+
+By default, `spec()` keeps edge standardization turned off so the native
+workflow stays close to the classic CPM path of screening edges,
+constructing summary features, and fitting the outcome model. If you
+want fold-local edge z-scoring, opt in with
+`cpm_construction_summary(standardize_edges = TRUE)`.
+
+If you are new to CPM, the key idea behind the current summary-based
+construction is:
+
+- `positive` edges are edges whose screening association with the
+  outcome is positive and passes the threshold;
+- `negative` edges are edges whose screening association with the
+  outcome is negative and passes the threshold;
+- CPM then collapses those screened edge sets into subject-level summary
+  features before fitting the outcome model.
+
+With `sign_mode = "separate"`, `cpmr` keeps the positive and negative
+summaries as separate predictors and reports three prediction streams:
+
+- `joint`, which fits one model with both summaries together;
+- `positive`, a positive-only diagnostic stream;
+- `negative`, a negative-only diagnostic stream.
+
+With `sign_mode = "net"`, `cpmr` constructs a single
+`net_summary = positive_summary - negative_summary` feature and returns
+one `net` prediction stream.
+
+`cpm()` is resample-first: it runs CPM under the requested assessment
+plan and returns out-of-fold predictions together with the fold
+structure.
+
+``` r
+summary(resample_obj)
+#> CPM summary:
+#>   Number of folds: 5
+#>   Prediction error:
+#>     RMSE:
+#>       Joint: 1.242
+#>       Positive: 1.204
+#>       Negative: 1.199
+#>     MAE:
+#>       Joint: 0.951
+#>       Positive: 0.956
+#>       Negative: 0.910
+#>   Pooled correlations (Pearson):
+#>     Joint: -0.108
+#>     Positive: -0.074
+#>     Negative: -0.080
+#>   Fold-wise correlations (Pearson):
+#>     Joint: -0.062 (SE 0.064)
+#>     Positive: 0.007 (SE 0.086)
+#>     Negative: -0.039 (SE 0.078)
+#>   Selected edges:
+#>     Positive: 0.56%
+#>     Negative: 0.32%
+head(resample_obj$predictions)
+#>   row fold    observed       joint    positive    negative
+#> 1   1    1  0.26499342 0.591709195 -0.08846823  0.76686948
+#> 2   2    5  1.83074748 0.325440165  0.29380525  0.05747766
+#> 3   3    5 -0.05937826 0.845311244  1.05634560 -0.34018567
+#> 4   4    3 -0.05320937 0.664779940  0.56680746  0.25720238
+#> 5   5    1  0.43790418 0.001660943  0.29376910 -0.36672391
+#> 6   6    4  1.33744904 0.591903346  0.45146065  0.34438321
 dim(resample_obj$edges)
-#> NULL
-head(resample_metrics(resample_obj))
-#>   fold n_assess metric prediction  estimate
-#> 1    1       20   rmse       both 1.1115539
-#> 2    1       20   rmse        pos 1.1024986
-#> 3    1       20   rmse        neg 1.0753358
-#> 4    2       20   rmse       both 0.9556034
-#> 5    2       20   rmse        pos 0.9872521
-#> 6    2       20   rmse        neg 1.0424502
+#> [1] 1000    2
+head(tidy(resample_obj, component = "metrics"))
+#> # A tibble: 6 × 17
+#>   covariates na_action return_edges selection_type selection_method
+#>   <lgl>      <chr>     <chr>        <chr>          <chr>
+#> 1 FALSE      fail      sum          cor            pearson
+#> 2 FALSE      fail      sum          cor            pearson
+#> 3 FALSE      fail      sum          cor            pearson
+#> 4 FALSE      fail      sum          cor            pearson
+#> 5 FALSE      fail      sum          cor            pearson
+#> 6 FALSE      fail      sum          cor            pearson
+#> # ℹ 12 more variables: selection_criterion <chr>, selection_level <dbl>,
+#> #   construction_type <chr>, construction_sign_mode <chr>, weight_scale <dbl>,
+#> #   standardize_edges <lgl>, model_type <chr>, fold <int>, n_assess <int>,
+#> #   metric <chr>, prediction <chr>, estimate <dbl>
+head(tidy(resample_obj, component = "metrics", level = "pooled"))
+#> # A tibble: 6 × 15
+#>   covariates na_action return_edges selection_type selection_method
+#>   <lgl>      <chr>     <chr>        <chr>          <chr>
+#> 1 FALSE      fail      sum          cor            pearson
+#> 2 FALSE      fail      sum          cor            pearson
+#> 3 FALSE      fail      sum          cor            pearson
+#> 4 FALSE      fail      sum          cor            pearson
+#> 5 FALSE      fail      sum          cor            pearson
+#> 6 FALSE      fail      sum          cor            pearson
+#> # ℹ 10 more variables: selection_criterion <chr>, selection_level <dbl>,
+#> #   construction_type <chr>, construction_sign_mode <chr>, weight_scale <dbl>,
+#> #   standardize_edges <lgl>, model_type <chr>, metric <chr>, prediction <chr>,
+#> #   estimate <dbl>
 ```
 
 `summary(resample_obj)` gives the default aggregate report, with pooled
 out-of-fold error metrics shown first and correlations reported as
-supplementary statistics. Use `resample_metrics(resample_obj)` when you
-want pooled or fold-wise metric tables directly.
+supplementary statistics. Use
+`tidy(resample_obj, component = "metrics")` when you want fold-wise
+metric tables directly, or
+`tidy(resample_obj, component = "metrics", level = "pooled")` for pooled
+metric tables.
+
+For `cpm()`, `resamples = NULL` means leave-one-out resampling,
+`resamples = 5` means 5-fold resampling, and a list passed to
+`resamples` enforces a manual assessment-fold partition.
 
 ## Choosing a path
 
 `cpmr` treats this native workflow as the primary package path:
 
-- use `fit(cpm_spec(), ...)` and `fit_resamples(cpm_spec(), ...)` for
-  native CPM analyses;
-- keep the `cpm_spec()` object around when you want an explicit,
-  reusable parameter object.
+- use `cpm(..., spec = spec())` for native CPM analyses;
+- keep the `spec()` object around when you want an explicit, reusable
+  parameter object.
 
 Why this matters: CPM often needs leakage-safe fold-local preprocessing
 and can benefit from future fold-level caching or threshold-aware
