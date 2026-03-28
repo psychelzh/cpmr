@@ -6,7 +6,7 @@
 #' A `cpm` object is a list with the following elements:
 #' \describe{
 #'   \item{`call`}{Matched call used for fitting or resampling.}
-#'   \item{`spec`}{The originating `cpm_spec` object.}
+#'   \item{`spec`}{The originating CPM specification object.}
 #'   \item{`settings`}{Runtime settings used for the CPM run, including
 #'     missing-data handling and edge-storage preferences.}
 #'   \item{`predictions`}{Data frame of observation-level predictions with

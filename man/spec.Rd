@@ -2,17 +2,10 @@
 % Please edit documentation in R/cpm-spec.R
 \name{spec}
 \alias{spec}
-\alias{cpm_spec}
 \alias{cpm}
 \title{Define a CPM specification}
 \usage{
 spec(
-  selection = cpm_selection_cor(),
-  construction = cpm_construction_summary(),
-  model = cpm_model_lm()
-)
-
-cpm_spec(
   selection = cpm_selection_cor(),
   construction = cpm_construction_summary(),
   model = cpm_model_lm()
@@ -44,8 +37,8 @@ column.}
 \item{behav}{A numeric outcome vector with one value per observation in
 \code{conmat}. Row or column matrices are accepted and converted with \code{\link[=drop]{drop()}}.}
 
-\item{spec}{A \code{cpm_spec} object created by \code{\link[=spec]{spec()}}. If \code{NULL},
-\code{\link[=spec]{spec()}} is used.}
+\item{spec}{A CPM specification created by \code{\link[=spec]{spec()}}. If \code{NULL}, \code{\link[=spec]{spec()}} is
+used.}
 
 \item{...}{For future extension. Currently ignored.}
 
@@ -68,7 +61,8 @@ is missing. \code{"exclude"} fits on complete cases and keeps the original row
 layout in the returned predictions.}
 }
 \value{
-\code{spec()} returns a \code{cpm_spec} object that can be reused across CPM runs.
+\code{spec()} returns a CPM specification object that can be reused across CPM
+runs.
 
 \code{cpm()} returns a \code{cpm} object containing observation-level predictions,
 resampling folds, and optional stored edges. Call \code{\link[=summary.cpm]{summary.cpm()}} for the
@@ -84,8 +78,7 @@ resampling plan and returns a \code{cpm} object with out-of-fold predictions.
 }
 \details{
 \code{spec()} keeps the main CPM decisions visible at the top level while
-grouping stage-specific settings into helpers. \code{cpm_spec()} remains
-available as a compatibility wrapper around \code{spec()}.
+grouping stage-specific settings into helpers.
 
 \code{spec()} groups CPM settings into three stages:
 \itemize{

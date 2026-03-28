@@ -11,7 +11,7 @@ A \code{cpm} object is the primary result returned by \code{\link[=cpm]{cpm()}}.
 A \code{cpm} object is a list with the following elements:
 \describe{
 \item{\code{call}}{Matched call used for fitting or resampling.}
-\item{\code{spec}}{The originating \code{cpm_spec} object.}
+\item{\code{spec}}{The originating CPM specification object.}
 \item{\code{settings}}{Runtime settings used for the CPM run, including
 missing-data handling and edge-storage preferences.}
 \item{\code{predictions}}{Data frame of observation-level predictions with

@@ -1,5 +1,5 @@
 single_fit_result <- function(
-  spec = cpm_spec(),
+  spec = spec(),
   conmat,
   behav,
   covariates = NULL,
@@ -19,7 +19,7 @@ test_that("Basic case works for `tidy()`", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- single_fit_result(cpm_spec(), conmat = conmat, behav = behav)
+  result <- single_fit_result(spec(), conmat = conmat, behav = behav)
 
   performance <- tidy(result, component = "performance")
   edges <- tidy(result, component = "edges")
@@ -68,7 +68,7 @@ test_that("Support pass arguments of `summary()`", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- single_fit_result(cpm_spec(), conmat = conmat, behav = behav)
+  result <- single_fit_result(spec(), conmat = conmat, behav = behav)
   expect_equal(
     tidy(result, component = "performance", method = "spearman")$method,
     "spearman"

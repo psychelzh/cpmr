@@ -9,7 +9,7 @@ prediction_complete_cases <- function(x) {
 }
 
 single_fit_result <- function(
-  spec = cpm_spec(),
+  spec = spec(),
   conmat,
   behav,
   covariates = NULL,
@@ -49,7 +49,7 @@ test_that("Alternative threshold method works", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
   result <- single_fit_result(
-    cpm_spec(selection = cpm_selection_cor(criterion = "proportion")),
+    spec(selection = cpm_selection_cor(criterion = "proportion")),
     conmat = conmat,
     behav = behav
   )
@@ -76,7 +76,7 @@ test_that("Different threshold levels works", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
   result <- single_fit_result(
-    cpm_spec(selection = cpm_selection_cor(level = 0.1)),
+    spec(selection = cpm_selection_cor(level = 0.1)),
     conmat = conmat,
     behav = behav
   )
@@ -97,7 +97,7 @@ test_that("Works with covariates", {
   behav <- rnorm(10)
   covariates <- matrix(rnorm(10), ncol = 1)
   result <- single_fit_result(
-    cpm_spec(),
+    spec(),
     conmat = conmat,
     behav = behav,
     covariates = covariates
@@ -118,7 +118,7 @@ test_that("fit with covariates uses in-sample residualized target scale", {
   covariates <- matrix(cov, ncol = 1)
 
   result <- single_fit_result(
-    cpm_spec(),
+    spec(),
     conmat = conmat,
     behav = behav,
     covariates = covariates
@@ -135,7 +135,7 @@ test_that("Keep names of behavior", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
   names(behav) <- LETTERS[1:10]
-  result <- single_fit_result(cpm_spec(), conmat = conmat, behav = behav)
+  result <- single_fit_result(spec(), conmat = conmat, behav = behav)
   expect_identical(rownames(result$predictions), LETTERS[1:10])
   expect_equal(result$predictions$row, seq_along(behav))
 })
@@ -144,7 +144,7 @@ test_that("single-fit CPM always stores selected edges", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- single_fit_result(cpm_spec(), conmat = conmat, behav = behav)
+  result <- single_fit_result(spec(), conmat = conmat, behav = behav)
   expect_equal(dim(result$edges), c(10, 2))
   expect_false("return_edges" %in% names(result$settings))
 })
@@ -168,11 +168,11 @@ test_that("Support row/column matrix input of `behav` and `covariates`", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- single_fit_result(cpm_spec(), conmat = conmat, behav = behav)
+  result <- single_fit_result(spec(), conmat = conmat, behav = behav)
   key_fields <- c("predictions", "edges")
   expect_identical(
     single_fit_result(
-      cpm_spec(),
+      spec(),
       conmat = conmat,
       behav = matrix(behav, ncol = 1)
     )[key_fields],
@@ -180,7 +180,7 @@ test_that("Support row/column matrix input of `behav` and `covariates`", {
   )
   expect_identical(
     single_fit_result(
-      cpm_spec(),
+      spec(),
       conmat = conmat,
       behav = matrix(behav, nrow = 1)
     )[key_fields],
@@ -188,14 +188,14 @@ test_that("Support row/column matrix input of `behav` and `covariates`", {
   )
   covariates <- matrix(rnorm(10), ncol = 1)
   result <- single_fit_result(
-    cpm_spec(),
+    spec(),
     conmat = conmat,
     behav = behav,
     covariates = covariates
   )
   expect_identical(
     single_fit_result(
-      cpm_spec(),
+      spec(),
       conmat = conmat,
       behav = behav,
       covariates = drop(covariates)
@@ -209,19 +209,19 @@ test_that("Throw informative error if data checking not pass", {
   conmat <- matrix(rnorm(100), ncol = 10)
   expect_error(
     single_fit_result(
-      cpm_spec(),
+      spec(),
       conmat = conmat,
       behav = matrix(rnorm(20), ncol = 2)
     ),
     "Behavior data must be a numeric vector."
   )
   expect_error(
-    single_fit_result(cpm_spec(), conmat = conmat, behav = rnorm(20)),
+    single_fit_result(spec(), conmat = conmat, behav = rnorm(20)),
     "The number of observations in `conmat` and `behav` must match."
   )
   expect_error(
     single_fit_result(
-      cpm_spec(),
+      spec(),
       conmat = conmat,
       behav = rnorm(10),
       covariates = matrix(rnorm(20), ncol = 1)
@@ -236,11 +236,11 @@ test_that("`na_action` argument works", {
   behav <- rnorm(10)
   behav[1] <- NA
   expect_error(
-    single_fit_result(cpm_spec(), conmat = conmat, behav = behav),
+    single_fit_result(spec(), conmat = conmat, behav = behav),
     "Missing values found in `behav`"
   )
   result <- single_fit_result(
-    cpm_spec(),
+    spec(),
     conmat = conmat,
     behav = behav,
     na_action = "exclude"
@@ -252,7 +252,7 @@ test_that("`na_action` argument works", {
   covariates <- matrix(rnorm(10), ncol = 1)
   covariates[2, 1] <- NA
   result <- single_fit_result(
-    cpm_spec(),
+    spec(),
     conmat = conmat,
     behav = behav,
     covariates = covariates,
@@ -267,7 +267,7 @@ test_that("`na_action` argument works", {
   expect_identical(result$settings$na_action, "exclude")
   conmat[1, 1] <- NA
   result <- single_fit_result(
-    cpm_spec(),
+    spec(),
     conmat = conmat,
     behav = behav,
     covariates = covariates,
@@ -293,7 +293,7 @@ test_that("fit excludes incomplete rows consistently when excluding missing data
   covariates[6, 1] <- NA
 
   result <- single_fit_result(
-    cpm_spec(),
+    spec(),
     conmat = conmat,
     behav = behav,
     covariates = covariates,

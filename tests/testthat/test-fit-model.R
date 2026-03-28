@@ -199,7 +199,7 @@ test_that("fit_split_model and predict_split_model compose correctly", {
     conmat = training_conmat,
     behav = training_behav,
     edge_selection = edge_selection,
-    construction_spec = cpm_spec(
+    construction_spec = spec(
       construction = cpm_construction_summary(
         sign_mode = "separate",
         weight_scale = 0,
@@ -239,7 +239,7 @@ test_that("net sign mode with lm model produces a single stream", {
     conmat = conmat,
     behav = behav,
     edge_selection = edge_selection,
-    construction_spec = cpm_spec(
+    construction_spec = spec(
       construction = cpm_construction_summary(
         sign_mode = "net",
         weight_scale = 0,
@@ -274,7 +274,7 @@ test_that("fit_split_model handles aliased empty-sign features", {
     conmat = conmat,
     behav = behav,
     edge_selection = edge_selection,
-    construction_spec = cpm_spec()$construction,
+    construction_spec = spec()$construction,
     model_spec = cpm_model_lm()
   )
   fitted <- model$outcome_models$joint
@@ -381,7 +381,7 @@ test_that("feature_matrix_summary skips empty edge signs in weighted mode", {
 
 test_that("prediction helpers validate unsupported modes", {
   construction_state <- list(
-    construction = cpm_spec()$construction,
+    construction = spec()$construction,
     center = NULL,
     scale = NULL,
     edge_mask = NULL,
@@ -450,7 +450,7 @@ test_that("prediction helpers validate unsupported modes", {
   construction_state_net <- utils::modifyList(
     construction_state,
     list(
-      construction = cpm_spec(
+      construction = spec(
         construction = cpm_construction_summary(
           sign_mode = "net",
           weight_scale = 0,
@@ -480,7 +480,7 @@ test_that("prediction helpers validate unsupported modes", {
 
 test_that("construction_features returns cached summary feature sets", {
   construction_state <- list(
-    construction = cpm_spec(
+    construction = spec(
       construction = cpm_construction_summary(sign_mode = "separate")
     )$construction,
     center = NULL,

@@ -28,12 +28,8 @@ test_that("spec stores staged model parameters", {
   expect_identical(s$model$type, "lm")
 })
 
-test_that("cpm_spec remains a compatibility wrapper for spec", {
-  expect_identical(cpm_spec(), spec())
-})
-
 single_fit_result <- function(
-  spec = cpm_spec(),
+  spec = spec(),
   conmat,
   behav,
   covariates = NULL,
@@ -49,8 +45,8 @@ single_fit_result <- function(
   )
 }
 
-test_that("cpm_spec defaults to classic CPM edge handling", {
-  spec <- cpm_spec()
+test_that("spec defaults to classic CPM edge handling", {
+  spec <- spec()
 
   expect_identical(spec$selection$type, "cor")
   expect_s3_class(spec$selection, "cpm_selection_spec")
@@ -132,23 +128,23 @@ test_that("helper constructors validate scalar parameter values", {
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(selection = list()),
+    spec(selection = list()),
     "`selection` must be a `cpm_selection_spec` object.",
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(construction = list()),
+    spec(construction = list()),
     "`construction` must be a `cpm_construction_spec` object.",
     fixed = TRUE
   )
   expect_error(
-    cpm_spec(model = list()),
+    spec(model = list()),
     "`model` must be a `cpm_model_spec` object.",
     fixed = TRUE
   )
 })
 
-test_that("cpm_spec checks stage classes without unpacking stage internals", {
+test_that("spec checks stage classes without unpacking stage internals", {
   custom_selection <- structure(
     list(type = "custom_selection"),
     class = "cpm_selection_spec"
@@ -162,7 +158,7 @@ test_that("cpm_spec checks stage classes without unpacking stage internals", {
     class = "cpm_model_spec"
   )
 
-  spec <- cpm_spec(
+  spec <- spec(
     selection = custom_selection,
     construction = custom_construction,
     model = custom_model
@@ -180,7 +176,7 @@ test_that("helper constructors round-trip through params", {
 })
 
 test_that("print.cpm_spec shows readable staged settings", {
-  spec <- cpm_spec(
+  spec <- spec(
     selection = cpm_selection_cor(
       method = "spearman",
       criterion = "absolute",
@@ -206,7 +202,7 @@ test_that("net construction yields a single prediction stream", {
   withr::local_seed(101)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(
+  spec <- spec(
     construction = cpm_construction_summary(sign_mode = "net")
   )
 
@@ -220,7 +216,7 @@ test_that("sigmoid edge weighting stores smooth edge weights in the model", {
   withr::local_seed(202)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(
+  spec <- spec(
     selection = cpm_selection_cor(
       criterion = "absolute",
       level = 0.1
@@ -278,7 +274,7 @@ test_that("cpm validates `spec` input", {
 
   expect_error(
     cpm(conmat = conmat, behav = behav, spec = list(), resamples = 5),
-    "`spec` must be a `cpm_spec` object.",
+    "`spec` must be a CPM specification created by `spec()`.",
     fixed = TRUE
   )
 })
@@ -287,7 +283,7 @@ test_that("cpm accepts custom resample indices", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec()
+  spec <- spec()
 
   resamples <- list(1:3, 4:6, 7:10)
   res <- cpm(
@@ -305,7 +301,7 @@ test_that("cpm accepts custom resample indices", {
 test_that("cpm validates fold-count resamples", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  spec <- cpm_spec()
+  spec <- spec()
 
   expect_error(
     cpm(conmat = conmat, behav = behav, spec = spec, resamples = 1),
@@ -328,7 +324,7 @@ test_that("cpm validates custom resamples", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  spec <- cpm_spec()
+  spec <- spec()
 
   expect_error(
     cpm(
@@ -395,7 +391,7 @@ test_that("cpm validates custom resamples", {
 test_that("cpm errors clearly for insufficient complete cases", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rep(NA_real_, 10)
-  spec <- cpm_spec()
+  spec <- spec()
 
   expect_error(
     cpm(conmat = conmat, behav = behav, spec = spec, na_action = "exclude"),
@@ -415,7 +411,7 @@ test_that("cpm errors clearly for insufficient complete cases", {
 test_that("cpm errors when any fold leaves fewer than 3 training rows", {
   conmat <- matrix(rnorm(40), ncol = 10)
   behav <- rnorm(4)
-  spec <- cpm_spec()
+  spec <- spec()
 
   expect_error(
     cpm(conmat = conmat, behav = behav, spec = spec, resamples = 2),
@@ -439,7 +435,7 @@ test_that("cpm can store summed edges", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec()
+  spec <- spec()
 
   res <- cpm(
     conmat = conmat,
@@ -458,7 +454,7 @@ test_that("cpm can store fold-wise edges", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec()
+  spec <- spec()
 
   res <- cpm(
     conmat = conmat,
@@ -481,7 +477,7 @@ test_that("cpm handles covariates in assessment pipeline", {
   conmat <- matrix(rnorm(n * p) + rep(cov, p), nrow = n, ncol = p)
   behav <- cov * 1.5 + rnorm(n)
   covariates <- matrix(cov, ncol = 1)
-  spec <- cpm_spec()
+  spec <- spec()
 
   res <- cpm(
     conmat = conmat,
@@ -505,7 +501,7 @@ test_that("cpm fold path matches the same internal single-fit training subset", 
   conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
   behav <- rnorm(n)
   covariates <- matrix(rnorm(n * 2), ncol = 2)
-  spec <- cpm_spec(
+  spec <- spec(
     selection = cpm_selection_cor(
       criterion = "p_value",
       level = 0.1
@@ -601,7 +597,7 @@ test_that("cpm excludes incomplete rows consistently with covariates", {
   conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
   behav <- rnorm(n)
   covariates <- matrix(rnorm(n * 2), ncol = 2)
-  spec <- cpm_spec()
+  spec <- spec()
 
   behav[2] <- NA_real_
   conmat[5, 3] <- NA_real_

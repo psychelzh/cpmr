@@ -2,7 +2,7 @@ test_that("run_single_fit returns a single-fold cpm object", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(
+  spec <- spec(
     selection = cpm_selection_cor(
       criterion = "p_value",
       level = 0.05
@@ -43,7 +43,7 @@ test_that("run_resample_fit matches cpm() outputs", {
   withr::local_seed(321)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- cpm_spec(
+  spec <- spec(
     selection = cpm_selection_cor(
       criterion = "proportion",
       level = 0.2
@@ -83,7 +83,7 @@ test_that("run_resample_fit matches cpm() outputs", {
 test_that("run_single_fit errors clearly on insufficient complete cases", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rep(NA_real_, 10)
-  spec <- cpm_spec()
+  spec <- spec()
   call <- quote(cpm(conmat = conmat, behav = behav, spec = spec))
 
   expect_error(
@@ -117,7 +117,7 @@ test_that("run_single_fit errors clearly on insufficient complete cases", {
 test_that("run_resample_fit errors clearly on insufficient complete cases", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rep(NA_real_, 10)
-  spec <- cpm_spec()
+  spec <- spec()
   expect_error(
     run_resample_fit(
       object = spec,

@@ -1,7 +1,7 @@
 prediction_streams <- c("joint", "positive", "negative")
 
 single_fit_result <- function(
-  spec = cpm_spec(),
+  spec = spec(),
   conmat,
   behav,
   covariates = NULL,
@@ -74,7 +74,7 @@ test_that("Works for basic summary", {
   conmat <- matrix(rnorm(10000), nrow = 10)
   behav <- rnorm(10)
   summary_result <- summary(
-    single_fit_result(cpm_spec(), conmat = conmat, behav = behav)
+    single_fit_result(spec(), conmat = conmat, behav = behav)
   )
   expect_s3_class(summary_result, "cpm_summary")
   expect_identical(
@@ -108,7 +108,7 @@ test_that("Works for basic summary", {
 test_that("summary.cpm returns NA when fewer than two valid pairs", {
   sparse_object <- structure(
     list(
-      spec = cpm_spec(),
+      spec = spec(),
       settings = list(covariates = FALSE, na_action = "fail"),
       predictions = data.frame(
         row = 1:3,
@@ -183,7 +183,7 @@ test_that("summary.cpm reports pooled errors, correlations, and edge rates", {
     structure(
       list(
         call = quote(cpm(conmat = conmat, behav = behav, spec = spec)),
-        spec = cpm_spec(),
+        spec = spec(),
         settings = list(return_edges = "sum"),
         predictions = predictions,
         edges = matrix(
@@ -280,7 +280,7 @@ test_that("summary.cpm returns NULL edges when resamples did not store them", {
     structure(
       list(
         call = quote(cpm(conmat = conmat, behav = behav, spec = spec)),
-        spec = cpm_spec(),
+        spec = spec(),
         settings = list(return_edges = "none"),
         predictions = data.frame(
           row = 1:4,
@@ -315,7 +315,7 @@ test_that("summary.cpm keeps default LOO summaries usable", {
   conmat <- matrix(rnorm(50), ncol = 10)
   behav <- rnorm(5)
 
-  result <- cpm(conmat = conmat, behav = behav, spec = cpm_spec())
+  result <- cpm(conmat = conmat, behav = behav, spec = spec())
   summary_result <- summary(result)
 
   expect_true(all(is.finite(summary_metric_matrix(
@@ -346,7 +346,7 @@ test_that("summary.cpm supports single-stream net summaries", {
   result <- cpm(
     conmat = conmat,
     behav = behav,
-    spec = cpm_spec(construction = cpm_construction_summary(sign_mode = "net")),
+    spec = spec(construction = cpm_construction_summary(sign_mode = "net")),
     resamples = 4
   )
   summary_result <- summary(result)
@@ -380,7 +380,7 @@ test_that("summary.cpm supports configurable correlation methods", {
     structure(
       list(
         call = quote(cpm(conmat = conmat, behav = behav, spec = spec)),
-        spec = cpm_spec(),
+        spec = spec(),
         settings = list(return_edges = "none"),
         predictions = predictions,
         edges = NULL,
@@ -426,7 +426,7 @@ test_that("summary.cpm averages fold-wise edges when all edges are stored", {
     structure(
       list(
         call = quote(cpm(conmat = conmat, behav = behav, spec = spec)),
-        spec = cpm_spec(),
+        spec = spec(),
         settings = list(return_edges = "all"),
         predictions = data.frame(
           row = 1:4,

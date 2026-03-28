@@ -7,7 +7,7 @@ example_resample_result <- function(resamples = 5L) {
 }
 
 single_fit_result <- function(
-  spec = cpm_spec(),
+  spec = spec(),
   conmat,
   behav,
   covariates = NULL,
@@ -116,7 +116,7 @@ test_that("resample_metrics ignores correlation_method when correlation is absen
 test_that("resample_metrics validates object type", {
   expect_error(
     resample_metrics(summary(single_fit_result(
-      cpm_spec(),
+      spec(),
       conmat = matrix(rnorm(100), ncol = 10),
       behav = rnorm(10)
     ))),

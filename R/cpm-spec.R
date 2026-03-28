@@ -4,8 +4,7 @@
 #' required to run connectome-based predictive modeling later with [cpm()].
 #'
 #' `spec()` keeps the main CPM decisions visible at the top level while
-#' grouping stage-specific settings into helpers. `cpm_spec()` remains
-#' available as a compatibility wrapper around `spec()`.
+#' grouping stage-specific settings into helpers.
 #'
 #' `spec()` groups CPM settings into three stages:
 #'
@@ -65,20 +64,6 @@ spec <- function(
   )
 }
 
-#' @rdname spec
-#' @export
-cpm_spec <- function(
-  selection = cpm_selection_cor(),
-  construction = cpm_construction_summary(),
-  model = cpm_model_lm()
-) {
-  spec(
-    selection = selection,
-    construction = construction,
-    model = model
-  )
-}
-
 #' @export
 print.cpm_spec <- function(x, ...) {
   cat("CPM specification:\n")
@@ -105,8 +90,8 @@ print.cpm_spec <- function(x, ...) {
 #'   column.
 #' @param behav A numeric outcome vector with one value per observation in
 #'   `conmat`. Row or column matrices are accepted and converted with [drop()].
-#' @param spec A `cpm_spec` object created by [spec()]. If `NULL`,
-#'   [spec()] is used.
+#' @param spec A CPM specification created by [spec()]. If `NULL`, [spec()] is
+#'   used.
 #' @param ... For future extension. Currently ignored.
 #' @param covariates A matrix of covariates. Observations in row, variables in
 #'   column. If `NULL`, no covariates are used. Vectors are converted to
@@ -124,7 +109,8 @@ print.cpm_spec <- function(x, ...) {
 #'   layout in the returned predictions.
 #'
 #' @return
-#' `spec()` returns a `cpm_spec` object that can be reused across CPM runs.
+#' `spec()` returns a CPM specification object that can be reused across CPM
+#' runs.
 #'
 #' `cpm()` returns a `cpm` object containing observation-level predictions,
 #' resampling folds, and optional stored edges. Call [summary.cpm()] for the
@@ -147,7 +133,10 @@ cpm <- function(
     spec <- spec()
   }
   if (!inherits(spec, "cpm_spec")) {
-    stop("`spec` must be a `cpm_spec` object.", call. = FALSE)
+    stop(
+      "`spec` must be a CPM specification created by `spec()`.",
+      call. = FALSE
+    )
   }
 
   run_resample_fit(
