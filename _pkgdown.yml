@@ -12,7 +12,6 @@ articles:
     navbar: ~
     contents:
       - native-getting-started
-      - workflow-selection
       - anti-leakage-covariates
 
 reference:

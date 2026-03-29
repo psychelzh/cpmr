@@ -1,52 +1,4 @@
-run_single_fit <- function(
-  object,
-  conmat,
-  behav,
-  covariates = NULL,
-  na_action = c("fail", "exclude"),
-  call = NULL
-) {
-  inputs <- prepare_runner_inputs(
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    na_action = na_action,
-    action = "fitting"
-  )
-
-  split_fit <- fit_split(
-    conmat = conmat,
-    behav = inputs$behav,
-    covariates = inputs$covariates,
-    rows_train = inputs$include_cases,
-    selection_spec = object$selection,
-    construction_spec = object$construction,
-    model_spec = object$model
-  )
-  predictions <- assemble_single_predictions(
-    observed = inputs$behav,
-    include_cases = inputs$include_cases,
-    split_fit = split_fit
-  )
-
-  structure(
-    list(
-      call = call,
-      spec = object,
-      settings = list(
-        covariates = !is.null(inputs$covariates),
-        na_action = inputs$na_action
-      ),
-      predictions = predictions,
-      edges = split_fit$edge_selection$mask,
-      model = split_fit$fitted_model,
-      folds = list(inputs$include_cases)
-    ),
-    class = "cpm"
-  )
-}
-
-run_resample_fit <- function(
+run_cpm_workflow <- function(
   object,
   conmat,
   behav,
@@ -57,15 +9,14 @@ run_resample_fit <- function(
   call = NULL
 ) {
   return_edges <- match.arg(return_edges)
-  inputs <- prepare_runner_inputs(
+  inputs <- prepare_cpm_inputs(
     conmat = conmat,
     behav = behav,
     covariates = covariates,
-    na_action = na_action,
-    action = "resampling"
+    na_action = na_action
   )
 
-  folds <- resolve_resample_folds(
+  folds <- resolve_assessment_folds(
     resamples = resamples,
     include_cases = inputs$include_cases
   )
@@ -122,12 +73,11 @@ run_resample_fit <- function(
   )
 }
 
-prepare_runner_inputs <- function(
+prepare_cpm_inputs <- function(
   conmat,
   behav,
   covariates,
-  na_action,
-  action
+  na_action
 ) {
   na_action <- match.arg(na_action, c("fail", "exclude"))
   inputs <- normalize_inputs(conmat, behav, covariates)
@@ -140,7 +90,7 @@ prepare_runner_inputs <- function(
 
   if (length(include_cases) == 0L) {
     stop(
-      sprintf("No complete-case observations available for %s.", action),
+      "No complete-case observations available for CPM.",
       call. = FALSE
     )
   }
@@ -249,10 +199,10 @@ fit_split <- function(
   behav,
   covariates,
   rows_train,
+  rows_test,
   selection_spec,
   construction_spec,
-  model_spec,
-  rows_test = NULL
+  model_spec
 ) {
   if (length(rows_train) < 3L) {
     stop(
@@ -263,20 +213,12 @@ fit_split <- function(
 
   conmat_train <- conmat[rows_train, , drop = FALSE]
   behav_train <- behav[rows_train]
-  conmat_test <- NULL
-  behav_test <- NULL
-
-  if (!is.null(rows_test)) {
-    conmat_test <- conmat[rows_test, , drop = FALSE]
-    behav_test <- behav[rows_test]
-  }
+  conmat_test <- conmat[rows_test, , drop = FALSE]
+  behav_test <- behav[rows_test]
 
   if (!is.null(covariates)) {
     covariates_train <- covariates[rows_train, , drop = FALSE]
-    covariates_test <- NULL
-    if (!is.null(rows_test)) {
-      covariates_test <- covariates[rows_test, , drop = FALSE]
-    }
+    covariates_test <- covariates[rows_test, , drop = FALSE]
 
     conmat_resid <- regress_covariates_by_train(
       resp_train = conmat_train,
@@ -292,10 +234,8 @@ fit_split <- function(
     )
     conmat_train <- conmat_resid$train
     behav_train <- drop(behav_resid$train)
-    if (!is.null(rows_test)) {
-      conmat_test <- conmat_resid$test
-      behav_test <- drop(behav_resid$test)
-    }
+    conmat_test <- conmat_resid$test
+    behav_test <- drop(behav_resid$test)
   }
 
   edge_selection <- run_edge_selection(
@@ -311,22 +251,11 @@ fit_split <- function(
     model_spec = model_spec
   )
 
-  observed <- behav_train
-  conmat_predict <- conmat_train
-  if (!is.null(rows_test)) {
-    observed <- behav_test
-    conmat_predict <- conmat_test
-  }
-
   list(
     edge_selection = edge_selection,
     fitted_model = fitted_model,
-    observed = observed,
-    predictions = if (is.null(rows_test)) {
-      predict_split_model(fitted_model)
-    } else {
-      predict_split_model(fitted_model, conmat_predict)
-    }
+    observed = behav_test,
+    predictions = predict_split_model(fitted_model, conmat_test)
   )
 }
 
@@ -356,22 +285,19 @@ fit_split_model <- function(
   construction_state
 }
 
-predict_split_model <- function(model, conmat_new = NULL) {
-  if (!is.null(conmat_new)) {
-    if (model$construction$standardize_edges) {
-      conmat_new <- fscale(
-        conmat_new,
-        model$center,
-        model$scale
-      )
-    }
-
-    model$summaries <- feature_matrix_summary(
-      conmat = conmat_new,
-      edge_mask = model$edge_mask,
-      edge_weights = model$edge_weights
+predict_split_model <- function(model, conmat_new) {
+  if (model$construction$standardize_edges) {
+    conmat_new <- fscale(
+      conmat_new,
+      model$center,
+      model$scale
     )
   }
+  model$summaries <- feature_matrix_summary(
+    conmat = conmat_new,
+    edge_mask = model$edge_mask,
+    edge_weights = model$edge_weights
+  )
   feature_sets <- construction_features(model)
 
   pred <- matrix(
@@ -430,26 +356,6 @@ predict_lm_outcome_model <- function(fitted_model, features) {
   drop(design %*% fitted_model$prediction_coefficients)
 }
 
-assemble_single_predictions <- function(
-  observed,
-  include_cases,
-  split_fit
-) {
-  pred <- matrix(
-    NA_real_,
-    nrow = length(observed),
-    ncol = ncol(split_fit$predictions),
-    dimnames = list(
-      prediction_row_names(observed),
-      colnames(split_fit$predictions)
-    )
-  )
-  pred[include_cases, ] <- split_fit$predictions
-
-  observed[include_cases] <- split_fit$observed
-  prediction_frame(observed, pred)
-}
-
 assemble_fold_predictions <- function(observed, folds, split_results) {
   pred <- matrix(
     NA_real_,
@@ -471,20 +377,16 @@ assemble_fold_predictions <- function(observed, folds, split_results) {
   prediction_frame(observed, pred, fold = fold_id)
 }
 
-prediction_frame <- function(observed, pred, fold = NULL) {
+prediction_frame <- function(observed, pred, fold) {
   prediction_streams <- colnames(pred)
   predictions <- data.frame(
     row = seq_along(observed),
     observed = observed,
+    fold = fold,
     pred,
     row.names = prediction_row_names(observed)
   )
 
-  if (is.null(fold)) {
-    return(predictions)
-  }
-
-  predictions$fold <- fold
   predictions[, c("row", "fold", "observed", prediction_streams), drop = FALSE]
 }
 

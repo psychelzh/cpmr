@@ -10,7 +10,7 @@ A \code{cpm} object is the primary result returned by \code{\link[=cpm]{cpm()}}.
 
 A \code{cpm} object is a list with the following elements:
 \describe{
-\item{\code{call}}{Matched call used for fitting or resampling.}
+\item{\code{call}}{Matched call used for the CPM run.}
 \item{\code{spec}}{The originating CPM specification object.}
 \item{\code{settings}}{Runtime settings used for the CPM run, including
 missing-data handling and edge-storage preferences.}
@@ -19,7 +19,6 @@ fold IDs and one column per configured prediction stream.}
 \item{\code{edges}}{Stored edge output based on \code{return_edges}
 (\code{NULL}/matrix/array).}
 \item{\code{folds}}{List of assessment-row indices for each fold.}
-\item{\code{model}}{Stored fitted CPM components when available.}
 }
 }
 

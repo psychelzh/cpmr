@@ -5,12 +5,6 @@ test_that("format helpers produce stable display strings", {
   expect_identical(format_rate(NA_real_), "NA")
   expect_identical(format_threshold_level(0.005), "0.005")
   expect_identical(format_threshold_level(0.2), "0.2")
-  expect_identical(format_covariates(TRUE), "included")
-  expect_identical(format_covariates(FALSE), "none")
-  expect_identical(format_method_name("pearson"), "Pearson")
-  expect_identical(edge_storage_label("none"), "not stored")
-  expect_identical(edge_storage_label("sum"), "summed across folds")
-  expect_identical(edge_storage_label("all"), "stored for each fold")
 })
 
 test_that("prediction labels use full names", {

@@ -28,23 +28,6 @@ test_that("spec stores staged model parameters", {
   expect_identical(s$model$type, "lm")
 })
 
-single_fit_result <- function(
-  spec = spec(),
-  conmat,
-  behav,
-  covariates = NULL,
-  na_action = "fail"
-) {
-  run_single_fit(
-    object = spec,
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    na_action = na_action,
-    call = quote(cpm(conmat = conmat, behav = behav, spec = spec))
-  )
-}
-
 test_that("spec defaults to classic CPM edge handling", {
   spec <- spec()
 
@@ -172,7 +155,6 @@ test_that("spec checks stage classes without unpacking stage internals", {
 test_that("helper constructors round-trip through params", {
   expect_s3_class(cpm_model_lm(), "cpm_model_spec")
   expect_identical(cpm_model_lm()$type, "lm")
-  expect_identical(format_model_type("custom"), "custom")
 })
 
 test_that("print.cpm_spec shows readable staged settings", {
@@ -202,21 +184,20 @@ test_that("net construction yields a single prediction stream", {
   withr::local_seed(101)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- spec(
+  s <- spec(
     construction = cpm_construction_summary(sign_mode = "net")
   )
 
-  result <- single_fit_result(spec, conmat = conmat, behav = behav)
+  result <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
 
-  expect_named(result$predictions, c("row", "observed", "net"))
-  expect_named(result$model$outcome_models, "net")
+  expect_named(result$predictions, c("row", "fold", "observed", "net"))
 })
 
-test_that("sigmoid edge weighting stores smooth edge weights in the model", {
+test_that("sigmoid edge weighting stores smooth edge weights in split models", {
   withr::local_seed(202)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  spec <- spec(
+  s <- spec(
     selection = cpm_selection_cor(
       criterion = "absolute",
       level = 0.1
@@ -226,12 +207,23 @@ test_that("sigmoid edge weighting stores smooth edge weights in the model", {
     )
   )
 
-  result <- single_fit_result(spec, conmat = conmat, behav = behav)
+  edge_selection <- run_edge_selection(
+    conmat = conmat,
+    behav = behav,
+    selection_spec = s$selection
+  )
+  model <- fit_split_model(
+    conmat = conmat,
+    behav = behav,
+    edge_selection = edge_selection,
+    construction_spec = s$construction,
+    model_spec = s$model
+  )
 
-  expect_true(is.double(result$model$edge_weights))
-  expect_equal(dim(result$model$edge_weights), c(ncol(conmat), 2))
+  expect_true(is.double(model$edge_weights))
+  expect_equal(dim(model$edge_weights), c(ncol(conmat), 2))
   expect_true(any(
-    result$model$edge_weights > 0 & result$model$edge_weights < 1
+    model$edge_weights > 0 & model$edge_weights < 1
   ))
 })
 
@@ -395,7 +387,7 @@ test_that("cpm errors clearly for insufficient complete cases", {
 
   expect_error(
     cpm(conmat = conmat, behav = behav, spec = spec, na_action = "exclude"),
-    "No complete-case observations available for resampling.",
+    "No complete-case observations available for CPM.",
     fixed = TRUE
   )
 
@@ -403,7 +395,7 @@ test_that("cpm errors clearly for insufficient complete cases", {
   behav[1] <- 1
   expect_error(
     cpm(conmat = conmat, behav = behav, spec = spec, na_action = "exclude"),
-    "At least 2 complete-case observations are required for resampling.",
+    "CPM requires at least 2 complete-case observations to define assessment folds.",
     fixed = TRUE
   )
 })
@@ -494,7 +486,7 @@ test_that("cpm handles covariates in assessment pipeline", {
   expect_equal(length(res$folds), 6L)
 })
 
-test_that("cpm fold path matches the same internal single-fit training subset", {
+test_that("cpm fold path matches the corresponding internal split model", {
   withr::local_seed(7)
   n <- 15
   p <- 12
@@ -510,14 +502,6 @@ test_that("cpm fold path matches the same internal single-fit training subset", 
   resamples <- list(1:5, 6:10, 11:15)
   rows_test <- resamples[[1]]
   rows_train <- setdiff(seq_len(n), rows_test)
-
-  single_fit <- single_fit_result(
-    spec,
-    conmat = conmat[rows_train, , drop = FALSE],
-    behav = behav[rows_train],
-    covariates = covariates[rows_train, , drop = FALSE],
-    na_action = "fail"
-  )
   covariates_train <- covariates[rows_train, , drop = FALSE]
   training_conmat <- regress_covariates_by_train(
     resp_train = conmat[rows_train, , drop = FALSE],
@@ -561,7 +545,7 @@ test_that("cpm fold path matches the same internal single-fit training subset", 
     construction_spec = spec$construction,
     model_spec = spec$model
   )
-  resampled <- cpm(
+  result <- cpm(
     conmat = conmat,
     behav = behav,
     spec = spec,
@@ -571,17 +555,9 @@ test_that("cpm fold path matches the same internal single-fit training subset", 
     na_action = "fail"
   )
   fold_pred <- predict_split_model(fold_model, assessment_conmat)
-  collected <- resampled$predictions
+  collected <- result$predictions
 
-  expect_equal(single_fit$edges, fold_edges)
-  expect_equal(single_fit$model$edges, fold_model$edges)
-  expect_equal(single_fit$model$outcome_models, fold_model$outcome_models)
-  expect_equal(single_fit$model$center, fold_model$center)
-  expect_equal(single_fit$model$scale, fold_model$scale)
-  expect_equal(
-    predict_split_model(single_fit$model, assessment_conmat),
-    fold_pred
-  )
+  expect_equal(fold_model$edges, fold_edges)
   expect_equal(
     as.matrix(collected[rows_test, c("joint", "positive", "negative")]),
     fold_pred,
@@ -605,7 +581,7 @@ test_that("cpm excludes incomplete rows consistently with covariates", {
 
   include_cases <- setdiff(seq_len(n), c(2L, 5L, 8L))
   resamples <- list(include_cases[1:4], include_cases[5:8], include_cases[9:12])
-  resampled <- cpm(
+  result <- cpm(
     conmat = conmat,
     behav = behav,
     spec = spec,
@@ -614,9 +590,9 @@ test_that("cpm excludes incomplete rows consistently with covariates", {
     return_edges = "sum",
     na_action = "exclude"
   )
-  collected <- resampled$predictions
+  collected <- result$predictions
 
-  expect_identical(resampled$folds, resamples)
+  expect_identical(result$folds, resamples)
   expect_equal(sort(collected$row[!is.na(collected$fold)]), include_cases)
   expect_true(isTRUE(all(stats::complete.cases(collected$joint[
     include_cases

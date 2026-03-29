@@ -45,7 +45,7 @@ covariates <- matrix(rnorm(n), ncol = 1)
 edge_signal <- rowMeans(conmat[, 1:10, drop = FALSE])
 behav <- 0.7 * edge_signal + 0.6 * covariates[, 1] + rnorm(n, sd = 0.5)
 
-# Leakage-safe CPM call: covariates are handled fold-wise inside resampling
+# Leakage-safe CPM call: covariates are handled fold-wise inside assessment
 res <- cpm(
   conmat = conmat,
   behav = behav,
@@ -77,7 +77,7 @@ dim(res_with_edges$edges)
 ```
 
 Using a reusable `spec()` object is helpful when you want the same CPM
-settings to drive multiple analyses under different resampling plans.
+settings to drive multiple analyses under different assessment plans.
 
 ## Edge Storage Tips
 

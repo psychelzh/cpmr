@@ -1,38 +1,19 @@
-single_fit_result <- function(
-  spec = spec(),
-  conmat,
-  behav,
-  covariates = NULL,
-  na_action = "fail"
-) {
-  run_single_fit(
-    object = spec,
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    na_action = na_action,
-    call = quote(cpm(conmat = conmat, behav = behav, spec = spec))
-  )
+example_tidy_result <- function() {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(200), nrow = 20)
+  behav <- rnorm(20)
+
+  cpm(conmat = conmat, behav = behav, spec = spec(), resamples = 4)
 }
 
 test_that("Basic case works for `tidy()`", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
-  result <- single_fit_result(spec(), conmat = conmat, behav = behav)
+  result <- example_tidy_result()
 
-  performance <- tidy(result, component = "performance")
+  pooled <- tidy(result, component = "metrics", level = "pooled")
   edges <- tidy(result, component = "edges")
 
-  expect_named(
-    performance,
-    c(
-      "method",
-      "joint",
-      "positive",
-      "negative"
-    )
-  )
+  expect_named(pooled, c("prediction", "estimate", "method"))
+  expect_true(all(c("joint", "positive", "negative") %in% pooled$prediction))
   expect_named(
     edges,
     c(
@@ -43,12 +24,17 @@ test_that("Basic case works for `tidy()`", {
 })
 
 test_that("Support pass arguments of `summary()`", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
-  result <- single_fit_result(spec(), conmat = conmat, behav = behav)
+  result <- example_tidy_result()
+
   expect_equal(
-    tidy(result, component = "performance", method = "spearman")$method,
+    unique(
+      tidy(
+        result,
+        component = "metrics",
+        level = "pooled",
+        method = "spearman"
+      )$method
+    ),
     "spearman"
   )
   expect_named(
@@ -58,20 +44,17 @@ test_that("Support pass arguments of `summary()`", {
 })
 
 test_that("tidy supports pooled and foldwise metric tables", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(200), nrow = 20)
-  behav <- rnorm(20)
-  result <- cpm(conmat = conmat, behav = behav, spec = spec(), resamples = 4)
+  result <- example_tidy_result()
 
   foldwise <- tidy(result, component = "metrics")
   pooled <- tidy(result, component = "metrics", level = "pooled")
 
   expect_true(all(
-    c("fold", "n_assess", "metric", "prediction", "estimate") %in%
+    c("fold", "n_assess", "prediction", "estimate", "method") %in%
       names(foldwise)
   ))
-  expect_true(all(c("metric", "prediction", "estimate") %in% names(pooled)))
-  expect_true(all(c("rmse", "mae", "correlation") %in% pooled$metric))
+  expect_true(all(c("prediction", "estimate", "method") %in% names(pooled)))
+  expect_true(all(pooled$method == "pearson"))
 })
 
 test_that("tidy edges errors clearly when edge storage is disabled", {

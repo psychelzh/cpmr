@@ -14,8 +14,7 @@
 
 \item{...}{For future extension. Currently ignored.}
 
-\item{method}{Correlation method used for pooled and fold-wise correlation
-summaries.}
+\item{method}{Correlation method used for pooled and fold-wise summaries.}
 
 \item{x}{An object of class \code{cpm_summary}.}
 }
@@ -23,15 +22,12 @@ summaries.}
 A \code{cpm_summary} object with the following elements:
 \describe{
 \item{\code{metrics}}{A compact summary-level data frame with columns \code{level},
-\code{metric}, \code{prediction}, \code{estimate}, \code{std_error}, and \code{method}. CPM
-summaries lead with pooled errors and pooled correlations, then report
-fold-wise correlation summaries as supplementary statistics.}
-\item{\code{tables}}{A list with \code{pooled} and \code{foldwise} raw metric tables for
+\code{prediction}, \code{estimate}, \code{std_error}, and \code{method}. It stores pooled
+correlations together with fold-wise correlation summaries.}
+\item{\code{tables}}{A list with \code{pooled} and \code{foldwise} correlation tables for
 downstream tidying.}
 \item{\code{edges}}{Aggregated edge-selection rates, or \code{NULL} when edges were
 not stored.}
-\item{\code{params}}{A one-row tibble of CPM settings used when tidying the
-summary object back into tabular form.}
 \item{\code{settings}}{A list containing summary-relevant CPM settings.}
 }
 }
@@ -39,7 +35,7 @@ summary object back into tabular form.}
 Summarize a \code{cpm} object
 }
 \details{
-\code{summary.cpm()} is designed to give a compact default report. It leads with
-pooled prediction-error metrics (\code{RMSE} and \code{MAE}), then reports pooled and
-fold-wise correlations as supplementary statistics.
+\code{summary.cpm()} is designed to give a compact correlation-based report. It
+summarizes pooled out-of-fold correlations for each prediction stream and
+then reports the mean and standard error of fold-wise correlations.
 }

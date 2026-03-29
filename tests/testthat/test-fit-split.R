@@ -215,10 +215,6 @@ test_that("fit_split_model and predict_split_model compose correctly", {
     dim(predict_split_model(model, assessment_conmat)),
     c(length(rows_test), 3)
   )
-  expect_equal(
-    predict_split_model(model),
-    predict_split_model(model, training_conmat)
-  )
 })
 
 test_that("net sign mode with lm model produces a single stream", {

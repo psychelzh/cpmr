@@ -43,11 +43,30 @@ test_that("complete_case_rows fails clearly on missing required inputs", {
   )
 
   conmat[1, 1] <- 0
+  behav[1] <- NA
+  expect_error(
+    complete_case_rows(conmat, behav, covariates, na_action = "fail"),
+    "Missing values found in `behav`",
+    fixed = TRUE
+  )
+
+  behav[1] <- 0
   covariates[1, 1] <- NA
   expect_error(
     complete_case_rows(conmat, behav, covariates, na_action = "fail"),
     "Missing values found in `covariates`",
     fixed = TRUE
+  )
+})
+
+test_that("complete_case_rows returns all rows in fail mode without missing data", {
+  conmat <- matrix(rnorm(30), ncol = 3)
+  behav <- rnorm(10)
+  covariates <- matrix(rnorm(10), ncol = 1)
+
+  expect_identical(
+    complete_case_rows(conmat, behav, covariates, na_action = "fail"),
+    seq_along(behav)
   )
 })
 

@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
 The cpmr package implements connectome predictive modeling (CPM) in R.
 Its primary workflow is native and matrix-first: you pass a subject-by-edge
 matrix together with a behavioral vector, and `cpmr` handles CPM-specific
-training, resampling, and leakage-safe preprocessing inside package code.
+training, fold planning, and leakage-safe preprocessing inside package code.
 This package relies on [Rfast](https://CRAN.R-project.org/package=Rfast) for
 row-oriented calculation.
 
@@ -55,10 +55,10 @@ withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
 s <- spec()
-resample_obj <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
+result <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
 
-summary(resample_obj)
-head(resample_obj$predictions)
+summary(result)
+head(result$predictions)
 ```
 
 `spec()` can also express richer CPM variants without leaving the native
@@ -118,26 +118,24 @@ With `sign_mode = "net"`, `cpmr` constructs a single
 `net_summary = positive_summary - negative_summary` feature and returns one
 `net` prediction stream.
 
-`cpm()` is resample-first: it runs CPM under the requested assessment plan and
+`cpm()` is fold-based: it runs CPM under the requested assessment plan and
 returns out-of-fold predictions together with the fold structure.
 
 ```{r resample}
-summary(resample_obj)
-head(resample_obj$predictions)
-dim(resample_obj$edges)
-head(tidy(resample_obj, component = "metrics"))
-head(tidy(resample_obj, component = "metrics", level = "pooled"))
+summary(result)
+head(result$predictions)
+dim(result$edges)
+head(tidy(result, component = "metrics"))
+head(tidy(result, component = "metrics", level = "pooled"))
 ```
 
-`summary(resample_obj)` gives the default aggregate report, with pooled
-out-of-fold error metrics shown first and correlations reported as
-supplementary statistics. Use `tidy(resample_obj, component = "metrics")` when
-you want fold-wise metric tables directly, or
-`tidy(resample_obj, component = "metrics", level = "pooled")` for pooled
-metric tables.
+`summary(result)` gives the default aggregate correlation report. Use
+`tidy(result, component = "metrics")` when you want fold-wise correlation
+tables directly, or `tidy(result, component = "metrics", level = "pooled")`
+for pooled correlation tables.
 
-For `cpm()`, `resamples = NULL` means leave-one-out resampling,
-`resamples = 5` means 5-fold resampling, and a list passed to `resamples`
+For `cpm()`, `resamples = NULL` means leave-one-out assessment,
+`resamples = 5` means 5-fold assessment, and a list passed to `resamples`
 enforces a manual assessment-fold partition.
 
 ## Choosing a path

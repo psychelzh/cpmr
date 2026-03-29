@@ -1,4 +1,4 @@
-example_resample_result <- function(resamples = 5L) {
+example_cpm_result <- function(resamples = 5L) {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
@@ -6,25 +6,8 @@ example_resample_result <- function(resamples = 5L) {
   cpm(conmat = conmat, behav = behav, spec = spec(), resamples = resamples)
 }
 
-single_fit_result <- function(
-  spec = spec(),
-  conmat,
-  behav,
-  covariates = NULL,
-  na_action = "fail"
-) {
-  run_single_fit(
-    object = spec,
-    conmat = conmat,
-    behav = behav,
-    covariates = covariates,
-    na_action = na_action,
-    call = quote(cpm(conmat = conmat, behav = behav, spec = spec))
-  )
-}
-
 test_that("print.cpm reports summary fields", {
-  res <- example_resample_result()
+  res <- example_cpm_result()
 
   expect_output(print(res), "CPM")
   expect_output(print(res), "Complete cases")
@@ -33,7 +16,7 @@ test_that("print.cpm reports summary fields", {
   expect_output(print(res), "Edge storage:\\s+summed across folds")
   expect_output(print(res), "Selection method:\\s+pearson")
   expect_output(print(res), "Construction sign mode:\\s+separate")
-  expect_output(print(res), "Use summary\\(\\) for aggregate metrics")
+  expect_output(print(res), "Use summary\\(\\) for aggregate correlations")
 })
 
 test_that("print.cpm uses human-readable edge storage labels", {
@@ -72,7 +55,7 @@ test_that("print.cpm uses human-readable edge storage labels", {
 })
 
 test_that("tidy metrics returns pooled and foldwise metric tables", {
-  res <- example_resample_result()
+  res <- example_cpm_result()
 
   foldwise <- tidy(res, component = "metrics")
   pooled <- tidy(res, component = "metrics", level = "pooled")
@@ -81,48 +64,34 @@ test_that("tidy metrics returns pooled and foldwise metric tables", {
     c(
       "fold",
       "n_assess",
-      "metric",
       "prediction",
-      "estimate"
+      "estimate",
+      "method"
     ) %in%
       names(foldwise)
   ))
   expect_true(all(
     c(
-      "metric",
       "prediction",
-      "estimate"
+      "estimate",
+      "method"
     ) %in%
       names(pooled)
   ))
-  expect_true(all(c("rmse", "mae", "correlation") %in% pooled$metric))
   expect_true(all(c("joint", "positive", "negative") %in% pooled$prediction))
+  expect_true(all(pooled$method == "pearson"))
 })
 
-test_that("tidy metrics supports metric filtering and spearman correlation", {
-  res <- example_resample_result()
+test_that("tidy metrics supports spearman correlation", {
+  res <- example_cpm_result()
 
   pooled <- tidy(
     res,
     component = "metrics",
     level = "pooled",
-    metrics = "correlation",
     method = "spearman"
   )
 
-  expect_true(all(pooled$metric == "correlation"))
   expect_equal(nrow(pooled), 3)
-})
-
-test_that("tidy metrics can return non-correlation metrics only", {
-  res <- example_resample_result()
-
-  metrics <- tidy(
-    res,
-    component = "metrics",
-    metrics = "rmse"
-  )
-
-  expect_true(all(metrics$metric == "rmse"))
-  expect_equal(nrow(metrics), 15)
+  expect_true(all(pooled$method == "spearman"))
 })

@@ -7,9 +7,8 @@
 \method{tidy}{cpm}(
   x,
   ...,
-  component = c("performance", "metrics", "edges"),
-  level = c("foldwise", "pooled"),
-  metrics = c("rmse", "mae", "correlation")
+  component = c("metrics", "edges"),
+  level = c("foldwise", "pooled")
 )
 }
 \arguments{
@@ -18,20 +17,15 @@
 \item{...}{Additional arguments passed to \code{summary()}.}
 
 \item{component}{A character vector indicating the component to tidy. Use
-\code{"performance"} for the compact pooled-correlation overview, \code{"metrics"}
-for tidy metric tables derived from \code{\link[=summary.cpm]{summary.cpm()}}, or \code{"edges"} for
-stored edge output.}
+\code{"metrics"} for correlation tables derived from \code{\link[=summary.cpm]{summary.cpm()}}, or
+\code{"edges"} for stored edge output.}
 
-\item{level}{Metric table to return when \code{component = "metrics"}. \code{"pooled"}
-returns pooled out-of-fold metrics, and \code{"foldwise"} returns one row per
-fold, metric, and prediction stream.}
-
-\item{metrics}{Metrics to keep when \code{component = "metrics"}.}
+\item{level}{Correlation table to return when \code{component = "metrics"}.
+\code{"pooled"} returns pooled out-of-fold correlations, and \code{"foldwise"}
+returns one row per fold and prediction stream.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} with component-specific columns.
-Use \code{summary(x)$params} when you need the static CPM settings separately
-from the tidy result table.
 }
 \description{
 Tidy a \code{cpm} object

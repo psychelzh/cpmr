@@ -1,7 +1,7 @@
-resolve_resample_folds <- function(resamples, include_cases) {
+resolve_assessment_folds <- function(resamples, include_cases) {
   if (length(include_cases) < 2L) {
     stop(
-      "At least 2 complete-case observations are required for resampling.",
+      "CPM requires at least 2 complete-case observations to define assessment folds.",
       call. = FALSE
     )
   }
@@ -10,9 +10,9 @@ resolve_resample_folds <- function(resamples, include_cases) {
     n_folds <- length(include_cases)
     folds <- make_kfold_assessment_folds(include_cases, n_folds)
   } else if (is.list(resamples)) {
-    folds <- normalize_manual_resamples(resamples, include_cases)
+    folds <- normalize_manual_folds(resamples, include_cases)
   } else {
-    n_folds <- normalize_resample_count(resamples)
+    n_folds <- normalize_fold_count(resamples)
     if (n_folds > length(include_cases)) {
       stop(
         paste0(
@@ -31,7 +31,7 @@ make_kfold_assessment_folds <- function(x, k) {
   split(sample(x), cut(seq_along(x), breaks = k, labels = FALSE))
 }
 
-normalize_manual_resamples <- function(resamples, include_cases) {
+normalize_manual_folds <- function(resamples, include_cases) {
   if (!is.list(resamples) || length(resamples) == 0L) {
     stop("`resamples` must be a non-empty list of assessment indices.")
   }
@@ -74,7 +74,7 @@ normalize_manual_resamples <- function(resamples, include_cases) {
   normalized
 }
 
-normalize_resample_count <- function(resamples) {
+normalize_fold_count <- function(resamples) {
   if (
     !is.numeric(resamples) ||
       length(resamples) != 1L ||

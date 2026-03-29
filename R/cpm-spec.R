@@ -37,13 +37,13 @@
 #'
 #' conmat <- matrix(rnorm(100 * 100), nrow = 100)
 #' behav <- rnorm(100)
-#' resample_obj <- cpm(
+#' result <- cpm(
 #'   conmat = conmat,
 #'   behav = behav,
 #'   spec = s,
 #'   resamples = 5
 #' )
-#' summary(resample_obj)
+#' summary(result)
 #' @export
 spec <- function(
   selection = cpm_selection_cor(),

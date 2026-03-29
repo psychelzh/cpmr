@@ -15,11 +15,12 @@ Use this skill for code, tests, docs, review, and release-quality validation in 
 - Keep validation and normalization at public constructors and workflow entry points. Internal runtime paths should trust staged objects instead of re-validating them.
 - Prefer direct, stepwise code. Avoid extra helper layers unless they remove real duplication or clarify a stable boundary.
 - Private helpers should usually come after their primary callers so the main workflow reads top-down.
+- Keep `tests/testthat` aligned with the current `R/` module boundaries. When `R/` files are merged, renamed, or deleted, rename or regroup the corresponding tests so the test layout does not preserve outdated file or concept names.
 
 ## CPM architecture
 
 - Treat CPM as a staged workflow: screen edges, summarize selected signal, then fit the outcome model.
-- The default user workflow is resample-first through `cpm()`.
+- The default user workflow is fold-based through `cpm()`.
 - Keep train-only computations leakage-safe. Anything learned from training data and reused at assessment time belongs in the fitted runtime state, not in public configuration.
 
 ## Code quality flow

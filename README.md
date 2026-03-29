@@ -15,7 +15,7 @@ status](https://www.r-pkg.org/badges/version/cpmr)](https://CRAN.R-project.org/p
 The cpmr package implements connectome predictive modeling (CPM) in R.
 Its primary workflow is native and matrix-first: you pass a
 subject-by-edge matrix together with a behavioral vector, and `cpmr`
-handles CPM-specific training, resampling, and leakage-safe
+handles CPM-specific training, fold planning, and leakage-safe
 preprocessing inside package code. This package relies on
 [Rfast](https://CRAN.R-project.org/package=Rfast) for row-oriented
 calculation.
@@ -50,20 +50,11 @@ withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
 s <- spec()
-resample_obj <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
+result <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
 
-summary(resample_obj)
+summary(result)
 #> CPM summary:
 #>   Number of folds: 5
-#>   Prediction error:
-#>     RMSE:
-#>       Joint: 1.242
-#>       Positive: 1.204
-#>       Negative: 1.199
-#>     MAE:
-#>       Joint: 0.951
-#>       Positive: 0.956
-#>       Negative: 0.910
 #>   Pooled correlations (Pearson):
 #>     Joint: -0.108
 #>     Positive: -0.074
@@ -75,7 +66,7 @@ summary(resample_obj)
 #>   Selected edges:
 #>     Positive: 0.56%
 #>     Negative: 0.32%
-head(resample_obj$predictions)
+head(result$predictions)
 #>   row fold    observed       joint    positive    negative
 #> 1   1    1  0.26499342 0.591709195 -0.08846823  0.76686948
 #> 2   2    5  1.83074748 0.325440165  0.29380525  0.05747766
@@ -149,23 +140,13 @@ With `sign_mode = "net"`, `cpmr` constructs a single
 `net_summary = positive_summary - negative_summary` feature and returns
 one `net` prediction stream.
 
-`cpm()` is resample-first: it runs CPM under the requested assessment
-plan and returns out-of-fold predictions together with the fold
-structure.
+`cpm()` is fold-based: it runs CPM under the requested assessment plan
+and returns out-of-fold predictions together with the fold structure.
 
 ``` r
-summary(resample_obj)
+summary(result)
 #> CPM summary:
 #>   Number of folds: 5
-#>   Prediction error:
-#>     RMSE:
-#>       Joint: 1.242
-#>       Positive: 1.204
-#>       Negative: 1.199
-#>     MAE:
-#>       Joint: 0.951
-#>       Positive: 0.956
-#>       Negative: 0.910
 #>   Pooled correlations (Pearson):
 #>     Joint: -0.108
 #>     Positive: -0.074
@@ -177,7 +158,7 @@ summary(resample_obj)
 #>   Selected edges:
 #>     Positive: 0.56%
 #>     Negative: 0.32%
-head(resample_obj$predictions)
+head(result$predictions)
 #>   row fold    observed       joint    positive    negative
 #> 1   1    1  0.26499342 0.591709195 -0.08846823  0.76686948
 #> 2   2    5  1.83074748 0.325440165  0.29380525  0.05747766
@@ -185,40 +166,35 @@ head(resample_obj$predictions)
 #> 4   4    3 -0.05320937 0.664779940  0.56680746  0.25720238
 #> 5   5    1  0.43790418 0.001660943  0.29376910 -0.36672391
 #> 6   6    4  1.33744904 0.591903346  0.45146065  0.34438321
-dim(resample_obj$edges)
+dim(result$edges)
 #> [1] 1000    2
-head(tidy(resample_obj, component = "metrics"))
+head(tidy(result, component = "metrics"))
 #> # A tibble: 6 × 5
-#>    fold n_assess metric prediction estimate
-#>   <int>    <int> <chr>  <chr>         <dbl>
-#> 1     1       20 rmse   joint         1.12 
-#> 2     1       20 rmse   positive      1.10 
-#> 3     1       20 rmse   negative      1.08 
-#> 4     2       20 rmse   joint         0.962
-#> 5     2       20 rmse   positive      0.989
-#> 6     2       20 rmse   negative      1.04
-head(tidy(resample_obj, component = "metrics", level = "pooled"))
-#> # A tibble: 6 × 3
-#>   metric prediction estimate
-#>   <chr>  <chr>         <dbl>
-#> 1 rmse   joint         1.24 
-#> 2 rmse   positive      1.20 
-#> 3 rmse   negative      1.20 
-#> 4 mae    joint         0.951
-#> 5 mae    positive      0.956
-#> 6 mae    negative      0.910
+#>    fold n_assess prediction estimate method 
+#>   <int>    <int> <chr>         <dbl> <chr>  
+#> 1     1       20 joint       -0.145  pearson
+#> 2     1       20 positive    -0.0444 pearson
+#> 3     1       20 negative    -0.110  pearson
+#> 4     2       20 joint        0.138  pearson
+#> 5     2       20 positive     0.154  pearson
+#> 6     2       20 negative     0.0234 pearson
+head(tidy(result, component = "metrics", level = "pooled"))
+#> # A tibble: 3 × 3
+#>   prediction estimate method 
+#>   <chr>         <dbl> <chr>  
+#> 1 joint       -0.108  pearson
+#> 2 positive    -0.0736 pearson
+#> 3 negative    -0.0798 pearson
 ```
 
-`summary(resample_obj)` gives the default aggregate report, with pooled
-out-of-fold error metrics shown first and correlations reported as
-supplementary statistics. Use
-`tidy(resample_obj, component = "metrics")` when you want fold-wise
-metric tables directly, or
-`tidy(resample_obj, component = "metrics", level = "pooled")` for pooled
-metric tables.
+`summary(result)` gives the default aggregate correlation report. Use
+`tidy(result, component = "metrics")` when you want fold-wise
+correlation tables directly, or
+`tidy(result, component = "metrics", level = "pooled")` for pooled
+correlation tables.
 
-For `cpm()`, `resamples = NULL` means leave-one-out resampling,
-`resamples = 5` means 5-fold resampling, and a list passed to
+For `cpm()`, `resamples = NULL` means leave-one-out assessment,
+`resamples = 5` means 5-fold assessment, and a list passed to
 `resamples` enforces a manual assessment-fold partition.
 
 ## Choosing a path

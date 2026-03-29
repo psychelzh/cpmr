@@ -46,10 +46,11 @@ used.}
 column. If \code{NULL}, no covariates are used. Vectors are converted to
 single-column matrices.}
 
-\item{resamples}{Optional resampling specification. Use \code{NULL} for leave-one-
-out resampling, a single integer greater than or equal to 2 to request
-k-fold resampling, or a list of assessment indices for manual folds. Manual
-resamples must contain integer vectors indexing rows in \code{conmat}.}
+\item{resamples}{Optional assessment-plan specification. Use \code{NULL} for
+leave-one-out assessment, a single integer greater than or equal to 2 to
+request k-fold assessment, or a list of assessment indices for manual
+folds. Manual \code{resamples} must contain integer vectors indexing rows in
+\code{conmat}.}
 
 \item{return_edges}{A character string indicating the return value of the
 selected edges. \code{"sum"} stores fold counts for each selected edge,
@@ -65,16 +66,17 @@ layout in the returned predictions.}
 runs.
 
 \code{cpm()} returns a \code{cpm} object containing observation-level predictions,
-resampling folds, and optional stored edges. Call \code{\link[=summary.cpm]{summary.cpm()}} for the
-default aggregate report, or \code{\link[=tidy.cpm]{tidy.cpm()}} when you want pooled or fold-wise
-metrics in tabular form.
+assessment folds, and optional stored edges. Call \code{\link[=summary.cpm]{summary.cpm()}} for the
+default correlation summary, or \code{\link[=tidy.cpm]{tidy.cpm()}} when you want pooled or
+fold-wise correlation tables.
 }
 \description{
 Create a lightweight specification object that stores the staged decisions
 required to run connectome-based predictive modeling later with \code{\link[=cpm]{cpm()}}.
 
-\code{cpm()} is the primary CPM workflow. It applies a CPM specification under a
-resampling plan and returns a \code{cpm} object with out-of-fold predictions.
+\code{cpm()} is the primary CPM workflow. It applies a CPM specification under
+the requested assessment plan and returns a \code{cpm} object with out-of-fold
+predictions.
 }
 \details{
 \code{spec()} keeps the main CPM decisions visible at the top level while
@@ -106,11 +108,11 @@ s
 
 conmat <- matrix(rnorm(100 * 100), nrow = 100)
 behav <- rnorm(100)
-resample_obj <- cpm(
+result <- cpm(
   conmat = conmat,
   behav = behav,
   spec = s,
   resamples = 5
 )
-summary(resample_obj)
+summary(result)
 }

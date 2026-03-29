@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 This vignette walks through:
 
 - how to shape CPM inputs;
-- how to run leakage-safe resampling;
+- how to run leakage-safe fold-based assessment;
 - how to inspect predictions and selected edges;
 - how custom resamples and missing-data handling work.
 
@@ -54,7 +54,7 @@ Use `cpm()` on a `spec()` object for an out-of-sample estimate of predictive
 performance.
 
 ```{r}
-resample_obj <- cpm(
+result <- cpm(
   conmat = conmat,
   behav = behav,
   spec = spec(),
@@ -62,48 +62,48 @@ resample_obj <- cpm(
   resamples = 5
 )
 
-resample_obj
-summary(resample_obj)
+result
+summary(result)
 ```
 
 This keeps CPM-specific steps such as covariate handling, edge selection, and
-model training inside each resample fold.
+model training inside each assessment fold.
 
 ## Inspect Predictions and Edges
 
-Native resampling results always keep raw observation-level predictions on the
+CPM results always keep raw observation-level predictions on the
 object, while `summary()` gives an aggregate out-of-fold report with error
 metrics as the default summary and correlations as supplementary output.
 
 ```{r}
-predictions <- resample_obj$predictions
+predictions <- result$predictions
 
-resample_summary <- summary(resample_obj)
+summary_result <- summary(result)
 
-resample_summary
-head(resample_summary[["metrics"]])
+summary_result
+head(summary_result[["metrics"]])
 head(predictions)
-head(tidy(resample_obj, component = "metrics"))
-head(tidy(resample_obj, component = "metrics", level = "pooled"))
+head(tidy(result, component = "metrics"))
+head(tidy(result, component = "metrics", level = "pooled"))
 ```
 
 These three outputs have slightly different jobs:
 
-- `summary(resample_obj)` prints the default aggregate report;
-- `summary(resample_obj)[["metrics"]]` exposes the compact summary-level metric
+- `summary(result)` prints the default aggregate report;
+- `summary(result)[["metrics"]]` exposes the compact summary-level metric
   table stored on the summary object;
-- `tidy(resample_obj, component = "metrics")` returns the raw fold-wise metric
+- `tidy(result, component = "metrics")` returns the raw fold-wise metric
   table for further filtering, plotting, or export, while
   `level = "pooled"` returns pooled metrics.
 
 By default, `cpm()` uses `return_edges = "sum"` and stores fold-aggregated edge
 selection counts. This makes edge summaries immediately available in the common
-resampling workflow.
+fold-based workflow.
 
 If you want to control edge storage explicitly:
 
 ```{r}
-edge_resample_obj <- cpm(
+edge_result <- cpm(
   conmat = conmat,
   behav = behav,
   spec = spec(),
@@ -112,7 +112,7 @@ edge_resample_obj <- cpm(
   return_edges = "sum"
 )
 
-dim(edge_resample_obj$edges)
+dim(edge_result$edges)
 ```
 
 `predictions` returns one row per original observation. If
@@ -175,14 +175,12 @@ na_predictions[na_predictions$row %in% c(3, 11), ]
 ```
 
 This behavior matters when you need to merge predictions back to subject-level
-metadata after resampling.
+metadata after assessment.
 
 ## Next Steps
 
 After you are comfortable with the native path:
 
-- read the workflow-selection article for guidance on how to use the native
-  `spec()` + `cpm()` workflow in different settings;
 - read the leakage-focused article if you need a more detailed covariate
   handling example;
 - keep a `spec()` object around when you want an explicit reusable
