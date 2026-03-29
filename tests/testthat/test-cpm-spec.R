@@ -5,7 +5,7 @@ test_that("spec stores staged model parameters", {
       criterion = "proportion",
       level = 0.05
     ),
-    construction = cpm_construction_summary(
+    construction = cpm_construction_strength(
       sign_mode = "net",
       weight_scale = 0.02,
       standardize_edges = FALSE
@@ -21,7 +21,7 @@ test_that("spec stores staged model parameters", {
   expect_identical(s$selection$method, "spearman")
   expect_identical(s$selection$criterion, "proportion")
   expect_identical(s$selection$level, 0.05)
-  expect_identical(s$construction$type, "summary")
+  expect_identical(s$construction$type, "strength")
   expect_identical(s$construction$sign_mode, "net")
   expect_identical(s$construction$weight_scale, 0.02)
   expect_false(s$construction$standardize_edges)
@@ -36,7 +36,7 @@ test_that("spec defaults to classic CPM edge handling", {
   expect_identical(spec$selection$method, "pearson")
   expect_identical(spec$selection$criterion, "p_value")
   expect_identical(spec$selection$level, 0.01)
-  expect_identical(spec$construction$type, "summary")
+  expect_identical(spec$construction$type, "strength")
   expect_s3_class(spec$construction, "cpm_construction_spec")
   expect_identical(spec$construction$sign_mode, "separate")
   expect_identical(spec$construction$weight_scale, 0)
@@ -96,17 +96,17 @@ test_that("helper constructors validate scalar parameter values", {
     fixed = TRUE
   )
   expect_error(
-    cpm_construction_summary(standardize_edges = NA),
+    cpm_construction_strength(standardize_edges = NA),
     "`standardize_edges` must be either TRUE or FALSE.",
     fixed = TRUE
   )
   expect_error(
-    cpm_construction_summary(weight_scale = -0.1),
+    cpm_construction_strength(weight_scale = -0.1),
     "`weight_scale` must be a single non-negative number.",
     fixed = TRUE
   )
   expect_error(
-    cpm_construction_summary(standardize_edges = c(TRUE, FALSE)),
+    cpm_construction_strength(standardize_edges = c(TRUE, FALSE)),
     "`standardize_edges` must be either TRUE or FALSE.",
     fixed = TRUE
   )
@@ -164,7 +164,7 @@ test_that("print.cpm_spec shows readable staged settings", {
       criterion = "absolute",
       level = 0.1
     ),
-    construction = cpm_construction_summary(
+    construction = cpm_construction_strength(
       sign_mode = "net",
       weight_scale = 0.03,
       standardize_edges = TRUE
@@ -190,7 +190,7 @@ test_that("net construction yields a single prediction stream", {
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
   s <- spec(
-    construction = cpm_construction_summary(sign_mode = "net")
+    construction = cpm_construction_strength(sign_mode = "net")
   )
 
   result <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
@@ -207,7 +207,7 @@ test_that("sigmoid edge weighting stores smooth edge weights in split models", {
       criterion = "absolute",
       level = 0.1
     ),
-    construction = cpm_construction_summary(
+    construction = cpm_construction_strength(
       weight_scale = 0.03
     )
   )

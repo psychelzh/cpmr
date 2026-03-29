@@ -14,7 +14,7 @@ workflow_default_setup <- rlang::expr({
           criterion = "p_value",
           level = 0.01
         ),
-        construction = cpmr::cpm_construction_summary(
+        construction = cpmr::cpm_construction_strength(
           sign_mode = "separate",
           weight_scale = 0,
           standardize_edges = FALSE
@@ -61,7 +61,7 @@ workflow_standardize_edges_setup <- rlang::expr({
           criterion = "p_value",
           level = 0.01
         ),
-        construction = cpmr::cpm_construction_summary(
+        construction = cpmr::cpm_construction_strength(
           sign_mode = "separate",
           weight_scale = 0,
           standardize_edges = TRUE

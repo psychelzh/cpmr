@@ -10,13 +10,13 @@
 #'
 #' - [cpm_selection_cor()] configures the current correlation-based edge
 #'   selection path.
-#' - [cpm_construction_summary()] configures the current summary-construction
+#' - [cpm_construction_strength()] configures the current strength-construction
 #'   path.
 #' - [cpm_model_lm()] defines the outcome model fitted on CPM-derived features.
 #'
 #' @param selection Selection helper created by [cpm_selection_cor()].
 #' @param construction Construction helper created by
-#'   [cpm_construction_summary()].
+#'   [cpm_construction_strength()].
 #' @param model Outcome-model helper created by [cpm_model_lm()]. This stage
 #'   maps CPM-derived subject-level features to the behavioral outcome.
 #'
@@ -27,7 +27,7 @@
 #'     criterion = "absolute",
 #'     level = 0.1
 #'   ),
-#'   construction = cpm_construction_summary(
+#'   construction = cpm_construction_strength(
 #'     sign_mode = "net",
 #'     weight_scale = 0.03
 #'   ),
@@ -47,7 +47,7 @@
 #' @export
 spec <- function(
   selection = cpm_selection_cor(),
-  construction = cpm_construction_summary(),
+  construction = cpm_construction_strength(),
   model = cpm_model_lm()
 ) {
   assert_spec_class(selection, "selection", "cpm_selection_spec")
@@ -268,13 +268,17 @@ cpm_selection_cor <- function(
   )
 }
 
-#' Define CPM summary-construction settings
+#' Define CPM strength-construction settings
 #'
 #' Build the feature-construction portion of a [spec()]. This helper
-#' configures the current summary-construction path by deciding how positive and
-#' negative screened edge sets are represented, whether screened edges are
-#' additionally weighted before summary construction, and whether edge
-#' standardization is applied before constructing subject-level predictors.
+#' configures the current CPM path that turns screened edges into subject-level
+#' strength-style predictors. The name uses "strength" because this stage
+#' follows the CPM tradition of constructing subject-level scores from screened
+#' edge sets, but it is not limited to a simple raw network-strength sum:
+#' positive and negative edges can be represented separately or collapsed into a
+#' net score, optional weighting can be applied before the score is formed, and
+#' edge values can be standardized within each training set before constructing
+#' the final predictors.
 #'
 #' @param sign_mode How positive and negative screened information is
 #'   represented. `"separate"` constructs `positive_summary` and
@@ -284,8 +288,8 @@ cpm_selection_cor <- function(
 #'   `net_summary = positive_summary - negative_summary` feature and returns a
 #'   single `net` stream.
 #' @param weight_scale Non-negative scale controlling optional sigmoid-style
-#'   edge weighting before summary construction. `0` disables additional
-#'   weighting and keeps the classic hard-threshold CPM summary. Values greater
+#'   edge weighting before strength construction. `0` disables additional
+#'   weighting and keeps the classic hard-threshold CPM score. Values greater
 #'   than `0` apply the current sigmoid weighting scheme, with larger values
 #'   producing a smoother transition around the selection cutoff.
 #' @param standardize_edges Logical value indicating if edge values should be
@@ -294,17 +298,17 @@ cpm_selection_cor <- function(
 #'   training data, and the same transformation is applied again at prediction
 #'   time. This follows the fold-local edge z-scoring approach described by
 #'   Rapuano et al. (2020). Defaults to `FALSE` so the default construction
-#'   stays close to the classic CPM summary workflow; set it to `TRUE`
+#'   stays close to the classic CPM strength workflow; set it to `TRUE`
 #'   when you want this additional preprocessing step explicitly.
 #'
 #' @examples
-#' cpm_construction_summary()
-#' cpm_construction_summary(
+#' cpm_construction_strength()
+#' cpm_construction_strength(
 #'   sign_mode = "net",
 #'   weight_scale = 0.03
 #' )
 #' @export
-cpm_construction_summary <- function(
+cpm_construction_strength <- function(
   sign_mode = c("separate", "net"),
   weight_scale = 0,
   standardize_edges = FALSE
@@ -335,7 +339,7 @@ cpm_construction_summary <- function(
 
   structure(
     list(
-      type = "summary",
+      type = "strength",
       sign_mode = sign_mode,
       weight_scale = weight_scale,
       standardize_edges = standardize_edges

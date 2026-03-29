@@ -86,7 +86,7 @@ rich_spec <- spec(
     criterion = "absolute",
     level = 0.1
   ),
-  construction = cpm_construction_summary(
+  construction = cpm_construction_strength(
     sign_mode = "net",
     weight_scale = 0.03
   ),
@@ -108,7 +108,7 @@ This keeps the main CPM stages visible while grouping naturally paired
 options into small helpers:
 
 - `selection = cpm_selection_cor(...)` defines how edges are screened;
-- `construction = cpm_construction_summary(...)` defines how screened
+- `construction = cpm_construction_strength(...)` defines how screened
   edges become CPM-derived predictors;
 - `model = cpm_model_lm()` defines the outcome model fitted on those
   predictors.
@@ -117,7 +117,7 @@ By default, `spec()` keeps edge standardization turned off so the native
 workflow stays close to the classic CPM path of screening edges,
 constructing summary features, and fitting the outcome model. If you
 want fold-local edge z-scoring, opt in with
-`cpm_construction_summary(standardize_edges = TRUE)`.
+`cpm_construction_strength(standardize_edges = TRUE)`.
 
 If you are new to CPM, the key idea behind the current summary-based
 construction is:

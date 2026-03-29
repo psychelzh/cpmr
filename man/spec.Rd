@@ -7,7 +7,7 @@
 \usage{
 spec(
   selection = cpm_selection_cor(),
-  construction = cpm_construction_summary(),
+  construction = cpm_construction_strength(),
   model = cpm_model_lm()
 )
 
@@ -26,7 +26,7 @@ cpm(
 \item{selection}{Selection helper created by \code{\link[=cpm_selection_cor]{cpm_selection_cor()}}.}
 
 \item{construction}{Construction helper created by
-\code{\link[=cpm_construction_summary]{cpm_construction_summary()}}.}
+\code{\link[=cpm_construction_strength]{cpm_construction_strength()}}.}
 
 \item{model}{Outcome-model helper created by \code{\link[=cpm_model_lm]{cpm_model_lm()}}. This stage
 maps CPM-derived subject-level features to the behavioral outcome.}
@@ -86,7 +86,7 @@ grouping stage-specific settings into helpers.
 \itemize{
 \item \code{\link[=cpm_selection_cor]{cpm_selection_cor()}} configures the current correlation-based edge
 selection path.
-\item \code{\link[=cpm_construction_summary]{cpm_construction_summary()}} configures the current summary-construction
+\item \code{\link[=cpm_construction_strength]{cpm_construction_strength()}} configures the current strength-construction
 path.
 \item \code{\link[=cpm_model_lm]{cpm_model_lm()}} defines the outcome model fitted on CPM-derived features.
 }
@@ -98,7 +98,7 @@ s <- spec(
     criterion = "absolute",
     level = 0.1
   ),
-  construction = cpm_construction_summary(
+  construction = cpm_construction_strength(
     sign_mode = "net",
     weight_scale = 0.03
   ),

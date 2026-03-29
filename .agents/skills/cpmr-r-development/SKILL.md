@@ -15,7 +15,7 @@ Use this skill for code, tests, docs, review, and release-quality validation in 
 - Keep validation and normalization at public constructors and workflow entry points. Internal runtime paths should trust staged objects instead of re-validating them.
 - Prefer direct, stepwise code. Avoid extra helper layers unless they remove real duplication or clarify a stable boundary.
 - Private helpers should usually come after their primary callers so the main workflow reads top-down.
-- Keep `tests/testthat` aligned with the current `R/` module boundaries. When `R/` files are merged, renamed, or deleted, rename or regroup the corresponding tests so the test layout does not preserve outdated file or concept names.
+- Keep `tests/testthat` aligned with the current `R/` module boundaries. When `R/` files are merged, renamed, or deleted, rename or regroup the corresponding tests so the test layout does not preserve outdated file or concept names. If several source files are intentionally collapsed into one module, collapse the corresponding tests too instead of preserving the older split.
 - After user-facing API, workflow, summary, or documentation changes, review `NEWS.md` against the current `main` branch. Keep only entries that are still true for the branch being worked on, and remove stale wording carried over from abandoned designs.
 - Version changes are release tasks, not routine development chores. Use `usethis::use_version()` when preparing a release bump, and `usethis::use_dev_version()` when starting the next development cycle after a release. During ordinary development, do not change the development version unless explicitly asked.
 

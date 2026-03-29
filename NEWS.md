@@ -13,7 +13,7 @@
 ## Enhancements
 
 * Added `spec()` together with `cpm_selection_cor()`,
-  `cpm_construction_summary()`, and `cpm_model_lm()` to make screening,
+  `cpm_construction_strength()`, and `cpm_model_lm()` to make screening,
   summarization, and outcome-model choices explicit.
 * `cpm()` now accepts integer or manual assessment plans through `resamples`,
   while keeping leave-one-out assessment as the default when `resamples` is

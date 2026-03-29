@@ -25,7 +25,7 @@ reference:
     desc: Helper constructors for staged CPM specifications.
     contents:
       - cpm_selection_cor
-      - cpm_construction_summary
+      - cpm_construction_strength
       - cpm_model_lm
 
   - title: Result Objects

@@ -12,7 +12,7 @@ build_construction_state <- function(
 ) {
   switch(
     construction_spec$type,
-    summary = {
+    strength = {
       center <- NULL
       scale <- NULL
       if (construction_spec$standardize_edges) {
@@ -56,7 +56,7 @@ build_construction_state <- function(
 construction_features <- function(construction_state) {
   switch(
     construction_state$construction$type,
-    summary = {
+    strength = {
       summaries <- construction_state$summaries
 
       switch(
@@ -75,7 +75,7 @@ construction_features <- function(construction_state) {
           negative = summaries[, "negative_summary", drop = FALSE]
         ),
         stop(
-          "`construction$sign_mode` must be a supported summary construction mode.",
+          "`construction$sign_mode` must be a supported CPM strength construction mode.",
           call. = FALSE
         )
       )
