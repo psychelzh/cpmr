@@ -1,0 +1,36 @@
+name: Continuous Benchmarks (Receive)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+on:
+  issue_comment:
+    types: ['created']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if:
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/benchmark') &&
+      (
+        github.event.comment.author_association == 'OWNER' ||
+        github.event.comment.author_association == 'MEMBER' ||
+        github.event.comment.author_association == 'COLLABORATOR'
+      )
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      RSPM: https://packagemanager.posit.co/all/latest
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: lorenzwalthert/touchstone/actions/receive@7e6072a25d1f8d72649188bc711113039ef94b75
+        with:
+          cache-version: 2
+          benchmarking_path: touchstone
+          force_upstream: true
+          r-version: release
+          touchstone_ref: "@7e6072a25d1f8d72649188bc711113039ef94b75"
