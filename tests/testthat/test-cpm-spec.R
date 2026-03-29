@@ -180,6 +180,11 @@ test_that("print.cpm_spec shows readable staged settings", {
   expect_output(print(spec), "Outcome model:\\s+linear regression")
 })
 
+test_that("print.cpm_spec shows default construction labels compactly", {
+  expect_output(print(spec()), "Weight scale:\\s+none")
+  expect_output(print(spec()), "Edge standardization:\\s+none")
+})
+
 test_that("net construction yields a single prediction stream", {
   withr::local_seed(101)
   conmat <- matrix(rnorm(120), ncol = 12)

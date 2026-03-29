@@ -101,6 +101,37 @@ print.cpm <- function(x, ...) {
     sum = "summed across folds",
     all = "stored for each fold"
   )
+  selection_summary <- paste(
+    x$spec$selection$method,
+    x$spec$selection$criterion,
+    format_threshold_level(x$spec$selection$level),
+    sep = " / "
+  )
+  construction_summary <- paste(
+    x$spec$construction$sign_mode,
+    if (x$spec$construction$weight_scale == 0) {
+      "no weighting"
+    } else {
+      paste0(
+        "sigmoid weighting (",
+        format_threshold_level(
+          x$spec$construction$weight_scale
+        ),
+        ")"
+      )
+    },
+    if (isTRUE(x$spec$construction$standardize_edges)) {
+      "z-score edges"
+    } else {
+      "raw edges"
+    },
+    sep = " / "
+  )
+  model_summary <- switch(
+    x$spec$model$type,
+    lm = "linear regression",
+    x$spec$model$type
+  )
 
   cat("CPM:\n")
   if (!is.null(x$call)) {
@@ -129,18 +160,17 @@ print.cpm <- function(x, ...) {
     "Edge storage",
     edge_storage
   )
-  print_staged_settings(
-    selection = x$spec$selection,
-    construction = x$spec$construction,
-    model = x$spec$model,
-    selection_labels = list(
-      method = "Selection method",
-      criterion = "Selection criterion",
-      level = "Selection level"
-    ),
-    construction_labels = list(
-      sign_mode = "Construction sign mode"
-    )
+  print_setting_line(
+    "Selection",
+    selection_summary
+  )
+  print_setting_line(
+    "Construction",
+    construction_summary
+  )
+  print_setting_line(
+    "Model",
+    model_summary
   )
   cat(
     "  Use summary() for aggregate correlations and tidy() for correlation tables.\n"
@@ -510,10 +540,6 @@ format_rate <- function(x) {
   ifelse(is.na(x), "NA", sprintf("%.2f%%", x * 100))
 }
 
-format_threshold_level <- function(x) {
-  trimws(formatC(x, format = "fg", digits = 3))
-}
-
 prediction_labels <- c(
   joint = "Joint",
   net = "Net",
@@ -523,129 +549,4 @@ prediction_labels <- c(
 
 prediction_label <- function(prediction_stream) {
   unname(prediction_labels[[prediction_stream]])
-}
-
-print_setting_line <- function(label, value, indent = "    ", width = 22L) {
-  cat(sprintf(
-    "%s%-*s %s\n",
-    indent,
-    width,
-    paste0(label, ":"),
-    value
-  ))
-}
-
-print_selection_settings <- function(
-  selection,
-  indent = "    ",
-  method_label = "Method",
-  criterion_label = "Criterion",
-  level_label = "Level"
-) {
-  print_setting_line(method_label, selection$method, indent = indent)
-  print_setting_line(criterion_label, selection$criterion, indent = indent)
-  print_setting_line(
-    level_label,
-    format_threshold_level(selection$level),
-    indent = indent
-  )
-
-  invisible(NULL)
-}
-
-print_construction_settings <- function(
-  construction,
-  indent = "    ",
-  sign_mode_label = "Sign mode"
-) {
-  print_setting_line(
-    sign_mode_label,
-    construction$sign_mode,
-    indent = indent
-  )
-  print_setting_line(
-    "Edge weighting",
-    if (construction$weight_scale == 0) "none" else "sigmoid",
-    indent = indent
-  )
-  print_setting_line(
-    "Weight scale",
-    if (construction$weight_scale == 0) {
-      "none"
-    } else {
-      format_threshold_level(construction$weight_scale)
-    },
-    indent = indent
-  )
-  print_setting_line(
-    "Edge standardization",
-    if (isTRUE(construction$standardize_edges)) "z-score" else "none",
-    indent = indent
-  )
-
-  invisible(NULL)
-}
-
-print_model_settings <- function(
-  model,
-  indent = "    ",
-  model_label = "Outcome model"
-) {
-  print_setting_line(
-    model_label,
-    switch(
-      model$type,
-      lm = "linear regression",
-      model$type
-    ),
-    indent = indent
-  )
-
-  invisible(NULL)
-}
-
-print_staged_settings <- function(
-  selection,
-  construction,
-  model,
-  indent = "    ",
-  headers = NULL,
-  selection_labels = list(
-    method = "Method",
-    criterion = "Criterion",
-    level = "Level"
-  ),
-  construction_labels = list(
-    sign_mode = "Sign mode"
-  ),
-  model_label = "Outcome model"
-) {
-  if (!is.null(headers$selection)) {
-    cat(headers$selection)
-  }
-  print_selection_settings(
-    selection,
-    indent = indent,
-    method_label = selection_labels$method,
-    criterion_label = selection_labels$criterion,
-    level_label = selection_labels$level
-  )
-  if (!is.null(headers$construction)) {
-    cat(headers$construction)
-  }
-  print_construction_settings(
-    construction,
-    indent = indent,
-    sign_mode_label = construction_labels$sign_mode
-  )
-  if (!is.null(headers$model)) {
-    cat(headers$model)
-  }
-  print_model_settings(
-    model,
-    indent = indent,
-    model_label = model_label
-  )
-
-  invisible(NULL)
 }

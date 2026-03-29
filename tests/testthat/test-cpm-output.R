@@ -14,8 +14,12 @@ test_that("print.cpm reports summary fields", {
   expect_output(print(res), "Covariates:\\s+none")
   expect_output(print(res), "Missing data:\\s+fail")
   expect_output(print(res), "Edge storage:\\s+summed across folds")
-  expect_output(print(res), "Selection method:\\s+pearson")
-  expect_output(print(res), "Construction sign mode:\\s+separate")
+  expect_output(print(res), "Selection:\\s+pearson / p_value / 0.01")
+  expect_output(
+    print(res),
+    "Construction:\\s+separate / no weighting / raw edges"
+  )
+  expect_output(print(res), "Model:\\s+linear regression")
   expect_output(print(res), "Use summary\\(\\) for aggregate correlations")
 })
 
@@ -52,6 +56,42 @@ test_that("print.cpm uses human-readable edge storage labels", {
     "Edge storage:\\s+summed across folds",
     out
   )))
+})
+
+test_that("print.cpm shows compact weighted construction summary", {
+  x <- structure(
+    list(
+      call = quote(cpm(conmat = conmat, behav = behav, spec = spec())),
+      spec = spec(
+        construction = cpm_construction_summary(
+          sign_mode = "separate",
+          weight_scale = 0.03,
+          standardize_edges = TRUE
+        )
+      ),
+      folds = list(1:3, 4:6),
+      predictions = data.frame(
+        row = 1:6,
+        fold = c(1L, 1L, 1L, 2L, 2L, 2L),
+        observed = c(1, 2, 3, 4, 5, 6),
+        joint = c(1, 2, 3, 6, 5, 4),
+        positive = c(1, 2, 3, 4, 5, 6),
+        negative = c(3, 2, 1, 6, 5, 4)
+      ),
+      settings = list(
+        covariates = FALSE,
+        na_action = "fail",
+        return_edges = "none"
+      ),
+      edges = NULL
+    ),
+    class = "cpm"
+  )
+
+  expect_output(
+    print(x),
+    "Construction:\\s+separate / sigmoid weighting \\(0.03\\) / z-score edges"
+  )
 })
 
 test_that("tidy metrics returns pooled and foldwise metric tables", {
