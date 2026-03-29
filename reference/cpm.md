@@ -1,42 +1,196 @@
-# cpm Fitted Object
+# Perform Connectome-based Predictive Modeling (CPM)
 
-A `cpm` object is returned by
-[`fit()`](https://generics.r-lib.org/reference/fit.html) when fitting a
-[`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-on a single dataset.
+The connectome-based predictive modeling (CPM) is a data-driven approach
+to predict individual behavior from brain connectivity data. Originally
+proposed by Shen et al. (2017), the CPM has been widely used in various
+studies. This function implements the CPM algorithm and provides a
+convenient interface to use it.
 
-## Structure
+## Usage
 
-A `cpm` object is a list with the following elements:
+``` r
+cpm(
+  conmat,
+  behav,
+  ...,
+  covariates = NULL,
+  confounds = NULL,
+  thresh_method = c("alpha", "sparsity"),
+  thresh_level = 0.01,
+  kfolds = NULL,
+  bias_correct = TRUE,
+  return_edges = c("sum", "none", "all"),
+  na_action = c("fail", "exclude")
+)
+```
 
-- `call`:
+## Arguments
 
-  Matched call used for fitting.
+- conmat:
 
-- `spec`:
+  A matrix of connectome data. Observations in row, edges in column
+  (assumed that duplicated edges are removed).
 
-  The originating `cpm_spec` object.
+- behav:
 
-- `params`:
+  A numeric vector contains behavior data. Length must equal to number
+  of observations in `conmat`. Note `behav` could also be a row/column
+  matrix, which will be converted to a vector using
+  [`drop()`](https://rdrr.io/r/base/drop.html).
 
-  Parameter list used at fit time.
+- ...:
 
-- `predictions`:
+  For future extension. Currently ignored.
 
-  Data frame of observation-level outputs with columns `row`, `real`,
-  `both`, `pos`, and `neg`.
+- covariates:
 
-- `edges`:
+  A matrix of covariates. Observations in row, variables in column. If
+  `NULL`, no covariates are used. Note if a vector is provided, it will
+  be converted to a column matrix.
 
-  Stored single-fit edge mask as a `p x 2` logical matrix with `pos` and
-  `neg` columns.
+- confounds:
 
-- `model`:
+  Deprecated alias of `covariates`.
 
-  Trained CPM model components used by prediction.
+- thresh_method, thresh_level:
 
-## See also
+  The threshold method and level used in edge selection. If method is
+  set to be `"alpha"`, the edge selection is based on the critical value
+  of correlation coefficient. If method is set to be `"sparsity"`, the
+  edge selection is based on the quantile of correlation coefficient,
+  thus network sparsity is controlled.
 
-[`fit()`](https://generics.r-lib.org/reference/fit.html),
-[`summary.cpm()`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md),
-[`tidy.cpm()`](https://psychelzh.github.io/cpmr/reference/tidy.cpm.md)
+- kfolds:
+
+  Folds number of cross-validation. If `NULL`, it will be set to be
+  equal to the number of observations, i.e., leave-one-subject-out.
+
+- bias_correct:
+
+  Logical value indicating if the connectome data should be
+  bias-corrected. If `TRUE`, the connectome data will be centered and
+  scaled to have unit variance based on the training data before model
+  fitting and prediction. See Rapuano et al. (2020) for more details.
+
+- return_edges:
+
+  A character string indicating the return value of the selected edges.
+  If `"none"`, no edges are returned. If `"sum"`, the sum of selected
+  edges across folds is returned. If `"all"`, the selected edges for
+  each fold is returned, which is a 3D array and memory-consuming.
+
+- na_action:
+
+  A character string indicating the action when missing values are found
+  in `behav`. If `"fail"`, an error will be thrown. If `"exclude"`,
+  missing values will be excluded from the analysis but kept in the
+  output. Note complete cases are intersection of `conmat`, `behav` and
+  `covariates` if provided.
+
+## Value
+
+A list with the following components:
+
+- folds:
+
+  The corresponding fold for each observation when used as test group in
+  cross-validation.
+
+- real:
+
+  The real behavior data. This is the same as the input `behav` if
+  `covariates` is `NULL`, otherwise it is the fold-wise residual of
+  `behav` after regressing out `covariates` in cross-validation.
+
+- pred:
+
+  The predicted behavior data, with each column corresponding to a
+  model, i.e., both edges, positive edges, negative edges, and the row
+  names corresponding to the observation names (the same as those of
+  `behav`).
+
+- edges:
+
+  The selected edges, if `return_edges` is not `"none"`. If
+  `return_edges` is `"sum"`, it is a matrix with rows corresponding to
+  edges and columns corresponding to correlation types (i.e., `"pos"`
+  and `"neg"`). If `return_edges` is `"all"`, it is a 3D array with
+  dimensions corresponding to edges, correlation types and folds.
+
+- call:
+
+  The matched call.
+
+- params:
+
+  A list of parameters used in the function, including:
+
+  - `covariates` indicating if covariates are used
+
+  - `thresh_method` indicating the threshold method
+
+  - `thresh_level` indicating the threshold level
+
+  - `kfolds` indicating the number of folds in cross-validation
+
+  - `bias_correct` indicating if bias correction is used
+
+## References
+
+Shen, X., Finn, E. S., Scheinost, D., Rosenberg, M. D., Chun, M. M.,
+Papademetris, X., & Constable, R. T. (2017). Using connectome-based
+predictive modeling to predict individual behavior from brain
+connectivity. Nature Protocols, 12(3), 506–518.
+https://doi.org/10.1038/nprot.2016.178
+
+Rapuano, K. M., Rosenberg, M. D., Maza, M. T., Dennis, N. J., Dorji, M.,
+Greene, A. S., Horien, C., Scheinost, D., Todd Constable, R., & Casey,
+B. J. (2020). Behavioral and brain signatures of substance use
+vulnerability in childhood. Developmental Cognitive Neuroscience, 46,
+100878. https://doi.org/10.1016/j.dcn.2020.100878
+
+## Examples
+
+``` r
+conmat <- matrix(rnorm(100 * 100), nrow = 100)
+behav <- rnorm(100)
+cpm(conmat, behav)
+#> CPM results:
+#>   Call: cpm(conmat = conmat, behav = behav)
+#>   Number of observations: 100
+#>     Complete cases: 100
+#>   Number of edges: 100
+#>   Parameters:
+#>     Covariates:       FALSE
+#>     Threshold method: alpha
+#>     Threshold level:  0.01
+#>     CV folds:         100
+#>     Bias correction:  TRUE
+# use different threshold method and level
+cpm(conmat, behav, thresh_method = "sparsity", thresh_level = 0.05)
+#> CPM results:
+#>   Call: cpm(conmat = conmat, behav = behav, thresh_method = "sparsity", 
+#>     thresh_level = 0.05)
+#>   Number of observations: 100
+#>     Complete cases: 100
+#>   Number of edges: 100
+#>   Parameters:
+#>     Covariates:       FALSE
+#>     Threshold method: sparsity
+#>     Threshold level:  0.05
+#>     CV folds:         100
+#>     Bias correction:  TRUE
+# use a 10-fold cross-validation
+cpm(conmat, behav, kfolds = 10)
+#> CPM results:
+#>   Call: cpm(conmat = conmat, behav = behav, kfolds = 10)
+#>   Number of observations: 100
+#>     Complete cases: 100
+#>   Number of edges: 100
+#>   Parameters:
+#>     Covariates:       FALSE
+#>     Threshold method: alpha
+#>     Threshold level:  0.01
+#>     CV folds:         10
+#>     Bias correction:  TRUE
+```

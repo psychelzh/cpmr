@@ -18,11 +18,8 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/native-getting-started.html">Native Getting Started with cpmr</a></li>
-    <li><a class="dropdown-item" href="../articles/workflow-selection.html">Choosing a Workflow in cpmr</a></li>
-    <li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
   </ul></li>
-<li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/psychelzh/cpmr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -41,24 +38,12 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="cpmr-development-version">cpmr (development version)<a class="anchor" aria-label="anchor" href="#cpmr-development-version"></a></h2>
 <div class="section level3">
-<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
-<ul><li>Removed the legacy <code><a href="../reference/cpm.html">cpm()</a></code> entry point and the deprecated <code>confounds</code> alias. Use <code>fit(cpm_spec(...), ...)</code> / <code>fit_resamples(cpm_spec(...), ...)</code> for the native workflow.</li>
-<li>
-<code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> now performs a single fit; resampling is handled by <code><a href="../reference/fit_resamples.html">fit_resamples()</a></code>.</li>
-<li>
-<code>cpm_resamples</code> no longer stores redundant resample metrics, and the <code>collect_*()</code> helpers have been removed. Use <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> for aggregated resample results and <code>predictions</code>, <code>edges</code>, and <code>folds</code> for raw outputs.</li>
-</ul></div>
-<div class="section level3">
 <h3 id="enhancements-development-version">Enhancements<a class="anchor" aria-label="anchor" href="#enhancements-development-version"></a></h3>
-<ul><li>Added <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> as the native interface for <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> and <code><a href="../reference/fit_resamples.html">fit_resamples()</a></code>, and made single-fit and resample result objects more consistent.</li>
-<li>Added <code><a href="../reference/summary.cpm_resamples.html">summary.cpm_resamples()</a></code>, which now reports pooled out-of-fold error metrics by default and keeps pooled / fold-wise correlations as supplementary statistics.</li>
-<li>Added <code><a href="../reference/resample_metrics.html">resample_metrics()</a></code> for direct access to pooled or fold-wise metric tables from a <code>cpm_resamples</code> object.</li>
-<li>Added native-first documentation, including a getting-started vignette and reorganized pkgdown reference pages.</li>
+<ul><li>Clarified <code>print.cpm()</code> output when edges are not stored and hardened <code><a href="../reference/summary.cpm.html">summary.cpm()</a></code> fold fallback for legacy objects.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="maintenance-development-version">Maintenance<a class="anchor" aria-label="anchor" href="#maintenance-development-version"></a></h3>
-<ul><li>Refactored internals and expanded test coverage around fit, summary, edge, and resampling behavior.</li>
-<li>Hardened resample validation so each fold must retain at least 3 complete-case training observations.</li>
+<ul><li>Stabilized GitHub Actions uploads for Codecov coverage and Test Analytics by generating and uploading JUnit test results from an explicit workspace path.</li>
 </ul></div>
 </div>
     <div class="section level2">

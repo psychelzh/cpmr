@@ -2,47 +2,17 @@
 
 ## cpmr (development version)
 
-### Breaking changes
-
-- Removed the legacy
-  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) entry
-  point and the deprecated `confounds` alias. Use
-  `fit(cpm_spec(...), ...)` / `fit_resamples(cpm_spec(...), ...)` for
-  the native workflow.
-- [`fit()`](https://generics.r-lib.org/reference/fit.html) now performs
-  a single fit; resampling is handled by
-  [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md).
-- `cpm_resamples` no longer stores redundant resample metrics, and the
-  `collect_*()` helpers have been removed. Use
-  [`summary()`](https://rdrr.io/r/base/summary.html) for aggregated
-  resample results and `predictions`, `edges`, and `folds` for raw
-  outputs.
-
 ### Enhancements
 
-- Added
-  [`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-  as the native interface for
-  [`fit()`](https://generics.r-lib.org/reference/fit.html) and
-  [`fit_resamples()`](https://psychelzh.github.io/cpmr/reference/fit_resamples.md),
-  and made single-fit and resample result objects more consistent.
-- Added
-  [`summary.cpm_resamples()`](https://psychelzh.github.io/cpmr/reference/summary.cpm_resamples.md),
-  which now reports pooled out-of-fold error metrics by default and
-  keeps pooled / fold-wise correlations as supplementary statistics.
-- Added
-  [`resample_metrics()`](https://psychelzh.github.io/cpmr/reference/resample_metrics.md)
-  for direct access to pooled or fold-wise metric tables from a
-  `cpm_resamples` object.
-- Added native-first documentation, including a getting-started vignette
-  and reorganized pkgdown reference pages.
+- Clarified `print.cpm()` output when edges are not stored and hardened
+  [`summary.cpm()`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)
+  fold fallback for legacy objects.
 
 ### Maintenance
 
-- Refactored internals and expanded test coverage around fit, summary,
-  edge, and resampling behavior.
-- Hardened resample validation so each fold must retain at least 3
-  complete-case training observations.
+- Stabilized GitHub Actions uploads for Codecov coverage and Test
+  Analytics by generating and uploading JUnit test results from an
+  explicit workspace path.
 
 ## cpmr 0.1.1
 

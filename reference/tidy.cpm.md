@@ -27,8 +27,9 @@ tidy(x, ..., component = c("performance", "edges"))
 ## Value
 
 A [tibble](https://tibble.tidyverse.org/reference/tibble-package.html)
-with columns storing parameters of the `cpm` object and further columns
-depending on the `component` argument:
+with columns storing parameters of the
+[`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) object and
+further columns depending on the `component` argument:
 
 For `component = "performance"`:
 
@@ -49,12 +50,16 @@ For `component = "performance"`:
 
 For `component = "edges"`:
 
+- level:
+
+  The proportional threshold for edge selection.
+
 - pos:
 
-  A logical vector indicating whether each edge is selected by the
-  fitted CPM model (positive).
+  A logical vector indicating whether each edge is selected based on the
+  edge_level (positive).
 
 - neg:
 
-  A logical vector indicating whether each edge is selected by the
-  fitted CPM model (negative).
+  A logical vector indicating whether each edge is selected based on the
+  edge_level (negative).

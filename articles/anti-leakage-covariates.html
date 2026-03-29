@@ -33,12 +33,9 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/native-getting-started.html">Native Getting Started with cpmr</a></li>
-    <li><a class="dropdown-item" href="../articles/workflow-selection.html">Choosing a Workflow in cpmr</a></li>
-    <li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
+<li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -86,7 +83,9 @@ selection) inside CV as well.</li>
 <h2 id="minimal-example-with-synthetic-data">Minimal Example with Synthetic Data<a class="anchor" aria-label="anchor" href="#minimal-example-with-synthetic-data"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/psychelzh/cpmr" class="external-link">cpmr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
 <span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fl">120</span></span>
 <span></span>
@@ -100,9 +99,8 @@ selection) inside CV as well.</li>
 <span><span class="va">edge_signal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">conmat</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">behav</span> <span class="op">&lt;-</span> <span class="fl">0.7</span> <span class="op">*</span> <span class="va">edge_signal</span> <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> <span class="va">covariates</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Leakage-safe CV call: covariates are handled fold-wise inside resampling</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_resamples.html">fit_resamples</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="../reference/cpm_spec.html">cpm_spec</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span><span class="co"># Leakage-safe call: covariates are handled fold-wise inside CV</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm.html">cpm</a></span><span class="op">(</span></span>
 <span>  conmat <span class="op">=</span> <span class="va">conmat</span>,</span>
 <span>  behav <span class="op">=</span> <span class="va">behav</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="va">covariates</span>,</span>
@@ -110,96 +108,34 @@ selection) inside CV as well.</li>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; CPM resample summary:</span></span>
-<span><span class="co">#&gt;   Number of folds: 5</span></span>
-<span><span class="co">#&gt;   Prediction error:</span></span>
-<span><span class="co">#&gt;     RMSE:</span></span>
-<span><span class="co">#&gt;       Combined: 0.514</span></span>
-<span><span class="co">#&gt;       Positive: 0.510</span></span>
-<span><span class="co">#&gt;       Negative: 0.529</span></span>
-<span><span class="co">#&gt;     MAE:</span></span>
-<span><span class="co">#&gt;       Combined: 0.405</span></span>
-<span><span class="co">#&gt;       Positive: 0.408</span></span>
-<span><span class="co">#&gt;       Negative: 0.387</span></span>
-<span><span class="co">#&gt;   Pooled correlations (Pearson):</span></span>
-<span><span class="co">#&gt;     Combined: 0.259</span></span>
+<span><span class="co">#&gt; CPM summary:</span></span>
+<span><span class="co">#&gt;   Performance (Pearson):</span></span>
 <span><span class="co">#&gt;     Positive: 0.279</span></span>
 <span><span class="co">#&gt;     Negative: -0.104</span></span>
-<span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
-<span><span class="co">#&gt;     Combined: 0.277 (SE 0.132)</span></span>
-<span><span class="co">#&gt;     Positive: 0.303 (SE 0.129)</span></span>
-<span><span class="co">#&gt;     Negative: -0.270</span></span></code></pre></div>
+<span><span class="co">#&gt;     Combined: 0.259</span></span>
+<span><span class="co">#&gt;   Prop. edges (50% folds):</span></span>
+<span><span class="co">#&gt;     Positive: 1.67%</span></span>
+<span><span class="co">#&gt;     Negative: 0.00%</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="native-api">Native API<a class="anchor" aria-label="anchor" href="#native-api"></a>
+<h2 id="migration-from-confounds-to-covariates">Migration from <code>confounds</code> to
+<code>covariates</code><a class="anchor" aria-label="anchor" href="#migration-from-confounds-to-covariates"></a>
 </h2>
+<p><code>covariates</code> is now the primary argument name.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm_spec.html">cpm_spec</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">single_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span></span>
-<span>  <span class="va">spec</span>,</span>
-<span>  conmat <span class="op">=</span> <span class="va">conmat</span>,</span>
-<span>  behav <span class="op">=</span> <span class="va">behav</span>,</span>
-<span>  covariates <span class="op">=</span> <span class="va">covariates</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">resamples_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_resamples.html">fit_resamples</a></span><span class="op">(</span></span>
-<span>  <span class="va">spec</span>,</span>
-<span>  conmat <span class="op">=</span> <span class="va">conmat</span>,</span>
-<span>  behav <span class="op">=</span> <span class="va">behav</span>,</span>
-<span>  covariates <span class="op">=</span> <span class="va">covariates</span>,</span>
-<span>  kfolds <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  return_edges <span class="op">=</span> <span class="st">"sum"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">resamples_fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; CPM resample summary:</span></span>
-<span><span class="co">#&gt;   Number of folds: 5</span></span>
-<span><span class="co">#&gt;   Prediction error:</span></span>
-<span><span class="co">#&gt;     RMSE:</span></span>
-<span><span class="co">#&gt;       Combined: 0.514</span></span>
-<span><span class="co">#&gt;       Positive: 0.511</span></span>
-<span><span class="co">#&gt;       Negative: 0.539</span></span>
-<span><span class="co">#&gt;     MAE:</span></span>
-<span><span class="co">#&gt;       Combined: 0.404</span></span>
-<span><span class="co">#&gt;       Positive: 0.406</span></span>
-<span><span class="co">#&gt;       Negative: 0.393</span></span>
-<span><span class="co">#&gt;   Pooled correlations (Pearson):</span></span>
-<span><span class="co">#&gt;     Combined: 0.254</span></span>
-<span><span class="co">#&gt;     Positive: 0.272</span></span>
-<span><span class="co">#&gt;     Negative: -0.080</span></span>
-<span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
-<span><span class="co">#&gt;     Combined: 0.214 (SE 0.120)</span></span>
-<span><span class="co">#&gt;     Positive: 0.235 (SE 0.120)</span></span>
-<span><span class="co">#&gt;     Negative: -0.115 (SE 0.080)</span></span>
-<span><span class="co">#&gt;   Selected edges:</span></span>
-<span><span class="co">#&gt;     Positive: 1.50%</span></span>
-<span><span class="co">#&gt;     Negative: 0.33%</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">resamples_fit</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   row fold       real        both         pos           neg</span></span>
-<span><span class="co">#&gt; 1   1    4 -0.5862850 -0.13713172 -0.13713172  1.647987e-17</span></span>
-<span><span class="co">#&gt; 2   2    4  0.7262082 -0.06258281 -0.06258281  1.647987e-17</span></span>
-<span><span class="co">#&gt; 3   3    2  0.4776754  0.11181262  0.08055321  6.622293e-02</span></span>
-<span><span class="co">#&gt; 4   4    3  0.4263198  0.14677926  0.14677926 -1.734723e-17</span></span>
-<span><span class="co">#&gt; 5   5    5 -1.5329525 -0.07744804 -0.07744804 -1.040834e-17</span></span>
-<span><span class="co">#&gt; 6   6    3  0.4996146  0.56813333  0.56813333 -1.734723e-17</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">resamples_fit</span><span class="op">$</span><span class="va">edges</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 120   2</span></span></code></pre></div>
-<p>Using a reusable <code><a href="../reference/cpm_spec.html">cpm_spec()</a></code> object is helpful when you
-want the same CPM settings to drive both single-fit and resampling
-analyses.</p>
-</div>
-<div class="section level2">
-<h2 id="edge-storage-tips">Edge Storage Tips<a class="anchor" aria-label="anchor" href="#edge-storage-tips"></a>
-</h2>
-<p>For large feature spaces, fold-wise edge storage can grow
-quickly.</p>
-<ul>
-<li>Use <code>return_edges = "sum"</code> to keep only fold-aggregated
-edge counts.</li>
-<li>Use <code>return_edges = "none"</code> if you only need predictive
-performance.</li>
-</ul>
+<code class="sourceCode R"><span><span class="co"># Preferred</span></span>
+<span><span class="va">fit_new</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm.html">cpm</a></span><span class="op">(</span><span class="va">conmat</span>, <span class="va">behav</span>, covariates <span class="op">=</span> <span class="va">covariates</span>, kfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+<p>The old name <code>confounds</code> is still accepted as a deprecated
+alias for backward compatibility.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Backward-compatible alias (deprecated)</span></span>
+<span><span class="va">fit_old</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cpm.html">cpm</a></span><span class="op">(</span><span class="va">conmat</span>, <span class="va">behav</span>, confounds <span class="op">=</span> <span class="va">covariates</span>, kfolds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: `confounds` is deprecated; please use `covariates` instead.</span></span></code></pre></div>
+<p>Do not pass both in the same call.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/cpm.html">cpm</a></span><span class="op">(</span><span class="va">conmat</span>, <span class="va">behav</span>, covariates <span class="op">=</span> <span class="va">covariates</span>, confounds <span class="op">=</span> <span class="va">covariates</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `resolve_covariates()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Please provide only one of `covariates` or `confounds`.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="anti-leakage-checklist">Anti-Leakage Checklist<a class="anchor" aria-label="anchor" href="#anti-leakage-checklist"></a>

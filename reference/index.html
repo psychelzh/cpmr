@@ -18,11 +18,8 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/native-getting-started.html">Native Getting Started with cpmr</a></li>
-    <li><a class="dropdown-item" href="../articles/workflow-selection.html">Choosing a Workflow in cpmr</a></li>
-    <li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/anti-leakage-covariates.html">Leakage-Safe Covariate Handling in CPM</a></li>
   </ul></li>
-<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/psychelzh/cpmr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -38,9 +35,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="native-fit-api">Native Fit API<a class="anchor" aria-label="anchor" href="#native-fit-api"></a></h2>
+      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
 
-      <div class="section-desc"><p>Primary entry points for fitting CPM models natively.</p></div>
+
 
       <dl></dl></div><div class="section level2">
 
@@ -49,56 +46,10 @@
 
       <dl><dt>
 
-          <code><a href="cpm_spec.html">cpm_spec()</a></code> <code><a href="cpm_spec.html">fit(<i>&lt;cpm_spec&gt;</i>)</a></code> <code><a href="cpm_spec.html">fit_resamples(<i>&lt;cpm_spec&gt;</i>)</a></code>
+          <code><a href="cpm.html">cpm()</a></code>
 
         </dt>
-        <dd>Define a CPM model specification</dd>
-
-        <dt>
-
-          <code><a href="fit_resamples.html">fit_resamples()</a></code>
-
-        </dt>
-        <dd>Fit a model specification on resamples</dd>
-      </dl></div><div class="section level2">
-      <h2 id="result-objects">Result Objects<a class="anchor" aria-label="anchor" href="#result-objects"></a></h2>
-
-      <div class="section-desc"><p>S3 result classes returned by single-fit and resampling workflows.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="cpm.html">cpm</a></code>
-
-        </dt>
-        <dd>cpm Fitted Object</dd>
-
-        <dt>
-
-          <code><a href="cpm_resamples.html">cpm_resamples</a></code>
-
-        </dt>
-        <dd>cpm_resamples Resampling Object</dd>
-      </dl></div><div class="section level2">
-      <h2 id="inspect-results">Inspect Results<a class="anchor" aria-label="anchor" href="#inspect-results"></a></h2>
-
-      <div class="section-desc"><p>Summary and tidying helpers for fitted results.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="resample_metrics.html">resample_metrics()</a></code>
-
-        </dt>
-        <dd>Extract resampling metrics from a <code>cpm_resamples</code> object</dd>
+        <dd>Perform Connectome-based Predictive Modeling (CPM)</dd>
 
         <dt>
 
@@ -109,36 +60,12 @@
 
         <dt>
 
-          <code><a href="summary.cpm_resamples.html">summary(<i>&lt;cpm_resamples&gt;</i>)</a></code> <code><a href="summary.cpm_resamples.html">print(<i>&lt;cpm_resamples_summary&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Summarize a <code>cpm_resamples</code> object</dd>
-
-        <dt>
-
           <code><a href="tidy.cpm.html">tidy(<i>&lt;cpm&gt;</i>)</a></code>
 
         </dt>
         <dd>Tidy a <code>cpm</code> object</dd>
-      </dl></div><div class="section level2">
-      <h2 id="package">Package<a class="anchor" aria-label="anchor" href="#package"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="cpmr-package.html">cpmr</a></code> <code><a href="cpmr-package.html">cpmr-package</a></code>
-
-        </dt>
-        <dd>cpmr: Connectome Predictive Modelling in R</dd>
       </dl></div>
-  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
-    </nav></aside></div>
+  </main></div>
 
 
     <footer><div class="pkgdown-footer-left">

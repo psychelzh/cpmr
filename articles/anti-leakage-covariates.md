@@ -17,6 +17,8 @@ In `cpmr`, leakage-safe behavior means:
 ## Minimal Example with Synthetic Data
 
 ``` r
+library(cpmr)
+
 set.seed(123)
 n <- 80
 p <- 120
@@ -31,9 +33,8 @@ covariates <- matrix(rnorm(n), ncol = 1)
 edge_signal <- rowMeans(conmat[, 1:10, drop = FALSE])
 behav <- 0.7 * edge_signal + 0.6 * covariates[, 1] + rnorm(n, sd = 0.5)
 
-# Leakage-safe CV call: covariates are handled fold-wise inside resampling
-fit <- fit_resamples(
-  cpm_spec(),
+# Leakage-safe call: covariates are handled fold-wise inside CV
+fit <- cpm(
   conmat = conmat,
   behav = behav,
   covariates = covariates,
@@ -41,94 +42,41 @@ fit <- fit_resamples(
 )
 
 summary(fit)
-#> CPM resample summary:
-#>   Number of folds: 5
-#>   Prediction error:
-#>     RMSE:
-#>       Combined: 0.514
-#>       Positive: 0.510
-#>       Negative: 0.529
-#>     MAE:
-#>       Combined: 0.405
-#>       Positive: 0.408
-#>       Negative: 0.387
-#>   Pooled correlations (Pearson):
-#>     Combined: 0.259
+#> CPM summary:
+#>   Performance (Pearson):
 #>     Positive: 0.279
 #>     Negative: -0.104
-#>   Fold-wise correlations (Pearson):
-#>     Combined: 0.277 (SE 0.132)
-#>     Positive: 0.303 (SE 0.129)
-#>     Negative: -0.270
+#>     Combined: 0.259
+#>   Prop. edges (50% folds):
+#>     Positive: 1.67%
+#>     Negative: 0.00%
 ```
 
-## Native API
+## Migration from `confounds` to `covariates`
+
+`covariates` is now the primary argument name.
 
 ``` r
-spec <- cpm_spec()
-
-single_fit <- fit(
-  spec,
-  conmat = conmat,
-  behav = behav,
-  covariates = covariates
-)
-
-resamples_fit <- fit_resamples(
-  spec,
-  conmat = conmat,
-  behav = behav,
-  covariates = covariates,
-  kfolds = 5,
-  return_edges = "sum"
-)
-
-summary(resamples_fit)
-#> CPM resample summary:
-#>   Number of folds: 5
-#>   Prediction error:
-#>     RMSE:
-#>       Combined: 0.514
-#>       Positive: 0.511
-#>       Negative: 0.539
-#>     MAE:
-#>       Combined: 0.404
-#>       Positive: 0.406
-#>       Negative: 0.393
-#>   Pooled correlations (Pearson):
-#>     Combined: 0.254
-#>     Positive: 0.272
-#>     Negative: -0.080
-#>   Fold-wise correlations (Pearson):
-#>     Combined: 0.214 (SE 0.120)
-#>     Positive: 0.235 (SE 0.120)
-#>     Negative: -0.115 (SE 0.080)
-#>   Selected edges:
-#>     Positive: 1.50%
-#>     Negative: 0.33%
-head(resamples_fit$predictions)
-#>   row fold       real        both         pos           neg
-#> 1   1    4 -0.5862850 -0.13713172 -0.13713172  1.647987e-17
-#> 2   2    4  0.7262082 -0.06258281 -0.06258281  1.647987e-17
-#> 3   3    2  0.4776754  0.11181262  0.08055321  6.622293e-02
-#> 4   4    3  0.4263198  0.14677926  0.14677926 -1.734723e-17
-#> 5   5    5 -1.5329525 -0.07744804 -0.07744804 -1.040834e-17
-#> 6   6    3  0.4996146  0.56813333  0.56813333 -1.734723e-17
-dim(resamples_fit$edges)
-#> [1] 120   2
+# Preferred
+fit_new <- cpm(conmat, behav, covariates = covariates, kfolds = 5)
 ```
 
-Using a reusable
-[`cpm_spec()`](https://psychelzh.github.io/cpmr/reference/cpm_spec.md)
-object is helpful when you want the same CPM settings to drive both
-single-fit and resampling analyses.
+The old name `confounds` is still accepted as a deprecated alias for
+backward compatibility.
 
-## Edge Storage Tips
+``` r
+# Backward-compatible alias (deprecated)
+fit_old <- cpm(conmat, behav, confounds = covariates, kfolds = 5)
+#> Warning: `confounds` is deprecated; please use `covariates` instead.
+```
 
-For large feature spaces, fold-wise edge storage can grow quickly.
+Do not pass both in the same call.
 
-- Use `return_edges = "sum"` to keep only fold-aggregated edge counts.
-- Use `return_edges = "none"` if you only need predictive performance.
+``` r
+cpm(conmat, behav, covariates = covariates, confounds = covariates)
+#> Error in `resolve_covariates()`:
+#> ! Please provide only one of `covariates` or `confounds`.
+```
 
 ## Anti-Leakage Checklist
 
