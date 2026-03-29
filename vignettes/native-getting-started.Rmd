@@ -1,0 +1,187 @@
+---
+title: "Native Getting Started with cpmr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Native Getting Started with cpmr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+`cpmr`'s primary workflow is a native, matrix-first API built around
+`spec()` together with `cpm()`.
+
+This vignette walks through:
+
+- how to shape CPM inputs;
+- how to run leakage-safe fold-based assessment;
+- how to inspect predictions and selected edges;
+- how custom resamples and missing-data handling work.
+
+## Prepare Inputs
+
+CPM expects one row per subject and one column per edge.
+
+- `conmat`: an `n x p` connectivity matrix;
+- `behav`: a length-`n` numeric outcome vector;
+- `covariates`: an optional `n x q` nuisance matrix.
+
+```{r}
+library(cpmr)
+
+withr::local_seed(123)
+n <- 80
+p <- 200
+
+conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
+covariates <- matrix(rnorm(n), ncol = 1)
+behav <- rowMeans(conmat[, 1:12, drop = FALSE]) +
+  0.5 * covariates[, 1] +
+  rnorm(n, sd = 0.5)
+```
+
+## Run CPM with `cpm()`
+
+Use `cpm()` on a `spec()` object for an out-of-sample estimate of predictive
+performance.
+
+```{r}
+result <- cpm(
+  conmat = conmat,
+  behav = behav,
+  spec = spec(),
+  covariates = covariates,
+  resamples = 5
+)
+
+result
+summary(result)
+```
+
+This keeps CPM-specific steps such as covariate handling, edge selection, and
+model training inside each assessment fold.
+
+## Inspect Predictions and Edges
+
+CPM results always keep raw observation-level predictions on the
+object, while `summary()` gives an aggregate out-of-fold report with error
+metrics as the default summary and correlations as supplementary output.
+
+```{r}
+predictions <- result$predictions
+
+summary_result <- summary(result)
+
+summary_result
+head(summary_result[["metrics"]])
+head(predictions)
+head(tidy(result, component = "metrics"))
+head(tidy(result, component = "metrics", level = "pooled"))
+```
+
+These three outputs have slightly different jobs:
+
+- `summary(result)` prints the default aggregate report;
+- `summary(result)[["metrics"]]` exposes the compact summary-level metric
+  table stored on the summary object;
+- `tidy(result, component = "metrics")` returns the raw fold-wise metric
+  table for further filtering, plotting, or export, while
+  `level = "pooled"` returns pooled metrics.
+
+By default, `cpm()` uses `return_edges = "sum"` and stores fold-aggregated edge
+selection counts. This makes edge summaries immediately available in the common
+fold-based workflow.
+
+If you want to control edge storage explicitly:
+
+```{r}
+edge_result <- cpm(
+  conmat = conmat,
+  behav = behav,
+  spec = spec(),
+  covariates = covariates,
+  resamples = 5,
+  return_edges = "sum"
+)
+
+dim(edge_result$edges)
+```
+
+`predictions` returns one row per original observation. If
+`na_action = "exclude"` removed subjects before fitting, those rows are still
+present and their `fold` value is `NA`.
+
+When `return_edges = "sum"`, `cpmr` stores fold-summed edge counts for each
+edge. If memory matters, switch to `return_edges = "none"` or use
+`return_edges = "all"` only when fold-wise edge arrays are truly needed.
+
+## Custom Resamples
+
+If you already have a partition scheme, pass it through `resamples`.
+
+```{r}
+custom_resamples <- split(
+  seq_len(n),
+  cut(seq_len(n), breaks = 4, labels = FALSE)
+)
+
+custom_obj <- cpm(
+  conmat = conmat,
+  behav = behav,
+  spec = spec(),
+  resamples = custom_resamples,
+  return_edges = "none"
+)
+
+summary(custom_obj)
+```
+
+Custom resamples must:
+
+- be supplied as assessment-row indices;
+- cover every complete-case subject exactly once;
+- not overlap across folds.
+
+When `na_action = "exclude"`, those indices still refer to original row numbers
+of the complete-case subjects kept in the analysis.
+
+## Missing-Data Handling
+
+Set `na_action = "exclude"` if you want `cpmr` to fit on complete cases while
+preserving original row positions in the outputs.
+
+```{r}
+behav_with_na <- behav
+behav_with_na[c(3, 11)] <- NA_real_
+
+na_obj <- cpm(
+  conmat = conmat,
+  behav = behav_with_na,
+  spec = spec(),
+  resamples = 5,
+  na_action = "exclude"
+)
+
+na_predictions <- na_obj$predictions
+na_predictions[na_predictions$row %in% c(3, 11), ]
+```
+
+This behavior matters when you need to merge predictions back to subject-level
+metadata after assessment.
+
+## Next Steps
+
+After you are comfortable with the native path:
+
+- read the leakage-focused article if you need a more detailed covariate
+  handling example;
+- keep a `spec()` object around when you want an explicit reusable
+  parameter object.

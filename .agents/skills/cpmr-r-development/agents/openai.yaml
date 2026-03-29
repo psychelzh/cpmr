@@ -1,0 +1,4 @@
+interface:
+  display_name: "cpmr R Development"
+  short_description: "Use for cpmr API and validation workflows."
+  default_prompt: "Use this skill when working in the cpmr repository. Preserve the public spec()/cpm() API, keep staged CPM configuration separate from runtime settings, prefer direct stepwise code over extra helper layers, and validate changes with air, devtools::document(), devtools::test(), pkgdown::build_site(preview = FALSE, install = TRUE), 100% coverage, then devtools::check()."

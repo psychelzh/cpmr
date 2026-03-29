@@ -8,6 +8,8 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
+library(cpmr)
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -29,8 +31,6 @@ In `cpmr`, leakage-safe behavior means:
 ## Minimal Example with Synthetic Data
 
 ```{r}
-library(cpmr)
-
 set.seed(123)
 n <- 80
 p <- 120
@@ -45,39 +45,46 @@ covariates <- matrix(rnorm(n), ncol = 1)
 edge_signal <- rowMeans(conmat[, 1:10, drop = FALSE])
 behav <- 0.7 * edge_signal + 0.6 * covariates[, 1] + rnorm(n, sd = 0.5)
 
-# Leakage-safe call: covariates are handled fold-wise inside CV
-fit <- cpm(
+# Leakage-safe CPM call: covariates are handled fold-wise inside assessment
+res <- cpm(
   conmat = conmat,
   behav = behav,
+  spec = spec(),
   covariates = covariates,
-  kfolds = 5
+  resamples = 5
 )
 
-summary(fit)
+summary(res)
 ```
 
-## Migration from `confounds` to `covariates`
-
-`covariates` is now the primary argument name.
+## Native API
 
 ```{r}
-# Preferred
-fit_new <- cpm(conmat, behav, covariates = covariates, kfolds = 5)
+model_spec <- spec()
+
+res_with_edges <- cpm(
+  conmat = conmat,
+  behav = behav,
+  spec = model_spec,
+  covariates = covariates,
+  resamples = 5,
+  return_edges = "sum"
+)
+
+summary(res_with_edges)
+head(res_with_edges$predictions)
+dim(res_with_edges$edges)
 ```
 
-The old name `confounds` is still accepted as a deprecated alias for backward
-compatibility.
+Using a reusable `spec()` object is helpful when you want the same CPM
+settings to drive multiple analyses under different assessment plans.
 
-```{r}
-# Backward-compatible alias (deprecated)
-fit_old <- cpm(conmat, behav, confounds = covariates, kfolds = 5)
-```
+## Edge Storage Tips
 
-Do not pass both in the same call.
+For large feature spaces, fold-wise edge storage can grow quickly.
 
-```{r, error = TRUE}
-cpm(conmat, behav, covariates = covariates, confounds = covariates)
-```
+- Use `return_edges = "sum"` to keep only fold-aggregated edge counts.
+- Use `return_edges = "none"` if you only need predictive performance.
 
 ## Anti-Leakage Checklist
 

@@ -4,5 +4,41 @@ template:
 
 navbar:
   structure:
-    left: [reference, articles]
+    left: [reference, articles, news]
     right: [search, github]
+
+articles:
+  - title: Get Started
+    navbar: ~
+    contents:
+      - native-getting-started
+      - anti-leakage-covariates
+
+reference:
+  - title: Native CPM API
+    desc: Primary entry points for defining CPM analyses and running them.
+    contents:
+      - spec
+      - cpm
+
+  - title: Stage Helpers
+    desc: Helper constructors for staged CPM specifications.
+    contents:
+      - cpm_selection_cor
+      - cpm_construction_strength
+      - cpm_model_lm
+
+  - title: Result Objects
+    desc: Result objects and summaries returned by `cpm()`.
+    contents:
+      - cpm_object
+
+  - title: Inspect Results
+    desc: Summary and tidying helpers for fitted results.
+    contents:
+      - summary.cpm
+      - tidy.cpm
+
+  - title: Package
+    contents:
+      - cpmr-package

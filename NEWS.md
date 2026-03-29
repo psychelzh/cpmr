@@ -1,12 +1,34 @@
 # cpmr (development version)
 
+## Breaking changes
+
+* `cpm()` now uses a staged specification created by `spec()`. The old
+  `thresh_method`, `thresh_level`, `kfolds`, and `bias_correct` arguments have
+  been replaced by `spec`, `resamples`, and staged helper constructors.
+* Removed the deprecated `confounds` alias. Use `covariates` instead.
+* The returned `cpm` object now stores workflow state under `spec`,
+  `settings`, `predictions`, and `folds`. Code that accessed the old
+  `real`, `pred`, or `params` fields must be updated.
+
 ## Enhancements
 
-* Clarified `print.cpm()` output when edges are not stored and hardened `summary.cpm()` fold fallback for legacy objects.
+* Added `spec()` together with `cpm_selection_cor()`,
+  `cpm_construction_strength()`, and `cpm_model_lm()` to make screening,
+  summarization, and outcome-model choices explicit.
+* `cpm()` now accepts integer or manual assessment plans through `resamples`,
+  while keeping leave-one-out assessment as the default when `resamples` is
+  `NULL`.
+* `summary.cpm()` and `tidy.cpm()` now focus on correlation-based reporting,
+  with pooled and fold-wise correlation tables plus optional edge summaries.
+* Reworked package documentation and pkgdown navigation around the
+  `spec()` + `cpm()` workflow, including a native getting-started vignette.
 
 ## Maintenance
 
-* Stabilized GitHub Actions uploads for Codecov coverage and Test Analytics by generating and uploading JUnit test results from an explicit workspace path.
+* Simplified the internal CPM workflow around fold-based execution and aligned
+  `tests/testthat` with the current `R/` modules.
+* Hardened assessment-fold validation and leakage-safe preprocessing so each
+  fold must retain at least 3 complete-case training observations.
 
 # cpmr 0.1.1
 

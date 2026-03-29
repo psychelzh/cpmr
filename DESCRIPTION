@@ -11,6 +11,8 @@ Description: Connectome Predictive Modelling (CPM) (Shen et al. (2017)
 License: MIT + file LICENSE
 URL: https://github.com/psychelzh/cpmr, https://psychelzh.github.io/cpmr/
 BugReports: https://github.com/psychelzh/cpmr/issues
+Depends:
+    R (>= 4.4.0)
 Imports:
     generics,
     Rfast,
@@ -21,10 +23,10 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     withr
-VignetteBuilder: 
+VignetteBuilder:
     knitr
 Config/testthat/edition: 3
 Config/testthat/parallel: true
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3

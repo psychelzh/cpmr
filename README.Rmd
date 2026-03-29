@@ -21,7 +21,12 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/cpmr)](https://CRAN.R-project.org/package=cpmr)
 <!-- badges: end -->
 
-The cpmr package is specifically designed for the analysis of the connectome predictive modeling (CPM) method in R. This package relies on [Rfast](https://CRAN.R-project.org/package=Rfast) to do row oriented calculation.
+The cpmr package implements connectome predictive modeling (CPM) in R.
+Its primary workflow is native and matrix-first: you pass a subject-by-edge
+matrix together with a behavioral vector, and `cpmr` handles CPM-specific
+training, fold planning, and leakage-safe preprocessing inside package code.
+This package relies on [Rfast](https://CRAN.R-project.org/package=Rfast) for
+row-oriented calculation.
 
 ## Installation
 
@@ -37,9 +42,11 @@ Or you can install the development version of cpmr from [r-universe](https://psy
 install.packages("cpmr", repos = c("https://psychelzh.r-universe.dev", getOption("repos")))
 ```
 
-## Example
+## Native workflow
 
-It is very simple to use this package. Just shape your connectivity matrix as a subjects by edges matrix, i.e., each row contains the correlation matrix (removed diagonal and duplicated values, e.g., lower triangular data) for each subject, and your behavior data a vector and feed them in `cpm()` function.
+Shape your connectivity matrix as a subjects-by-edges matrix, where each row
+contains the edge vector for one subject, and pair it with a behavioral vector.
+The native workflow uses `spec()` together with `cpm()`.
 
 ```{r example}
 library(cpmr)
@@ -47,10 +54,101 @@ library(cpmr)
 withr::local_seed(123)
 conmat <- matrix(rnorm(100 * 1000), nrow = 100)
 behav <- rnorm(100)
-res <- cpm(conmat, behav, kfolds = 10, return_edges = "sum")
-res
-summary(res)
+s <- spec()
+result <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
+
+summary(result)
+head(result$predictions)
 ```
+
+`spec()` can also express richer CPM variants without leaving the native
+API surface:
+
+```{r rich-spec}
+rich_spec <- spec(
+  selection = cpm_selection_cor(
+    method = "spearman",
+    criterion = "absolute",
+    level = 0.1
+  ),
+  construction = cpm_construction_strength(
+    sign_mode = "net",
+    weight_scale = 0.03
+  ),
+  model = cpm_model_lm()
+)
+
+cpm(conmat = conmat, behav = behav, spec = rich_spec, resamples = 5)$predictions |>
+  head()
+```
+
+This keeps the main CPM stages visible while grouping naturally paired options
+into small helpers:
+
+- `selection = cpm_selection_cor(...)` defines how edges are screened;
+- `construction = cpm_construction_strength(...)` defines how screened edges
+  become CPM-derived predictors;
+- `model = cpm_model_lm()` defines the outcome model fitted on those
+  predictors.
+
+By default, `spec()` keeps edge standardization turned off so the native
+workflow stays close to the classic CPM path of screening edges, constructing
+summary features, and fitting the outcome model. If you want fold-local edge
+z-scoring, opt in with
+`cpm_construction_strength(standardize_edges = TRUE)`.
+
+If you are new to CPM, the key idea behind the current summary-based
+construction is:
+
+- `positive` edges are edges whose screening association with the outcome is
+  positive and passes the threshold;
+- `negative` edges are edges whose screening association with the outcome is
+  negative and passes the threshold;
+- CPM then collapses those screened edge sets into subject-level summary
+  features before fitting the outcome model.
+
+With `sign_mode = "separate"`, `cpmr` keeps the positive and negative summaries
+as separate predictors and reports three prediction streams:
+
+- `joint`, which fits one model with both summaries together;
+- `positive`, a positive-only diagnostic stream;
+- `negative`, a negative-only diagnostic stream.
+
+With `sign_mode = "net"`, `cpmr` constructs a single
+`net_summary = positive_summary - negative_summary` feature and returns one
+`net` prediction stream.
+
+`cpm()` is fold-based: it runs CPM under the requested assessment plan and
+returns out-of-fold predictions together with the fold structure.
+
+```{r resample}
+summary(result)
+head(result$predictions)
+dim(result$edges)
+head(tidy(result, component = "metrics"))
+head(tidy(result, component = "metrics", level = "pooled"))
+```
+
+`summary(result)` gives the default aggregate correlation report. Use
+`tidy(result, component = "metrics")` when you want fold-wise correlation
+tables directly, or `tidy(result, component = "metrics", level = "pooled")`
+for pooled correlation tables.
+
+For `cpm()`, `resamples = NULL` means leave-one-out assessment,
+`resamples = 5` means 5-fold assessment, and a list passed to `resamples`
+enforces a manual assessment-fold partition.
+
+## Choosing a path
+
+`cpmr` treats this native workflow as the primary package path:
+
+- use `cpm(..., spec = spec())` for native CPM analyses;
+- keep the `spec()` object around when you want an explicit, reusable
+  parameter object.
+
+Why this matters: CPM often needs leakage-safe fold-local preprocessing and can
+benefit from future fold-level caching or threshold-aware optimization. Those
+workloads fit native `cpmr` runners better than a generic orchestration layer.
 
 ## Code of Conduct
 
