@@ -2,33 +2,33 @@
 
 ## Breaking changes
 
-* Removed the legacy `cpm()` entry point and the deprecated `confounds` alias.
-  Use `fit(cpm_spec(...), ...)` / `fit_resamples(cpm_spec(...), ...)` for the
-  native workflow.
-* `fit()` now performs a single fit; resampling is handled by
-  `fit_resamples()`.
-* `cpm_resamples` no longer stores redundant resample metrics, and the
-  `collect_*()` helpers have been removed. Use `summary()` for aggregated
-  resample results and `predictions`, `edges`, and `folds` for raw outputs.
+* `cpm()` now uses a staged specification created by `spec()`. The old
+  `thresh_method`, `thresh_level`, `kfolds`, and `bias_correct` arguments have
+  been replaced by `spec`, `resamples`, and staged helper constructors.
+* Removed the deprecated `confounds` alias. Use `covariates` instead.
+* The returned `cpm` object now stores workflow state under `spec`,
+  `settings`, `predictions`, and `folds`. Code that accessed the old
+  `real`, `pred`, or `params` fields must be updated.
 
 ## Enhancements
 
-* Added `cpm_spec()` as the native interface for `fit()` and `fit_resamples()`,
-  and made single-fit and resample result objects more consistent.
-* Added `summary.cpm_resamples()`, which now reports pooled out-of-fold error
-  metrics by default and keeps pooled / fold-wise correlations as supplementary
-  statistics.
-* Added `resample_metrics()` for direct access to pooled or fold-wise metric
-  tables from a `cpm_resamples` object.
-* Added native-first documentation, including a getting-started vignette and
-  reorganized pkgdown reference pages.
+* Added `spec()` together with `cpm_selection_cor()`,
+  `cpm_construction_summary()`, and `cpm_model_lm()` to make screening,
+  summarization, and outcome-model choices explicit.
+* `cpm()` now accepts integer or manual assessment plans through `resamples`,
+  while keeping leave-one-out assessment as the default when `resamples` is
+  `NULL`.
+* `summary.cpm()` and `tidy.cpm()` now focus on correlation-based reporting,
+  with pooled and fold-wise correlation tables plus optional edge summaries.
+* Reworked package documentation and pkgdown navigation around the
+  `spec()` + `cpm()` workflow, including a native getting-started vignette.
 
 ## Maintenance
 
-* Refactored internals and expanded test coverage around fit, summary, edge,
-  and resampling behavior.
-* Hardened resample validation so each fold must retain at least 3
-  complete-case training observations.
+* Simplified the internal CPM workflow around fold-based execution and aligned
+  `tests/testthat` with the current `R/` modules.
+* Hardened assessment-fold validation and leakage-safe preprocessing so each
+  fold must retain at least 3 complete-case training observations.
 
 # cpmr 0.1.1
 
