@@ -35,7 +35,7 @@ Run this sequence after meaningful changes:
 4. `cov <- covr::package_coverage()`
 5. `covr::percent_coverage(cov)` must be `100`
 6. If coverage is short, inspect `covr::zero_coverage(cov)` and close the gap
-7. `devtools::check()`
+7. `devtools::check(document = TRUE)` (also use this for standalone checks)
 
 ## Tooling notes
 

@@ -186,13 +186,14 @@ regress_covariates_by_train <- function(
   model <- stats::.lm.fit(x_train, resp_train)
 
   if (is.null(resp_test)) {
-    return(list(train = model$residuals))
+    return(list(train = model$residuals, rank = model$rank))
   }
 
-  x_test <- cbind(1, cov_test)
+  x_test <- cbind(1, cov_test)[, model$pivot, drop = FALSE]
   list(
     train = model$residuals,
-    test = resp_test - x_test %*% model$coefficients
+    test = resp_test - x_test %*% model$coefficients,
+    rank = model$rank
   )
 }
 
@@ -218,6 +219,7 @@ fit_split <- function(
   conmat_test <- conmat[rows_test, , drop = FALSE]
   behav_test <- behav[rows_test]
 
+  covariate_rank <- 0L
   if (!is.null(covariates)) {
     covariates_train <- covariates[rows_train, , drop = FALSE]
     covariates_test <- covariates[rows_test, , drop = FALSE]
@@ -238,12 +240,14 @@ fit_split <- function(
     behav_train <- drop(behav_resid$train)
     conmat_test <- conmat_resid$test
     behav_test <- drop(behav_resid$test)
+    covariate_rank <- conmat_resid$rank - 1L
   }
 
   edge_selection <- run_edge_selection(
     conmat = conmat_train,
     behav = behav_train,
-    selection_spec = selection_spec
+    selection_spec = selection_spec,
+    covariate_rank = covariate_rank
   )
   fitted_model <- fit_split_model(
     conmat = conmat_train,

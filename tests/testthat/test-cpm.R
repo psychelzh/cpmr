@@ -201,7 +201,7 @@ test_that("cpm supports missing-data exclusion while keeping row layout", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  covariates <- matrix(rnorm(20), ncol = 2)
+  covariates <- matrix(rnorm(10), ncol = 1)
 
   behav[2] <- NA
   conmat[4, 3] <- NA

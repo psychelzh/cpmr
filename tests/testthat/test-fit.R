@@ -173,6 +173,78 @@ test_that("critical_r matches the t-statistic conversion", {
   )
 })
 
+test_that("covariate-adjusted screening uses effective residual degrees of freedom", {
+  withr::local_seed(44)
+  covariates <- matrix(rnorm(200), nrow = 20)
+  basis <- qr.Q(qr(cbind(1, covariates, matrix(rnorm(40), nrow = 20))))
+  behav <- basis[, 12]
+  edge <- 0.5 * behav + sqrt(0.75) * basis[, 13]
+  selection <- cpm_selection_cor(level = 0.05)
+
+  unadjusted <- run_edge_selection(matrix(edge, ncol = 1), behav, selection)
+  adjusted <- run_edge_selection(
+    matrix(edge, ncol = 1),
+    behav,
+    selection,
+    covariate_rank = 10
+  )
+  expect_true(unadjusted$mask[1, "positive"])
+  expect_false(adjusted$mask[1, "positive"])
+  expect_equal(
+    adjusted$thresholds[["positive"]],
+    sqrt(qt(0.975, 8)^2 / (qt(0.975, 8)^2 + 8))
+  )
+
+  covariates <- cbind(covariates, covariates[, 1])
+  fit <- fit_split(
+    conmat = matrix(c(edge, 0), ncol = 1),
+    behav = c(behav, 0),
+    covariates = rbind(covariates, rep(0, ncol(covariates))),
+    rows_train = 1:20,
+    rows_test = 21,
+    selection_spec = selection,
+    construction_spec = cpm_construction_strength(),
+    model_spec = cpm_model_lm()
+  )
+  expect_false(fit$edge_mask[1, "positive"])
+  expect_error(
+    critical_r(5, 0.05, covariate_rank = 3),
+    "positive residual degrees of freedom",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(
+      matrix(rnorm(24), nrow = 6),
+      rnorm(6),
+      covariates = matrix(rnorm(12), nrow = 6),
+      resamples = list(1:3, 4:6)
+    ),
+    "positive residual degrees of freedom",
+    fixed = TRUE
+  )
+})
+
+test_that("covariate residual predictions respect rank-deficient QR pivots", {
+  cov_train <- cbind(1, 1:4)
+  cov_test <- matrix(c(1, 5), nrow = 1)
+  response <- 2 + 3 * (1:4)
+  vector_result <- regress_covariates_by_train(
+    response,
+    cov_train,
+    17,
+    cov_test
+  )
+  matrix_result <- regress_covariates_by_train(
+    cbind(response, 2 * response),
+    cov_train,
+    matrix(c(17, 34), nrow = 1),
+    cov_test
+  )
+  expect_equal(vector_result$rank, 2L)
+  expect_equal(drop(vector_result$test), 0, tolerance = 1e-12)
+  expect_equal(drop(matrix_result$test), c(0, 0), tolerance = 1e-12)
+})
+
 test_that("critical_r validates alpha bounds", {
   expect_identical(critical_r(20, 0), Inf)
   expect_error(

@@ -532,21 +532,16 @@ test_that("cpm fold path matches the corresponding internal split model", {
       cov_test = covariates[rows_test, , drop = FALSE]
     )$test
   )
-  fold_edges <- select_edge_mask(
+  fold_selection <- run_edge_selection(
     conmat = training_conmat,
     behav = training_behav,
-    method = spec$selection$method,
-    criterion = spec$selection$criterion,
-    level = spec$selection$level
+    selection_spec = spec$selection,
+    covariate_rank = qr(cbind(1, covariates_train))$rank - 1L
   )
   fold_model <- fit_split_model(
     conmat = training_conmat,
     behav = training_behav,
-    edge_selection = run_edge_selection(
-      conmat = training_conmat,
-      behav = training_behav,
-      selection_spec = spec$selection
-    ),
+    edge_selection = fold_selection,
     construction_spec = spec$construction,
     model_spec = spec$model
   )
@@ -562,7 +557,7 @@ test_that("cpm fold path matches the corresponding internal split model", {
   fold_pred <- predict_split_model(fold_model, assessment_conmat)
   collected <- result$predictions
 
-  expect_equal(fold_model$edges, fold_edges)
+  expect_equal(fold_model$edges, fold_selection$mask)
   expect_equal(
     as.matrix(collected[rows_test, c("joint", "positive", "negative")]),
     fold_pred,

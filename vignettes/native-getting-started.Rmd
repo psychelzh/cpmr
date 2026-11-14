@@ -71,9 +71,8 @@ model training inside each assessment fold.
 
 ## Inspect Predictions and Edges
 
-CPM results always keep raw observation-level predictions on the
-object, while `summary()` gives an aggregate out-of-fold report with error
-metrics as the default summary and correlations as supplementary output.
+CPM results keep observation-level predictions on the object, while
+`summary()` reports pooled and fold-wise out-of-fold correlations.
 
 ```{r}
 predictions <- result$predictions

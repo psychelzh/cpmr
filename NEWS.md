@@ -31,6 +31,8 @@
 
 ## Maintenance
 
+* Corrected covariate-adjusted p-value screening degrees of freedom and
+  predictions from rank-deficient nuisance regressions.
 * Simplified the internal CPM workflow around fold-based execution and aligned
   `tests/testthat` with the current `R/` modules.
 * Hardened assessment-fold validation and leakage-safe preprocessing so each

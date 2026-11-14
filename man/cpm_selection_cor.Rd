@@ -16,7 +16,10 @@ the default CPM path; \code{"spearman"} can be useful when a monotonic but
 non-linear relationship is expected.}
 
 \item{criterion}{How \code{level} is interpreted. \code{"p_value"} thresholds the
-absolute correlation by the critical value implied by \code{level}.
+absolute correlation by the critical value implied by \code{level}. When
+covariates are used, the test accounts for the effective training-set
+covariate rank. Spearman screening uses the same t approximation after
+residualization.
 \code{"absolute"} treats \code{level} as a direct absolute-correlation cutoff.
 \code{"proportion"} retains a per-sign proportion of positive and negative edges
 separately. Because edge counts are discrete and ties at the cutoff are

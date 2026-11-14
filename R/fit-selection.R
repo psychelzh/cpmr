@@ -1,11 +1,15 @@
 run_edge_selection <- function(
   conmat,
   behav,
-  selection_spec
+  selection_spec,
+  covariate_rank = 0L
 ) {
   switch(
     selection_spec$type,
     cor = {
+      p_value_cutoff <- if (selection_spec$criterion == "p_value") {
+        critical_r(nrow(conmat), selection_spec$level, covariate_rank)
+      }
       associations <- drop(stats::cor(
         conmat,
         behav,
@@ -17,7 +21,7 @@ run_edge_selection <- function(
         selection_spec$criterion,
         p_value = stats::setNames(
           rep(
-            critical_r(nrow(conmat), selection_spec$level),
+            p_value_cutoff,
             length(edge_signs)
           ),
           edge_signs
@@ -124,7 +128,7 @@ sign_sparsity_cutoff <- function(scores, proportion) {
   scores[order(scores, decreasing = TRUE)[[k]]]
 }
 
-critical_r <- function(n, alpha) {
+critical_r <- function(n, alpha, covariate_rank = 0L) {
   if (
     !is.numeric(alpha) ||
       length(alpha) != 1L ||
@@ -135,11 +139,17 @@ critical_r <- function(n, alpha) {
   ) {
     stop("`alpha` must be a single number between 0 and 1.", call. = FALSE)
   }
+  df <- n - 2 - covariate_rank
+  if (df <= 0L) {
+    stop(
+      "P-value edge selection requires positive residual degrees of freedom after covariate adjustment.",
+      call. = FALSE
+    )
+  }
   if (alpha == 0) {
     return(Inf)
   }
 
-  df <- n - 2
   ct <- stats::qt(alpha / 2, df, lower.tail = FALSE)
   sqrt((ct^2) / ((ct^2) + df))
 }

@@ -220,7 +220,10 @@ print_staged_settings <- function(
 #'   the default CPM path; `"spearman"` can be useful when a monotonic but
 #'   non-linear relationship is expected.
 #' @param criterion How `level` is interpreted. `"p_value"` thresholds the
-#'   absolute correlation by the critical value implied by `level`.
+#'   absolute correlation by the critical value implied by `level`. When
+#'   covariates are used, the test accounts for the effective training-set
+#'   covariate rank. Spearman screening uses the same t approximation after
+#'   residualization.
 #'   `"absolute"` treats `level` as a direct absolute-correlation cutoff.
 #'   `"proportion"` retains a per-sign proportion of positive and negative edges
 #'   separately. Because edge counts are discrete and ties at the cutoff are
