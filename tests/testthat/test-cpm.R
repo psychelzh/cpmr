@@ -170,6 +170,33 @@ test_that("cpm throws informative data-checking errors", {
   )
 })
 
+test_that("cpm rejects obsolete and unused arguments without evaluating them", {
+  conmat <- matrix(seq_len(40), nrow = 10)
+  behav <- seq_len(10)
+
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      confounds = stop("must not be evaluated"),
+      kfolds = 5,
+      thresh_level = 0.05
+    ),
+    "Use `covariates` instead of `confounds`",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(conmat, behav, typo = 1),
+    "Unused arguments in `...` are not supported.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(conmat, behav, NULL, 5),
+    "Unused arguments in `...` are not supported.",
+    fixed = TRUE
+  )
+})
+
 test_that("cpm supports missing-data exclusion while keeping row layout", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)

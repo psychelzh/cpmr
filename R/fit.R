@@ -31,7 +31,7 @@ run_cpm_workflow <- function(
     rows_test <- folds[[fold]]
     rows_train <- setdiff(inputs$include_cases, rows_test)
 
-    split_results[[fold]] <- fit_split(
+    split_result <- fit_split(
       conmat = conmat,
       behav = inputs$behav,
       covariates = inputs$covariates,
@@ -46,8 +46,10 @@ run_cpm_workflow <- function(
       edges = edges,
       return_edges = return_edges,
       fold = fold,
-      edge_mask = split_results[[fold]]$edge_selection$mask
+      edge_mask = split_result$edge_mask
     )
+    split_results[[fold]] <- split_result[c("observed", "predictions")]
+    rm(split_result)
   }
 
   predictions <- assemble_fold_predictions(
@@ -252,8 +254,7 @@ fit_split <- function(
   )
 
   list(
-    edge_selection = edge_selection,
-    fitted_model = fitted_model,
+    edge_mask = edge_selection$mask,
     observed = behav_test,
     predictions = predict_split_model(fitted_model, conmat_test)
   )

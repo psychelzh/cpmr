@@ -87,6 +87,27 @@ test_that("fit_split requires at least three training observations", {
   )
 })
 
+test_that("fit_split retains only prediction data and the selected-edge mask", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(80), nrow = 10)
+  behav <- rnorm(10)
+  result <- fit_split(
+    conmat = conmat,
+    behav = behav,
+    covariates = NULL,
+    rows_train = 1:8,
+    rows_test = 9:10,
+    selection_spec = cpm_selection_cor(),
+    construction_spec = cpm_construction_strength(),
+    model_spec = cpm_model_lm()
+  )
+
+  expect_named(result, c("edge_mask", "observed", "predictions"))
+  expect_equal(dim(result$edge_mask), c(8, 2))
+  expect_equal(result$observed, behav[9:10])
+  expect_equal(dim(result$predictions), c(2, 3))
+})
+
 test_that("normalize_inputs checks case-name alignment directly", {
   conmat <- matrix(1:10, nrow = 2, dimnames = list(c("a", "b"), NULL))
   behav <- stats::setNames(1:2, c("a", "c"))

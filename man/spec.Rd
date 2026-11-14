@@ -40,7 +40,7 @@ column.}
 \item{spec}{A CPM specification created by \code{\link[=spec]{spec()}}. If \code{NULL}, \code{\link[=spec]{spec()}} is
 used.}
 
-\item{...}{For future extension. Currently ignored.}
+\item{...}{Reserved for future extensions; must be empty.}
 
 \item{covariates}{A matrix of covariates. Observations in row, variables in
 column. If \code{NULL}, no covariates are used. Vectors are converted to

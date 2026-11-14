@@ -6,6 +6,10 @@ on:
 
 name: document.yaml
 
+concurrency:
+  group: document-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions: read-all
 
 jobs:
@@ -32,15 +36,44 @@ jobs:
           extra-packages: any::roxygen2
           needs: roxygen2
 
-      - name: Document
-        run: roxygen2::roxygenise()
-        shell: Rscript {0}
-
-      - name: Commit and push changes
+      - name: Generate and push documentation
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        shell: bash
         run: |
+          set -euo pipefail
           git config --local user.name "$GITHUB_ACTOR"
           git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git add man/\* NAMESPACE DESCRIPTION
-          git commit -m "Update documentation" || echo "No changes to commit"
-          git pull --ff-only
-          git push origin
+
+          worktree=""
+          cleanup() {
+            if [[ -n "$worktree" ]]; then
+              git worktree remove --force "$worktree" || true
+            fi
+          }
+          trap cleanup EXIT
+
+          for attempt in 1 2 3; do
+            git fetch origin "refs/heads/$BRANCH_NAME:refs/remotes/origin/$BRANCH_NAME"
+            worktree="$(mktemp -d)"
+            git worktree add --detach "$worktree" "refs/remotes/origin/$BRANCH_NAME"
+            (cd "$worktree" && Rscript -e 'roxygen2::roxygenise()')
+            git -C "$worktree" add -- man/ NAMESPACE DESCRIPTION
+
+            if git -C "$worktree" diff --cached --quiet; then
+              echo "Documentation is up to date."
+              exit 0
+            fi
+
+            git -C "$worktree" commit -m "Update documentation"
+            if git -C "$worktree" push origin "HEAD:refs/heads/$BRANCH_NAME"; then
+              exit 0
+            fi
+
+            echo "Documentation push failed; regenerating from the latest branch tip (attempt $attempt/3)."
+            git worktree remove --force "$worktree"
+            worktree=""
+          done
+
+          echo "Unable to push generated documentation after 3 attempts." >&2
+          exit 1

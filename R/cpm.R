@@ -33,7 +33,7 @@ NULL
 #'   `conmat`. Row or column matrices are accepted and converted with [drop()].
 #' @param spec A CPM specification created by [spec()]. If `NULL`, [spec()] is
 #'   used.
-#' @param ... For future extension. Currently ignored.
+#' @param ... Reserved for future extensions; must be empty.
 #' @param covariates A matrix of covariates. Observations in row, variables in
 #'   column. If `NULL`, no covariates are used. Vectors are converted to
 #'   single-column matrices.
@@ -70,6 +70,17 @@ cpm <- function(
   na_action = c("fail", "exclude")
 ) {
   call <- match.call()
+
+  if (...length() > 0L) {
+    stop(
+      paste0(
+        "Unused arguments in `...` are not supported. Use `covariates` ",
+        "instead of `confounds`, `resamples` instead of `kfolds`, and ",
+        "`spec()` for selection and construction settings."
+      ),
+      call. = FALSE
+    )
+  }
 
   if (is.null(spec)) {
     spec <- spec()

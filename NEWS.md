@@ -4,7 +4,8 @@
 
 * `cpm()` now uses a staged specification created by `spec()`. The old
   `thresh_method`, `thresh_level`, `kfolds`, and `bias_correct` arguments have
-  been replaced by `spec`, `resamples`, and staged helper constructors.
+  been replaced by `spec`, `resamples`, and staged helper constructors. Unused
+  arguments passed through `...` now cause an error rather than being ignored.
 * Removed the deprecated `confounds` alias. Use `covariates` instead.
 * The returned `cpm` object now stores workflow state under `spec`,
   `settings`, `predictions`, and `folds`. Code that accessed the old
@@ -23,6 +24,8 @@
 * Unweighted edge standardization now processes only selected edges when
   constructing training and assessment features, reducing time and memory use
   for sparse edge selections.
+* Fold execution discards intermediate model state after each fit instead of
+  retaining it until all predictions have been assembled.
 * Reworked package documentation and pkgdown navigation around the
   `spec()` + `cpm()` workflow, including a native getting-started vignette.
 
