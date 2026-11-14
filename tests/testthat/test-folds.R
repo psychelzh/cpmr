@@ -5,6 +5,14 @@ test_that("normalize_manual_folds rejects malformed assessment sets", {
     fixed = FALSE
   )
   expect_error(
+    normalize_manual_folds(
+      list(integer(), 1:4),
+      include_cases = 1:4
+    ),
+    "must contain assessment indices",
+    fixed = TRUE
+  )
+  expect_error(
     normalize_manual_folds(list(c(1, Inf), 2:3), include_cases = 1:4),
     "finite numeric indices",
     fixed = FALSE
@@ -45,6 +53,15 @@ test_that("resolve_assessment_folds generates and validates public folds", {
     include_cases = include_cases
   )
   expect_identical(sort(unlist(loo, use.names = FALSE)), include_cases)
+
+  expect_error(
+    resolve_assessment_folds(
+      resamples = 2,
+      include_cases = 1:4
+    ),
+    "must leave at least 3 complete-case observations for training",
+    fixed = TRUE
+  )
 })
 
 test_that("resolve_assessment_folds requires enough complete cases to define folds", {

@@ -70,6 +70,23 @@ test_that("complete_case_rows returns all rows in fail mode without missing data
   )
 })
 
+test_that("fit_split requires at least three training observations", {
+  expect_error(
+    fit_split(
+      conmat = matrix(1:8, nrow = 4),
+      behav = 1:4,
+      covariates = NULL,
+      rows_train = 1:2,
+      rows_test = 3:4,
+      selection_spec = cpm_selection_cor(),
+      construction_spec = cpm_construction_strength(),
+      model_spec = cpm_model_lm()
+    ),
+    "CPM fitting requires at least 3 training observations.",
+    fixed = TRUE
+  )
+})
+
 test_that("normalize_inputs checks case-name alignment directly", {
   conmat <- matrix(1:10, nrow = 2, dimnames = list(c("a", "b"), NULL))
   behav <- stats::setNames(1:2, c("a", "c"))
@@ -500,6 +517,36 @@ test_that("feature_matrix_summary skips empty edge signs in weighted mode", {
       negative_summary = c(0, 0)
     )
   )
+})
+
+test_that("selected-edge standardization matches full-matrix standardization", {
+  withr::local_seed(123)
+  train <- matrix(rnorm(80), nrow = 10)
+  assessment <- matrix(rnorm(24), nrow = 3)
+  mask <- cbind(
+    positive = c(TRUE, FALSE, TRUE, rep(FALSE, 5)),
+    negative = c(FALSE, TRUE, rep(FALSE, 6))
+  )
+  center <- Rfast::colmeans(train)
+  scale <- Rfast::colVars(train, std = TRUE)
+  weights <- cbind(
+    positive = c(0.8, 0, 0.2, rep(0, 5)),
+    negative = c(0, 0.6, rep(0, 6))
+  )
+
+  for (data in list(train, assessment, assessment[1, , drop = FALSE])) {
+    for (edge_weights in list(NULL, weights)) {
+      expected <- feature_matrix_summary(
+        fscale(data, center, scale),
+        mask,
+        edge_weights
+      )
+      expect_equal(
+        feature_matrix_summary(data, mask, edge_weights, center, scale),
+        expected
+      )
+    }
+  }
 })
 
 test_that("prediction helpers validate unsupported modes", {

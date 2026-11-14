@@ -18,7 +18,6 @@ build_construction_state <- function(
       if (construction_spec$standardize_edges) {
         center <- Rfast::colmeans(conmat)
         scale <- Rfast::colVars(conmat, std = TRUE)
-        conmat <- fscale(conmat, center, scale)
       }
 
       edge_mask <- edge_selection$mask
@@ -42,7 +41,9 @@ build_construction_state <- function(
         summaries = feature_matrix_summary(
           conmat = conmat,
           edge_mask = edge_mask,
-          edge_weights = edge_weights
+          edge_weights = edge_weights,
+          center = center,
+          scale = scale
         )
       )
     },
@@ -126,7 +127,9 @@ edge_weights_summary <- function(
 feature_matrix_summary <- function(
   conmat,
   edge_mask,
-  edge_weights = NULL
+  edge_weights = NULL,
+  center = NULL,
+  scale = NULL
 ) {
   summaries <- matrix(
     0,
@@ -135,6 +138,10 @@ feature_matrix_summary <- function(
     dimnames = list(NULL, summary_columns)
   )
   weighted <- !is.null(edge_weights)
+  if (weighted && !is.null(center)) {
+    conmat <- fscale(conmat, center, scale)
+    center <- NULL
+  }
 
   for (edge_sign in edge_signs) {
     if (!weighted) {
@@ -146,10 +153,15 @@ feature_matrix_summary <- function(
       next
     }
 
+    selected <- conmat[, idx, drop = FALSE]
+    if (!is.null(center)) {
+      selected <- fscale(selected, center[idx], scale[idx])
+    }
+
     summaries[, summary_column_names[[edge_sign]]] <- if (!weighted) {
-      Rfast::rowsums(conmat[, idx, drop = FALSE])
+      Rfast::rowsums(selected)
     } else {
-      drop(conmat[, idx, drop = FALSE] %*% edge_weights[idx, edge_sign])
+      drop(selected %*% edge_weights[idx, edge_sign])
     }
   }
 

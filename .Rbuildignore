@@ -16,3 +16,4 @@
 ^Meta$
 ^touchstone$
 ^\.agents($|/)
+^\.git$

@@ -286,17 +286,12 @@ fit_split_model <- function(
 }
 
 predict_split_model <- function(model, conmat_new) {
-  if (model$construction$standardize_edges) {
-    conmat_new <- fscale(
-      conmat_new,
-      model$center,
-      model$scale
-    )
-  }
   model$summaries <- feature_matrix_summary(
     conmat = conmat_new,
     edge_mask = model$edge_mask,
-    edge_weights = model$edge_weights
+    edge_weights = model$edge_weights,
+    center = model$center,
+    scale = model$scale
   )
   feature_sets <- construction_features(model)
 

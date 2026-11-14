@@ -412,7 +412,7 @@ test_that("cpm errors when any fold leaves fewer than 3 training rows", {
 
   expect_error(
     cpm(conmat = conmat, behav = behav, spec = spec, resamples = 2),
-    "CPM fitting requires at least 3 training observations.",
+    "Each assessment fold must leave at least 3 complete-case observations for training.",
     fixed = TRUE
   )
 
@@ -423,7 +423,7 @@ test_that("cpm errors when any fold leaves fewer than 3 training rows", {
       spec = spec,
       resamples = list(1L, 2:4)
     ),
-    "CPM fitting requires at least 3 training observations.",
+    "Each assessment fold must leave at least 3 complete-case observations for training.",
     fixed = TRUE
   )
 })

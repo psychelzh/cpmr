@@ -24,6 +24,13 @@ resolve_assessment_folds <- function(resamples, include_cases) {
     folds <- make_kfold_assessment_folds(include_cases, n_folds)
   }
 
+  if (any(length(include_cases) - lengths(folds) < 3L)) {
+    stop(
+      "Each assessment fold must leave at least 3 complete-case observations for training.",
+      call. = FALSE
+    )
+  }
+
   folds
 }
 
@@ -40,6 +47,9 @@ normalize_manual_folds <- function(resamples, include_cases) {
   }
 
   normalized <- lapply(resamples, function(idx) {
+    if (length(idx) == 0L) {
+      stop("Each element in `resamples` must contain assessment indices.")
+    }
     if (!is.numeric(idx) || anyNA(idx) || any(!is.finite(idx))) {
       stop("Each element in `resamples` must contain finite numeric indices.")
     }

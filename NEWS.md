@@ -20,6 +20,9 @@
   `NULL`.
 * `summary.cpm()` and `tidy.cpm()` now focus on correlation-based reporting,
   with pooled and fold-wise correlation tables plus optional edge summaries.
+* Unweighted edge standardization now processes only selected edges when
+  constructing training and assessment features, reducing time and memory use
+  for sparse edge selections.
 * Reworked package documentation and pkgdown navigation around the
   `spec()` + `cpm()` workflow, including a native getting-started vignette.
 
