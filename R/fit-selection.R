@@ -55,24 +55,6 @@ run_edge_selection <- function(
   )
 }
 
-select_edge_mask <- function(
-  conmat,
-  behav,
-  method = c("pearson", "spearman"),
-  criterion = c("p_value", "absolute", "proportion"),
-  level = 0.01
-) {
-  run_edge_selection(
-    conmat = conmat,
-    behav = behav,
-    selection_spec = cpm_selection_cor(
-      method = method,
-      criterion = criterion,
-      level = level
-    )
-  )$mask
-}
-
 edge_mask_from_cutoffs <- function(associations, cutoffs) {
   matrix(
     c(
