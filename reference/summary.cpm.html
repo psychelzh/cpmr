@@ -64,7 +64,7 @@
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>Correlation method used for pooled and fold-wise summaries.</p></dd>
+<dd><p>Correlation method used for correlation summaries.</p></dd>
 
 
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
@@ -74,13 +74,13 @@
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>cpm_summary</code> object with the following elements:</p><dl><dt><code>metrics</code></dt>
-<dd><p>A compact summary-level data frame with columns <code>level</code>,
-<code>prediction</code>, <code>estimate</code>, <code>std_error</code>, and <code>method</code>. It stores pooled
-correlations together with fold-wise correlation summaries.</p></dd>
+<dd><p>A summary-level data frame with <code>level</code>, <code>metric</code>,
+<code>prediction</code>, <code>estimate</code>, <code>std_error</code>, <code>method</code>, <code>n</code>, <code>n_folds</code>, and
+<code>descriptive_only</code> columns.</p></dd>
 
 <dt><code>tables</code></dt>
-<dd><p>A list with <code>pooled</code> and <code>foldwise</code> correlation tables for
-downstream tidying.</p></dd>
+<dd><p>A list of pooled metric and fold-wise correlation tables
+for downstream tidying.</p></dd>
 
 <dt><code>edges</code></dt>
 <dd><p>Aggregated edge-selection rates, or <code>NULL</code> when edges were
@@ -93,9 +93,14 @@ not stored.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>summary.cpm()</code> is designed to give a compact correlation-based report. It
-summarizes pooled out-of-fold correlations for each prediction stream and
-then reports the mean and standard error of fold-wise correlations.</p>
+    <p><code>summary.cpm()</code> reports pooled out-of-fold RMSE and MAE, pooled correlations,
+and the mean and standard error of fold-wise correlations. Correlations
+require at least three valid pairs; fold-wise correlations are unavailable
+for folds with fewer than three assessment observations. With covariates,
+reported RMSE and MAE are on the fold-specific residualized outcome scale,
+not the original behavior scale. Pooled correlation rows include a
+<code>descriptive_only</code> flag when assessment folds are too small for fold-wise
+correlations.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

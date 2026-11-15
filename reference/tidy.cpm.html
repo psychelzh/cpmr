@@ -67,14 +67,16 @@
 
 <dt id="arg-component">component<a class="anchor" aria-label="anchor" href="#arg-component"></a></dt>
 <dd><p>A character vector indicating the component to tidy. Use
-<code>"metrics"</code> for correlation tables derived from <code><a href="summary.cpm.html">summary.cpm()</a></code>, or
+<code>"metrics"</code> for metric tables derived from <code><a href="summary.cpm.html">summary.cpm()</a></code>, or
 <code>"edges"</code> for stored edge output.</p></dd>
 
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
-<dd><p>Correlation table to return when <code>component = "metrics"</code>.
-<code>"pooled"</code> returns pooled out-of-fold correlations, and <code>"foldwise"</code>
-returns one row per fold and prediction stream.</p></dd>
+<dd><p>Metric table to return when <code>component = "metrics"</code>.
+<code>"pooled"</code> returns RMSE, MAE, and out-of-fold correlations; <code>"foldwise"</code>
+returns one correlation row per fold and prediction stream. The pooled
+table's <code>descriptive_only</code> column flags correlations computed when
+assessment folds contain fewer than three observations.</p></dd>
 
 </dl></div>
     <div class="section level2">

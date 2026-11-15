@@ -50,9 +50,9 @@
 <h3 id="enhancements-development-version">Enhancements<a class="anchor" aria-label="anchor" href="#enhancements-development-version"></a></h3>
 <ul><li>Added <code><a href="../reference/spec.html">spec()</a></code> together with <code><a href="../reference/cpm_selection_cor.html">cpm_selection_cor()</a></code>, <code><a href="../reference/cpm_construction_strength.html">cpm_construction_strength()</a></code>, and <code><a href="../reference/cpm_model_lm.html">cpm_model_lm()</a></code> to make screening, summarization, and outcome-model choices explicit.</li>
 <li>
-<code><a href="../reference/spec.html">cpm()</a></code> now accepts integer or manual assessment plans through <code>resamples</code>, while keeping leave-one-out assessment as the default when <code>resamples</code> is <code>NULL</code>.</li>
+<code><a href="../reference/spec.html">cpm()</a></code> now defaults to 10-fold assessment; explicit leave-one-out and manual assessment plans remain available through <code>resamples</code>.</li>
 <li>
-<code><a href="../reference/summary.cpm.html">summary.cpm()</a></code> and <code><a href="../reference/tidy.cpm.html">tidy.cpm()</a></code> now focus on correlation-based reporting, with pooled and fold-wise correlation tables plus optional edge summaries.</li>
+<code><a href="../reference/summary.cpm.html">summary.cpm()</a></code> and <code><a href="../reference/tidy.cpm.html">tidy.cpm()</a></code> report pooled RMSE/MAE alongside correlation metrics. Small assessment folds trigger a warning, make fold-wise correlations unavailable, and identify pooled out-of-fold correlations as descriptive; fold-wise summaries report the number of contributing folds.</li>
 <li>Unweighted edge standardization now processes only selected edges when constructing training and assessment features, reducing time and memory use for sparse edge selections.</li>
 <li>Fold execution discards intermediate model state after each fit instead of retaining it until all predictions have been assembled.</li>
 <li>Fold-wise edge storage avoids copying the full edge array for every fold.</li>

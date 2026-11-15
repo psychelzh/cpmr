@@ -49,9 +49,17 @@ summary(res)
 #>     Positive: 0.261
 #>     Negative: -0.104
 #>   Fold-wise correlations (Pearson):
-#>     Joint: 0.265 (SE 0.136)
-#>     Positive: 0.291 (SE 0.134)
-#>     Negative: -0.270
+#>     Joint: 0.265 (SE 0.136) (5/5 folds)
+#>     Positive: 0.291 (SE 0.134) (5/5 folds)
+#>     Negative: -0.270 (1/5 folds)
+#>   Pooled RMSE:
+#>     Joint: 0.518
+#>     Positive: 0.513
+#>     Negative: 0.529
+#>   Pooled MAE:
+#>     Joint: 0.407
+#>     Positive: 0.411
+#>     Negative: 0.387
 #>   Selected edges:
 #>     Positive: 1.67%
 #>     Negative: 0.17%
@@ -80,20 +88,28 @@ summary(res_with_edges)
 #>     Positive: 0.273
 #>     Negative: -0.080
 #>   Fold-wise correlations (Pearson):
-#>     Joint: 0.215 (SE 0.122)
-#>     Positive: 0.237 (SE 0.121)
-#>     Negative: -0.115 (SE 0.080)
+#>     Joint: 0.215 (SE 0.122) (5/5 folds)
+#>     Positive: 0.237 (SE 0.121) (5/5 folds)
+#>     Negative: -0.115 (SE 0.080) (2/5 folds)
+#>   Pooled RMSE:
+#>     Joint: 0.513
+#>     Positive: 0.510
+#>     Negative: 0.539
+#>   Pooled MAE:
+#>     Joint: 0.403
+#>     Positive: 0.404
+#>     Negative: 0.393
 #>   Selected edges:
 #>     Positive: 1.50%
 #>     Negative: 0.33%
 head(res_with_edges$predictions)
 #>   row fold   observed       joint    positive      negative
-#> 1   1    4 -0.5862850 -0.13713172 -0.13713172  1.647987e-17
-#> 2   2    4  0.7262082 -0.06258281 -0.06258281  1.647987e-17
+#> 1   1    4 -0.5862850 -0.13713172 -0.13713172  8.673617e-18
+#> 2   2    4  0.7262082 -0.06258281 -0.06258281  8.673617e-18
 #> 3   3    2  0.4776754  0.10974448  0.07822397  6.622293e-02
-#> 4   4    3  0.4263198  0.13974339  0.13974339  0.000000e+00
-#> 5   5    5 -1.5329525 -0.07914174 -0.07914174 -1.040834e-17
-#> 6   6    3  0.4996146  0.57309166  0.57309166  0.000000e+00
+#> 4   4    3  0.4263198  0.13974339  0.13974339 -1.561251e-17
+#> 5   5    5 -1.5329525 -0.07914174 -0.07914174  1.908196e-17
+#> 6   6    3  0.4996146  0.57309166  0.57309166 -1.561251e-17
 dim(res_with_edges$edges)
 #> [1] 120   2
 ```

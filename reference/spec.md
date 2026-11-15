@@ -23,7 +23,7 @@ cpm(
   spec = NULL,
   ...,
   covariates = NULL,
-  resamples = NULL,
+  resamples = 10L,
   return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 )
@@ -74,11 +74,14 @@ cpm(
 
 - resamples:
 
-  Optional assessment-plan specification. Use `NULL` for leave-one-out
-  assessment, a single integer greater than or equal to 2 to request
-  k-fold assessment, or a list of assessment indices for manual folds.
-  Manual `resamples` must contain integer vectors indexing rows in
-  `conmat`.
+  Assessment-plan specification. Defaults to 10-fold assessment. Use
+  `NULL` for leave-one-out assessment, a single integer greater than or
+  equal to 2 to request k-fold assessment, or a list of assessment
+  indices for manual folds. Manual `resamples` must contain integer
+  vectors indexing rows in `conmat`. Ten-fold assessment needs at least
+  10 complete cases; around 30 cases are a rough minimum for having at
+  least 3 observations in each assessment fold, not a guarantee of
+  stable correlations.
 
 - return_edges:
 
@@ -101,9 +104,9 @@ CPM runs.
 `cpm()` returns a `cpm` object containing observation-level predictions,
 assessment folds, and optional stored edges. Call
 [`summary.cpm()`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)
-for the default correlation summary, or
+for prediction errors and correlation summaries, or
 [`tidy.cpm()`](https://psychelzh.github.io/cpmr/reference/tidy.cpm.md)
-when you want pooled or fold-wise correlation tables.
+for their pooled or fold-wise tables.
 
 ## Details
 
@@ -164,7 +167,11 @@ summary(result)
 #>   Pooled correlations (Pearson):
 #>     Net: 0.007
 #>   Fold-wise correlations (Pearson):
-#>     Net: 0.020 (SE 0.094)
+#>     Net: 0.020 (SE 0.094) (5/5 folds)
+#>   Pooled RMSE:
+#>     Net: 1.190
+#>   Pooled MAE:
+#>     Net: 0.883
 #>   Selected edges:
 #>     Positive: 22.40%
 #>     Negative: 15.60%

@@ -24,7 +24,7 @@ print(x, ...)
 
 - method:
 
-  Correlation method used for pooled and fold-wise summaries.
+  Correlation method used for correlation summaries.
 
 - x:
 
@@ -36,14 +36,14 @@ A `cpm_summary` object with the following elements:
 
 - `metrics`:
 
-  A compact summary-level data frame with columns `level`, `prediction`,
-  `estimate`, `std_error`, and `method`. It stores pooled correlations
-  together with fold-wise correlation summaries.
+  A summary-level data frame with `level`, `metric`, `prediction`,
+  `estimate`, `std_error`, `method`, `n`, `n_folds`, and
+  `descriptive_only` columns.
 
 - `tables`:
 
-  A list with `pooled` and `foldwise` correlation tables for downstream
-  tidying.
+  A list of pooled metric and fold-wise correlation tables for
+  downstream tidying.
 
 - `edges`:
 
@@ -55,6 +55,11 @@ A `cpm_summary` object with the following elements:
 
 ## Details
 
-`summary.cpm()` is designed to give a compact correlation-based report.
-It summarizes pooled out-of-fold correlations for each prediction stream
-and then reports the mean and standard error of fold-wise correlations.
+`summary.cpm()` reports pooled out-of-fold RMSE and MAE, pooled
+correlations, and the mean and standard error of fold-wise correlations.
+Correlations require at least three valid pairs; fold-wise correlations
+are unavailable for folds with fewer than three assessment observations.
+With covariates, reported RMSE and MAE are on the fold-specific
+residualized outcome scale, not the original behavior scale. Pooled
+correlation rows include a `descriptive_only` flag when assessment folds
+are too small for fold-wise correlations.

@@ -26,14 +26,15 @@
   [`cpm_model_lm()`](https://psychelzh.github.io/cpmr/reference/cpm_model_lm.md)
   to make screening, summarization, and outcome-model choices explicit.
 - [`cpm()`](https://psychelzh.github.io/cpmr/reference/spec.md) now
-  accepts integer or manual assessment plans through `resamples`, while
-  keeping leave-one-out assessment as the default when `resamples` is
-  `NULL`.
+  defaults to 10-fold assessment; explicit leave-one-out and manual
+  assessment plans remain available through `resamples`.
 - [`summary.cpm()`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)
   and
   [`tidy.cpm()`](https://psychelzh.github.io/cpmr/reference/tidy.cpm.md)
-  now focus on correlation-based reporting, with pooled and fold-wise
-  correlation tables plus optional edge summaries.
+  report pooled RMSE/MAE alongside correlation metrics. Small assessment
+  folds trigger a warning, make fold-wise correlations unavailable, and
+  identify pooled out-of-fold correlations as descriptive; fold-wise
+  summaries report the number of contributing folds.
 - Unweighted edge standardization now processes only selected edges when
   constructing training and assessment features, reducing time and
   memory use for sparse edge selections.

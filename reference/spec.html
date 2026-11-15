@@ -68,7 +68,7 @@ predictions.</p>
 <span>  spec <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  resamples <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  resamples <span class="op">=</span> <span class="fl">10L</span>,</span>
 <span>  return_edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sum"</span>, <span class="st">"none"</span>, <span class="st">"all"</span><span class="op">)</span>,</span>
 <span>  na_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fail"</span>, <span class="st">"exclude"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -118,11 +118,14 @@ single-column matrices.</p></dd>
 
 
 <dt id="arg-resamples">resamples<a class="anchor" aria-label="anchor" href="#arg-resamples"></a></dt>
-<dd><p>Optional assessment-plan specification. Use <code>NULL</code> for
-leave-one-out assessment, a single integer greater than or equal to 2 to
-request k-fold assessment, or a list of assessment indices for manual
-folds. Manual <code>resamples</code> must contain integer vectors indexing rows in
-<code>conmat</code>.</p></dd>
+<dd><p>Assessment-plan specification. Defaults to 10-fold
+assessment. Use <code>NULL</code> for leave-one-out assessment, a single integer
+greater than or equal to 2 to request k-fold assessment, or a list of
+assessment indices for manual folds. Manual <code>resamples</code> must contain
+integer vectors indexing rows in <code>conmat</code>. Ten-fold assessment needs at
+least 10 complete cases; around 30 cases are a rough minimum for having
+at least 3 observations in each assessment fold, not a guarantee of
+stable correlations.</p></dd>
 
 
 <dt id="arg-return-edges">return_edges<a class="anchor" aria-label="anchor" href="#arg-return-edges"></a></dt>
@@ -143,9 +146,9 @@ layout in the returned predictions.</p></dd>
     <p><code>spec()</code> returns a CPM specification object that can be reused across CPM
 runs.</p>
 <p><code>cpm()</code> returns a <code>cpm</code> object containing observation-level predictions,
-assessment folds, and optional stored edges. Call <code><a href="summary.cpm.html">summary.cpm()</a></code> for the
-default correlation summary, or <code><a href="tidy.cpm.html">tidy.cpm()</a></code> when you want pooled or
-fold-wise correlation tables.</p>
+assessment folds, and optional stored edges. Call <code><a href="summary.cpm.html">summary.cpm()</a></code> for
+prediction errors and correlation summaries, or <code><a href="tidy.cpm.html">tidy.cpm()</a></code> for their
+pooled or fold-wise tables.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -200,7 +203,11 @@ path.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Pooled correlations (Pearson):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Net: 0.007</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Fold-wise correlations (Pearson):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Net: 0.020 (SE 0.094)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Net: 0.020 (SE 0.094) (5/5 folds)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Pooled RMSE:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Net: 1.190</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Pooled MAE:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Net: 0.883</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Selected edges:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Positive: 22.40%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Negative: 15.60%</span>

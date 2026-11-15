@@ -28,15 +28,17 @@ tidy(
 - component:
 
   A character vector indicating the component to tidy. Use `"metrics"`
-  for correlation tables derived from
+  for metric tables derived from
   [`summary.cpm()`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md),
   or `"edges"` for stored edge output.
 
 - level:
 
-  Correlation table to return when `component = "metrics"`. `"pooled"`
-  returns pooled out-of-fold correlations, and `"foldwise"` returns one
-  row per fold and prediction stream.
+  Metric table to return when `component = "metrics"`. `"pooled"`
+  returns RMSE, MAE, and out-of-fold correlations; `"foldwise"` returns
+  one correlation row per fold and prediction stream. The pooled table's
+  `descriptive_only` column flags correlations computed when assessment
+  folds contain fewer than three observations.
 
 ## Value
 

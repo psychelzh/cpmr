@@ -133,7 +133,7 @@ out-of-sample estimate of predictive performance.</p>
 <span><span class="co">#&gt;     Selection:             pearson / p_value / 0.01</span></span>
 <span><span class="co">#&gt;     Construction:          separate / no weighting / raw edges</span></span>
 <span><span class="co">#&gt;     Model:                 linear regression</span></span>
-<span><span class="co">#&gt;   Use summary() for aggregate correlations and tidy() for correlation tables.</span></span>
+<span><span class="co">#&gt;   Use summary() for aggregate metrics and tidy() for metric tables.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="co">#&gt; CPM summary:</span></span>
 <span><span class="co">#&gt;   Number of folds: 5</span></span>
@@ -142,9 +142,17 @@ out-of-sample estimate of predictive performance.</p>
 <span><span class="co">#&gt;     Positive: 0.062</span></span>
 <span><span class="co">#&gt;     Negative: -0.177</span></span>
 <span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
-<span><span class="co">#&gt;     Joint: -0.071 (SE 0.045)</span></span>
-<span><span class="co">#&gt;     Positive: 0.030 (SE 0.055)</span></span>
-<span><span class="co">#&gt;     Negative: -0.174 (SE 0.097)</span></span>
+<span><span class="co">#&gt;     Joint: -0.071 (SE 0.045) (5/5 folds)</span></span>
+<span><span class="co">#&gt;     Positive: 0.030 (SE 0.055) (5/5 folds)</span></span>
+<span><span class="co">#&gt;     Negative: -0.174 (SE 0.097) (3/5 folds)</span></span>
+<span><span class="co">#&gt;   Pooled RMSE:</span></span>
+<span><span class="co">#&gt;     Joint: 0.705</span></span>
+<span><span class="co">#&gt;     Positive: 0.644</span></span>
+<span><span class="co">#&gt;     Negative: 0.701</span></span>
+<span><span class="co">#&gt;   Pooled MAE:</span></span>
+<span><span class="co">#&gt;     Joint: 0.573</span></span>
+<span><span class="co">#&gt;     Positive: 0.515</span></span>
+<span><span class="co">#&gt;     Negative: 0.558</span></span>
 <span><span class="co">#&gt;   Selected edges:</span></span>
 <span><span class="co">#&gt;     Positive: 1.00%</span></span>
 <span><span class="co">#&gt;     Negative: 0.50%</span></span></code></pre></div>
@@ -155,8 +163,9 @@ selection, and model training inside each assessment fold.</p>
 <h2 id="inspect-predictions-and-edges">Inspect Predictions and Edges<a class="anchor" aria-label="anchor" href="#inspect-predictions-and-edges"></a>
 </h2>
 <p>CPM results keep observation-level predictions on the object, while
-<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> reports pooled and fold-wise out-of-fold
-correlations.</p>
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> reports pooled RMSE and MAE, pooled out-of-fold
+correlations, and mean fold-wise correlations. Use <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>
+to obtain pooled metrics or the per-fold correlation table.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">predictions</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">predictions</span></span>
 <span></span>
@@ -170,45 +179,63 @@ correlations.</p>
 <span><span class="co">#&gt;     Positive: 0.062</span></span>
 <span><span class="co">#&gt;     Negative: -0.177</span></span>
 <span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
-<span><span class="co">#&gt;     Joint: -0.071 (SE 0.045)</span></span>
-<span><span class="co">#&gt;     Positive: 0.030 (SE 0.055)</span></span>
-<span><span class="co">#&gt;     Negative: -0.174 (SE 0.097)</span></span>
+<span><span class="co">#&gt;     Joint: -0.071 (SE 0.045) (5/5 folds)</span></span>
+<span><span class="co">#&gt;     Positive: 0.030 (SE 0.055) (5/5 folds)</span></span>
+<span><span class="co">#&gt;     Negative: -0.174 (SE 0.097) (3/5 folds)</span></span>
+<span><span class="co">#&gt;   Pooled RMSE:</span></span>
+<span><span class="co">#&gt;     Joint: 0.705</span></span>
+<span><span class="co">#&gt;     Positive: 0.644</span></span>
+<span><span class="co">#&gt;     Negative: 0.701</span></span>
+<span><span class="co">#&gt;   Pooled MAE:</span></span>
+<span><span class="co">#&gt;     Joint: 0.573</span></span>
+<span><span class="co">#&gt;     Positive: 0.515</span></span>
+<span><span class="co">#&gt;     Negative: 0.558</span></span>
 <span><span class="co">#&gt;   Selected edges:</span></span>
 <span><span class="co">#&gt;     Positive: 1.00%</span></span>
 <span><span class="co">#&gt;     Negative: 0.50%</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">summary_result</span><span class="op">[[</span><span class="st">"metrics"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;             level prediction    estimate  std_error  method</span></span>
-<span><span class="co">#&gt; 1          pooled      joint -0.08438626         NA pearson</span></span>
-<span><span class="co">#&gt; 2          pooled   positive  0.06200956         NA pearson</span></span>
-<span><span class="co">#&gt; 3          pooled   negative -0.17727972         NA pearson</span></span>
-<span><span class="co">#&gt; joint    foldwise      joint -0.07073201 0.04541292 pearson</span></span>
-<span><span class="co">#&gt; positive foldwise   positive  0.02959662 0.05523617 pearson</span></span>
-<span><span class="co">#&gt; negative foldwise   negative -0.17395274 0.09676208 pearson</span></span>
+<span><span class="co">#&gt;    level metric prediction  estimate std_error method  n n_folds</span></span>
+<span><span class="co">#&gt; 1 pooled   rmse      joint 0.7050899        NA   &lt;NA&gt; 80      NA</span></span>
+<span><span class="co">#&gt; 2 pooled    mae      joint 0.5726172        NA   &lt;NA&gt; 80      NA</span></span>
+<span><span class="co">#&gt; 3 pooled   rmse   positive 0.6441440        NA   &lt;NA&gt; 80      NA</span></span>
+<span><span class="co">#&gt; 4 pooled    mae   positive 0.5153804        NA   &lt;NA&gt; 80      NA</span></span>
+<span><span class="co">#&gt; 5 pooled   rmse   negative 0.7009207        NA   &lt;NA&gt; 80      NA</span></span>
+<span><span class="co">#&gt; 6 pooled    mae   negative 0.5581996        NA   &lt;NA&gt; 80      NA</span></span>
+<span><span class="co">#&gt;   descriptive_only</span></span>
+<span><span class="co">#&gt; 1            FALSE</span></span>
+<span><span class="co">#&gt; 2            FALSE</span></span>
+<span><span class="co">#&gt; 3            FALSE</span></span>
+<span><span class="co">#&gt; 4            FALSE</span></span>
+<span><span class="co">#&gt; 5            FALSE</span></span>
+<span><span class="co">#&gt; 6            FALSE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">predictions</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   row fold   observed        joint     positive      negative</span></span>
-<span><span class="co">#&gt; 1   1    5 -0.6339456  0.344338065  0.344338065  2.602085e-18</span></span>
+<span><span class="co">#&gt; 1   1    5 -0.6339456  0.344338065  0.344338065  8.673617e-18</span></span>
 <span><span class="co">#&gt; 2   2    1  0.4116546 -0.478738601  0.028245399 -5.179443e-01</span></span>
 <span><span class="co">#&gt; 3   3    1  0.2898583 -0.032769603  0.073529511 -1.070810e-01</span></span>
-<span><span class="co">#&gt; 4   4    3  0.7870086  0.001199379  0.001199379  8.673617e-18</span></span>
-<span><span class="co">#&gt; 5   5    5  0.1169538 -0.028386998 -0.028386998  2.602085e-18</span></span>
-<span><span class="co">#&gt; 6   6    3  0.7875511  0.264960292  0.264960292  8.673617e-18</span></span>
+<span><span class="co">#&gt; 4   4    3  0.7870086  0.001199379  0.001199379  1.387779e-17</span></span>
+<span><span class="co">#&gt; 5   5    5  0.1169538 -0.028386998 -0.028386998  8.673617e-18</span></span>
+<span><span class="co">#&gt; 6   6    3  0.7875511  0.264960292  0.264960292  1.387779e-17</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">result</span>, component <span class="op">=</span> <span class="st">"metrics"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
-<span><span class="co">#&gt;    fold n_assess prediction estimate method </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1       16 joint       -<span style="color: #BB0000;">0.048</span><span style="color: #BB0000; text-decoration: underline;">8</span> pearson</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     1       16 positive    -<span style="color: #BB0000;">0.091</span><span style="color: #BB0000; text-decoration: underline;">3</span> pearson</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     1       16 negative     0.015<span style="text-decoration: underline;">1</span> pearson</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     2       16 joint       -<span style="color: #BB0000;">0.142</span>  pearson</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     2       16 positive     0.168  pearson</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     2       16 negative    -<span style="color: #BB0000;">0.233</span>  pearson</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
+<span><span class="co">#&gt;    fold metric      n_assess prediction estimate method </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 correlation       16 joint       -<span style="color: #BB0000;">0.048</span><span style="color: #BB0000; text-decoration: underline;">8</span> pearson</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     1 correlation       16 positive    -<span style="color: #BB0000;">0.091</span><span style="color: #BB0000; text-decoration: underline;">3</span> pearson</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     1 correlation       16 negative     0.015<span style="text-decoration: underline;">1</span> pearson</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     2 correlation       16 joint       -<span style="color: #BB0000;">0.142</span>  pearson</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     2 correlation       16 positive     0.168  pearson</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     2 correlation       16 negative    -<span style="color: #BB0000;">0.233</span>  pearson</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">result</span>, component <span class="op">=</span> <span class="st">"metrics"</span>, level <span class="op">=</span> <span class="st">"pooled"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 3</span></span></span>
-<span><span class="co">#&gt;   prediction estimate method </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> joint       -<span style="color: #BB0000;">0.084</span><span style="color: #BB0000; text-decoration: underline;">4</span> pearson</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> positive     0.062<span style="text-decoration: underline;">0</span> pearson</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> negative    -<span style="color: #BB0000;">0.177</span>  pearson</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
+<span><span class="co">#&gt;   metric prediction estimate     n method descriptive_only</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> rmse   joint         0.705    80 <span style="color: #BB0000;">NA</span>     FALSE           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> mae    joint         0.573    80 <span style="color: #BB0000;">NA</span>     FALSE           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> rmse   positive      0.644    80 <span style="color: #BB0000;">NA</span>     FALSE           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> mae    positive      0.515    80 <span style="color: #BB0000;">NA</span>     FALSE           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> rmse   negative      0.701    80 <span style="color: #BB0000;">NA</span>     FALSE           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> mae    negative      0.558    80 <span style="color: #BB0000;">NA</span>     FALSE</span></span></code></pre></div>
 <p>These three outputs have slightly different jobs:</p>
 <ul>
 <li>
@@ -222,9 +249,17 @@ summary-level metric table stored on the summary object;</li>
 fold-wise metric table for further filtering, plotting, or export, while
 <code>level = "pooled"</code> returns pooled metrics.</li>
 </ul>
-<p>By default, <code><a href="../reference/spec.html">cpm()</a></code> uses <code>return_edges = "sum"</code>
-and stores fold-aggregated edge selection counts. This makes edge
-summaries immediately available in the common fold-based workflow.</p>
+<p>By default, <code><a href="../reference/spec.html">cpm()</a></code> uses 10-fold assessment and
+<code>return_edges = "sum"</code>. Ten folds require at least 10
+complete cases; around 30 cases are a rough minimum for at least 3
+observations per assessment fold, not a guarantee of stable
+correlations. Smaller assessment folds trigger a warning, prioritize
+RMSE and MAE, and mark pooled out-of-fold correlations as descriptive.
+Explicit leave-one-out assessment is available with
+<code>resamples = NULL</code>.</p>
+<p>By default, <code><a href="../reference/spec.html">cpm()</a></code> stores fold-aggregated edge selection
+counts. This makes edge summaries immediately available in the common
+fold-based workflow.</p>
 <p>If you want to control edge storage explicitly:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">edge_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec.html">cpm</a></span><span class="op">(</span></span>
@@ -275,9 +310,17 @@ truly needed.</p>
 <span><span class="co">#&gt;     Positive: 0.169</span></span>
 <span><span class="co">#&gt;     Negative: -0.003</span></span>
 <span><span class="co">#&gt;   Fold-wise correlations (Pearson):</span></span>
-<span><span class="co">#&gt;     Joint: 0.154 (SE 0.119)</span></span>
-<span><span class="co">#&gt;     Positive: 0.240 (SE 0.129)</span></span>
-<span><span class="co">#&gt;     Negative: 0.031 (SE 0.111)</span></span></code></pre></div>
+<span><span class="co">#&gt;     Joint: 0.154 (SE 0.119) (4/4 folds)</span></span>
+<span><span class="co">#&gt;     Positive: 0.240 (SE 0.129) (4/4 folds)</span></span>
+<span><span class="co">#&gt;     Negative: 0.031 (SE 0.111) (3/4 folds)</span></span>
+<span><span class="co">#&gt;   Pooled RMSE:</span></span>
+<span><span class="co">#&gt;     Joint: 0.934</span></span>
+<span><span class="co">#&gt;     Positive: 0.906</span></span>
+<span><span class="co">#&gt;     Negative: 0.940</span></span>
+<span><span class="co">#&gt;   Pooled MAE:</span></span>
+<span><span class="co">#&gt;     Joint: 0.676</span></span>
+<span><span class="co">#&gt;     Positive: 0.644</span></span>
+<span><span class="co">#&gt;     Negative: 0.730</span></span></code></pre></div>
 <p>Custom resamples must:</p>
 <ul>
 <li>be supplied as assessment-row indices;</li>
