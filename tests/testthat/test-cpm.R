@@ -1,205 +1,697 @@
-test_that("Default threshold method works", {
+prediction_matrix <- function(x) {
+  as.matrix(x$predictions[, prediction_columns(x$predictions), drop = FALSE])
+}
+
+prediction_complete_cases <- function(x) {
+  stats::complete.cases(
+    x$predictions[, prediction_columns(x$predictions), drop = FALSE]
+  )
+}
+
+example_cpm_result <- function(
+  spec_obj = spec(),
+  conmat,
+  behav,
+  covariates = NULL,
+  resamples = 5,
+  return_edges = "sum",
+  na_action = "fail"
+) {
+  cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = spec_obj,
+    covariates = covariates,
+    resamples = resamples,
+    return_edges = return_edges,
+    na_action = na_action
+  )
+}
+
+test_that("net construction yields a single prediction stream", {
+  withr::local_seed(101)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  s <- spec(
+    construction = cpm_construction_strength(sign_mode = "net")
+  )
+
+  result <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
+
+  expect_named(result$predictions, c("row", "fold", "observed", "net"))
+})
+
+test_that("cpm returns predictions and folds", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- cpm(conmat, behav)
-  expect_s3_class(result, "cpm")
-  expect_snapshot_value(result$pred, style = "json2")
-  expect_snapshot_value(result$edges, style = "json2")
-  expect_snapshot_value(result$params, style = "json2")
-  expect_snapshot(result)
+  s <- spec()
+
+  res <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
+
+  expect_s3_class(res, "cpm")
+  expect_identical(as.character(res$call[[1]]), "cpm")
+  expect_s3_class(res$spec, "cpm_spec")
+  expect_identical(res$spec, s)
+  expect_identical(length(res$folds), 5L)
+  expect_equal(nrow(res$predictions), 10)
+  expect_named(
+    res$predictions,
+    c("row", "fold", "observed", "joint", "positive", "negative")
+  )
+  expect_equal(dim(res$edges), c(10, 2))
+  expect_s3_class(summary(res), "cpm_summary")
 })
 
-test_that("`kfolds` works", {
+test_that("cpm uses spec() by default", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- cpm(conmat, behav, kfolds = 5)
-  expect_s3_class(result, "cpm")
-  expect_snapshot_value(result$pred, style = "json2")
-  expect_snapshot_value(result$edges, style = "json2")
-  expect_snapshot_value(result$params, style = "json2")
-  expect_snapshot(result)
+
+  res <- cpm(conmat = conmat, behav = behav, resamples = 5)
+
+  expect_s3_class(res, "cpm")
+  expect_s3_class(res$spec, "cpm_spec")
 })
 
-test_that("Alternative threshold method works", {
+test_that("cpm validates `spec` input", {
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+
+  expect_error(
+    cpm(conmat = conmat, behav = behav, spec = list(), resamples = 5),
+    "`spec` must be a CPM specification created by `spec()`.",
+    fixed = TRUE
+  )
+})
+
+test_that("cpm accepts custom resample indices", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  spec <- spec()
+
+  resamples <- list(1:3, 4:6, 7:10)
+  res <- cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = spec,
+    na_action = "exclude",
+    resamples = resamples
+  )
+
+  expect_identical(length(res$folds), length(resamples))
+  expect_identical(res$folds, resamples)
+})
+
+test_that("cpm validates fold-count resamples", {
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+  spec <- spec()
+
+  expect_error(
+    cpm(conmat = conmat, behav = behav, spec = spec, resamples = 1),
+    "`resamples` must be NULL, a single integer greater than or equal to 2, or a non-empty list of assessment indices.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(conmat = conmat, behav = behav, spec = spec, resamples = 2.5),
+    "`resamples` must be NULL, a single integer greater than or equal to 2, or a non-empty list of assessment indices.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(conmat = conmat, behav = behav, spec = spec, resamples = 11),
+    "`resamples` as a fold count must be less than or equal to complete-case observations.",
+    fixed = TRUE
+  )
+})
+
+test_that("cpm validates custom resamples", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- cpm(conmat, behav, thresh_method = "sparsity")
-  expect_s3_class(result, "cpm")
-  expect_snapshot_value(result$pred, style = "json2")
-  expect_snapshot_value(result$edges, style = "json2")
-  expect_snapshot_value(result$params, style = "json2")
-  expect_snapshot(result)
+  spec <- spec()
+
+  expect_error(
+    cpm(
+      conmat = conmat,
+      behav = behav,
+      spec = spec,
+      resamples = list(1:6, 6:10)
+    ),
+    "must not overlap",
+    fixed = FALSE
+  )
+  expect_error(
+    cpm(
+      conmat = conmat,
+      behav = behav,
+      spec = spec,
+      resamples = list(1:5)
+    ),
+    "at least 2 assessment sets",
+    fixed = FALSE
+  )
+  expect_error(
+    cpm(
+      conmat = conmat,
+      behav = behav,
+      spec = spec,
+      resamples = list(c(1.5, 2.5), 3:10)
+    ),
+    "integer-valued indices",
+    fixed = FALSE
+  )
+  expect_error(
+    cpm(
+      conmat = conmat,
+      behav = behav,
+      spec = spec,
+      resamples = list(c(0, 1), 2:10)
+    ),
+    "positive indices",
+    fixed = FALSE
+  )
+  expect_error(
+    cpm(
+      conmat = conmat,
+      behav = behav,
+      spec = spec,
+      resamples = list(c(1, 1), 2:10)
+    ),
+    "must not contain duplicates",
+    fixed = FALSE
+  )
+  expect_error(
+    cpm(
+      conmat = conmat,
+      behav = behav,
+      spec = spec,
+      resamples = list(1:4, 5:8)
+    ),
+    "must cover all complete-case rows exactly once",
+    fixed = TRUE
+  )
 })
 
-test_that("Different threshold levels works", {
+test_that("cpm errors clearly for insufficient complete cases", {
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rep(NA_real_, 10)
+  spec <- spec()
+
+  expect_error(
+    cpm(conmat = conmat, behav = behav, spec = spec, na_action = "exclude"),
+    "No complete-case observations available for CPM.",
+    fixed = TRUE
+  )
+
+  behav[] <- NA_real_
+  behav[1] <- 1
+  expect_error(
+    cpm(conmat = conmat, behav = behav, spec = spec, na_action = "exclude"),
+    "CPM requires at least 2 complete-case observations to define assessment folds.",
+    fixed = TRUE
+  )
+})
+
+test_that("cpm errors when any fold leaves fewer than 3 training rows", {
+  conmat <- matrix(rnorm(40), ncol = 10)
+  behav <- rnorm(4)
+  spec <- spec()
+
+  expect_error(
+    cpm(conmat = conmat, behav = behav, spec = spec, resamples = 2),
+    "Each assessment fold must leave at least 3 complete-case observations for training.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    cpm(
+      conmat = conmat,
+      behav = behav,
+      spec = spec,
+      resamples = list(1L, 2:4)
+    ),
+    "Each assessment fold must leave at least 3 complete-case observations for training.",
+    fixed = TRUE
+  )
+})
+
+test_that("cpm can store summed edges", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  spec <- spec()
+
+  res <- cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = spec,
+    resamples = 5,
+    return_edges = "sum"
+  )
+
+  edges <- res$edges
+  expect_type(edges, "double")
+  expect_equal(dim(edges), c(12, 2))
+})
+
+test_that("cpm can store fold-wise edges", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(120), ncol = 12)
+  behav <- rnorm(10)
+  spec <- spec()
+
+  res <- cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = spec,
+    resamples = 5,
+    return_edges = "all"
+  )
+
+  edges <- res$edges
+  expect_type(edges, "logical")
+  expect_equal(dim(edges), c(12, 2, 5))
+})
+
+test_that("cpm handles covariates in assessment pipeline", {
+  withr::local_seed(42)
+  n <- 24
+  p <- 18
+  cov <- rnorm(n)
+  conmat <- matrix(rnorm(n * p) + rep(cov, p), nrow = n, ncol = p)
+  behav <- cov * 1.5 + rnorm(n)
+  covariates <- matrix(cov, ncol = 1)
+  spec <- spec()
+
+  res <- cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = spec,
+    covariates = covariates,
+    resamples = 6,
+    return_edges = "sum"
+  )
+
+  pred <- res$predictions
+  expect_true(isTRUE(all(stats::complete.cases(pred$joint))))
+  expect_true(isTRUE(res$settings$covariates))
+  expect_equal(length(res$folds), 6L)
+})
+
+test_that("cpm fold path matches the corresponding internal split model", {
+  withr::local_seed(7)
+  n <- 15
+  p <- 12
+  conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
+  behav <- rnorm(n)
+  covariates <- matrix(rnorm(n * 2), ncol = 2)
+  spec <- spec(
+    selection = cpm_selection_cor(
+      criterion = "p_value",
+      level = 0.1
+    )
+  )
+  resamples <- list(1:5, 6:10, 11:15)
+  rows_test <- resamples[[1]]
+  rows_train <- setdiff(seq_len(n), rows_test)
+  covariates_train <- covariates[rows_train, , drop = FALSE]
+  training_conmat <- regress_covariates_by_train(
+    resp_train = conmat[rows_train, , drop = FALSE],
+    cov_train = covariates_train
+  )$train
+  training_behav <- drop(
+    regress_covariates_by_train(
+      resp_train = behav[rows_train],
+      cov_train = covariates_train
+    )$train
+  )
+  assessment_conmat <- regress_covariates_by_train(
+    resp_train = conmat[rows_train, , drop = FALSE],
+    resp_test = conmat[rows_test, , drop = FALSE],
+    cov_train = covariates_train,
+    cov_test = covariates[rows_test, , drop = FALSE]
+  )$test
+  assessment_behav <- drop(
+    regress_covariates_by_train(
+      resp_train = behav[rows_train],
+      resp_test = behav[rows_test],
+      cov_train = covariates_train,
+      cov_test = covariates[rows_test, , drop = FALSE]
+    )$test
+  )
+  fold_selection <- run_edge_selection(
+    conmat = training_conmat,
+    behav = training_behav,
+    selection_spec = spec$selection,
+    covariate_rank = qr(cbind(1, covariates_train))$rank - 1L
+  )
+  fold_model <- fit_split_model(
+    conmat = training_conmat,
+    behav = training_behav,
+    edge_selection = fold_selection,
+    construction_spec = spec$construction,
+    model_spec = spec$model
+  )
+  result <- cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = spec,
+    covariates = covariates,
+    resamples = resamples,
+    return_edges = "sum",
+    na_action = "fail"
+  )
+  fold_pred <- predict_split_model(fold_model, assessment_conmat)
+  collected <- result$predictions
+
+  expect_equal(fold_model$edges, fold_selection$mask)
+  expect_equal(
+    as.matrix(collected[rows_test, c("joint", "positive", "negative")]),
+    fold_pred,
+    ignore_attr = TRUE
+  )
+  expect_equal(collected$observed[rows_test], assessment_behav)
+})
+
+test_that("cpm excludes incomplete rows consistently with covariates", {
+  withr::local_seed(11)
+  n <- 15
+  p <- 8
+  conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
+  behav <- rnorm(n)
+  covariates <- matrix(rnorm(n * 2), ncol = 2)
+  spec <- spec()
+
+  behav[2] <- NA_real_
+  conmat[5, 3] <- NA_real_
+  covariates[8, 1] <- NA_real_
+
+  include_cases <- setdiff(seq_len(n), c(2L, 5L, 8L))
+  resamples <- list(include_cases[1:4], include_cases[5:8], include_cases[9:12])
+  result <- cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = spec,
+    covariates = covariates,
+    resamples = resamples,
+    return_edges = "sum",
+    na_action = "exclude"
+  )
+  collected <- result$predictions
+
+  expect_identical(result$folds, resamples)
+  expect_equal(sort(collected$row[!is.na(collected$fold)]), include_cases)
+  expect_true(isTRUE(all(stats::complete.cases(collected$joint[
+    include_cases
+  ]))))
+  expect_true(isTRUE(all(is.na(collected$joint[-include_cases]))))
+  expect_true(isTRUE(all(is.na(collected$fold[-include_cases]))))
+})
+
+test_that("cpm returns a fold-based cpm object", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- cpm(conmat, behav, thresh_level = 0.1)
+
+  result <- example_cpm_result(conmat = conmat, behav = behav)
+
   expect_s3_class(result, "cpm")
-  expect_snapshot_value(result$pred, style = "json2")
-  expect_snapshot_value(result$edges, style = "json2")
-  expect_snapshot_value(result$params, style = "json2")
-  expect_snapshot(result)
+  expect_length(result$folds, 5)
+  expect_named(
+    result$predictions,
+    c("row", "fold", "observed", "joint", "positive", "negative")
+  )
+  expect_equal(dim(result$edges), c(ncol(conmat), 2))
+  expect_identical(result$settings$return_edges, "sum")
+  expect_identical(result$settings$na_action, "fail")
+  expect_false(result$settings$covariates)
 })
 
-test_that("Works with covariates", {
+test_that("cpm works with alternative staged settings", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  behav <- rnorm(10)
+
+  result <- example_cpm_result(
+    spec_obj = spec(
+      selection = cpm_selection_cor(criterion = "proportion"),
+      construction = cpm_construction_strength(sign_mode = "net")
+    ),
+    conmat = conmat,
+    behav = behav
+  )
+
+  expect_named(result$predictions, c("row", "fold", "observed", "net"))
+  expect_true(any(prediction_complete_cases(result)))
+  expect_identical(result$spec$selection$criterion, "proportion")
+  expect_identical(result$spec$construction$sign_mode, "net")
+})
+
+test_that("cpm works with covariates", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
   covariates <- matrix(rnorm(10), ncol = 1)
-  result <- cpm(conmat, behav, covariates = covariates)
-  expect_s3_class(result, "cpm")
-  expect_equal(sum(complete.cases(result$pred)), 10)
-  expect_length(result$real, 10)
-  expect_true(isTRUE(result$params$covariates))
 
-  expect_warning(
-    legacy <- cpm(conmat, behav, confounds = covariates),
-    "deprecated"
+  result <- example_cpm_result(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates
   )
-  expect_equal(legacy$pred, result$pred, tolerance = 1e-6)
-  expect_equal(legacy$real, result$real, tolerance = 1e-6)
-  expect_error(
-    cpm(conmat, behav, covariates = covariates, confounds = covariates),
-    "Please provide only one"
-  )
+
+  expect_true(isTRUE(result$settings$covariates))
+  expect_equal(nrow(result$predictions), 10)
+  expect_true(any(prediction_complete_cases(result)))
 })
 
-test_that("Fold-wise covariate regression differs from global pre-CV regression", {
-  # Verifies that the implementation actually uses fold-wise regression
-  # (leakage-safe), not global regression applied before CV.
-  # If global regression were used, results would differ because test-fold
-  # residuals would have been influenced by information from those same cases
-  # during the global fit.
-  withr::local_seed(42)
-  n <- 30
-  p <- 20
-  # Covariate correlated with both connectome and behavior to make leakage detectable
-  cov <- rnorm(n)
-  conmat <- matrix(rnorm(n * p) + rep(cov, p), nrow = n, ncol = p)
-  behav <- cov * 2 + rnorm(n)
-  covariates <- matrix(cov, ncol = 1)
-
-  # Fold-wise (leakage-safe) — current implementation
-  result_foldwise <- cpm(conmat, behav, covariates = covariates, kfolds = 5)
-
-  # Global pre-CV regression (leaky) — manually regress out covariate on full
-  # data, then run CPM without covariates
-  regress_covariates <- getFromNamespace("regress_covariates", "cpmr")
-  behav_global <- regress_covariates(behav, covariates)
-  result_global <- cpm(conmat, behav_global, kfolds = 5)
-
-  # The two approaches should produce different predictions
-  expect_false(isTRUE(all.equal(result_foldwise$pred, result_global$pred)))
-  # And different residualised behavior values
-  expect_false(isTRUE(all.equal(result_foldwise$real, result_global$real)))
-})
-
-test_that("Keep names of behavior", {
+test_that("cpm keeps behavior names in prediction row names", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
   names(behav) <- LETTERS[1:10]
-  result <- cpm(conmat, behav)
-  expect_named(result$real, LETTERS[1:10])
-  expect_identical(rownames(result$pred), LETTERS[1:10])
+
+  result <- example_cpm_result(
+    conmat = conmat,
+    behav = behav
+  )
+
+  expect_identical(rownames(result$predictions), LETTERS[1:10])
+  expect_equal(result$predictions$row, seq_along(behav))
 })
 
-test_that("`return_edges` argument works", {
+test_that("cpm accepts matrix behavior and vector covariates", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)
-  result <- cpm(conmat, behav, return_edges = "none")
-  expect_null(result$edges)
-  expect_snapshot(result)
-  result <- cpm(conmat, behav, return_edges = "all")
-  expect_snapshot_value(result$edges, style = "json2")
-  expect_snapshot(result)
-})
-
-test_that("Support row/column matrix input of `behav` and `covariates`", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
-  result <- cpm(conmat, behav)
-  key_fields <- c("real", "pred", "edges")
-  expect_identical(
-    cpm(conmat, matrix(behav, ncol = 1))[key_fields],
-    result[key_fields]
-  )
-  expect_identical(
-    cpm(conmat, matrix(behav, nrow = 1))[key_fields],
-    result[key_fields]
-  )
   covariates <- matrix(rnorm(10), ncol = 1)
-  result <- cpm(conmat, behav, covariates = covariates)
+  folds <- list(1:2, 3:4, 5:6, 7:8, 9:10)
+
+  vector_result <- example_cpm_result(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    resamples = folds
+  )
+
   expect_identical(
-    cpm(conmat, behav, covariates = drop(covariates))[key_fields],
-    result[key_fields]
+    example_cpm_result(
+      conmat = conmat,
+      behav = matrix(behav, ncol = 1),
+      covariates = covariates,
+      resamples = folds
+    )[c("predictions", "edges", "folds")],
+    vector_result[c("predictions", "edges", "folds")]
+  )
+  expect_identical(
+    example_cpm_result(
+      conmat = conmat,
+      behav = matrix(behav, nrow = 1),
+      covariates = covariates,
+      resamples = folds
+    )[c("predictions", "edges", "folds")],
+    vector_result[c("predictions", "edges", "folds")]
+  )
+  expect_identical(
+    example_cpm_result(
+      conmat = conmat,
+      behav = behav,
+      covariates = drop(covariates),
+      resamples = folds
+    )[c("predictions", "edges", "folds")],
+    vector_result[c("predictions", "edges", "folds")]
   )
 })
 
-test_that("Throw informative error if data checking not pass", {
+test_that("cpm throws informative data-checking errors", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(100), ncol = 10)
+
   expect_error(
-    cpm(conmat, matrix(rnorm(20), ncol = 2)),
+    example_cpm_result(
+      conmat = conmat,
+      behav = matrix(rnorm(20), ncol = 2)
+    ),
     "Behavior data must be a numeric vector."
   )
   expect_error(
-    cpm(conmat, rnorm(20)),
-    "Case numbers of `conmat` and `behav` must match."
+    example_cpm_result(
+      conmat = conmat,
+      behav = rnorm(20)
+    ),
+    "The number of observations in `conmat` and `behav` must match."
   )
   expect_error(
-    cpm(conmat, rnorm(10), covariates = matrix(rnorm(20), ncol = 1)),
-    "Case numbers of `covariates` and `behav` must match."
+    example_cpm_result(
+      conmat = conmat,
+      behav = rnorm(10),
+      covariates = matrix(rnorm(20), ncol = 1)
+    ),
+    "The number of observations in `covariates` and `behav` must match."
   )
 })
 
-test_that("`na_action` argument works", {
-  withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
-  behav[1] <- NA
-  expect_error(cpm(conmat, behav), "Missing values found in `behav`")
-  result <- cpm(conmat, behav, na_action = "exclude")
-  expect_equal(sum(complete.cases(result$real)), 9)
-  expect_equal(sum(complete.cases(result$pred)), 9)
-  expect_snapshot(result)
-  covariates <- matrix(rnorm(10), ncol = 1)
-  covariates[2, 1] <- NA
-  result <- cpm(conmat, behav, covariates = covariates, na_action = "exclude")
-  expect_equal(sum(complete.cases(result$real)), sum(complete.cases(behav)))
-  expect_equal(sum(complete.cases(result$pred)), 8)
-  expect_snapshot(result)
-  conmat[1, 1] <- NA
-  result <- cpm(conmat, behav, covariates = covariates, na_action = "exclude")
-  expect_equal(sum(complete.cases(result$real)), sum(complete.cases(behav)))
-  expect_equal(sum(complete.cases(result$pred)), 8)
-  expect_snapshot(result)
+test_that("cpm rejects obsolete and unused arguments without evaluating them", {
+  conmat <- matrix(seq_len(40), nrow = 10)
+  behav <- seq_len(10)
+
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      confounds = stop("must not be evaluated"),
+      kfolds = 5,
+      thresh_level = 0.05
+    ),
+    "Use `covariates` instead of `confounds`",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(conmat, behav, typo = 1),
+    "Unused arguments in `...` are not supported.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(conmat, behav, NULL, 5),
+    "Unused arguments in `...` are not supported.",
+    fixed = TRUE
+  )
 })
 
-test_that("Folds cover complete cases exactly when excluding missing data", {
+test_that("cpm supports missing-data exclusion while keeping row layout", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(120), ncol = 12)
   behav <- rnorm(10)
-  covariates <- matrix(rnorm(20), ncol = 2)
+  covariates <- matrix(rnorm(10), ncol = 1)
 
-  # Remove different rows from each input to validate intersection behavior.
   behav[2] <- NA
   conmat[4, 3] <- NA
   covariates[6, 1] <- NA
 
-  result <- cpm(conmat, behav, covariates = covariates, na_action = "exclude")
-  include_cases <- intersect(
-    intersect(which(complete.cases(conmat)), which(complete.cases(behav))),
-    which(complete.cases(covariates))
+  include_cases <- setdiff(seq_len(10), c(2L, 4L, 6L))
+  resamples <- list(include_cases[1:3], include_cases[4:5], include_cases[6:7])
+
+  result <- example_cpm_result(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    resamples = resamples,
+    na_action = "exclude"
   )
 
-  expect_setequal(unlist(result$folds), include_cases)
-  expect_equal(sum(complete.cases(result$pred)), length(include_cases))
+  expect_identical(result$folds, resamples)
+  expect_equal(
+    sort(result$predictions$row[!is.na(result$predictions$fold)]),
+    include_cases
+  )
+  expect_true(all(is.na(prediction_matrix(result)[-include_cases, ])))
+})
+
+test_that("print.cpm reports summary fields", {
+  res <- example_cpm_output_result()
+
+  expect_output(print(res), "CPM")
+  expect_output(print(res), "Complete cases")
+  expect_output(print(res), "Covariates:\\s+none")
+  expect_output(print(res), "Missing data:\\s+fail")
+  expect_output(print(res), "Edge storage:\\s+summed across folds")
+  expect_output(print(res), "Selection:\\s+pearson / p_value / 0.01")
+  expect_output(
+    print(res),
+    "Construction:\\s+separate / no weighting / raw edges"
+  )
+  expect_output(print(res), "Model:\\s+linear regression")
+  expect_output(print(res), "Use summary\\(\\) for aggregate correlations")
+})
+
+test_that("print.cpm uses human-readable edge storage labels", {
+  x <- structure(
+    list(
+      call = quote(cpm(conmat = conmat, behav = behav, spec = spec())),
+      spec = spec(),
+      folds = list(1:3, 4:6),
+      predictions = data.frame(
+        row = 1:6,
+        fold = c(1L, 1L, 1L, 2L, 2L, 2L),
+        observed = c(1, 2, 3, 4, 5, 6),
+        joint = c(1, 2, 3, 6, 5, 4),
+        positive = c(1, 2, 3, 4, 5, 6),
+        negative = c(3, 2, 1, 6, 5, 4)
+      ),
+      settings = list(
+        covariates = FALSE,
+        na_action = "fail",
+        return_edges = "sum"
+      ),
+      edges = matrix(
+        c(2, 0, 1, 2),
+        ncol = 2,
+        dimnames = list(NULL, c("positive", "negative"))
+      )
+    ),
+    class = "cpm"
+  )
+
+  out <- capture.output(print(x))
+  expect_true(any(grepl(
+    "Edge storage:\\s+summed across folds",
+    out
+  )))
+})
+
+test_that("print.cpm shows compact weighted construction summary", {
+  x <- structure(
+    list(
+      call = quote(cpm(conmat = conmat, behav = behav, spec = spec())),
+      spec = spec(
+        construction = cpm_construction_strength(
+          sign_mode = "separate",
+          weight_scale = 0.03,
+          standardize_edges = TRUE
+        )
+      ),
+      folds = list(1:3, 4:6),
+      predictions = data.frame(
+        row = 1:6,
+        fold = c(1L, 1L, 1L, 2L, 2L, 2L),
+        observed = c(1, 2, 3, 4, 5, 6),
+        joint = c(1, 2, 3, 6, 5, 4),
+        positive = c(1, 2, 3, 4, 5, 6),
+        negative = c(3, 2, 1, 6, 5, 4)
+      ),
+      settings = list(
+        covariates = FALSE,
+        na_action = "fail",
+        return_edges = "none"
+      ),
+      edges = NULL
+    ),
+    class = "cpm"
+  )
+
+  expect_output(
+    print(x),
+    "Construction:\\s+separate / sigmoid weighting \\(0.03\\) / z-score edges"
+  )
 })

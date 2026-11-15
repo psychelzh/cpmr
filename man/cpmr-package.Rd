@@ -20,5 +20,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Liang Zhang \email{psychelzh@outlook.com} (\href{https://orcid.org/0000-0001-9041-1150}{ORCID})
 
+Authors:
+\itemize{
+  \item Liang Zhang \email{psychelzh@outlook.com} (\href{https://orcid.org/0000-0001-9041-1150}{ORCID})
+}
+
 }
 \keyword{internal}

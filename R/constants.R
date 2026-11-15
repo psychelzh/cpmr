@@ -1,2 +1,1 @@
-corr_types <- c("pos", "neg")
-inc_edges <- c("both", corr_types)
+edge_signs <- c("positive", "negative")

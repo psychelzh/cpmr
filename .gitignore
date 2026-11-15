@@ -5,3 +5,9 @@
 .DS_Store
 .quarto
 docs
+/doc/
+/Meta/
+.agents/*
+!.agents/skills/
+!.agents/skills/cpmr-r-development/
+!.agents/skills/cpmr-r-development/**
