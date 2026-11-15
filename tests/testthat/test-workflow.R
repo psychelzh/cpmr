@@ -191,8 +191,8 @@ test_that("fold-wise edge masks agree with individual fits and summed storage", 
 
 test_that("run_cpm_workflow matches cpm() outputs", {
   withr::local_seed(321)
-  conmat <- matrix(rnorm(120), ncol = 12)
-  behav <- rnorm(10)
+  conmat <- matrix(rnorm(240), ncol = 12)
+  behav <- rnorm(20)
   spec <- spec(
     selection = cpm_selection_cor(
       criterion = "proportion",

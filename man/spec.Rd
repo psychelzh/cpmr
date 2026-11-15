@@ -17,7 +17,7 @@ cpm(
   spec = NULL,
   ...,
   covariates = NULL,
-  resamples = NULL,
+  resamples = 10L,
   return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 )
@@ -46,11 +46,14 @@ used.}
 column. If \code{NULL}, no covariates are used. Vectors are converted to
 single-column matrices.}
 
-\item{resamples}{Optional assessment-plan specification. Use \code{NULL} for
-leave-one-out assessment, a single integer greater than or equal to 2 to
-request k-fold assessment, or a list of assessment indices for manual
-folds. Manual \code{resamples} must contain integer vectors indexing rows in
-\code{conmat}.}
+\item{resamples}{Assessment-plan specification. Defaults to 10-fold
+assessment. Use \code{NULL} for leave-one-out assessment, a single integer
+greater than or equal to 2 to request k-fold assessment, or a list of
+assessment indices for manual folds. Manual \code{resamples} must contain
+integer vectors indexing rows in \code{conmat}. Ten-fold assessment needs at
+least 10 complete cases; around 30 cases are a rough minimum for having
+at least 3 observations in each assessment fold, not a guarantee of
+stable correlations.}
 
 \item{return_edges}{A character string indicating the return value of the
 selected edges. \code{"sum"} stores fold counts for each selected edge,
@@ -66,9 +69,9 @@ layout in the returned predictions.}
 runs.
 
 \code{cpm()} returns a \code{cpm} object containing observation-level predictions,
-assessment folds, and optional stored edges. Call \code{\link[=summary.cpm]{summary.cpm()}} for the
-default correlation summary, or \code{\link[=tidy.cpm]{tidy.cpm()}} when you want pooled or
-fold-wise correlation tables.
+assessment folds, and optional stored edges. Call \code{\link[=summary.cpm]{summary.cpm()}} for
+prediction errors and correlation summaries, or \code{\link[=tidy.cpm]{tidy.cpm()}} for their
+pooled or fold-wise tables.
 }
 \description{
 Create a lightweight specification object that stores the staged decisions

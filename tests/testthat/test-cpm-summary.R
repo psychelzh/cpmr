@@ -2,8 +2,8 @@ prediction_streams <- c("joint", "positive", "negative")
 
 example_summary_result <- function() {
   withr::local_seed(123)
-  conmat <- matrix(rnorm(10000), nrow = 10)
-  behav <- rnorm(10)
+  conmat <- matrix(rnorm(10000), nrow = 20)
+  behav <- rnorm(20)
 
   cpm(conmat = conmat, behav = behav, spec = spec(), resamples = 5)
 }
@@ -12,30 +12,61 @@ example_cpm_summary <- function(
   metrics = rbind(
     data.frame(
       level = "pooled",
+      metric = "correlation",
       prediction = prediction_streams,
       estimate = c(0.4, 0.2, -0.1),
       std_error = NA_real_,
       method = "pearson",
+      n = 20L,
+      n_folds = NA_integer_,
+      stringsAsFactors = FALSE
+    ),
+    data.frame(
+      level = "pooled",
+      metric = "rmse",
+      prediction = prediction_streams,
+      estimate = c(0.7, 0.8, 0.9),
+      std_error = NA_real_,
+      method = NA_character_,
+      n = 20L,
+      n_folds = NA_integer_,
+      stringsAsFactors = FALSE
+    ),
+    data.frame(
+      level = "pooled",
+      metric = "mae",
+      prediction = prediction_streams,
+      estimate = c(0.5, 0.6, 0.7),
+      std_error = NA_real_,
+      method = NA_character_,
+      n = 20L,
+      n_folds = NA_integer_,
       stringsAsFactors = FALSE
     ),
     data.frame(
       level = "foldwise",
+      metric = "correlation",
       prediction = prediction_streams,
       estimate = c(0.35, 0.15, -0.05),
       std_error = c(0.05, 0.02, 0.01),
       method = "pearson",
+      n = NA_integer_,
+      n_folds = 5L,
       stringsAsFactors = FALSE
     )
   ),
   tables = list(
     pooled = data.frame(
-      prediction = prediction_streams,
-      estimate = c(0.4, 0.2, -0.1),
-      method = "pearson",
+      metric = rep(c("correlation", "rmse", "mae"), each = 3),
+      prediction = rep(prediction_streams, 3),
+      estimate = c(0.4, 0.2, -0.1, 0.7, 0.8, 0.9, 0.5, 0.6, 0.7),
+      n = 20L,
+      method = c(rep("pearson", 3), rep(NA_character_, 6)),
       stringsAsFactors = FALSE
     ),
     foldwise = data.frame(
       fold = rep(1:5, each = 3),
+      metric = "correlation",
       n_assess = rep(4L, 15),
       prediction = rep(prediction_streams, times = 5),
       estimate = rep(c(0.35, 0.15, -0.05), 5),
@@ -46,6 +77,7 @@ example_cpm_summary <- function(
   edges = NULL,
   settings = list(
     n_folds = 5L,
+    small_assessment_folds = FALSE,
     edge_storage = "not stored",
     correlation_method = "pearson",
     prediction_streams = prediction_streams
@@ -78,9 +110,10 @@ test_that("prediction labels use full names", {
   expect_identical(prediction_label("net"), "Net")
 })
 
-test_that("safe_cor returns NA for degenerate vectors and values for valid ones", {
+test_that("safe_cor requires three valid pairs and handles degenerate vectors", {
   expect_true(is.na(safe_cor(c(1, 1, 1), c(1, 2, 3))))
   expect_true(is.na(safe_cor(c(1), c(1))))
+  expect_true(is.na(safe_cor(c(1, 2), c(2, 4))))
   expect_equal(safe_cor(c(1, 2, 3), c(2, 4, 6)), 1)
 })
 
@@ -99,8 +132,11 @@ test_that("summary correlation helpers produce stable summaries", {
     method = "spearman",
     stringsAsFactors = FALSE
   )
+  pooled$metric <- "correlation"
+  pooled$n <- 10L
+  foldwise$metric <- "correlation"
 
-  metrics <- compute_summary_correlations(
+  metrics <- compute_summary_metrics(
     pooled_metrics = pooled,
     foldwise_metrics = foldwise,
     correlation_method = "spearman"
@@ -108,7 +144,16 @@ test_that("summary correlation helpers produce stable summaries", {
 
   expect_named(
     metrics,
-    c("level", "prediction", "estimate", "std_error", "method")
+    c(
+      "level",
+      "metric",
+      "prediction",
+      "estimate",
+      "std_error",
+      "method",
+      "n",
+      "n_folds"
+    )
   )
   expect_equal(
     summary_correlation_values(
@@ -126,7 +171,7 @@ test_that("summary correlation helpers produce stable summaries", {
     ),
     c(joint = 0.3, positive = 0.2, negative = NA_real_)
   )
-  expect_true(all(metrics$method == "spearman"))
+  expect_true(all(metrics$method[metrics$metric == "correlation"] == "spearman"))
 })
 
 test_that("safe summary helpers handle empty and missing values", {
@@ -139,6 +184,32 @@ test_that("safe summary helpers handle empty and missing values", {
   expect_equal(safe_std_error(c(1, 3)), 1)
 })
 
+test_that("pooled metric tables compute errors from complete prediction pairs", {
+  predictions <- data.frame(
+    row = 1:4,
+    fold = 1:4,
+    observed = c(1, 2, 3, 4),
+    joint = c(1, 4, NA_real_, 2),
+    positive = c(2, 2, 2, 2),
+    negative = c(NA_real_, 1, 3, 4)
+  )
+
+  metrics <- compute_pooled_metric_table(predictions)
+  joint_rmse <- metrics$estimate[
+    metrics$metric == "rmse" & metrics$prediction == "joint"
+  ]
+  joint_mae <- metrics$estimate[
+    metrics$metric == "mae" & metrics$prediction == "joint"
+  ]
+  joint_n <- metrics$n[
+    metrics$metric == "rmse" & metrics$prediction == "joint"
+  ]
+
+  expect_equal(joint_rmse, sqrt(8 / 3))
+  expect_equal(joint_mae, 4 / 3)
+  expect_identical(joint_n, 3L)
+})
+
 test_that("summary.cpm returns the expected object structure", {
   summary_result <- summary(example_summary_result())
 
@@ -149,13 +220,14 @@ test_that("summary.cpm returns the expected object structure", {
   )
   expect_named(
     summary_result$metrics,
-    c("level", "prediction", "estimate", "std_error", "method")
+    c("level", "metric", "prediction", "estimate", "std_error", "method",
+      "n", "n_folds")
   )
   expect_named(summary_result$tables, c("pooled", "foldwise"))
   expect_identical(summary_result$settings$n_folds, 5L)
 })
 
-test_that("summary.cpm returns NA when fewer than two valid pairs remain", {
+test_that("summary.cpm returns NA when fewer than three valid pairs remain", {
   sparse_object <- structure(
     list(
       spec = spec(),
@@ -306,15 +378,24 @@ test_that("summary.cpm returns NULL edges when they were not stored", {
   ))))
 })
 
-test_that("summary.cpm keeps default LOO summaries usable", {
+test_that("summary.cpm keeps explicit LOO summaries usable", {
   withr::local_seed(123)
   conmat <- matrix(rnorm(50), ncol = 10)
   behav <- rnorm(5)
 
-  result <- cpm(conmat = conmat, behav = behav, spec = spec())
+  expect_warning(
+    result <- cpm(
+      conmat = conmat,
+      behav = behav,
+      spec = spec(),
+      resamples = NULL
+    ),
+    "assessment folds contain fewer than 3 observations"
+  )
   summary_result <- summary(result)
   output <- capture.output(print(summary_result))
 
+  expect_true(all(c("rmse", "mae") %in% summary_result$metrics$metric))
   expect_true(all(is.finite(summary_correlation_values(
     summary_result$metrics,
     level = "pooled"
@@ -323,7 +404,10 @@ test_that("summary.cpm keeps default LOO summaries usable", {
     summary_result$metrics,
     level = "foldwise"
   ))))
-  expect_true(any(grepl("Pooled correlations \\(Pearson\\):", output)))
+  expect_true(any(grepl("Pooled correlations \\(Pearson; descriptive only\\):", output)))
+  expect_true(any(grepl("Pooled RMSE:", output, fixed = TRUE)))
+  expect_true(any(grepl("Pooled MAE:", output, fixed = TRUE)))
+  expect_true(any(grepl("descriptive only", output, fixed = TRUE)))
   expect_true(any(grepl(
     "unavailable because they were undefined for all prediction streams",
     output,
@@ -386,7 +470,11 @@ test_that("summary.cpm supports configurable correlation methods", {
   output <- capture.output(print(summary_result))
 
   expect_identical(summary_result$settings$correlation_method, "spearman")
-  expect_true(all(summary_result$metrics$method == "spearman"))
+  expect_true(all(
+    summary_result$metrics$method[
+      summary_result$metrics$metric == "correlation"
+    ] == "spearman"
+  ))
   expect_true(any(grepl("Pooled correlations \\(Spearman\\):", output)))
 })
 
@@ -454,6 +542,7 @@ test_that("print.cpm_summary reports fold count, correlations, and edge rates", 
   )))
   expect_true(any(grepl("Joint: 0.400", output, fixed = TRUE)))
   expect_true(any(grepl("Joint: 0.350 (SE 0.050)", output, fixed = TRUE)))
+  expect_true(any(grepl("5/5 folds", output, fixed = TRUE)))
   expect_true(any(grepl("Positive: 50.00%", output, fixed = TRUE)))
   expect_true(any(grepl("Negative: 25.00%", output, fixed = TRUE)))
 })
@@ -487,6 +576,7 @@ test_that("print.cpm_summary prints fold-wise block when some streams remain est
     metrics = within(example_cpm_summary()$metrics, {
       estimate[level == "foldwise" & prediction == "positive"] <- NA_real_
       std_error[level == "foldwise" & prediction == "positive"] <- NA_real_
+      n_folds[level == "foldwise" & prediction == "positive"] <- 0L
     })
   )
 
@@ -531,14 +621,14 @@ test_that("correlation tables summarize pooled and fold-wise predictions", {
 
   expect_named(
     foldwise,
-    c("fold", "n_assess", "prediction", "estimate", "method")
+    c("fold", "metric", "n_assess", "prediction", "estimate", "method")
   )
   expect_equal(nrow(foldwise), 6)
   expect_equal(sort(unique(foldwise$fold)), 1:2)
   expect_equal(unique(foldwise$n_assess), 3)
 })
 
-test_that("summary correlations combine pooled and fold-wise estimates", {
+test_that("summary metrics combine errors and fold-wise correlations", {
   pooled <- data.frame(
     prediction = c("joint", "positive", "negative"),
     estimate = c(0.4, 0.2, -0.1),
@@ -561,7 +651,10 @@ test_that("summary correlations combine pooled and fold-wise estimates", {
     stringsAsFactors = FALSE
   )
 
-  metrics <- compute_summary_correlations(
+  pooled$metric <- "correlation"
+  pooled$n <- 10L
+  foldwise$metric <- "correlation"
+  metrics <- compute_summary_metrics(
     pooled_metrics = pooled,
     foldwise_metrics = foldwise,
     correlation_method = "pearson"
@@ -569,9 +662,19 @@ test_that("summary correlations combine pooled and fold-wise estimates", {
 
   expect_named(
     metrics,
-    c("level", "prediction", "estimate", "std_error", "method")
+    c(
+      "level",
+      "metric",
+      "prediction",
+      "estimate",
+      "std_error",
+      "method",
+      "n",
+      "n_folds"
+    )
   )
   expect_true(all(c("pooled", "foldwise") %in% metrics$level))
+  expect_true(all(metrics$metric == "correlation"))
   expect_equal(
     summary_correlation_values(metrics, level = "pooled"),
     c(joint = 0.4, positive = 0.2, negative = -0.1)

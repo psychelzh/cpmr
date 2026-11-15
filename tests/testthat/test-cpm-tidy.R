@@ -14,6 +14,7 @@ test_that("tidy metrics returns pooled and foldwise metric tables", {
 
   expect_true(all(
     c(
+      "metric",
       "fold",
       "n_assess",
       "prediction",
@@ -24,14 +25,17 @@ test_that("tidy metrics returns pooled and foldwise metric tables", {
   ))
   expect_true(all(
     c(
+      "metric",
       "prediction",
       "estimate",
+      "n",
       "method"
     ) %in%
       names(pooled)
   ))
   expect_true(all(c("joint", "positive", "negative") %in% pooled$prediction))
-  expect_true(all(pooled$method == "pearson"))
+  expect_true(all(c("rmse", "mae", "correlation") %in% pooled$metric))
+  expect_true(all(pooled$method[pooled$metric == "correlation"] == "pearson"))
 })
 
 test_that("tidy metrics supports spearman correlation", {
@@ -44,8 +48,8 @@ test_that("tidy metrics supports spearman correlation", {
     method = "spearman"
   )
 
-  expect_equal(nrow(pooled), 3)
-  expect_true(all(pooled$method == "spearman"))
+  expect_equal(nrow(pooled), 9)
+  expect_true(all(pooled$method[pooled$metric == "correlation"] == "spearman"))
 })
 
 test_that("Basic case works for `tidy()`", {
@@ -54,7 +58,7 @@ test_that("Basic case works for `tidy()`", {
   pooled <- tidy(result, component = "metrics", level = "pooled")
   edges <- tidy(result, component = "edges")
 
-  expect_named(pooled, c("prediction", "estimate", "method"))
+  expect_named(pooled, c("metric", "prediction", "estimate", "n", "method"))
   expect_true(all(c("joint", "positive", "negative") %in% pooled$prediction))
   expect_named(
     edges,
@@ -67,16 +71,15 @@ test_that("Basic case works for `tidy()`", {
 
 test_that("Support pass arguments of `summary()`", {
   result <- example_tidy_result()
+  pooled <- tidy(
+    result,
+    component = "metrics",
+    level = "pooled",
+    method = "spearman"
+  )
 
   expect_equal(
-    unique(
-      tidy(
-        result,
-        component = "metrics",
-        level = "pooled",
-        method = "spearman"
-      )$method
-    ),
+    unique(pooled$method[pooled$metric == "correlation"]),
     "spearman"
   )
   expect_named(
@@ -92,17 +95,19 @@ test_that("tidy supports pooled and foldwise metric tables", {
   pooled <- tidy(result, component = "metrics", level = "pooled")
 
   expect_true(all(
-    c("fold", "n_assess", "prediction", "estimate", "method") %in%
+    c("fold", "metric", "n_assess", "prediction", "estimate", "method") %in%
       names(foldwise)
   ))
-  expect_true(all(c("prediction", "estimate", "method") %in% names(pooled)))
-  expect_true(all(pooled$method == "pearson"))
+  expect_true(all(
+    c("metric", "prediction", "estimate", "n", "method") %in% names(pooled)
+  ))
+  expect_true(all(pooled$method[pooled$metric == "correlation"] == "pearson"))
 })
 
 test_that("tidy edges errors clearly when edge storage is disabled", {
   withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
+  conmat <- matrix(rnorm(200), ncol = 10)
+  behav <- rnorm(20)
   result <- cpm(
     conmat = conmat,
     behav = behav,

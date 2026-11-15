@@ -3,11 +3,11 @@
 #' @param x A `cpm` object.
 #' @param ... Additional arguments passed to `summary()`.
 #' @param component A character vector indicating the component to tidy. Use
-#'   `"metrics"` for correlation tables derived from [summary.cpm()], or
+#'   `"metrics"` for metric tables derived from [summary.cpm()], or
 #'   `"edges"` for stored edge output.
-#' @param level Correlation table to return when `component = "metrics"`.
-#'   `"pooled"` returns pooled out-of-fold correlations, and `"foldwise"`
-#'   returns one row per fold and prediction stream.
+#' @param level Metric table to return when `component = "metrics"`.
+#'   `"pooled"` returns RMSE, MAE, and out-of-fold correlations; `"foldwise"`
+#'   returns one correlation row per fold and prediction stream.
 #' @return A [tibble][tibble::tibble-package] with component-specific columns.
 #' @export
 tidy.cpm <- function(

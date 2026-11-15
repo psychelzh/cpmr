@@ -37,11 +37,14 @@ NULL
 #' @param covariates A matrix of covariates. Observations in row, variables in
 #'   column. If `NULL`, no covariates are used. Vectors are converted to
 #'   single-column matrices.
-#' @param resamples Optional assessment-plan specification. Use `NULL` for
-#'   leave-one-out assessment, a single integer greater than or equal to 2 to
-#'   request k-fold assessment, or a list of assessment indices for manual
-#'   folds. Manual `resamples` must contain integer vectors indexing rows in
-#'   `conmat`.
+#' @param resamples Assessment-plan specification. Defaults to 10-fold
+#'   assessment. Use `NULL` for leave-one-out assessment, a single integer
+#'   greater than or equal to 2 to request k-fold assessment, or a list of
+#'   assessment indices for manual folds. Manual `resamples` must contain
+#'   integer vectors indexing rows in `conmat`. Ten-fold assessment needs at
+#'   least 10 complete cases; around 30 cases are a rough minimum for having
+#'   at least 3 observations in each assessment fold, not a guarantee of
+#'   stable correlations.
 #' @param return_edges A character string indicating the return value of the
 #'   selected edges. `"sum"` stores fold counts for each selected edge,
 #'   `"none"` skips edge storage, and `"all"` stores the fold-wise edge masks.
@@ -55,9 +58,9 @@ NULL
 #' runs.
 #'
 #' `cpm()` returns a `cpm` object containing observation-level predictions,
-#' assessment folds, and optional stored edges. Call [summary.cpm()] for the
-#' default correlation summary, or [tidy.cpm()] when you want pooled or
-#' fold-wise correlation tables.
+#' assessment folds, and optional stored edges. Call [summary.cpm()] for
+#' prediction errors and correlation summaries, or [tidy.cpm()] for their
+#' pooled or fold-wise tables.
 #' @export
 cpm <- function(
   conmat,
@@ -65,7 +68,7 @@ cpm <- function(
   spec = NULL,
   ...,
   covariates = NULL,
-  resamples = NULL,
+  resamples = 10L,
   return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude")
 ) {
@@ -184,7 +187,7 @@ print.cpm <- function(x, ...) {
     model_summary
   )
   cat(
-    "  Use summary() for aggregate correlations and tidy() for correlation tables.\n"
+    "  Use summary() for aggregate metrics and tidy() for metric tables.\n"
   )
   invisible(x)
 }
