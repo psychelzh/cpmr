@@ -42,12 +42,11 @@ run_cpm_workflow <- function(
       model_spec = object$model
     )
 
-    edges <- update_edge_storage(
-      edges = edges,
-      return_edges = return_edges,
-      fold = fold,
-      edge_mask = split_result$edge_mask
-    )
+    if (return_edges == "all") {
+      edges[,, fold] <- split_result$edge_mask
+    } else if (return_edges == "sum") {
+      edges <- edges + split_result$edge_mask
+    }
     split_results[[fold]] <- split_result[c("observed", "predictions")]
     rm(split_result)
   }
@@ -212,18 +211,6 @@ init_edge_storage <- function(return_edges, conmat, n_folds) {
       dimnames = list(NULL, edge_signs)
     ),
     none = NULL
-  )
-}
-
-update_edge_storage <- function(edges, return_edges, fold, edge_mask) {
-  switch(
-    return_edges,
-    all = {
-      edges[,, fold] <- edge_mask
-      edges
-    },
-    sum = edges + edge_mask,
-    none = edges
   )
 }
 

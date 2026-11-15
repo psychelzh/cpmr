@@ -26,6 +26,7 @@
   for sparse edge selections.
 * Fold execution discards intermediate model state after each fit instead of
   retaining it until all predictions have been assembled.
+* Fold-wise edge storage avoids copying the full edge array for every fold.
 * Reworked package documentation and pkgdown navigation around the
   `spec()` + `cpm()` workflow, including a native getting-started vignette.
 
