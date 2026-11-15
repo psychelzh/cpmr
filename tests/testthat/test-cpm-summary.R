@@ -83,6 +83,13 @@ example_cpm_summary <- function(
     prediction_streams = prediction_streams
   )
 ) {
+  if (!"descriptive_only" %in% names(metrics)) {
+    metrics$descriptive_only <- FALSE
+  }
+  if (!"descriptive_only" %in% names(tables$pooled)) {
+    tables$pooled$descriptive_only <- FALSE
+  }
+
   structure(
     list(
       metrics = metrics,
@@ -134,6 +141,7 @@ test_that("summary correlation helpers produce stable summaries", {
   )
   pooled$metric <- "correlation"
   pooled$n <- 10L
+  pooled$descriptive_only <- TRUE
   foldwise$metric <- "correlation"
 
   metrics <- compute_summary_metrics(
@@ -152,7 +160,8 @@ test_that("summary correlation helpers produce stable summaries", {
       "std_error",
       "method",
       "n",
-      "n_folds"
+      "n_folds",
+      "descriptive_only"
     )
   )
   expect_equal(
@@ -171,7 +180,9 @@ test_that("summary correlation helpers produce stable summaries", {
     ),
     c(joint = 0.3, positive = 0.2, negative = NA_real_)
   )
-  expect_true(all(metrics$method[metrics$metric == "correlation"] == "spearman"))
+  expect_true(all(
+    metrics$method[metrics$metric == "correlation"] == "spearman"
+  ))
 })
 
 test_that("safe summary helpers handle empty and missing values", {
@@ -210,6 +221,46 @@ test_that("pooled metric tables compute errors from complete prediction pairs", 
   expect_identical(joint_n, 3L)
 })
 
+test_that("foldwise summaries count only valid correlations", {
+  predictions <- data.frame(
+    row = 1:8,
+    fold = c(1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L),
+    observed = c(1, 2, 1, 2, 3, 5, 6, 7),
+    joint = c(1, 2, 1, 2, 3, 0, 0, 0),
+    positive = c(2, 1, 3, 2, 1, 5, 6, 7),
+    negative = c(1, 2, 1, 2, 3, 7, 6, 5)
+  )
+  result <- structure(
+    list(
+      spec = spec(),
+      settings = list(return_edges = "none"),
+      predictions = predictions,
+      edges = NULL,
+      folds = list(1:2, 3:5, 6:8)
+    ),
+    class = "cpm"
+  )
+
+  metrics <- summary(result)$metrics
+  foldwise <- metrics[metrics$level == "foldwise", ]
+
+  expect_equal(
+    stats::setNames(foldwise$n_folds, foldwise$prediction),
+    c(joint = 1L, positive = 2L, negative = 2L)
+  )
+  expect_equal(
+    summary_correlation_values(metrics, level = "foldwise"),
+    c(joint = 1, positive = 0, negative = 0)
+  )
+  expect_true(is.na(
+    summary_correlation_values(
+      metrics,
+      level = "foldwise",
+      field = "std_error"
+    )[["joint"]]
+  ))
+})
+
 test_that("summary.cpm returns the expected object structure", {
   summary_result <- summary(example_summary_result())
 
@@ -220,8 +271,17 @@ test_that("summary.cpm returns the expected object structure", {
   )
   expect_named(
     summary_result$metrics,
-    c("level", "metric", "prediction", "estimate", "std_error", "method",
-      "n", "n_folds")
+    c(
+      "level",
+      "metric",
+      "prediction",
+      "estimate",
+      "std_error",
+      "method",
+      "n",
+      "n_folds",
+      "descriptive_only"
+    )
   )
   expect_named(summary_result$tables, c("pooled", "foldwise"))
   expect_identical(summary_result$settings$n_folds, 5L)
@@ -396,6 +456,19 @@ test_that("summary.cpm keeps explicit LOO summaries usable", {
   output <- capture.output(print(summary_result))
 
   expect_true(all(c("rmse", "mae") %in% summary_result$metrics$metric))
+  expect_true(all(
+    summary_result$metrics$descriptive_only[
+      summary_result$metrics$level == "pooled" &
+        summary_result$metrics$metric == "correlation"
+    ]
+  ))
+  pooled_metrics <- tidy(result, component = "metrics", level = "pooled")
+  expect_true(all(
+    pooled_metrics$descriptive_only[pooled_metrics$metric == "correlation"]
+  ))
+  expect_false(any(
+    pooled_metrics$descriptive_only[pooled_metrics$metric %in% c("rmse", "mae")]
+  ))
   expect_true(all(is.finite(summary_correlation_values(
     summary_result$metrics,
     level = "pooled"
@@ -404,7 +477,10 @@ test_that("summary.cpm keeps explicit LOO summaries usable", {
     summary_result$metrics,
     level = "foldwise"
   ))))
-  expect_true(any(grepl("Pooled correlations \\(Pearson; descriptive only\\):", output)))
+  expect_true(any(grepl(
+    "Pooled correlations \\(Pearson; descriptive only\\):",
+    output
+  )))
   expect_true(any(grepl("Pooled RMSE:", output, fixed = TRUE)))
   expect_true(any(grepl("Pooled MAE:", output, fixed = TRUE)))
   expect_true(any(grepl("descriptive only", output, fixed = TRUE)))
@@ -473,7 +549,8 @@ test_that("summary.cpm supports configurable correlation methods", {
   expect_true(all(
     summary_result$metrics$method[
       summary_result$metrics$metric == "correlation"
-    ] == "spearman"
+    ] ==
+      "spearman"
   ))
   expect_true(any(grepl("Pooled correlations \\(Spearman\\):", output)))
 })
@@ -653,6 +730,7 @@ test_that("summary metrics combine errors and fold-wise correlations", {
 
   pooled$metric <- "correlation"
   pooled$n <- 10L
+  pooled$descriptive_only <- FALSE
   foldwise$metric <- "correlation"
   metrics <- compute_summary_metrics(
     pooled_metrics = pooled,
@@ -670,7 +748,8 @@ test_that("summary metrics combine errors and fold-wise correlations", {
       "std_error",
       "method",
       "n",
-      "n_folds"
+      "n_folds",
+      "descriptive_only"
     )
   )
   expect_true(all(c("pooled", "foldwise") %in% metrics$level))

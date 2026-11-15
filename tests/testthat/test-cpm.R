@@ -168,7 +168,8 @@ test_that("10-fold assessment warns when folds are too small for correlations", 
   expect_true(all(
     summary_result$metrics$n_folds[
       summary_result$metrics$level == "foldwise"
-    ] == 0L
+    ] ==
+      0L
   ))
 })
 

@@ -22,7 +22,9 @@
 
 \item{level}{Metric table to return when \code{component = "metrics"}.
 \code{"pooled"} returns RMSE, MAE, and out-of-fold correlations; \code{"foldwise"}
-returns one correlation row per fold and prediction stream.}
+returns one correlation row per fold and prediction stream. The pooled
+table's \code{descriptive_only} column flags correlations computed when
+assessment folds contain fewer than three observations.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} with component-specific columns.

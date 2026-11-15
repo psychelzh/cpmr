@@ -22,8 +22,8 @@
 A \code{cpm_summary} object with the following elements:
 \describe{
 \item{\code{metrics}}{A summary-level data frame with \code{level}, \code{metric},
-\code{prediction}, \code{estimate}, \code{std_error}, \code{method}, \code{n}, and \code{n_folds}
-columns.}
+\code{prediction}, \code{estimate}, \code{std_error}, \code{method}, \code{n}, \code{n_folds}, and
+\code{descriptive_only} columns.}
 \item{\code{tables}}{A list of pooled metric and fold-wise correlation tables
 for downstream tidying.}
 \item{\code{edges}}{Aggregated edge-selection rates, or \code{NULL} when edges were
@@ -38,5 +38,9 @@ Summarize a \code{cpm} object
 \code{summary.cpm()} reports pooled out-of-fold RMSE and MAE, pooled correlations,
 and the mean and standard error of fold-wise correlations. Correlations
 require at least three valid pairs; fold-wise correlations are unavailable
-for folds with fewer than three assessment observations.
+for folds with fewer than three assessment observations. With covariates,
+reported RMSE and MAE are on the fold-specific residualized outcome scale,
+not the original behavior scale. Pooled correlation rows include a
+\code{descriptive_only} flag when assessment folds are too small for fold-wise
+correlations.
 }

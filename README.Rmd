@@ -140,9 +140,11 @@ around 30 cases are a rough minimum for having at least 3 observations in each
 assessment fold, not a guarantee of stable correlations. Folds smaller than 3
 produce a warning because their fold-wise correlations are unavailable. In
 that setting, RMSE and MAE are prioritized and pooled out-of-fold correlations
-are descriptive. Use `resamples = NULL` to explicitly request leave-one-out
-assessment, `resamples = 5` for 5-fold assessment, or a list of indices for a
-manual assessment-fold partition.
+are marked `descriptive_only` in the pooled metric table. When covariates are
+used, RMSE and MAE are calculated on the fold-specific residualized outcome
+scale rather than the original behavior scale. Use `resamples = NULL` to
+explicitly request leave-one-out assessment, `resamples = 5` for 5-fold
+assessment, or a list of indices for a manual assessment-fold partition.
 
 ## Choosing a path
 

@@ -7,7 +7,9 @@
 #'   `"edges"` for stored edge output.
 #' @param level Metric table to return when `component = "metrics"`.
 #'   `"pooled"` returns RMSE, MAE, and out-of-fold correlations; `"foldwise"`
-#'   returns one correlation row per fold and prediction stream.
+#'   returns one correlation row per fold and prediction stream. The pooled
+#'   table's `descriptive_only` column flags correlations computed when
+#'   assessment folds contain fewer than three observations.
 #' @return A [tibble][tibble::tibble-package] with component-specific columns.
 #' @export
 tidy.cpm <- function(

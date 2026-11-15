@@ -196,12 +196,12 @@ head(tidy(result, component = "metrics"))
 #> 6     2 correlation       20 negative     0.0234 pearson
 pooled_metrics <- tidy(result, component = "metrics", level = "pooled")
 head(pooled_metrics[pooled_metrics$metric == "correlation", ])
-#> # A tibble: 3 x 5
-#>   metric      prediction estimate     n method
-#>   <chr>       <chr>         <dbl> <int> <chr>
-#> 1 correlation joint       -0.108    100 pearson
-#> 2 correlation positive    -0.0736   100 pearson
-#> 3 correlation negative    -0.0798   100 pearson
+#> # A tibble: 3 x 6
+#>   metric      prediction estimate     n method  descriptive_only
+#>   <chr>       <chr>         <dbl> <int> <chr>   <lgl>
+#> 1 correlation joint       -0.108    100 pearson FALSE
+#> 2 correlation positive    -0.0736   100 pearson FALSE
+#> 3 correlation negative    -0.0798   100 pearson FALSE
 ```
 
 `summary(result)` reports pooled out-of-fold RMSE and MAE, pooled
@@ -215,10 +215,12 @@ cases; around 30 cases are a rough minimum for having at least 3
 observations in each assessment fold, not a guarantee of stable
 correlations. Folds smaller than 3 produce a warning because their
 fold-wise correlations are unavailable. In that setting, RMSE and MAE
-are prioritized and pooled out-of-fold correlations are descriptive. Use
-`resamples = NULL` to explicitly request leave-one-out assessment,
-`resamples = 5` for 5-fold assessment, or a list of indices for a manual
-assessment-fold partition.
+are prioritized and pooled out-of-fold correlations are marked
+`descriptive_only` in the pooled metric table. When covariates are used,
+RMSE and MAE are calculated on the fold-specific residualized outcome
+scale rather than the original behavior scale. Use `resamples = NULL` to
+explicitly request leave-one-out assessment, `resamples = 5` for 5-fold
+assessment, or a list of indices for a manual assessment-fold partition.
 
 ## Choosing a path
 

@@ -9,13 +9,17 @@
 #' `summary.cpm()` reports pooled out-of-fold RMSE and MAE, pooled correlations,
 #' and the mean and standard error of fold-wise correlations. Correlations
 #' require at least three valid pairs; fold-wise correlations are unavailable
-#' for folds with fewer than three assessment observations.
+#' for folds with fewer than three assessment observations. With covariates,
+#' reported RMSE and MAE are on the fold-specific residualized outcome scale,
+#' not the original behavior scale. Pooled correlation rows include a
+#' `descriptive_only` flag when assessment folds are too small for fold-wise
+#' correlations.
 #'
 #' @return A `cpm_summary` object with the following elements:
 #' \describe{
 #'   \item{`metrics`}{A summary-level data frame with `level`, `metric`,
-#'     `prediction`, `estimate`, `std_error`, `method`, `n`, and `n_folds`
-#'     columns.}
+#'     `prediction`, `estimate`, `std_error`, `method`, `n`, `n_folds`, and
+#'     `descriptive_only` columns.}
 #'   \item{`tables`}{A list of pooled metric and fold-wise correlation tables
 #'     for downstream tidying.}
 #'   \item{`edges`}{Aggregated edge-selection rates, or `NULL` when edges were
@@ -29,9 +33,11 @@ summary.cpm <- function(
   method = c("pearson", "spearman")
 ) {
   correlation_method <- match.arg(method)
+  small_assessment_folds <- any(lengths(object$folds) < 3L)
   pooled_metrics <- compute_pooled_metric_table(
     object$predictions,
-    correlation_method = correlation_method
+    correlation_method = correlation_method,
+    descriptive_only = small_assessment_folds
   )
   foldwise_metrics <- compute_fold_correlation_table(
     object$predictions,
@@ -66,7 +72,7 @@ summary.cpm <- function(
       edges = edge_rates,
       settings = list(
         n_folds = length(object$folds),
-        small_assessment_folds = any(lengths(object$folds) < 3L),
+        small_assessment_folds = small_assessment_folds,
         edge_storage = edge_storage,
         correlation_method = correlation_method,
         prediction_streams = prediction_columns(object$predictions)
@@ -159,7 +165,8 @@ print.cpm_summary <- function(x, ...) {
 
 compute_pooled_metric_table <- function(
   predictions,
-  correlation_method = c("pearson", "spearman")
+  correlation_method = c("pearson", "spearman"),
+  descriptive_only = FALSE
 ) {
   prediction_streams <- prediction_columns(predictions)
   error_metrics <- do.call(
@@ -181,6 +188,7 @@ compute_pooled_metric_table <- function(
         ),
         n = length(errors),
         method = NA_character_,
+        descriptive_only = FALSE,
         stringsAsFactors = FALSE
       )
     })
@@ -200,8 +208,9 @@ compute_pooled_metric_table <- function(
     },
     integer(1)
   )
-  correlations <- correlations[
-    , c("metric", "prediction", "estimate", "n", "method"),
+  correlations$descriptive_only <- descriptive_only
+  correlations <- correlations[,
+    c("metric", "prediction", "estimate", "n", "method", "descriptive_only"),
     drop = FALSE
   ]
 
@@ -297,6 +306,7 @@ compute_summary_metrics <- function(
       method = pooled_errors$method,
       n = pooled_errors$n,
       n_folds = rep(NA_integer_, nrow(pooled_errors)),
+      descriptive_only = pooled_errors$descriptive_only,
       stringsAsFactors = FALSE
     ),
     data.frame(
@@ -308,6 +318,7 @@ compute_summary_metrics <- function(
       method = correlation_method,
       n = pooled_correlations$n,
       n_folds = rep(NA_integer_, nrow(pooled_correlations)),
+      descriptive_only = pooled_correlations$descriptive_only,
       stringsAsFactors = FALSE
     ),
     data.frame(
@@ -337,12 +348,15 @@ compute_summary_metrics <- function(
       n_folds = vapply(
         foldwise_predictions,
         function(prediction_stream) {
-          sum(!is.na(foldwise_metrics$estimate[
-            foldwise_metrics$prediction == prediction_stream
-          ]))
+          sum(
+            !is.na(foldwise_metrics$estimate[
+              foldwise_metrics$prediction == prediction_stream
+            ])
+          )
         },
         integer(1)
       ),
+      descriptive_only = rep(FALSE, length(foldwise_predictions)),
       stringsAsFactors = FALSE
     )
   )

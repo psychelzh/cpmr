@@ -29,7 +29,8 @@ test_that("tidy metrics returns pooled and foldwise metric tables", {
       "prediction",
       "estimate",
       "n",
-      "method"
+      "method",
+      "descriptive_only"
     ) %in%
       names(pooled)
   ))
@@ -58,7 +59,10 @@ test_that("Basic case works for `tidy()`", {
   pooled <- tidy(result, component = "metrics", level = "pooled")
   edges <- tidy(result, component = "edges")
 
-  expect_named(pooled, c("metric", "prediction", "estimate", "n", "method"))
+  expect_named(
+    pooled,
+    c("metric", "prediction", "estimate", "n", "method", "descriptive_only")
+  )
   expect_true(all(c("joint", "positive", "negative") %in% pooled$prediction))
   expect_named(
     edges,
@@ -99,7 +103,15 @@ test_that("tidy supports pooled and foldwise metric tables", {
       names(foldwise)
   ))
   expect_true(all(
-    c("metric", "prediction", "estimate", "n", "method") %in% names(pooled)
+    c(
+      "metric",
+      "prediction",
+      "estimate",
+      "n",
+      "method",
+      "descriptive_only"
+    ) %in%
+      names(pooled)
   ))
   expect_true(all(pooled$method[pooled$metric == "correlation"] == "pearson"))
 })
