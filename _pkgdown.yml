@@ -1,4 +1,7 @@
 url: https://psychelzh.github.io/cpmr/
+redirects:
+  - ["reference/cpm_spec.html", "reference/spec.html"]
+
 template:
   bootstrap: 5
 
