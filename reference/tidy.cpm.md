@@ -6,7 +6,12 @@ Tidy a `cpm` object
 
 ``` r
 # S3 method for class 'cpm'
-tidy(x, ..., component = c("performance", "edges"))
+tidy(
+  x,
+  ...,
+  component = c("metrics", "edges"),
+  level = c("foldwise", "pooled")
+)
 ```
 
 ## Arguments
@@ -22,44 +27,18 @@ tidy(x, ..., component = c("performance", "edges"))
 
 - component:
 
-  A character vector indicating the component to tidy.
+  A character vector indicating the component to tidy. Use `"metrics"`
+  for correlation tables derived from
+  [`summary.cpm()`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md),
+  or `"edges"` for stored edge output.
+
+- level:
+
+  Correlation table to return when `component = "metrics"`. `"pooled"`
+  returns pooled out-of-fold correlations, and `"foldwise"` returns one
+  row per fold and prediction stream.
 
 ## Value
 
 A [tibble](https://tibble.tidyverse.org/reference/tibble-package.html)
-with columns storing parameters of the
-[`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) object and
-further columns depending on the `component` argument:
-
-For `component = "performance"`:
-
-- method:
-
-  The method used to calculate the correlation between the real and
-  predicted values.
-
-- pos:
-
-  The correlation between the real and predicted values for positive
-  edges.
-
-- neg:
-
-  The correlation between the real and predicted values for negative
-  edges.
-
-For `component = "edges"`:
-
-- level:
-
-  The proportional threshold for edge selection.
-
-- pos:
-
-  A logical vector indicating whether each edge is selected based on the
-  edge_level (positive).
-
-- neg:
-
-  A logical vector indicating whether each edge is selected based on the
-  edge_level (negative).
+with component-specific columns.

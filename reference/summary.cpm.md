@@ -1,13 +1,12 @@
-# Summary of a cpm object.
+# Summarize a `cpm` object
 
-This function provides a summary of a `cpm` object, including the
-prediction performance and the selected edges.
+Summarize a `cpm` object
 
 ## Usage
 
 ``` r
 # S3 method for class 'cpm'
-summary(object, ..., method = c("pearson", "spearman"), edge_level = 0.5)
+summary(object, ..., method = c("pearson", "spearman"))
 
 # S3 method for class 'cpm_summary'
 print(x, ...)
@@ -21,17 +20,11 @@ print(x, ...)
 
 - ...:
 
-  Other parameters passed to the function.
+  For future extension. Currently ignored.
 
 - method:
 
-  A character vector indicating the method used to calculate the
-  correlation between the real and predicted values.
-
-- edge_level:
-
-  A numeric value between 0 and 1 indicating the proportional threshold
-  for edge selection.
+  Correlation method used for pooled and fold-wise summaries.
 
 - x:
 
@@ -39,19 +32,29 @@ print(x, ...)
 
 ## Value
 
-A list of class `cpm_summary` containing two elements:
+A `cpm_summary` object with the following elements:
 
-- performance:
+- `metrics`:
 
-  A matrix of prediction performance, including the correlation between
-  the real and predicted values for both edges, positive edges only, and
-  negative edges only.
+  A compact summary-level data frame with columns `level`, `prediction`,
+  `estimate`, `std_error`, and `method`. It stores pooled correlations
+  together with fold-wise correlation summaries.
 
-- edges:
+- `tables`:
 
-  A logical vector indicating whether each edge is selected based on the
-  edge_level.
+  A list with `pooled` and `foldwise` correlation tables for downstream
+  tidying.
 
-- params:
+- `edges`:
 
-  A list of parameters used in the summary.
+  Aggregated edge-selection rates, or `NULL` when edges were not stored.
+
+- `settings`:
+
+  A list containing summary-relevant CPM settings.
+
+## Details
+
+`summary.cpm()` is designed to give a compact correlation-based report.
+It summarizes pooled out-of-fold correlations for each prediction stream
+and then reports the mean and standard error of fold-wise correlations.

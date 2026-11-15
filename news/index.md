@@ -2,17 +2,58 @@
 
 ## cpmr (development version)
 
+### Breaking changes
+
+- [`cpm()`](https://psychelzh.github.io/cpmr/reference/spec.md) now uses
+  a staged specification created by
+  [`spec()`](https://psychelzh.github.io/cpmr/reference/spec.md). The
+  old `thresh_method`, `thresh_level`, `kfolds`, and `bias_correct`
+  arguments have been replaced by `spec`, `resamples`, and staged helper
+  constructors. Unused arguments passed through `...` now cause an error
+  rather than being ignored.
+- Removed the deprecated `confounds` alias. Use `covariates` instead.
+- The returned `cpm` object now stores workflow state under `spec`,
+  `settings`, `predictions`, and `folds`. Code that accessed the old
+  `real`, `pred`, or `params` fields must be updated.
+
 ### Enhancements
 
-- Clarified `print.cpm()` output when edges are not stored and hardened
-  [`summary.cpm()`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)
-  fold fallback for legacy objects.
+- Added [`spec()`](https://psychelzh.github.io/cpmr/reference/spec.md)
+  together with
+  [`cpm_selection_cor()`](https://psychelzh.github.io/cpmr/reference/cpm_selection_cor.md),
+  [`cpm_construction_strength()`](https://psychelzh.github.io/cpmr/reference/cpm_construction_strength.md),
+  and
+  [`cpm_model_lm()`](https://psychelzh.github.io/cpmr/reference/cpm_model_lm.md)
+  to make screening, summarization, and outcome-model choices explicit.
+- [`cpm()`](https://psychelzh.github.io/cpmr/reference/spec.md) now
+  accepts integer or manual assessment plans through `resamples`, while
+  keeping leave-one-out assessment as the default when `resamples` is
+  `NULL`.
+- [`summary.cpm()`](https://psychelzh.github.io/cpmr/reference/summary.cpm.md)
+  and
+  [`tidy.cpm()`](https://psychelzh.github.io/cpmr/reference/tidy.cpm.md)
+  now focus on correlation-based reporting, with pooled and fold-wise
+  correlation tables plus optional edge summaries.
+- Unweighted edge standardization now processes only selected edges when
+  constructing training and assessment features, reducing time and
+  memory use for sparse edge selections.
+- Fold execution discards intermediate model state after each fit
+  instead of retaining it until all predictions have been assembled.
+- Fold-wise edge storage avoids copying the full edge array for every
+  fold.
+- Reworked package documentation and pkgdown navigation around the
+  [`spec()`](https://psychelzh.github.io/cpmr/reference/spec.md) +
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/spec.md)
+  workflow, including a native getting-started vignette.
 
 ### Maintenance
 
-- Stabilized GitHub Actions uploads for Codecov coverage and Test
-  Analytics by generating and uploading JUnit test results from an
-  explicit workspace path.
+- Corrected covariate-adjusted p-value screening degrees of freedom and
+  predictions from rank-deficient nuisance regressions.
+- Simplified the internal CPM workflow around fold-based execution and
+  aligned `tests/testthat` with the current `R/` modules.
+- Hardened assessment-fold validation and leakage-safe preprocessing so
+  each fold must retain at least 3 complete-case training observations.
 
 ## cpmr 0.1.1
 
@@ -25,7 +66,7 @@ CRAN release: 2026-03-11
   addition, the documentation which mentioned `networks` has been
   updated to use correlation types to better reflect their meaning.
 - Reorganized `R/cpm.R` so
-  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) remains
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/spec.md) remains
   the entry-point function at the top, followed by `print.cpm()`, with
   internal helpers grouped below.
 - Improved test architecture with explicit internal-helper coverage and
@@ -34,7 +75,7 @@ CRAN release: 2026-03-11
 ### Maintenance
 
 - Refactored the internal
-  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) workflow
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/spec.md) workflow
   into smaller helpers (`normalize_inputs`, `resolve_include_cases`,
   `apply_confounds_regression`, etc.) while preserving user-facing
   behavior.
@@ -58,15 +99,15 @@ CRAN release: 2024-10-06
   method to tidy the results of the CPM analysis
   ([\#10](https://github.com/psychelzh/cpmr/issues/10)).
 - Support `na_action` argument in
-  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) function
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/spec.md) function
   to handle missing values in the input data
   ([\#2](https://github.com/psychelzh/cpmr/issues/2)).
 
 ### Enhancements
 
 - Added `params` to
-  [`cpm()`](https://psychelzh.github.io/cpmr/reference/cpm.md) output to
-  store the input arguments
+  [`cpm()`](https://psychelzh.github.io/cpmr/reference/spec.md) output
+  to store the input arguments
   ([\#14](https://github.com/psychelzh/cpmr/issues/14)).
 - Let `"sum"` be the default value for `return_edges` argument.
 - Let the first two dimensions of `edges` in the output be edges and

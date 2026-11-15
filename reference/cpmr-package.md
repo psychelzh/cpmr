@@ -20,3 +20,8 @@ Useful links:
 
 **Maintainer**: Liang Zhang <psychelzh@outlook.com>
 ([ORCID](https://orcid.org/0000-0001-9041-1150))
+
+Authors:
+
+- Liang Zhang <psychelzh@outlook.com>
+  ([ORCID](https://orcid.org/0000-0001-9041-1150))
