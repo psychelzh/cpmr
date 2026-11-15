@@ -17,7 +17,7 @@ example_cpm_result <- function(
   return_edges = "sum",
   na_action = "fail"
 ) {
-  cpm(
+  suppressWarnings(cpm(
     conmat = conmat,
     behav = behav,
     spec = spec_obj,
@@ -25,13 +25,13 @@ example_cpm_result <- function(
     resamples = resamples,
     return_edges = return_edges,
     na_action = na_action
-  )
+  ))
 }
 
 test_that("net construction yields a single prediction stream", {
   withr::local_seed(101)
-  conmat <- matrix(rnorm(120), ncol = 12)
-  behav <- rnorm(10)
+  conmat <- matrix(rnorm(240), ncol = 12)
+  behav <- rnorm(20)
   s <- spec(
     construction = cpm_construction_strength(sign_mode = "net")
   )
@@ -43,8 +43,8 @@ test_that("net construction yields a single prediction stream", {
 
 test_that("cpm returns predictions and folds", {
   withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
+  conmat <- matrix(rnorm(200), ncol = 10)
+  behav <- rnorm(20)
   s <- spec()
 
   res <- cpm(conmat = conmat, behav = behav, spec = s, resamples = 5)
@@ -54,7 +54,7 @@ test_that("cpm returns predictions and folds", {
   expect_s3_class(res$spec, "cpm_spec")
   expect_identical(res$spec, s)
   expect_identical(length(res$folds), 5L)
-  expect_equal(nrow(res$predictions), 10)
+  expect_equal(nrow(res$predictions), 20)
   expect_named(
     res$predictions,
     c("row", "fold", "observed", "joint", "positive", "negative")
@@ -65,13 +65,14 @@ test_that("cpm returns predictions and folds", {
 
 test_that("cpm uses spec() by default", {
   withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
+  conmat <- matrix(rnorm(300), ncol = 10)
+  behav <- rnorm(30)
 
-  res <- cpm(conmat = conmat, behav = behav, resamples = 5)
+  res <- cpm(conmat = conmat, behav = behav)
 
   expect_s3_class(res, "cpm")
   expect_s3_class(res$spec, "cpm_spec")
+  expect_length(res$folds, 10L)
 })
 
 test_that("cpm validates `spec` input", {
@@ -121,15 +122,61 @@ test_that("cpm validates fold-count resamples", {
   )
   expect_error(
     cpm(conmat = conmat, behav = behav, spec = spec, resamples = 11),
-    "`resamples` as a fold count must be less than or equal to complete-case observations.",
+    "The requested fold count must be less than or equal to the number of complete-case observations.",
     fixed = TRUE
   )
 })
 
+test_that("default 10-fold assessment requires 10 complete cases", {
+  conmat <- matrix(rnorm(90), ncol = 10)
+  behav <- rnorm(9)
+
+  expect_error(
+    cpm(conmat = conmat, behav = behav, return_edges = "none"),
+    "specify a smaller `resamples` value or use `resamples = NULL`.",
+    fixed = TRUE
+  )
+
+  behav <- c(rnorm(9), NA_real_)
+  conmat <- matrix(rnorm(100), ncol = 10)
+  expect_error(
+    cpm(
+      conmat = conmat,
+      behav = behav,
+      na_action = "exclude",
+      return_edges = "none"
+    ),
+    "specify a smaller `resamples` value or use `resamples = NULL`.",
+    fixed = TRUE
+  )
+})
+
+test_that("10-fold assessment warns when folds are too small for correlations", {
+  withr::local_seed(123)
+  conmat <- matrix(rnorm(190), ncol = 10)
+  behav <- rnorm(19)
+
+  expect_warning(
+    result <- cpm(conmat = conmat, behav = behav),
+    "10 of 10 assessment folds contain fewer than 3 observations"
+  )
+  summary_result <- summary(result)
+
+  expect_true(all(lengths(result$folds) < 3L))
+  expect_true(summary_result$settings$small_assessment_folds)
+  expect_true(all(is.na(summary_result$tables$foldwise$estimate)))
+  expect_true(all(
+    summary_result$metrics$n_folds[
+      summary_result$metrics$level == "foldwise"
+    ] ==
+      0L
+  ))
+})
+
 test_that("cpm validates custom resamples", {
   withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
+  conmat <- matrix(rnorm(200), ncol = 10)
+  behav <- rnorm(20)
   spec <- spec()
 
   expect_error(
@@ -239,8 +286,8 @@ test_that("cpm errors when any fold leaves fewer than 3 training rows", {
 
 test_that("cpm can store summed edges", {
   withr::local_seed(123)
-  conmat <- matrix(rnorm(120), ncol = 12)
-  behav <- rnorm(10)
+  conmat <- matrix(rnorm(240), ncol = 12)
+  behav <- rnorm(20)
   spec <- spec()
 
   res <- cpm(
@@ -258,8 +305,8 @@ test_that("cpm can store summed edges", {
 
 test_that("cpm can store fold-wise edges", {
   withr::local_seed(123)
-  conmat <- matrix(rnorm(120), ncol = 12)
-  behav <- rnorm(10)
+  conmat <- matrix(rnorm(240), ncol = 12)
+  behav <- rnorm(20)
   spec <- spec()
 
   res <- cpm(
@@ -412,8 +459,8 @@ test_that("cpm excludes incomplete rows consistently with covariates", {
 
 test_that("cpm returns a fold-based cpm object", {
   withr::local_seed(123)
-  conmat <- matrix(rnorm(100), ncol = 10)
-  behav <- rnorm(10)
+  conmat <- matrix(rnorm(200), ncol = 10)
+  behav <- rnorm(20)
 
   result <- example_cpm_result(conmat = conmat, behav = behav)
 
@@ -622,7 +669,7 @@ test_that("print.cpm reports summary fields", {
     "Construction:\\s+separate / no weighting / raw edges"
   )
   expect_output(print(res), "Model:\\s+linear regression")
-  expect_output(print(res), "Use summary\\(\\) for aggregate correlations")
+  expect_output(print(res), "Use summary\\(\\) for aggregate metrics")
 })
 
 test_that("print.cpm uses human-readable edge storage labels", {

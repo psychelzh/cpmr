@@ -17,12 +17,14 @@
 \item{...}{Additional arguments passed to \code{summary()}.}
 
 \item{component}{A character vector indicating the component to tidy. Use
-\code{"metrics"} for correlation tables derived from \code{\link[=summary.cpm]{summary.cpm()}}, or
+\code{"metrics"} for metric tables derived from \code{\link[=summary.cpm]{summary.cpm()}}, or
 \code{"edges"} for stored edge output.}
 
-\item{level}{Correlation table to return when \code{component = "metrics"}.
-\code{"pooled"} returns pooled out-of-fold correlations, and \code{"foldwise"}
-returns one row per fold and prediction stream.}
+\item{level}{Metric table to return when \code{component = "metrics"}.
+\code{"pooled"} returns RMSE, MAE, and out-of-fold correlations; \code{"foldwise"}
+returns one correlation row per fold and prediction stream. The pooled
+table's \code{descriptive_only} column flags correlations computed when
+assessment folds contain fewer than three observations.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} with component-specific columns.

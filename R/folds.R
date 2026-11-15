@@ -16,9 +16,11 @@ resolve_assessment_folds <- function(resamples, include_cases) {
     if (n_folds > length(include_cases)) {
       stop(
         paste0(
-          "`resamples` as a fold count must be less than or equal to ",
-          "complete-case observations."
-        )
+          "The requested fold count must be less than or equal to the ",
+          "number of complete-case observations. The default is 10; ",
+          "specify a smaller `resamples` value or use `resamples = NULL`."
+        ),
+        call. = FALSE
       )
     }
     folds <- make_kfold_assessment_folds(include_cases, n_folds)

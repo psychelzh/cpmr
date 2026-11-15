@@ -72,7 +72,9 @@ model training inside each assessment fold.
 ## Inspect Predictions and Edges
 
 CPM results keep observation-level predictions on the object, while
-`summary()` reports pooled and fold-wise out-of-fold correlations.
+`summary()` reports pooled RMSE and MAE, pooled out-of-fold correlations, and
+mean fold-wise correlations. Use `tidy()` to obtain pooled metrics or the
+per-fold correlation table.
 
 ```{r}
 predictions <- result$predictions
@@ -95,7 +97,14 @@ These three outputs have slightly different jobs:
   table for further filtering, plotting, or export, while
   `level = "pooled"` returns pooled metrics.
 
-By default, `cpm()` uses `return_edges = "sum"` and stores fold-aggregated edge
+By default, `cpm()` uses 10-fold assessment and `return_edges = "sum"`. Ten
+folds require at least 10 complete cases; around 30 cases are a rough minimum
+for at least 3 observations per assessment fold, not a guarantee of stable
+correlations. Smaller assessment folds trigger a warning, prioritize RMSE and
+MAE, and mark pooled out-of-fold correlations as descriptive. Explicit
+leave-one-out assessment is available with `resamples = NULL`.
+
+By default, `cpm()` stores fold-aggregated edge
 selection counts. This makes edge summaries immediately available in the common
 fold-based workflow.
 

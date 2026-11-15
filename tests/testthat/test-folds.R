@@ -73,6 +73,14 @@ test_that("resolve_assessment_folds requires enough complete cases to define fol
     "CPM requires at least 2 complete-case observations to define assessment folds.",
     fixed = TRUE
   )
+  expect_error(
+    resolve_assessment_folds(
+      resamples = 10,
+      include_cases = 1:9
+    ),
+    "The requested fold count must be less than or equal to the number of complete-case observations.",
+    fixed = TRUE
+  )
 })
 
 test_that("normalize_fold_count rejects malformed fold counts", {

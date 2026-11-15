@@ -3,7 +3,7 @@ run_cpm_workflow <- function(
   conmat,
   behav,
   covariates = NULL,
-  resamples = NULL,
+  resamples = 10L,
   return_edges = c("sum", "none", "all"),
   na_action = c("fail", "exclude"),
   call = NULL
@@ -21,6 +21,7 @@ run_cpm_workflow <- function(
     include_cases = inputs$include_cases
   )
   n_folds <- length(folds)
+  warn_small_assessment_folds(folds)
 
   warn_large_edge_storage(ncol(conmat), n_folds, return_edges)
 
@@ -196,6 +197,28 @@ warn_large_edge_storage <- function(n_edges, n_folds, return_edges) {
   }
 
   invisible()
+}
+
+warn_small_assessment_folds <- function(folds) {
+  small_folds <- sum(lengths(folds) < 3L)
+  if (small_folds == 0L) {
+    return(invisible(FALSE))
+  }
+
+  warning(
+    sprintf(
+      paste0(
+        "%d of %d assessment folds contain fewer than 3 observations. ",
+        "Fold-wise correlations for these folds are unavailable; RMSE and ",
+        "MAE should be prioritized, and pooled out-of-fold correlations ",
+        "should be treated as descriptive."
+      ),
+      small_folds,
+      length(folds)
+    ),
+    call. = FALSE
+  )
+  invisible(TRUE)
 }
 
 init_edge_storage <- function(return_edges, conmat, n_folds) {

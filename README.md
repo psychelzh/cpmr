@@ -60,9 +60,17 @@ summary(result)
 #>     Positive: -0.074
 #>     Negative: -0.080
 #>   Fold-wise correlations (Pearson):
-#>     Joint: -0.062 (SE 0.064)
-#>     Positive: 0.007 (SE 0.086)
-#>     Negative: -0.039 (SE 0.078)
+#>     Joint: -0.062 (SE 0.064) (5/5 folds)
+#>     Positive: 0.007 (SE 0.086) (5/5 folds)
+#>     Negative: -0.039 (SE 0.078) (5/5 folds)
+#>   Pooled RMSE:
+#>     Joint: 1.242
+#>     Positive: 1.204
+#>     Negative: 1.199
+#>   Pooled MAE:
+#>     Joint: 0.951
+#>     Positive: 0.956
+#>     Negative: 0.910
 #>   Selected edges:
 #>     Positive: 0.56%
 #>     Negative: 0.32%
@@ -152,9 +160,17 @@ summary(result)
 #>     Positive: -0.074
 #>     Negative: -0.080
 #>   Fold-wise correlations (Pearson):
-#>     Joint: -0.062 (SE 0.064)
-#>     Positive: 0.007 (SE 0.086)
-#>     Negative: -0.039 (SE 0.078)
+#>     Joint: -0.062 (SE 0.064) (5/5 folds)
+#>     Positive: 0.007 (SE 0.086) (5/5 folds)
+#>     Negative: -0.039 (SE 0.078) (5/5 folds)
+#>   Pooled RMSE:
+#>     Joint: 1.242
+#>     Positive: 1.204
+#>     Negative: 1.199
+#>   Pooled MAE:
+#>     Joint: 0.951
+#>     Positive: 0.956
+#>     Negative: 0.910
 #>   Selected edges:
 #>     Positive: 0.56%
 #>     Negative: 0.32%
@@ -169,33 +185,42 @@ head(result$predictions)
 dim(result$edges)
 #> [1] 1000    2
 head(tidy(result, component = "metrics"))
-#> # A tibble: 6 × 5
-#>    fold n_assess prediction estimate method 
-#>   <int>    <int> <chr>         <dbl> <chr>  
-#> 1     1       20 joint       -0.145  pearson
-#> 2     1       20 positive    -0.0444 pearson
-#> 3     1       20 negative    -0.110  pearson
-#> 4     2       20 joint        0.138  pearson
-#> 5     2       20 positive     0.154  pearson
-#> 6     2       20 negative     0.0234 pearson
-head(tidy(result, component = "metrics", level = "pooled"))
-#> # A tibble: 3 × 3
-#>   prediction estimate method 
-#>   <chr>         <dbl> <chr>  
-#> 1 joint       -0.108  pearson
-#> 2 positive    -0.0736 pearson
-#> 3 negative    -0.0798 pearson
+#> # A tibble: 6 x 6
+#>    fold metric      n_assess prediction estimate method
+#>   <int> <chr>          <int> <chr>         <dbl> <chr>
+#> 1     1 correlation       20 joint       -0.145  pearson
+#> 2     1 correlation       20 positive    -0.0444 pearson
+#> 3     1 correlation       20 negative    -0.110  pearson
+#> 4     2 correlation       20 joint        0.138  pearson
+#> 5     2 correlation       20 positive     0.154  pearson
+#> 6     2 correlation       20 negative     0.0234 pearson
+pooled_metrics <- tidy(result, component = "metrics", level = "pooled")
+head(pooled_metrics[pooled_metrics$metric == "correlation", ])
+#> # A tibble: 3 x 6
+#>   metric      prediction estimate     n method  descriptive_only
+#>   <chr>       <chr>         <dbl> <int> <chr>   <lgl>
+#> 1 correlation joint       -0.108    100 pearson FALSE
+#> 2 correlation positive    -0.0736   100 pearson FALSE
+#> 3 correlation negative    -0.0798   100 pearson FALSE
 ```
 
-`summary(result)` gives the default aggregate correlation report. Use
-`tidy(result, component = "metrics")` when you want fold-wise
-correlation tables directly, or
-`tidy(result, component = "metrics", level = "pooled")` for pooled
-correlation tables.
+`summary(result)` reports pooled out-of-fold RMSE and MAE, pooled
+correlations, and mean fold-wise correlations. The pooled metrics are
+available as tables through
+`tidy(result, component = "metrics", level = "pooled")`; fold-wise
+correlations are returned with `level = "foldwise"`.
 
-For `cpm()`, `resamples = NULL` means leave-one-out assessment,
-`resamples = 5` means 5-fold assessment, and a list passed to
-`resamples` enforces a manual assessment-fold partition.
+`cpm()` defaults to 10-fold assessment. It requires at least 10 complete
+cases; around 30 cases are a rough minimum for having at least 3
+observations in each assessment fold, not a guarantee of stable
+correlations. Folds smaller than 3 produce a warning because their
+fold-wise correlations are unavailable. In that setting, RMSE and MAE
+are prioritized and pooled out-of-fold correlations are marked
+`descriptive_only` in the pooled metric table. When covariates are used,
+RMSE and MAE are calculated on the fold-specific residualized outcome
+scale rather than the original behavior scale. Use `resamples = NULL` to
+explicitly request leave-one-out assessment, `resamples = 5` for 5-fold
+assessment, or a list of indices for a manual assessment-fold partition.
 
 ## Choosing a path
 
