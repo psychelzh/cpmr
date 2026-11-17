@@ -8,6 +8,29 @@ fit_split <- function(
   construction_spec,
   model_spec
 ) {
+  prepared <- prepare_split_data(
+    conmat = conmat,
+    behav = behav,
+    covariates = covariates,
+    rows_train = rows_train,
+    rows_test = rows_test
+  )
+
+  fit_prepared_split(
+    prepared = prepared,
+    selection_spec = selection_spec,
+    construction_spec = construction_spec,
+    model_spec = model_spec
+  )
+}
+
+prepare_split_data <- function(
+  conmat,
+  behav,
+  covariates,
+  rows_train,
+  rows_test
+) {
   if (length(rows_train) < 3L) {
     stop(
       "CPM fitting requires at least 3 training observations.",
@@ -44,15 +67,41 @@ fit_split <- function(
     covariate_rank <- conmat_resid$rank - 1L
   }
 
-  edge_selection <- run_edge_selection(
-    conmat = conmat_train,
-    behav = behav_train,
-    selection_spec = selection_spec,
+  list(
+    conmat_train = conmat_train,
+    behav_train = behav_train,
+    conmat_test = conmat_test,
+    behav_test = behav_test,
     covariate_rank = covariate_rank
   )
+}
+
+fit_prepared_split <- function(
+  prepared,
+  selection_spec,
+  construction_spec,
+  model_spec,
+  associations = NULL
+) {
+  edge_selection <- if (is.null(associations)) {
+    run_edge_selection(
+      conmat = prepared$conmat_train,
+      behav = prepared$behav_train,
+      selection_spec = selection_spec,
+      covariate_rank = prepared$covariate_rank
+    )
+  } else {
+    select_edges_from_associations(
+      associations = associations,
+      n_observations = nrow(prepared$conmat_train),
+      selection_spec = selection_spec,
+      covariate_rank = prepared$covariate_rank
+    )
+  }
+
   fitted_model <- fit_split_model(
-    conmat = conmat_train,
-    behav = behav_train,
+    conmat = prepared$conmat_train,
+    behav = prepared$behav_train,
     edge_selection = edge_selection,
     construction_spec = construction_spec,
     model_spec = model_spec
@@ -60,8 +109,8 @@ fit_split <- function(
 
   list(
     edge_mask = edge_selection$mask,
-    observed = behav_test,
-    predictions = predict_split_model(fitted_model, conmat_test)
+    observed = prepared$behav_test,
+    predictions = predict_split_model(fitted_model, prepared$conmat_test)
   )
 }
 

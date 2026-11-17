@@ -104,6 +104,42 @@ correlations. Smaller assessment folds trigger a warning, prioritize RMSE and
 MAE, and mark pooled out-of-fold correlations as descriptive. Explicit
 leave-one-out assessment is available with `resamples = NULL`.
 
+## Tune the selection level
+
+When comparing several edge-selection levels, `selection_levels` performs
+inner-fold selection separately within each outer training set. The outer
+assessment fold is excluded from that choice and is used only to estimate
+performance. The default objective is the mean inner-fold RMSE; set
+`selection_metric = "mae"` to select by mean MAE instead. Separate-sign
+construction selects by the `joint` prediction stream, while net construction
+selects by `net`. Inner-fold candidate scores and selected levels are available
+through `tidy(..., component = "tuning")`. The nested results estimate the
+performance of the selection procedure, and the selected level may differ
+across outer folds.
+
+```{r tune-selection-level}
+tuned_result <- cpm(
+  conmat = conmat,
+  behav = behav,
+  spec = spec(),
+  resamples = 5,
+  selection_levels = c(0.001, 0.01, 0.05),
+  selection_metric = "rmse",
+  inner_resamples = 4,
+  return_edges = "none"
+)
+
+summary(tuned_result)
+tidy(tuned_result, component = "tuning")
+```
+
+Each inner-fold association vector is computed once and reused across the
+candidate levels for that split. No cached statistics are retained between
+folds or calls, so changes to folds, covariates, or selection settings cannot
+reuse stale values. Use `set.seed()` when reproducible random inner folds are
+needed. Nested tuning costs more than a fixed-specification run because each
+outer training set evaluates every candidate across its inner folds.
+
 By default, `cpm()` stores fold-aggregated edge
 selection counts. This makes edge summaries immediately available in the common
 fold-based workflow.

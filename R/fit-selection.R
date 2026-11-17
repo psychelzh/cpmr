@@ -4,54 +4,88 @@ run_edge_selection <- function(
   selection_spec,
   covariate_rank = 0L
 ) {
-  switch(
-    selection_spec$type,
-    cor = {
-      p_value_cutoff <- if (selection_spec$criterion == "p_value") {
-        critical_r(nrow(conmat), selection_spec$level, covariate_rank)
-      }
-      associations <- drop(stats::cor(
-        conmat,
-        behav,
-        method = selection_spec$method
-      ))
-      associations[!is.finite(associations)] <- NA_real_
-
-      thresholds <- switch(
-        selection_spec$criterion,
-        p_value = stats::setNames(
-          rep(
-            p_value_cutoff,
-            length(edge_signs)
-          ),
-          edge_signs
-        ),
-        absolute = stats::setNames(
-          rep(selection_spec$level, length(edge_signs)),
-          edge_signs
-        ),
-        proportion = select_sparsity_thresholds(
-          associations = associations,
-          proportion = selection_spec$level
-        ),
-        stop(
-          paste(
-            "`criterion` must be one of",
-            "\"p_value\", \"absolute\", or \"proportion\"."
-          )
-        )
-      )
-
-      list(
-        associations = associations,
-        thresholds = thresholds,
-        mask = edge_mask_from_cutoffs(
-          associations = associations,
-          cutoffs = thresholds
-        )
-      )
-    },
+  if (selection_spec$type != "cor") {
     stop("`selection` must be a supported CPM selection spec.", call. = FALSE)
+  }
+  validate_edge_selection(
+    n_observations = nrow(conmat),
+    selection_spec = selection_spec,
+    covariate_rank = covariate_rank
+  )
+
+  associations <- compute_edge_associations(
+    conmat,
+    behav,
+    method = selection_spec$method
+  )
+
+  select_edges_from_associations(
+    associations = associations,
+    n_observations = nrow(conmat),
+    selection_spec = selection_spec,
+    covariate_rank = covariate_rank
+  )
+}
+
+validate_edge_selection <- function(
+  n_observations,
+  selection_spec,
+  covariate_rank = 0L
+) {
+  if (selection_spec$criterion == "p_value") {
+    critical_r(
+      n_observations,
+      selection_spec$level,
+      covariate_rank
+    )
+  }
+}
+
+compute_edge_associations <- function(conmat, behav, method) {
+  associations <- drop(stats::cor(conmat, behav, method = method))
+  associations[!is.finite(associations)] <- NA_real_
+  associations
+}
+
+select_edges_from_associations <- function(
+  associations,
+  n_observations,
+  selection_spec,
+  covariate_rank = 0L
+) {
+  p_value_cutoff <- if (selection_spec$criterion == "p_value") {
+    critical_r(n_observations, selection_spec$level, covariate_rank)
+  }
+
+  thresholds <- switch(
+    selection_spec$criterion,
+    p_value = stats::setNames(
+      rep(p_value_cutoff, length(edge_signs)),
+      edge_signs
+    ),
+    absolute = stats::setNames(
+      rep(selection_spec$level, length(edge_signs)),
+      edge_signs
+    ),
+    proportion = select_sparsity_thresholds(
+      associations = associations,
+      proportion = selection_spec$level
+    ),
+    stop(
+      paste(
+        "`criterion` must be one of",
+        "\"p_value\", \"absolute\", or \"proportion\"."
+      )
+    )
+  )
+
+  list(
+    associations = associations,
+    thresholds = thresholds,
+    mask = edge_mask_from_cutoffs(
+      associations = associations,
+      cutoffs = thresholds
+    )
   )
 }
 

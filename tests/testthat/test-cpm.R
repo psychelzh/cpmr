@@ -75,6 +75,256 @@ test_that("cpm uses spec() by default", {
   expect_length(res$folds, 10L)
 })
 
+test_that("cpm tunes selection levels inside each outer training set", {
+  withr::local_seed(73)
+  conmat <- matrix(rnorm(600), nrow = 30)
+  behav <- rowSums(conmat[, 1:4, drop = FALSE]) + rnorm(30, sd = 0.5)
+  outer_folds <- split(seq_len(30), rep(seq_len(3), each = 10))
+  candidates <- c(0.01, 0.05, 0.1)
+  rows_train <- 11:30
+  tuning_seed <- 321
+  withr::local_seed(tuning_seed)
+  inner_folds <- make_kfold_assessment_folds(rows_train, 4L)
+
+  withr::local_seed(tuning_seed)
+  result <- cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = spec(),
+    resamples = outer_folds,
+    selection_levels = candidates,
+    inner_resamples = 4,
+    return_edges = "none"
+  )
+
+  tuning <- tidy(result, component = "tuning")
+  expect_equal(nrow(tuning), length(outer_folds) * length(candidates))
+  expect_true(all(tapply(tuning$selected, tuning$outer_fold, sum) == 1L))
+  expect_true(all(tuning$n_inner_folds == 4L))
+  expect_true(all(tuning$prediction == "joint"))
+  expect_identical(result$settings$tuning$metric, "rmse")
+  expect_equal(result$folds, outer_folds)
+  expect_s3_class(summary(result), "cpm_summary")
+  expect_output(print(result), "Threshold tuning: RMSE")
+  expect_output(print(result), "Selected levels by outer fold")
+
+  remapped_folds <- lapply(inner_folds, function(fold) {
+    match(fold, rows_train)
+  })
+  expected_scores <- vapply(
+    candidates,
+    function(level) {
+      candidate_spec <- spec(
+        selection = cpm_selection_cor(level = level)
+      )
+      reference <- cpm(
+        conmat = conmat[rows_train, , drop = FALSE],
+        behav = behav[rows_train],
+        spec = candidate_spec,
+        resamples = remapped_folds,
+        return_edges = "none"
+      )
+      fold_scores <- vapply(
+        seq_along(remapped_folds),
+        function(fold) {
+          assessment <- reference$predictions$fold == fold
+          errors <- reference$predictions$observed[assessment] -
+            reference$predictions$joint[assessment]
+          sqrt(mean(errors^2))
+        },
+        numeric(1)
+      )
+      mean(fold_scores)
+    },
+    numeric(1)
+  )
+  actual_scores <- tuning$estimate[
+    tuning$outer_fold == 1L
+  ]
+  expect_equal(actual_scores, expected_scores)
+
+  changed_behav <- behav
+  changed_behav[outer_folds[[1]]] <- changed_behav[outer_folds[[1]]] + 100
+  withr::local_seed(tuning_seed)
+  changed_result <- cpm(
+    conmat = conmat,
+    behav = changed_behav,
+    spec = spec(),
+    resamples = outer_folds,
+    selection_levels = candidates,
+    inner_resamples = 4,
+    return_edges = "none"
+  )
+  expect_equal(
+    changed_result$tuning[changed_result$tuning$outer_fold == 1L, ],
+    result$tuning[result$tuning$outer_fold == 1L, ]
+  )
+  expect_equal(
+    changed_result$predictions$joint[outer_folds[[1]]],
+    result$predictions$joint[outer_folds[[1]]]
+  )
+})
+
+test_that("cpm tuning supports MAE and net prediction streams", {
+  withr::local_seed(82)
+  conmat <- matrix(rnorm(240), nrow = 24)
+  behav <- rowSums(conmat[, 1:3, drop = FALSE]) + rnorm(24)
+  result <- cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = spec(
+      construction = cpm_construction_strength(sign_mode = "net")
+    ),
+    resamples = 3,
+    selection_levels = c(0.01, 0.1),
+    selection_metric = "mae",
+    inner_resamples = 3,
+    return_edges = "none"
+  )
+
+  expect_true(all(result$tuning$metric == "mae"))
+  expect_true(all(result$tuning$prediction == "net"))
+  expect_named(result$predictions, c("row", "fold", "observed", "net"))
+})
+
+test_that("cpm validates selection tuning settings", {
+  conmat <- matrix(rnorm(240), nrow = 24)
+  behav <- rnorm(24)
+
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      resamples = 3,
+      selection_levels = c(0.01, 0.01)
+    ),
+    "`selection_levels` must contain at least two unique finite numbers",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      resamples = 3,
+      selection_levels = c(0.01, NA_real_)
+    ),
+    "`selection_levels` must contain at least two unique finite numbers",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      resamples = 3,
+      selection_levels = c(0.01, Inf)
+    ),
+    "`selection_levels` must contain at least two unique finite numbers",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      resamples = 3,
+      selection_levels = c(0.01, 1.1)
+    ),
+    "`selection_levels` must contain at least two unique finite numbers",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      resamples = 3,
+      selection_levels = matrix(c(0.01, 0.1))
+    ),
+    "`selection_levels` must contain at least two unique finite numbers",
+    fixed = TRUE
+  )
+  invalid_spec <- spec()
+  invalid_spec$selection$type <- "unsupported"
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      spec = invalid_spec,
+      resamples = 3,
+      selection_levels = c(0.01, 0.1)
+    ),
+    "Threshold tuning requires a correlation-based selection specification.",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      resamples = 3,
+      selection_levels = c(0.01, 0.1),
+      inner_resamples = 2.5
+    ),
+    "`resamples` must be NULL, a single integer greater than or equal to 2",
+    fixed = TRUE
+  )
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      resamples = 3,
+      selection_levels = c(0.01, 0.1),
+      inner_resamples = 17
+    ),
+    "Each outer training set must contain at least 17 observations",
+    fixed = TRUE
+  )
+  expect_warning(
+    cpm(
+      conmat,
+      behav,
+      resamples = 3,
+      selection_levels = c(0, 0.1),
+      inner_resamples = 3,
+      return_edges = "none"
+    ),
+    "`selection_levels` includes a boundary value",
+    fixed = TRUE
+  )
+})
+
+test_that("cpm tuning errors when inner predictions are all missing", {
+  testthat::local_mocked_bindings(
+    fit_prepared_split = function(...) {
+      list(
+        observed = NA_real_,
+        predictions = matrix(
+          NA_real_,
+          nrow = 1,
+          ncol = 1,
+          dimnames = list(
+            NULL,
+            "joint"
+          )
+        )
+      )
+    },
+    .package = "cpmr"
+  )
+  conmat <- matrix(rnorm(360), nrow = 30)
+  behav <- rnorm(30)
+
+  expect_error(
+    cpm(
+      conmat,
+      behav,
+      resamples = 3,
+      selection_levels = c(0.01, 0.1),
+      inner_resamples = 3,
+      return_edges = "none"
+    ),
+    "No candidate selection level produced valid inner-fold predictions.",
+    fixed = TRUE
+  )
+})
+
 test_that("cpm validates `spec` input", {
   conmat <- matrix(rnorm(100), ncol = 10)
   behav <- rnorm(10)

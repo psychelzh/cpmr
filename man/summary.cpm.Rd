@@ -29,6 +29,8 @@ for downstream tidying.}
 \item{\code{edges}}{Aggregated edge-selection rates, or \code{NULL} when edges were
 not stored.}
 \item{\code{settings}}{A list containing summary-relevant CPM settings.}
+\item{\code{tuning}}{Candidate-level inner-fold scores and selected levels by
+outer fold, or \code{NULL} for fixed-specification runs.}
 }
 }
 \description{

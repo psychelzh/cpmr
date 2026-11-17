@@ -13,12 +13,15 @@ A \code{cpm} object is a list with the following elements:
 \item{\code{call}}{Matched call used for the CPM run.}
 \item{\code{spec}}{The originating CPM specification object.}
 \item{\code{settings}}{Runtime settings used for the CPM run, including
-missing-data handling and edge-storage preferences.}
+missing-data handling, edge-storage preferences, and any nested tuning
+settings.}
 \item{\code{predictions}}{Data frame of observation-level predictions with
 fold IDs and one column per configured prediction stream.}
 \item{\code{edges}}{Stored edge output based on \code{return_edges}
 (\code{NULL}/matrix/array).}
-\item{\code{folds}}{List of assessment-row indices for each fold.}
+\item{\code{folds}}{List of outer assessment-row indices for each fold.}
+\item{\code{tuning}}{Candidate-level inner-fold scores and the selected level
+for each outer fold, or \code{NULL} for fixed-specification runs.}
 }
 }
 

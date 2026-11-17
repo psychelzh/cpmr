@@ -267,7 +267,7 @@ test_that("summary.cpm returns the expected object structure", {
   expect_s3_class(summary_result, "cpm_summary")
   expect_identical(
     names(summary_result),
-    c("metrics", "tables", "edges", "settings")
+    c("metrics", "tables", "edges", "settings", "tuning")
   )
   expect_named(
     summary_result$metrics,

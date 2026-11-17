@@ -8,12 +8,15 @@
 #'   \item{`call`}{Matched call used for the CPM run.}
 #'   \item{`spec`}{The originating CPM specification object.}
 #'   \item{`settings`}{Runtime settings used for the CPM run, including
-#'     missing-data handling and edge-storage preferences.}
+#'     missing-data handling, edge-storage preferences, and any nested tuning
+#'     settings.}
 #'   \item{`predictions`}{Data frame of observation-level predictions with
 #'     fold IDs and one column per configured prediction stream.}
 #'   \item{`edges`}{Stored edge output based on `return_edges`
 #'     (`NULL`/matrix/array).}
-#'   \item{`folds`}{List of assessment-row indices for each fold.}
+#'   \item{`folds`}{List of outer assessment-row indices for each fold.}
+#'   \item{`tuning`}{Candidate-level inner-fold scores and the selected level
+#'     for each outer fold, or `NULL` for fixed-specification runs.}
 #' }
 #'
 #' @seealso [cpm()], [summary.cpm()], [tidy.cpm()]
@@ -45,6 +48,18 @@ NULL
 #'   least 10 complete cases; around 30 cases are a rough minimum for having
 #'   at least 3 observations in each assessment fold, not a guarantee of
 #'   stable correlations.
+#' @param selection_levels Optional numeric vector of at least two candidate
+#'   levels for the selection criterion in `spec`. When supplied, `cpm()` uses
+#'   nested assessment: each outer training set selects a level using inner
+#'   folds, then the selected level is evaluated on that outer assessment fold.
+#'   Candidate values must be unique and between 0 and 1.
+#' @param selection_metric Inner-fold prediction-error metric used to select a
+#'   candidate level by its mean across inner folds, using the primary
+#'   prediction stream (`"joint"` or `"net"`). `"rmse"` is the default;
+#'   `"mae"` is also supported. Ties are resolved by the first value in
+#'   `selection_levels`.
+#' @param inner_resamples Number of folds used to compare candidate selection
+#'   levels within each outer training set. Defaults to 5.
 #' @param return_edges A character string indicating the return value of the
 #'   selected edges. `"sum"` stores fold counts for each selected edge,
 #'   `"none"` skips edge storage, and `"all"` stores the fold-wise edge masks.
@@ -58,9 +73,13 @@ NULL
 #' runs.
 #'
 #' `cpm()` returns a `cpm` object containing observation-level predictions,
-#' assessment folds, and optional stored edges. Call [summary.cpm()] for
-#' prediction errors and correlation summaries, or [tidy.cpm()] for their
-#' pooled or fold-wise tables.
+#' assessment folds, optional stored edges, and optional tuning results. Call
+#' [summary.cpm()] for prediction errors and correlation summaries, or
+#' [tidy.cpm()] for their pooled or fold-wise tables. When `selection_levels`
+#' is supplied, use `tidy(..., component = "tuning")` to inspect the inner-fold
+#' candidate scores and selected level for each outer fold. The summary metrics
+#' then describe the nested outer-fold predictions, not the inner-fold
+#' selection scores.
 #' @export
 cpm <- function(
   conmat,
@@ -70,7 +89,10 @@ cpm <- function(
   covariates = NULL,
   resamples = 10L,
   return_edges = c("sum", "none", "all"),
-  na_action = c("fail", "exclude")
+  na_action = c("fail", "exclude"),
+  selection_levels = NULL,
+  selection_metric = c("rmse", "mae"),
+  inner_resamples = 5L
 ) {
   call <- match.call()
 
@@ -101,6 +123,9 @@ cpm <- function(
     behav = behav,
     covariates = covariates,
     resamples = resamples,
+    selection_levels = selection_levels,
+    selection_metric = selection_metric,
+    inner_resamples = inner_resamples,
     return_edges = return_edges,
     na_action = na_action,
     call = call
@@ -115,12 +140,21 @@ print.cpm <- function(x, ...) {
     sum = "summed across folds",
     all = "stored for each fold"
   )
-  selection_summary <- paste(
-    x$spec$selection$method,
-    x$spec$selection$criterion,
-    format_threshold_level(x$spec$selection$level),
-    sep = " / "
-  )
+  selection_summary <- if (is.null(x$settings$tuning)) {
+    paste(
+      x$spec$selection$method,
+      x$spec$selection$criterion,
+      format_threshold_level(x$spec$selection$level),
+      sep = " / "
+    )
+  } else {
+    paste(
+      x$spec$selection$method,
+      x$spec$selection$criterion,
+      "nested level selection",
+      sep = " / "
+    )
+  }
   construction_summary <- paste(
     x$spec$construction$sign_mode,
     if (x$spec$construction$weight_scale == 0) {
@@ -154,6 +188,22 @@ print.cpm <- function(x, ...) {
   }
   cat(sprintf("  Number of folds: %d\n", length(x$folds)))
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
+  if (!is.null(x$settings$tuning)) {
+    selected_levels <- unique(x$tuning$level[x$tuning$selected])
+    cat(sprintf(
+      "  Threshold tuning: %s (%d inner folds)\n",
+      toupper(x$settings$tuning$metric),
+      x$settings$tuning$inner_resamples
+    ))
+    cat(sprintf(
+      "    Candidate levels: %s\n",
+      paste(format_threshold_level(x$settings$tuning$levels), collapse = ", ")
+    ))
+    cat(sprintf(
+      "    Selected levels by outer fold: %s\n",
+      paste(format_threshold_level(selected_levels), collapse = ", ")
+    ))
+  }
   cat(sprintf(
     "    Complete cases: %d\n",
     sum(stats::complete.cases(x$predictions[,
