@@ -189,7 +189,7 @@ print.cpm <- function(x, ...) {
   cat(sprintf("  Number of folds: %d\n", length(x$folds)))
   cat(sprintf("  Number of observations: %d\n", nrow(x$predictions)))
   if (!is.null(x$settings$tuning)) {
-    selected_levels <- unique(x$tuning$level[x$tuning$selected])
+    selected_levels <- x$tuning$level[x$tuning$selected]
     cat(sprintf(
       "  Threshold tuning: %s (%d inner folds)\n",
       toupper(x$settings$tuning$metric),

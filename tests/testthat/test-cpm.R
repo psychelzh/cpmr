@@ -108,6 +108,24 @@ test_that("cpm tunes selection levels inside each outer training set", {
   expect_output(print(result), "Threshold tuning: RMSE")
   expect_output(print(result), "Selected levels by outer fold")
 
+  display_result <- result
+  display_result$tuning$selected <- FALSE
+  selected_rows <- vapply(
+    seq_along(outer_folds),
+    function(fold) {
+      which(
+        display_result$tuning$outer_fold == fold &
+          display_result$tuning$level == c(0.01, 0.05, 0.01)[[fold]]
+      )
+    },
+    integer(1)
+  )
+  display_result$tuning$selected[selected_rows] <- TRUE
+  expect_output(
+    print(display_result),
+    "Selected levels by outer fold: 0.01, 0.05, 0.01"
+  )
+
   remapped_folds <- lapply(inner_folds, function(fold) {
     match(fold, rows_train)
   })
@@ -162,6 +180,99 @@ test_that("cpm tunes selection levels inside each outer training set", {
   expect_equal(
     changed_result$predictions$joint[outer_folds[[1]]],
     result$predictions$joint[outer_folds[[1]]]
+  )
+})
+
+test_that("nested tuning reuses only fold-local covariate and edge transforms", {
+  withr::local_seed(74)
+  n <- 36
+  p <- 20
+  covariates <- matrix(rnorm(n), ncol = 1)
+  conmat <- matrix(rnorm(n * p), nrow = n, ncol = p)
+  conmat <- conmat + 0.4 * drop(covariates) %o% rep(1, p)
+  behav <- rowSums(conmat[, 1:4, drop = FALSE]) +
+    0.8 * covariates[, 1] +
+    rnorm(n, sd = 0.5)
+  outer_folds <- split(seq_len(n), rep(seq_len(3), each = 12))
+  candidates <- c(0.005, 0.05, 0.2)
+  rows_train <- 13:36
+  tuning_seed <- 432
+  withr::local_seed(tuning_seed)
+  inner_folds <- make_kfold_assessment_folds(rows_train, 4L)
+  tuning_spec <- spec(
+    selection = cpm_selection_cor(method = "spearman"),
+    construction = cpm_construction_strength(standardize_edges = TRUE)
+  )
+
+  withr::local_seed(tuning_seed)
+  result <- cpm(
+    conmat = conmat,
+    behav = behav,
+    spec = tuning_spec,
+    covariates = covariates,
+    resamples = outer_folds,
+    selection_levels = candidates,
+    inner_resamples = 4,
+    return_edges = "none"
+  )
+
+  remapped_folds <- lapply(inner_folds, function(fold) {
+    match(fold, rows_train)
+  })
+  expected_scores <- vapply(
+    candidates,
+    function(level) {
+      reference <- cpm(
+        conmat = conmat[rows_train, , drop = FALSE],
+        behav = behav[rows_train],
+        spec = spec(
+          selection = cpm_selection_cor(method = "spearman", level = level),
+          construction = cpm_construction_strength(standardize_edges = TRUE)
+        ),
+        covariates = covariates[rows_train, , drop = FALSE],
+        resamples = remapped_folds,
+        return_edges = "none"
+      )
+      fold_scores <- vapply(
+        seq_along(remapped_folds),
+        function(fold) {
+          assessment <- reference$predictions$fold == fold
+          errors <- reference$predictions$observed[assessment] -
+            reference$predictions$joint[assessment]
+          sqrt(mean(errors^2))
+        },
+        numeric(1)
+      )
+      mean(fold_scores)
+    },
+    numeric(1)
+  )
+  expect_equal(
+    result$tuning$estimate[result$tuning$outer_fold == 1L],
+    expected_scores
+  )
+
+  changed_conmat <- conmat
+  changed_covariates <- covariates
+  outer_assessment <- outer_folds[[1]]
+  changed_conmat[outer_assessment, ] <-
+    changed_conmat[outer_assessment, ] + 100
+  changed_covariates[outer_assessment, ] <-
+    changed_covariates[outer_assessment, ] + 100
+  withr::local_seed(tuning_seed)
+  changed_result <- cpm(
+    conmat = changed_conmat,
+    behav = behav,
+    spec = tuning_spec,
+    covariates = changed_covariates,
+    resamples = outer_folds,
+    selection_levels = candidates,
+    inner_resamples = 4,
+    return_edges = "none"
+  )
+  expect_equal(
+    changed_result$tuning[changed_result$tuning$outer_fold == 1L, ],
+    result$tuning[result$tuning$outer_fold == 1L, ]
   )
 })
 
