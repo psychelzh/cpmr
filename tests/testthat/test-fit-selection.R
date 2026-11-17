@@ -23,6 +23,17 @@ test_that("edge selection rejects unsupported selection types", {
   )
 })
 
+test_that("edge selection rejects unsupported criteria", {
+  selection <- cpm_selection_cor()
+  selection$criterion <- "bogus"
+
+  expect_error(
+    run_edge_selection(matrix(1:6, nrow = 3), 1:3, selection),
+    '`criterion` must be one of "p_value", "absolute", or "proportion".',
+    fixed = TRUE
+  )
+})
+
 test_that("covariate-adjusted screening uses effective residual degrees of freedom", {
   withr::local_seed(44)
   covariates <- matrix(rnorm(200), nrow = 20)

@@ -1033,6 +1033,27 @@ test_that("print.cpm reports summary fields", {
   expect_output(print(res), "Use summary\\(\\) for aggregate metrics")
 })
 
+test_that("print.cpm reports stored fold edges and covariates", {
+  withr::local_seed(123)
+  res <- cpm(
+    matrix(rnorm(240), ncol = 12),
+    rnorm(20),
+    covariates = matrix(rnorm(20), ncol = 1),
+    resamples = 5,
+    return_edges = "all"
+  )
+
+  expect_output(print(res), "Edge storage:\\s+stored for each fold")
+  expect_output(print(res), "Covariates:\\s+included")
+})
+
+test_that("print.cpm displays unrecognized model names", {
+  res <- example_cpm_output_result()
+  res$spec$model$type <- "custom"
+
+  expect_output(print(res), "Model:\\s+custom")
+})
+
 test_that("print.cpm uses human-readable edge storage labels", {
   x <- structure(
     list(
