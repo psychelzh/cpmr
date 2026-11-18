@@ -115,7 +115,9 @@ construction selects by the `joint` prediction stream, while net construction
 selects by `net`. Inner-fold candidate scores and selected levels are available
 through `tidy(..., component = "tuning")`. The nested results estimate the
 performance of the selection procedure, and the selected level may differ
-across outer folds.
+across outer folds. See [Nested Selection-Level
+Tuning](nested-selection-tuning.html) for a detailed example and guidance on
+interpreting the results.
 
 ```{r tune-selection-level}
 tuned_result <- cpm(
