@@ -189,3 +189,10 @@ test_that("print.cpm_spec shows default construction labels compactly", {
   expect_output(print(spec()), "Weight scale:\\s+none")
   expect_output(print(spec()), "Edge standardization:\\s+none")
 })
+
+test_that("print.cpm_spec displays unrecognized model names", {
+  x <- spec()
+  x$model$type <- "custom"
+
+  expect_output(print(x), "Outcome model:\\s+custom")
+})

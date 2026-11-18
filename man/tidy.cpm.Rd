@@ -7,7 +7,7 @@
 \method{tidy}{cpm}(
   x,
   ...,
-  component = c("metrics", "edges"),
+  component = c("metrics", "edges", "tuning"),
   level = c("foldwise", "pooled")
 )
 }
@@ -18,13 +18,16 @@
 
 \item{component}{A character vector indicating the component to tidy. Use
 \code{"metrics"} for metric tables derived from \code{\link[=summary.cpm]{summary.cpm()}}, or
-\code{"edges"} for stored edge output.}
+\code{"edges"} for stored edge output, or \code{"tuning"} for nested threshold
+candidate scores.}
 
 \item{level}{Metric table to return when \code{component = "metrics"}.
 \code{"pooled"} returns RMSE, MAE, and out-of-fold correlations; \code{"foldwise"}
 returns one correlation row per fold and prediction stream. The pooled
 table's \code{descriptive_only} column flags correlations computed when
-assessment folds contain fewer than three observations.}
+assessment folds contain fewer than three observations. When
+\code{component = "tuning"}, the result contains candidate-level scores and
+the prediction stream and level selected within each outer fold.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} with component-specific columns.

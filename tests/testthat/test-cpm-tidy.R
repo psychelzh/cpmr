@@ -138,3 +138,36 @@ test_that("tidy edges errors clearly when edge storage is disabled", {
     fixed = TRUE
   )
 })
+
+test_that("tidy reports nested selection tuning results", {
+  withr::local_seed(8)
+  conmat <- matrix(rnorm(360), nrow = 30)
+  behav <- rowSums(conmat[, 1:3, drop = FALSE]) + rnorm(30)
+  result <- cpm(
+    conmat = conmat,
+    behav = behav,
+    resamples = 3,
+    selection_levels = c(0.01, 0.05),
+    inner_resamples = 3,
+    return_edges = "none"
+  )
+
+  tuning <- tidy(result, component = "tuning")
+  expect_named(
+    tuning,
+    c(
+      "outer_fold",
+      "level",
+      "metric",
+      "prediction",
+      "estimate",
+      "n_inner_folds",
+      "selected"
+    )
+  )
+  expect_error(
+    tidy(example_tidy_result(), component = "tuning"),
+    "was fit without `selection_levels`",
+    fixed = TRUE
+  )
+})

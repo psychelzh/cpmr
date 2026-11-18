@@ -19,7 +19,10 @@ cpm(
   covariates = NULL,
   resamples = 10L,
   return_edges = c("sum", "none", "all"),
-  na_action = c("fail", "exclude")
+  na_action = c("fail", "exclude"),
+  selection_levels = NULL,
+  selection_metric = c("rmse", "mae"),
+  inner_resamples = 5L
 )
 }
 \arguments{
@@ -63,15 +66,34 @@ selected edges. \code{"sum"} stores fold counts for each selected edge,
 are found in the inputs. \code{"fail"} stops immediately when any required value
 is missing. \code{"exclude"} fits on complete cases and keeps the original row
 layout in the returned predictions.}
+
+\item{selection_levels}{Optional numeric vector of at least two candidate
+levels for the selection criterion in \code{spec}. When supplied, \code{cpm()} uses
+nested assessment: each outer training set selects a level using inner
+folds, then the selected level is evaluated on that outer assessment fold.
+Candidate values must be unique and between 0 and 1.}
+
+\item{selection_metric}{Inner-fold prediction-error metric used to select a
+candidate level by its mean across inner folds, using the primary
+prediction stream (\code{"joint"} or \code{"net"}). \code{"rmse"} is the default;
+\code{"mae"} is also supported. Ties are resolved by the first value in
+\code{selection_levels}.}
+
+\item{inner_resamples}{Number of folds used to compare candidate selection
+levels within each outer training set. Defaults to 5.}
 }
 \value{
 \code{spec()} returns a CPM specification object that can be reused across CPM
 runs.
 
 \code{cpm()} returns a \code{cpm} object containing observation-level predictions,
-assessment folds, and optional stored edges. Call \code{\link[=summary.cpm]{summary.cpm()}} for
-prediction errors and correlation summaries, or \code{\link[=tidy.cpm]{tidy.cpm()}} for their
-pooled or fold-wise tables.
+assessment folds, optional stored edges, and optional tuning results. Call
+\code{\link[=summary.cpm]{summary.cpm()}} for prediction errors and correlation summaries, or
+\code{\link[=tidy.cpm]{tidy.cpm()}} for their pooled or fold-wise tables. When \code{selection_levels}
+is supplied, use \code{tidy(..., component = "tuning")} to inspect the inner-fold
+candidate scores and selected level for each outer fold. The summary metrics
+then describe the nested outer-fold predictions, not the inner-fold
+selection scores.
 }
 \description{
 Create a lightweight specification object that stores the staged decisions

@@ -25,6 +25,8 @@
 #'   \item{`edges`}{Aggregated edge-selection rates, or `NULL` when edges were
 #'     not stored.}
 #'   \item{`settings`}{A list containing summary-relevant CPM settings.}
+#'   \item{`tuning`}{Candidate-level inner-fold scores and selected levels by
+#'     outer fold, or `NULL` for fixed-specification runs.}
 #' }
 #' @export
 summary.cpm <- function(
@@ -75,8 +77,10 @@ summary.cpm <- function(
         small_assessment_folds = small_assessment_folds,
         edge_storage = edge_storage,
         correlation_method = correlation_method,
-        prediction_streams = prediction_columns(object$predictions)
-      )
+        prediction_streams = prediction_columns(object$predictions),
+        tuning = object$settings$tuning
+      ),
+      tuning = object$tuning
     ),
     class = "cpm_summary"
   )

@@ -1,0 +1,135 @@
+---
+title: "Nested Selection-Level Tuning"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Nested Selection-Level Tuning}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Why use nested assessment?
+
+The edge-selection level controls which connections enter a CPM. Choosing it
+using the same assessment predictions that are reported as final performance
+can make the performance estimate optimistic. With nested assessment, each
+outer training set has its own inner folds for choosing a level. The selected
+level is then fitted on that outer training set and evaluated on the held-out
+outer fold. Outer predictions estimate the performance of the entire
+level-selection procedure, not that of a single fixed level.
+
+## Set up an example
+
+The following synthetic data have one row per subject and one column per
+connection. The nuisance variable is passed to `cpm()` rather than regressed
+out beforehand.
+
+```{r}
+library(cpmr)
+
+set.seed(2026)
+n <- 80
+conmat <- matrix(rnorm(n * 120), nrow = n)
+covariates <- matrix(rnorm(n), ncol = 1)
+behav <- rowMeans(conmat[, 1:10, drop = FALSE]) +
+  0.5 * covariates[, 1] + rnorm(n, sd = 0.5)
+
+model_spec <- spec(
+  selection = cpm_selection_cor(criterion = "p_value"),
+  construction = cpm_construction_strength(standardize_edges = TRUE)
+)
+```
+
+## Compare levels inside each outer fold
+
+Supply at least two unique, finite candidate levels between 0 and 1 via
+`selection_levels`. They use the criterion in `spec`: here they are p-value
+cutoffs. For `"absolute"`, they are absolute-correlation cutoffs; for
+`"proportion"`, they are per-sign proportions. The fixed `level` in the
+selection specification is replaced by each candidate during tuning.
+
+```{r}
+set.seed(123)
+tuned <- cpm(
+  conmat = conmat,
+  behav = behav,
+  spec = model_spec,
+  covariates = covariates,
+  resamples = 5,
+  selection_levels = c(0.001, 0.01, 0.05),
+  selection_metric = "rmse",
+  inner_resamples = 4,
+  return_edges = "none"
+)
+
+tuned
+```
+
+For each outer fold, `cpm()` compares the candidates using mean inner-fold
+RMSE and chooses the smallest mean. The mean is over valid fold scores, with
+each contributing fold weighted equally. Set `selection_metric = "mae"` to use
+mean MAE instead; RMSE is the default. Ties are resolved by the order of
+`selection_levels`. The default separate-sign construction uses the `joint`
+prediction stream for selection; `sign_mode = "net"` uses the `net` stream.
+
+`resamples` controls the outer folds and can also accept a list of assessment
+row indices. `inner_resamples` is the number of randomly generated inner folds
+within each outer training set; its default is 5. Set the random seed before
+`cpm()` to reproduce both generated outer folds and inner folds. With manual
+outer folds, the seed still controls the inner folds.
+
+## Inspect choices and outer performance
+
+The tuning table has one row per candidate and outer fold. For example, inspect
+the candidate scores in the first fold and then the choice in every fold:
+
+```{r}
+tuning <- tidy(tuned, component = "tuning")
+tuning[tuning$outer_fold == 1, ]
+tuning[tuning$selected, ]
+```
+
+`estimate` is the mean inner-fold error, `n_inner_folds` counts the valid
+scores contributing to that mean, and `selected` marks the chosen candidate.
+Selections can differ across outer folds. These inner scores are used for
+selection, not as the final performance estimate.
+
+```{r}
+summary(tuned)
+tidy(tuned, component = "metrics", level = "pooled")
+head(tuned$predictions)
+```
+
+The summary and pooled metrics use the outer-fold predictions. Because this
+example includes covariates, the observed outcomes and predictions are on the
+fold-specific residualized outcome scale: nuisance regressions are fitted on
+the relevant training split and applied to its assessment split.
+
+## Practical considerations
+
+- Covariate adjustment, edge standardization, edge screening, and model fitting
+  are learned within each training split; outer assessment data do not select
+  the level. Avoid preprocessing the full dataset before calling `cpm()`.
+- Candidate values of 0 or 1 produce a warning because selection may become
+  degenerate. Choose candidates in advance and report the criterion, metric,
+  outer and inner fold counts, seed, and covariate handling.
+- Nested tuning evaluates the procedure; it does not return one final
+  full-data model or identify a universally best level. Inspecting outer
+  results to choose settings and reporting those same results as final
+  performance would reuse assessment data for selection.
+- Every outer training set must support the requested inner folds and their
+  training requirements, including residual degrees of freedom when using
+  covariates and p-value screening.
+- Nested tuning is more expensive than a fixed-level run. Association
+  statistics are reused across candidates within an inner split, but not
+  across folds or calls. `return_edges = "none"` avoids storing edge masks.
+
+See [Leakage-Safe Covariate Handling in CPM](anti-leakage-covariates.html) for
+more on covariate handling and [Native Getting Started with
+cpmr](native-getting-started.html) for the basic workflow.

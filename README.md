@@ -184,24 +184,9 @@ head(result$predictions)
 #> 6   6    4  1.33744904 0.591903346  0.45146065  0.34438321
 dim(result$edges)
 #> [1] 1000    2
-head(tidy(result, component = "metrics"))
-#> # A tibble: 6 x 6
-#>    fold metric      n_assess prediction estimate method
-#>   <int> <chr>          <int> <chr>         <dbl> <chr>
-#> 1     1 correlation       20 joint       -0.145  pearson
-#> 2     1 correlation       20 positive    -0.0444 pearson
-#> 3     1 correlation       20 negative    -0.110  pearson
-#> 4     2 correlation       20 joint        0.138  pearson
-#> 5     2 correlation       20 positive     0.154  pearson
-#> 6     2 correlation       20 negative     0.0234 pearson
+invisible(head(tidy(result, component = "metrics")))
 pooled_metrics <- tidy(result, component = "metrics", level = "pooled")
-head(pooled_metrics[pooled_metrics$metric == "correlation", ])
-#> # A tibble: 3 x 6
-#>   metric      prediction estimate     n method  descriptive_only
-#>   <chr>       <chr>         <dbl> <int> <chr>   <lgl>
-#> 1 correlation joint       -0.108    100 pearson FALSE
-#> 2 correlation positive    -0.0736   100 pearson FALSE
-#> 3 correlation negative    -0.0798   100 pearson FALSE
+invisible(head(pooled_metrics[pooled_metrics$metric == "correlation", ]))
 ```
 
 `summary(result)` reports pooled out-of-fold RMSE and MAE, pooled
@@ -221,6 +206,52 @@ RMSE and MAE are calculated on the fold-specific residualized outcome
 scale rather than the original behavior scale. Use `resamples = NULL` to
 explicitly request leave-one-out assessment, `resamples = 5` for 5-fold
 assessment, or a list of indices for a manual assessment-fold partition.
+
+To compare selection levels, provide `selection_levels`. `cpm()` then
+uses inner folds to choose a level independently within each outer
+training set; the outer assessment folds remain held out for the
+reported performance. The level minimizing the mean inner-fold RMSE is
+selected by default, with MAE available as an alternative. In
+`sign_mode = "separate"`, selection uses the `joint` prediction stream;
+`sign_mode = "net"` uses `net`. The inner candidate scores and selected
+level for each outer fold are available with
+`tidy(result, component = "tuning")`.
+
+``` r
+tuned_result <- cpm(
+  conmat = conmat,
+  behav = behav,
+  spec = s,
+  resamples = 5,
+  selection_levels = c(0.001, 0.01, 0.05),
+  selection_metric = "rmse",
+  inner_resamples = 4
+)
+
+summary(tuned_result)
+#> CPM summary:
+#>   Number of folds: 5
+#>   Pooled correlations (Pearson):
+#>     Joint: -0.082
+#>     Positive: -0.010
+#>     Negative: -0.174
+#>   Fold-wise correlations (Pearson):
+#>     Joint: -0.092 (SE 0.015) (2/5 folds)
+#>     Positive: 0.006 (SE 0.082) (2/5 folds)
+#>     Negative: -0.295 (1/5 folds)
+#>   Pooled RMSE:
+#>     Joint: 1.132
+#>     Positive: 1.122
+#>     Negative: 1.126
+#>   Pooled MAE:
+#>     Joint: 0.857
+#>     Positive: 0.844
+#>     Negative: 0.843
+#>   Selected edges:
+#>     Positive: 0.64%
+#>     Negative: 0.34%
+invisible(tidy(tuned_result, component = "tuning"))
+```
 
 ## Choosing a path
 

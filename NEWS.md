@@ -23,6 +23,12 @@
   fold-wise correlations unavailable, and identify pooled out-of-fold
   correlations as descriptive; fold-wise summaries report the number of
   contributing folds.
+* `cpm()` can compare selection levels using nested outer/inner assessment.
+  Inner-fold mean RMSE is the default selection objective, with MAE available;
+  outer-fold predictions estimate the performance of the selected-level
+  procedure. Inner-fold association statistics are reused across candidate
+  levels and are not cached across folds or calls. A new vignette explains
+  nested tuning and its results.
 * Unweighted edge standardization now processes only selected edges when
   constructing training and assessment features, reducing time and memory use
   for sparse edge selections.

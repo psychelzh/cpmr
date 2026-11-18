@@ -15,6 +15,7 @@ articles:
     navbar: ~
     contents:
       - native-getting-started
+      - nested-selection-tuning
       - anti-leakage-covariates
 
 reference:
